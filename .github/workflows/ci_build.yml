@@ -1,0 +1,215 @@
+# Adapted from the default github "CMake" workflows.
+#
+# Configure CMake in a 'build' subdirectory. `CMAKE_BUILD_TYPE` is only required if you are using a single-configuration generator such as make.
+# See https://cmake.org/cmake/help/latest/variable/CMAKE_BUILD_TYPE.html?highlight=cmake_build_type
+#
+# Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+#
+# Execute tests defined by the CMake configuration. Note that --build-config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
+# See https://cmake.org/cmake/help/latest/manual/ctest.1.html for more detail
+name: CI build
+
+on:
+  workflow_dispatch: # https://docs.github.com/en/actions/using-workflows/manually-running-a-workflow
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+env:
+  # Customize the CMake build type here (Release, Debug, RelWithDebInfo, etc.)
+  BUILD_TYPE: RelWithDebInfo
+
+jobs:
+  # ----------------------------------------------------------------------------------------------
+  build-linux:
+    name: Linux (x86_64)
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install build dependencies (libelf, libpcap)
+      uses: awalsh128/cache-apt-pkgs-action@latest
+      with:
+        packages: libelf-dev libpcap0.8-dev
+
+    - name: Install build dependencies (rust)
+      uses: moonrepo/setup-rust@v1
+      with:
+        targets: x86_64-unknown-linux-gnu
+        components: clippy,rustfmt
+        target-dirs: rust/target
+
+    - name: Install build dependencies (rust-script)
+      run: cargo install rust-script
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DDYNAMIPS_CODE=both -DDYNAMIPS_RENAME=stable -DBUILD_UDP_RECV=ON -DBUILD_UDP_SEND=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      run: |
+        set -x
+        cd ${{github.workspace}}/build
+        ctest --verbose --build-config ${{env.BUILD_TYPE}}
+        ./stable/dynamips -e
+        ./unstable/dynamips_amd64_unstable -e
+
+    - name: Install
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target install
+
+    - name: Build failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: linux-build-failure
+        path: ${{github.workspace}}/build
+
+  # ----------------------------------------------------------------------------------------------
+  build-macos:
+    name: MacOS (x86_64)
+    runs-on: macos-13 # macos-latest/macos-14 has an ARM cpu (Apple M1) but we want an AMD64 cpu
+    steps:
+    - uses: actions/checkout@v4
+
+    # FIXME cache brew stuff
+    - name: Install build dependencies (build stuff, libelf)
+      uses: ConorMacBride/install-package@v1
+      with:
+        brew: cmake libelf # libpcap is included in the SDK
+
+    - name: Install build dependencies (rust)
+      uses: moonrepo/setup-rust@v1
+      with:
+        targets: x86_64-apple-darwin
+        components: clippy,rustfmt
+        target-dirs: rust/target
+
+    - name: Install build dependencies (rust-script)
+      run: cargo install rust-script
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_INSTALL_PREFIX=${{github.workspace}}/build/install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DDYNAMIPS_CODE=both -DDYNAMIPS_RENAME=stable -DBUILD_UDP_RECV=ON -DBUILD_UDP_SEND=ON
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      run: |
+        set -x
+        cd ${{github.workspace}}/build
+        ctest --verbose --build-config ${{env.BUILD_TYPE}}
+        ./stable/dynamips -e
+        ./unstable/dynamips_amd64_unstable -e
+
+    - name: Install
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --target install
+
+    - name: Build failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: macos-build-failure
+        path: ${{github.workspace}}/build
+
+  # ----------------------------------------------------------------------------------------------
+  build-cygwin:
+    # FIXME rust needs a cygwin target https://gist.github.com/ookiineko/057eb3a91825313caeaf6d793a33b0b2
+    if: false
+    name: Cygwin (x86_64)
+    runs-on: windows-latest
+    env:
+      # FIXME find out why cygwin builds fail without this
+      CYGWIN_NOWINPATH: 1 # isolate cygwin from windows
+      RUSTUP_TOOLCHAIN: stable-x86_64-pc-windows-gnu
+    defaults:
+      run:
+        shell: C:\cygwin\bin\bash.EXE --login -e -o pipefail -o igncr '{0}'
+    steps:
+    - name: Avoid '\r' problems
+      shell: cmd
+      run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v4
+
+    # FIXME cache cygwin stuff: https://github.com/cygwin/cygwin-install-action/pull/6
+    - name: Install build dependencies (cygwin, build stuff)
+      uses: cygwin/cygwin-install-action@master
+      with:
+        packages: git curl p7zip cmake make gcc-core
+        platform: x86_64
+
+    - name: Install build dependencies (rust)
+      uses: moonrepo/setup-rust@v1
+      with:
+        targets: x86_64-pc-windows-gnu
+        components: clippy,rustfmt
+        target-dirs: rust/target
+
+    - name: Adapt cygwin environment
+      run: |
+        set -x
+        # avoid git error "detected dubious ownership"
+        git config --global --add safe.directory '*'
+        # add rust to the path
+        echo "export PATH=$PATH:$(cygpath -u $HOMEPATH)/.cargo/bin" >> ~/.bash_profile
+        # set the start directory
+        echo "cd '${{github.workspace}}'" >> ~/.bash_profile
+
+    - name: Install build dependencies (rust-script)
+      run: cargo install rust-script
+
+    # FIXME when using cygwin package libelf-devel you get a missing libintl_dgettext error
+    - name: Install build dependencies (libelf)
+      run: |
+        set -x
+        curl -O https://fossies.org/linux/misc/old/libelf-0.8.13.tar.gz
+        tar xvzf libelf-0.8.13.tar.gz
+        cd libelf-0.8.13
+        ./configure --host x86_64-pc-cygwin
+        make
+        make install
+
+    - name: Install build dependencies (winpcap SDK)
+      run: |
+        set -x
+        curl -O https://www.winpcap.org/install/bin/WpdPack_4_1_2.zip
+        7za x ./WpdPack_4_1_2.zip -o.
+        cp ./WpdPack/Lib/x64/Packet.lib /usr/local/lib/libpacket.a
+        cp ./WpdPack/Lib/x64/wpcap.lib /usr/local/lib/libwpcap.a
+        cp --verbose --force --recursive ./WpdPack/Include/* /usr/local/include/
+
+    - name: Install run dependencies (win10pcap)
+      shell: cmd
+      run: |
+        echo on
+        curl -O "http://www.win10pcap.org/download/Win10Pcap-v10.2-5002.msi"
+        msiexec /i "Win10Pcap-v10.2-5002.msi" /qn /norestart /L*v "Win10Pcap-install.log"
+        type "Win10Pcap-install.log"
+
+    - name: Configure CMake
+      run: cmake -B "$(pwd)/build" -DCMAKE_INSTALL_PREFIX=$(pwd)/build/install -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DDYNAMIPS_CODE=both -DDYNAMIPS_RENAME=stable -DBUILD_UDP_RECV=ON -DBUILD_UDP_SEND=ON
+
+    - name: Build
+      run: cmake --build "$(pwd)/build" --config ${{env.BUILD_TYPE}}
+
+    - name: Test
+      run: |
+        set -x
+        cd build
+        ctest --verbose --build-config ${{env.BUILD_TYPE}}
+        ./stable/dynamips -e
+        ./unstable/dynamips_amd64_unstable -e
+
+    - name: Install
+      run: cmake --build $(pwd)/build --config ${{env.BUILD_TYPE}} --target install
+
+    - name: Build failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: cygwin-build-failure
+        path: ${{github.workspace}}\build
+

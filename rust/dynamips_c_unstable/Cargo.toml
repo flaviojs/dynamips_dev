@@ -1,0 +1,17 @@
+[package]
+name = "dynamips_c_unstable"
+version = "0.2.23"
+edition = "2021"
+workspace = ".."
+publish = false
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+dynamips_c = { path = "../dynamips_c", features = ["USE_UNSTABLE"] }
+
+[features]
+ENABLE_LINUX_ETH = ["dynamips_c/ENABLE_LINUX_ETH"]
+ENABLE_GEN_ETH = ["dynamips_c/ENABLE_GEN_ETH"]
+ENABLE_IPV6 = ["dynamips_c/ENABLE_IPV6"]

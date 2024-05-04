@@ -1,0 +1,17 @@
+[package]
+name = "dynamips_c"
+version = "0.2.23"
+edition = "2021"
+workspace = ".."
+publish = false
+
+[lib]
+crate-type = ["staticlib","rlib"]
+
+[dependencies]
+
+[features]
+ENABLE_LINUX_ETH = []
+ENABLE_GEN_ETH = []
+ENABLE_IPV6 = []
+USE_UNSTABLE = []

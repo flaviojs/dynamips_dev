@@ -7,6 +7,8 @@
  * Based on GT9100 documentation and Linux kernel sources.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

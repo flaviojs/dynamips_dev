@@ -37,6 +37,46 @@ if( APPLE OR (CMAKE_SYSTEM_NAME MATCHES "FreeBSD") )
     include_directories(include /opt/local/include/)
 endif()
 
+# Rust code
+include ( FetchContent )
+FetchContent_Declare (
+   Corrosion
+   GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+   GIT_TAG v0.5
+)
+FetchContent_MakeAvailable ( Corrosion )
+corrosion_import_crate (
+  MANIFEST_PATH "${CMAKE_SOURCE_DIR}/rust/Cargo.toml"
+  PROFILE release-with-debug
+  CRATES
+    dynamips_c
+    dynamips_c_unstable
+)
+function ( _set_features _crate )
+   set ( _features )
+   foreach ( _feature IN ITEMS ${ARGV} )
+      if( ${_feature} )
+         list ( APPEND _features "${_feature}" )
+      endif()
+   endforeach ()
+   corrosion_set_features ( "${_crate}" FEATURES ${_features} )
+endfunction ()
+_set_features( dynamips_c ENABLE_LINUX_ETH ENABLE_GEN_ETH ENABLE_IPV6 )
+_set_features( dynamips_c_unstable ENABLE_LINUX_ETH ENABLE_GEN_ETH ENABLE_IPV6 )
+corrosion_experimental_cbindgen( MANIFEST_PATH "${CMAKE_SOURCE_DIR}/rust/dynamips_c/Cargo.toml" TARGET dynamips_c HEADER_NAME "rust_dynamips_c.h" )
+target_include_directories ( dynamips_c_unstable INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/corrosion_generated/cbindgen/dynamips_c/include" ) 
+add_dependencies ( dynamips_c_unstable "_corrosion_cbindgen_dynamips_c_bindings" )
+
+add_custom_target ( cargo_fmt COMMAND cargo fmt -v WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/rust" USES_TERMINAL )
+add_custom_target ( cargo_clippy COMMAND cargo clippy --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/rust" USES_TERMINAL )
+add_custom_target ( cargo_test COMMAND cargo test --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v -- --test-threads 1 WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/rust" USES_TERMINAL )
+add_custom_target ( cargo_doc COMMAND cargo doc --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/rust" USES_TERMINAL )
+
+enable_testing()
+add_test( NAME test_cargo_fmt COMMAND cargo fmt --check -v WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/rust" )
+add_test( NAME test_cargo_clippy COMMAND cargo clippy --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v -- -D warnings WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/rust" )
+add_test( NAME test_cargo_test COMMAND cargo test --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v -- --test-threads 1 WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/rust" )
+
 add_subdirectory ( man )
 add_subdirectory ( common )
 add_subdirectory ( stable )

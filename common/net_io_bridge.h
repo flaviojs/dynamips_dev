@@ -8,6 +8,8 @@
 #ifndef __NET_IO_BRIDGE_H__
 #define __NET_IO_BRIDGE_H__
 
+#include "rust_dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h"

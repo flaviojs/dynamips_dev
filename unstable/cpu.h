@@ -6,6 +6,8 @@
 #ifndef __CPU_H__
 #define __CPU_H__
 
+#include "rust_dynamips_c.h"
+
 #include <pthread.h>
 #include <setjmp.h>
 #include "utils.h"

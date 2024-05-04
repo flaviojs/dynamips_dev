@@ -22,6 +22,8 @@
 #ifndef __DEV_C7200_H__
 #define __DEV_C7200_H__
 
+#include "rust_dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h"

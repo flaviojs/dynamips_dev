@@ -1,0 +1,34 @@
+[package]
+name = "dynamips_c"
+version = "0.2.23"
+edition = "2021"
+workspace = ".."
+publish = false
+
+[lib]
+crate-type = ["staticlib","rlib"]
+
+[dependencies]
+fn_abi = "3.0.0"
+function_name = "0.3"
+libc = "0.2"
+libc_alloc = "1.0"
+likely_stable = "0.1.2"
+paste = "1.0"
+pcap-sys = { version = "0.1.3", optional = true }
+setjmp = "0.1"
+sprintf = "0.3.1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+linux-raw-sys = { version = "0.6.4", features = ["ioctl"] }
+
+[build-dependencies]
+autocfg = "1"
+cc = "1.0"
+
+[features]
+ENABLE_LINUX_ETH = []
+ENABLE_GEN_ETH = []
+ENABLE_IPV6 = []
+USE_UNSTABLE = []
+fastcall= []

@@ -9,6 +9,8 @@
  * Just an experimentation (I don't have any PA-POS-OC3).
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

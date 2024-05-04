@@ -1,5 +1,7 @@
 # dynamips - unstable code
 
+list ( APPEND DYNAMIPS_LIBRARIES dynamips_c_unstable )
+
 set ( COMMON "${CMAKE_SOURCE_DIR}/common" )
 set ( LOCAL "${CMAKE_CURRENT_SOURCE_DIR}" )
 include_directories ( "${CMAKE_CURRENT_SOURCE_DIR}" "${COMMON}" "${CMAKE_CURRENT_BINARY_DIR}" )

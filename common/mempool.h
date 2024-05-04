@@ -8,6 +8,8 @@
 #ifndef __MEMPOOL_H__
 #define __MEMPOOL_H__  1
 
+#include "rust_dynamips_c.h"
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <pthread.h>

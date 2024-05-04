@@ -8,6 +8,8 @@
 #ifndef __CISCO_EEPROM_H__
 #define __CISCO_EEPROM_H__
 
+#include "rust_dynamips_c.h"
+
 #include "utils.h"
 
 /*

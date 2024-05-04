@@ -9,6 +9,8 @@
 #ifndef __RBTREE_H__
 #define __RBTREE_H__   1
 
+#include "rust_dynamips_c.h"
+
 static const char rcsid_rbtree[] = "$Id$";
 
 #include <sys/types.h>

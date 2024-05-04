@@ -8,6 +8,8 @@
 #ifndef __NET_IO_H__
 #define __NET_IO_H__
 
+#include "rust_dynamips_c.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>

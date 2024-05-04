@@ -1,0 +1,12 @@
+[workspace]
+# https://doc.rust-lang.org/cargo/reference/resolver.html#feature-resolver-version-2
+resolver = "2"
+members = [
+    "dynamips_c",
+    "dynamips_c_unstable",
+]
+
+[profile.release-with-debug]
+# custom profiles require cargo 1.57+
+inherits = "release"
+debug = true

@@ -5,6 +5,8 @@
  * ROMMON Environment Variables.
  */
 
+#include "rust_dynamips_c.h"
+
 #include "utils.h"
 #include "rommon_var.h"
 

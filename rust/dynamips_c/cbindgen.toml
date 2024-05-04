@@ -1,0 +1,39 @@
+language = "C"
+include_version = true
+include_guard = "RUST_DYNAMIPS_C_H"
+pragma_once = true
+documentation_style = "c++"
+style = "tag"
+sys_includes = [
+    "pthread.h",
+    "setjmp.h",
+    "stdio.h",
+    "sys/un.h",
+    "sys/uio.h",
+]
+after_includes = """
+#if defined(GEN_ETH)
+#include <pcap.h>
+#endif
+
+#define _attribute_aligned(n) __attribute__ ((aligned(n)))
+"""
+
+[defines]
+"feature = ENABLE_GEN_ETH" = "GEN_ETH"
+"feature = ENABLE_LINUX_ETH" = "LINUX_ETH"
+"feature = USE_UNSTABLE" = "USE_UNSTABLE"
+"target_arch = x86_64" = "XXX_depends_on_target_arch"
+"target_arch = x86" = "XXX_depends_on_target_arch"
+"target_endian = big" = "XXX_depends_on_target_endian"
+"target_endian = little" = "XXX_depends_on_target_endian"
+
+[export]
+include = [
+]
+exclude = [
+]
+
+[layout]
+aligned_n = "_attribute_aligned"
+packed = "__attribute__ ((__packed__))"

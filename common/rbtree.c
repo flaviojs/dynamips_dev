@@ -6,6 +6,8 @@
  * rbtree.c: Red/Black Trees.
  */
 
+#include "rust_dynamips_c.h"
+
 static const char rcsid[] = "$Id$";
 
 #include <stdio.h>

@@ -8,6 +8,8 @@
 #ifndef __FRAME_RELAY_H__
 #define __FRAME_RELAY_H__
 
+#include "rust_dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h"

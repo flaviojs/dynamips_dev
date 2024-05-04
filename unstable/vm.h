@@ -8,6 +8,8 @@
 #ifndef __VM_H__
 #define __VM_H__
 
+#include "rust_dynamips_c.h"
+
 #include <pthread.h>
 
 #include "dynamips.h"

@@ -5,6 +5,8 @@
  * PC Modules NM (NM-NAM, NM-CIDS, ...) for c2691 platforms.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

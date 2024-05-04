@@ -6,6 +6,8 @@
 #ifndef __DEV_ROM_H__
 #define __DEV_ROM_H__
 
+#include "rust_dynamips_c.h"
+
 #include <sys/types.h>
 #include "utils.h"
 #include "cpu.h"

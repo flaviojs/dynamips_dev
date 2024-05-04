@@ -8,6 +8,8 @@
 #ifndef __ROMMON_VAR_H__
 #define __ROMMON_VAR_H__
 
+#include "rust_dynamips_c.h"
+
 #include "dynamips_common.h"
 
 /* ROMMON variable */

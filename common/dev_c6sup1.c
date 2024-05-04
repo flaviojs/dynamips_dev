@@ -7,6 +7,8 @@
  * This is not a working platform! I only added it to play.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

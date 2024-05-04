@@ -5,6 +5,8 @@
  * Dallas DS1620 Temperature sensors.
  */
 
+#include "rust_dynamips_c.h"
+
 #include "dev_ds1620.h"
 
 /* DS1620 commands */

@@ -5,6 +5,8 @@
  * Utility functions.
  */
 
+#include "rust_dynamips_c.h"
+
 #include "dynamips_common.h"
 
 #define _GNU_SOURCE

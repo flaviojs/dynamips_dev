@@ -14,6 +14,8 @@
 #ifndef __DYNAMIPS_COMMON_H__
 #define __DYNAMIPS_COMMON_H__
 
+#include "rust_dynamips_c.h"
+
 /* Config file - not used at the moment */
 #if HAVE_DYNAMIPS_CONFIG_H
 #include "dynamips_config.h"

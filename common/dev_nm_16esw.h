@@ -6,6 +6,8 @@
 #ifndef __DEV_NM_16ESW_H__
 #define __DEV_NM_16ESW_H__
 
+#include "rust_dynamips_c.h"
+
 #include <sys/types.h>
 
 #include "utils.h"

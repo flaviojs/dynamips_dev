@@ -6,6 +6,8 @@
 #ifndef __PPC32_X86_TRANS_H__
 #define __PPC32_X86_TRANS_H__
 
+#include "rust_dynamips_c.h"
+
 #include "utils.h"
 #include "x86-codegen.h"
 #include "cpu.h"

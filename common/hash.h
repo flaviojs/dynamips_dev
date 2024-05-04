@@ -8,6 +8,8 @@
 #ifndef __HASH_H__
 #define __HASH_H__  1
 
+#include "rust_dynamips_c.h"
+
 #include <sys/types.h>
 #include "utils.h"
 

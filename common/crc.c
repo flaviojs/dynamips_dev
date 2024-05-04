@@ -5,6 +5,8 @@
  * CRC functions.
  */
 
+#include "rust_dynamips_c.h"
+
 #include "dynamips_common.h"
 
 #define CRC12_POLY  0x0f01

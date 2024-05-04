@@ -6,6 +6,8 @@
 #ifndef __PPC_32_H__
 #define __PPC_32_H__
 
+#include "rust_dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h" 

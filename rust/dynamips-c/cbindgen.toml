@@ -1,0 +1,48 @@
+language = "C"
+include_version = true
+include_guard = "RUST_DYNAMIPS_C_H"
+pragma_once = true
+documentation_style = "c++"
+style = "tag"
+sys_includes = [
+    "pthread.h",
+    "setjmp.h",
+    "stdio.h",
+    "sys/uio.h",
+    "sys/un.h",
+]
+after_includes = """
+#if defined(GEN_ETH)
+#include <pcap.h>
+#endif
+
+#define _attribute_aligned(n) __attribute__ ((aligned(n)))
+"""
+
+[defines]
+"feature = ENABLE_GEN_ETH" = "GEN_ETH" # has optional dependencies of gen_eth
+"feature = ENABLE_LINUX_ETH" = "LINUX_ETH" # has optional dependencies of linux_eth
+"feature = USE_DEBUG_BLOCK_TIMESTAMP" = "USE_DEBUG_BLOCK_TIMESTAMP" # some struct fields only exist with DEBUG_BLOCK_TIMESTAMP
+"feature = USE_DEBUG_SYM_TREE" = "USE_DEBUG_SYM_TREE" # a match case only exists with DEBUG_SYM_TREE
+"feature = USE_MIPS64_AMD64_TRANS" = "USE_MIPS64_AMD64_TRANS" # translate mips64 executable code to x86_64 machine code
+"feature = USE_MIPS64_NOJIT_TRANS" = "USE_MIPS64_NOJIT_TRANS" # do not translate mips64 executable code
+"feature = USE_MIPS64_PPC32_TRANS" = "USE_MIPS64_PPC32_TRANS" # translate mips64 executable code to powerpc machine code
+"feature = USE_MIPS64_X86_TRANS" = "USE_MIPS64_X86_TRANS" # translate mips64 executable code to x86 machine code
+"feature = USE_PPC32_AMD64_TRANS" = "USE_PPC32_AMD64_TRANS" # translate ppc32 executable code to x86_64 machine code
+"feature = USE_PPC32_NOJIT_TRANS" = "USE_PPC32_NOJIT_TRANS" # do not translate ppc32 executable code
+"feature = USE_PPC32_X86_TRANS" = "USE_PPC32_X86_TRANS" # translate ppc32 executable code to x86 machine code
+"feature = USE_UNSTABLE" = "USE_UNSTABLE" # some code is different in unstable
+"if_0" = "XXX_NOT_SUPPORTED"
+"target_arch = x86_64" = "HAS_TARGET_ARCH_X86_64"
+"target_arch = x86" = "HAS_TARGET_ARCH_X86"
+"target_endian = big" = "HAS_TARGET_ENDIAN_BIG"
+"target_endian = little" = "HAS_TARGET_ENDIAN_LITTLE"
+
+[export]
+exclude = [
+    "JIT_SUPPORT", # symbol appears multiple times
+]
+
+[layout]
+aligned_n = "_attribute_aligned"
+packed = "__attribute__ ((__packed__))"

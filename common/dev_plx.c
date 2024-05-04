@@ -8,6 +8,8 @@
  * to work, and for the upcoming PA-MC-8TE1.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -8,6 +8,8 @@
 #ifndef __SBOX_H__
 #define __SBOX_H__
 
+#include "rust_dynamips_c.h"
+
 #include "dynamips_common.h"
 
 extern m_uint32_t sbox_array[];

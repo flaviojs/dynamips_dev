@@ -11,6 +11,8 @@
 #ifndef FS_FAT_H__
 #define FS_FAT_H__
 
+#include "rust_dynamips_c.h"
+
 #include "dynamips_common.h"
 
 #define FS_FAT_SECTOR_SIZE  512

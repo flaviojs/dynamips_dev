@@ -2,6 +2,8 @@
  * Contribution of Mtve.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>

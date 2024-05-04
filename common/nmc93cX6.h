@@ -8,6 +8,8 @@
 #ifndef __NMC93CX6_H__
 #define __NMC93CX6_H__
 
+#include "rust_dynamips_c.h"
+
 #include <sys/types.h>
 #include "utils.h"
 #include "cisco_eeprom.h"

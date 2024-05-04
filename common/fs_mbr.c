@@ -8,6 +8,8 @@
  * Copyright (c) 2014 Flávio J. Saraiva <flaviojs2005@gmail.com>
  */
 
+#include "rust_dynamips_c.h"
+
 #include "fs_mbr.h"
 
 /** Decode a CHS reference */

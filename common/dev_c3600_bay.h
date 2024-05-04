@@ -8,6 +8,8 @@
 #ifndef __DEV_C3600_BAY_H__
 #define __DEV_C3600_BAY_H__
 
+#include "rust_dynamips_c.h"
+
 #include "pci_dev.h"
 #include "dev_c3600.h"
 

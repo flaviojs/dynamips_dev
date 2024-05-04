@@ -9,6 +9,8 @@
  *   http://www.science.unitn.it/~fiorella/guidelinux/tlk/node76.html
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

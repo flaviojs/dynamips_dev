@@ -8,6 +8,8 @@
 #ifndef __DEV_C2691_IOFPGA_H__
 #define __DEV_C2691_IOFPGA_H__
 
+#include "rust_dynamips_c.h"
+
 /* Forward declaration for IO_FPGA private data */
 struct c2691_iofpga_data;
 

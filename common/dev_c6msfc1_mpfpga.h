@@ -8,6 +8,8 @@
 #ifndef __DEV_C6MSFC1_MPFPGA_H__
 #define __DEV_C6MSFC1_MPFPGA_H__
 
+#include "rust_dynamips_c.h"
+
 /* Forward declaration for MP_FPGA private data */
 struct c6msfc1_mpfpga_data;
 

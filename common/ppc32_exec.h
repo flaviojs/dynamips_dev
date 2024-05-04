@@ -6,6 +6,8 @@
 #ifndef __PPC32_EXEC_H__
 #define __PPC32_EXEC_H__
 
+#include "rust_dynamips_c.h"
+
 #include "utils.h"
 
 /* PowerPC instruction recognition */

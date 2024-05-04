@@ -5,6 +5,8 @@
  * PA-MC-8TE1 card. Doesn't work at this time.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -8,6 +8,8 @@
 #ifndef __NET_H__
 #define __NET_H__  1
 
+#include "rust_dynamips_c.h"
+
 #include "dynamips_common.h"
 
 #include <arpa/inet.h>

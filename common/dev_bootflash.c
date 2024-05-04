@@ -14,6 +14,8 @@
  * TODO: A lot of commands are lacking. Doesn't work with NPE-G2.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

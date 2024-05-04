@@ -1,0 +1,48 @@
+[package]
+name = "dynamips-c"
+version = "0.2.23"
+edition = "2021"
+workspace = ".."
+publish = false
+
+[lib]
+crate-type = ["staticlib","rlib"]
+
+[dependencies]
+compile-time = "0.2"
+constcat = "0.5"
+fn_abi = "3.0.0"
+function_name = "0.3"
+libc = "0.2"
+libc_alloc = "1.0"
+libelf-sys = "0.1.0"
+likely_stable = "0.1.2"
+paste = "1.0"
+pcap-sys = { version = "0.1.3", optional = true }
+setjmp = "0.1"
+sprintf = "0.3.1"
+
+[target.'cfg(target_os = "linux")'.dependencies]
+linux-raw-sys = { version = "0.6.4", features = ["ioctl"] }
+
+[build-dependencies]
+autocfg = "1"
+bindgen = "0.70"
+cc = "1.0"
+elf = "0.7.4"
+
+[features]
+ENABLE_GEN_ETH = ["pcap-sys"] # has optional dependencies of gen_eth
+ENABLE_IPV6 = [] # system has support for HAS_RFC2553 code
+ENABLE_LINUX_ETH = [] # has optional dependencies of linux_eth
+USE_DEBUG_BLOCK_TIMESTAMP = [] # some struct fields only exist with DEBUG_BLOCK_TIMESTAMP
+USE_DEBUG_SYM_TREE = [] # a match case only exists with DEBUG_SYM_TREE
+USE_MIPS64_AMD64_TRANS = [] # translate mips64 executable code to x86_64 machine code
+USE_MIPS64_NOJIT_TRANS = [] # do not translate mips64 executable code
+USE_MIPS64_PPC32_TRANS = [] # translate mips64 executable code to powerpc machine code
+USE_MIPS64_X86_TRANS = [] # translate mips64 executable code to x86 machine code
+USE_PPC32_AMD64_TRANS = [] # translate ppc32 executable code to x86_64 machine code
+USE_PPC32_NOJIT_TRANS = [] # do not translate ppc32 executable code
+USE_PPC32_X86_TRANS = [] # translate ppc32 executable code to x86 machine code
+USE_PROFILER = [] # TODO debug code for x86? no usage examples in the code
+USE_UNSTABLE = [] # some code is different in unstable

@@ -6,6 +6,8 @@
 #ifndef __PARSER_H__
 #define __PARSER_H__
 
+#include "rust_dynamips_c.h"
+
 #include <sys/types.h>
 
 /* Parser Errors */

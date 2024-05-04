@@ -16,6 +16,8 @@
 #ifndef AMD64_H
 #define AMD64_H
 
+#include "rust_dynamips_c.h"
+
 typedef enum {
 	AMD64_RAX = 0,
 	AMD64_RCX = 1,

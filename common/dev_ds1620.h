@@ -9,6 +9,8 @@
 #ifndef __DEV_DS1620_H__
 #define __DEV_DS1620_H__
 
+#include "rust_dynamips_c.h"
+
 #include "dynamips_common.h"
 
 struct ds1620_data {

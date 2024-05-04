@@ -1,0 +1,28 @@
+[package]
+name = "dynamips-c-unstable"
+version = "0.2.23"
+edition = "2021"
+workspace = ".."
+publish = false
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+dynamips-c = { path = "../dynamips-c", features = ["USE_UNSTABLE"] }
+
+[features]
+# propagate features other than USE_UNSTABLE
+ENABLE_GEN_ETH = ["dynamips-c/ENABLE_GEN_ETH"]
+ENABLE_IPV6 = ["dynamips-c/ENABLE_IPV6"]
+ENABLE_LINUX_ETH = ["dynamips-c/ENABLE_LINUX_ETH"]
+USE_DEBUG_BLOCK_TIMESTAMP = ["dynamips-c/USE_DEBUG_BLOCK_TIMESTAMP"]
+USE_DEBUG_SYM_TREE = ["dynamips-c/USE_DEBUG_SYM_TREE"]
+USE_MIPS64_AMD64_TRANS = ["dynamips-c/USE_MIPS64_AMD64_TRANS"]
+USE_MIPS64_NOJIT_TRANS = ["dynamips-c/USE_MIPS64_NOJIT_TRANS"]
+USE_MIPS64_PPC32_TRANS = ["dynamips-c/USE_MIPS64_PPC32_TRANS"]
+USE_MIPS64_X86_TRANS = ["dynamips-c/USE_MIPS64_X86_TRANS"]
+USE_PPC32_AMD64_TRANS = ["dynamips-c/USE_PPC32_AMD64_TRANS"]
+USE_PPC32_NOJIT_TRANS = ["dynamips-c/USE_PPC32_NOJIT_TRANS"]
+USE_PPC32_X86_TRANS = ["dynamips-c/USE_PPC32_X86_TRANS"]
+USE_PROFILER = ["dynamips-c/USE_PROFILER"]

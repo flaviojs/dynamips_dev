@@ -9,6 +9,8 @@
  * scheme used here.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <ctype.h>
 
 static const char base64digits[] =

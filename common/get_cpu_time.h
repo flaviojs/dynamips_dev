@@ -7,6 +7,8 @@
 #ifndef __GET_CPU_TIME_H__
 #define __GET_CPU_TIME_H__
 
+#include "rust_dynamips_c.h"
+
 double get_cpu_time();
 
 #endif

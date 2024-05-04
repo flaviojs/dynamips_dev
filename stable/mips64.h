@@ -6,6 +6,8 @@
 #ifndef __MIPS_64_H__
 #define __MIPS_64_H__
 
+#include "rust_dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h" 

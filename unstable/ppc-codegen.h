@@ -8,6 +8,9 @@
 
 #ifndef __MONO_PPC_CODEGEN_H__
 #define __MONO_PPC_CODEGEN_H__
+
+#include "rust_dynamips_c.h"
+
 #include <assert.h>
 
 typedef enum {

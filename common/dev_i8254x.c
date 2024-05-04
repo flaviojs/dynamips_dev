@@ -5,6 +5,8 @@
  * Intel i8254x (Wiseman/Livengood) Ethernet chip emulation.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

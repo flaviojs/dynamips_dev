@@ -1,0 +1,4 @@
+# Do not wrap below the line limit
+use_small_heuristics = "Max"
+# Current monitors are big, so set a big line limit
+max_width = 300

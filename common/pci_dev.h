@@ -6,6 +6,8 @@
 #ifndef	__PCI_DEV_H__
 #define	__PCI_DEV_H__
 
+#include "rust_dynamips_c.h"
+
 #include "utils.h"
 
 #define	PCI_BUS_ADDR  0xcf8

@@ -1,0 +1,17 @@
+[workspace]
+# https://doc.rust-lang.org/cargo/reference/resolver.html#feature-resolver-version-2
+resolver = "2"
+members = [
+    "dynamips-c",
+    "dynamips-c-stable",
+    "dynamips-c-unstable",
+]
+
+[profile.release-with-debug]
+# custom profiles require cargo 1.57+
+inherits = "release"
+debug = true
+
+[profile.test]
+inherits = "release-with-debug"
+overflow-checks = true

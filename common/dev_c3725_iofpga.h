@@ -8,6 +8,8 @@
 #ifndef __DEV_C3725_IOFPGA_H__
 #define __DEV_C3725_IOFPGA_H__
 
+#include "rust_dynamips_c.h"
+
 /* Forward declaration for IO_FPGA private data */
 struct c3725_iofpga_data;
 

@@ -6,6 +6,8 @@
 #ifndef __MEMORY_H__
 #define __MEMORY_H__
 
+#include "rust_dynamips_c.h"
+
 #include <sys/types.h>
 #include "utils.h"
 

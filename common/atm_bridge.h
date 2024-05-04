@@ -8,6 +8,8 @@
 #ifndef __ATM_BRIDGE_H__
 #define __ATM_BRIDGE_H__
 
+#include "rust_dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h"

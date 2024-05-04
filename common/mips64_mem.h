@@ -6,6 +6,8 @@
 #ifndef __MIPS64_MEM_H__
 #define __MIPS64_MEM_H__
 
+#include "rust_dynamips_c.h"
+
 /* Shutdown the MTS subsystem */
 void mips64_mem_shutdown(cpu_mips_t *cpu);
 

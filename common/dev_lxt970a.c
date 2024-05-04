@@ -10,5 +10,7 @@
  *  IEEE Std 802.3-2008, Section 2
  */
 
+#include "rust_dynamips_c.h"
+
 #include "dev_lxt970a.h"
 

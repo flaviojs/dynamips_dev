@@ -7,6 +7,8 @@
 #ifndef __DYNAMIPS_H__
 #define __DYNAMIPS_H__
 
+#include "rust_dynamips_c.h"
+
 #include <libelf.h>
 
 #include "utils.h"

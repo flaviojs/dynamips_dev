@@ -8,6 +8,8 @@
  * similar to an NPE-200. I think that could work with a functional CatOS SP.
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -11,6 +11,8 @@
 #ifndef __BASE64_H__
 #define __BASE64_H__
 
+#include "rust_dynamips_c.h"
+
 /* Encode into base64 */
 void base64_encode(unsigned char *out,const unsigned char *in,int inlen);
 

@@ -3,6 +3,8 @@
  * Copyright (c) 2006 Christophe Fillot (cf@utc.fr)
  */
 
+#include "rust_dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -5,6 +5,8 @@
  * Template code for MTS.
  */
 
+#include "rust_dynamips_c.h"
+
 #define MTS_ENTRY  MTS_NAME(entry_t)
 #define MTS_CACHE(cpu)  ( cpu->mts_u. MTS_NAME(cache) )
 

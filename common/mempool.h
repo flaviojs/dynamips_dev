@@ -16,51 +16,6 @@
 
 #include "utils.h"
 
-/* Memory Pool "Fixed" Flag */
-#define MEMPOOL_FIXED  1
-
-/* Dummy value used to check if a memory block is invalid */
-#define MEMBLOCK_TAG  0xdeadbeef
-
-typedef struct memblock memblock_t;
-typedef struct mempool mempool_t;
-
-/* Memory block */
-struct memblock {
-   int tag;                  /* MEMBLOCK_TAG if block is valid */
-   size_t block_size;        /* Block size (without header) */
-   memblock_t *next,*prev;   /* Double linked list pointers */
-   mempool_t *pool;          /* Pool which contains this block */
-   m_uint64_t data[0];       /* Memory block itself */
-};
-
-/* Memory Pool */
-struct mempool {
-   memblock_t *block_list;   /* Double-linked block list */
-   pthread_mutex_t lock;     /* Mutex for managing pool */
-   char *name;               /* Name of this pool */
-   int flags;                /* Flags */
-   int nr_blocks;            /* Number of blocks in this pool */
-   size_t total_size;        /* Total bytes allocated */
-   size_t max_size;          /* Maximum memory */
-};
-
-/* Lock and unlock access to a memory pool */
-#define MEMPOOL_LOCK(mp)    pthread_mutex_lock(&(mp)->lock)
-#define MEMPOOL_UNLOCK(mp)  pthread_mutex_unlock(&(mp)->lock)
-
-/* Callback function for use with mp_foreach */
-typedef void (*mp_foreach_cbk)(memblock_t *block,void *user_arg);
-
-/* Execute an action for each block in specified pool */
-static inline void mp_foreach(mempool_t *pool,mp_foreach_cbk cbk,void *arg)
-{
-   memblock_t *mb;
-
-   for(mb=pool->block_list;mb;mb=mb->next)
-      cbk(mb,arg);
-}
-
 /* Allocate a new block in specified pool */
 void *mp_alloc(mempool_t *pool,size_t size);
 

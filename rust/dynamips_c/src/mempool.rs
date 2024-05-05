@@ -246,6 +246,21 @@ pub unsafe extern "C" fn mp_free_pool(pool: *mut mempool_t) {
     }
 }
 
+/// Create a new pool in a fixed memory area
+#[no_mangle]
+pub unsafe extern "C" fn mp_create_fixed_pool(mp: *mut mempool_t, name: *mut c_char) -> *mut mempool_t {
+    libc::memset(mp.cast::<_>(), 0, size_of::<mempool_t>());
+
+    if libc::pthread_mutex_init(addr_of_mut!((*mp).lock), null_mut()) != 0 {
+        return null_mut();
+    }
+
+    (*mp).name = name;
+    (*mp).block_list = null_mut();
+    (*mp).flags = MEMPOOL_FIXED;
+    mp
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
 

@@ -97,20 +97,6 @@ static inline void *mp_alloc_inline(mempool_t *pool,size_t size,int zeroed)
    return(block->data);
 }
 
-/* Create a new pool in a fixed memory area */
-mempool_t *mp_create_fixed_pool(mempool_t *mp,char *name)
-{
-   memset(mp,0,sizeof(*mp));
-
-   if (pthread_mutex_init(&mp->lock,NULL) != 0)
-      return NULL;
-
-   mp->name = name;
-   mp->block_list = NULL;
-   mp->flags = MEMPOOL_FIXED;
-   return mp;
-}
-
 /* Create a new pool */
 mempool_t *mp_create_pool(char *name)
 {

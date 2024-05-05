@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "mempool.h"
 #include "net_io.h"
 
 /* DLCIs used for LMI */

@@ -12,4 +12,5 @@ typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;
 typedef struct memblock memblock_t;
 typedef struct mempool mempool_t;
+typedef struct registry_entry registry_entry_t;
 """

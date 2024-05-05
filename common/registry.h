@@ -17,17 +17,6 @@ static const char rcsid_registry[] = "$Id$";
 
 #include "rust_dynamips_c.h"
 
-/* Registry entry */
-typedef struct registry_entry registry_entry_t;
-struct registry_entry {
-   char *name;
-   void *data;
-   int object_type;
-   int ref_count;
-   registry_entry_t *hname_next,*hname_prev;
-   registry_entry_t *htype_next,*htype_prev;
-};
-
 /* Registry info */
 typedef struct registry registry_t;
 struct registry {

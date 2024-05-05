@@ -91,43 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Add a new entry to the registry */
-int registry_add(char *name,int object_type,void *data)
-{
-   registry_entry_t *entry;
-
-   if (!name) 
-      return(-1);
-
-   REGISTRY_LOCK();
-
-   /* check if we have already a reference for this name */
-   if ((entry = registry_find_entry(name,object_type))) {
-      REGISTRY_UNLOCK();
-      return(-1);
-   }
-
-   /* create a new entry */
-   if (!(entry = mp_alloc(&registry->mp,sizeof(*entry)))) {
-      REGISTRY_UNLOCK();
-      return(-1);
-   }
-
-   entry->name = name;
-   entry->data = data;
-   entry->object_type = object_type;
-   entry->ref_count = 1;   /* consider object is referenced by the caller */
-   registry_insert_entry(entry);
-
-#if DEBUG_REGISTRY
-   printf("Registry: object %s: ref_count = %d after add.\n",
-          entry->name, entry->ref_count);
-#endif
-
-   REGISTRY_UNLOCK();
-   return(0);
-}
-
 /* Delete an entry from the registry */
 int registry_delete(char *name,int object_type)
 {

@@ -1,5 +1,6 @@
 //! Object Registry.
 
+use crate::hash::*;
 use crate::mempool::*;
 use crate::prelude::*;
 
@@ -60,8 +61,53 @@ pub type registry_foreach = Option<unsafe extern "C" fn(entry: *mut registry_ent
 /// Registry "exec" callback
 pub type registry_exec = Option<unsafe extern "C" fn(data: *mut c_void, opt_arg: *mut c_void) -> c_int>;
 
+const DEBUG_REGISTRY: bool = false;
+
 #[no_mangle]
 pub static mut registry: *mut registry_t = null_mut(); // TODO private
+
+unsafe fn REGISTRY_LOCK() {
+    libc::pthread_mutex_lock(addr_of_mut!((*registry).lock));
+}
+unsafe fn REGISTRY_UNLOCK() {
+    libc::pthread_mutex_unlock(addr_of_mut!((*registry).lock));
+}
+
+/// Insert a new entry
+unsafe fn registry_insert_entry(entry: *mut registry_entry_t) {
+    // insert new entry in hash table for names
+    let h_index: usize = str_hash((*entry).name.cast::<_>()) as usize % (*registry).ht_name_entries as usize;
+    let mut bucket: *mut registry_entry_t = (*registry).ht_names.add(h_index);
+
+    (*entry).hname_next = (*bucket).hname_next;
+    (*entry).hname_prev = bucket;
+    (*(*bucket).hname_next).hname_prev = entry;
+    (*bucket).hname_next = entry;
+
+    // insert new entry in hash table for object types
+    bucket = (*registry).ht_types.offset((*entry).object_type as isize);
+
+    (*entry).htype_next = (*bucket).htype_next;
+    (*entry).htype_prev = bucket;
+    (*(*bucket).htype_next).htype_prev = entry;
+    (*bucket).htype_next = entry;
+}
+
+/// Locate an entry
+unsafe fn registry_find_entry(name: *mut c_char, object_type: c_int) -> *mut registry_entry_t {
+    let h_index: usize = str_hash(name.cast::<_>()) as usize % (*registry).ht_name_entries as usize;
+    let bucket: *mut registry_entry_t = (*registry).ht_names.add(h_index);
+
+    let mut entry: *mut registry_entry_t = (*bucket).hname_next;
+    while entry != bucket {
+        if libc::strcmp((*entry).name, name) == 0 && (*entry).object_type == object_type {
+            return entry;
+        }
+        entry = (*entry).hname_next;
+    }
+
+    null_mut()
+}
 
 /// Terminate the registry
 extern "C" fn registry_terminate() {
@@ -117,6 +163,43 @@ pub unsafe extern "C" fn registry_init() -> c_int {
 
     libc::atexit(registry_terminate);
 
+    0
+}
+
+/// Add a new entry to the registry
+#[no_mangle]
+pub unsafe extern "C" fn registry_add(name: *mut c_char, object_type: c_int, data: *mut c_void) -> c_int {
+    if name.is_null() {
+        return -1;
+    }
+
+    REGISTRY_LOCK();
+
+    // check if we have already a reference for this name
+    let mut entry: *mut registry_entry_t = registry_find_entry(name, object_type);
+    if !entry.is_null() {
+        REGISTRY_UNLOCK();
+        return -1;
+    }
+
+    // create a new entry
+    entry = mp_alloc(addr_of_mut!((*registry).mp), size_of::<registry_entry_t>()).cast::<_>();
+    if entry.is_null() {
+        REGISTRY_UNLOCK();
+        return -1;
+    }
+
+    (*entry).name = name;
+    (*entry).data = data;
+    (*entry).object_type = object_type;
+    (*entry).ref_count = 1; // consider object is referenced by the caller
+    registry_insert_entry(entry);
+
+    if DEBUG_REGISTRY {
+        libc::printf(cstr!("Registry: object %s: ref_count = %d after add.\n"), (*entry).name, (*entry).ref_count);
+    }
+
+    REGISTRY_UNLOCK();
     0
 }
 

@@ -14,4 +14,5 @@ pub mod mempool;
 pub mod net;
 /// cbindgen:ignore
 pub mod prelude;
+pub mod registry;
 pub mod utils;

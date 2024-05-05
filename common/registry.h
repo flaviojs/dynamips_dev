@@ -17,7 +17,6 @@ static const char rcsid_registry[] = "$Id$";
 
 #include "rust_dynamips_c.h"
 
-#define REGISTRY_HT_NAME_ENTRIES  1024
 #define REGISTRY_MAX_TYPES  256
 
 /* Object types for Registry */

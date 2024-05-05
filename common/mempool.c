@@ -97,32 +97,6 @@ static inline void *mp_alloc_inline(mempool_t *pool,size_t size,int zeroed)
    return(block->data);
 }
 
-/* Reallocate a block */
-void *mp_realloc(void *addr,size_t new_size)
-{
-   memblock_t *ptr,*block = (memblock_t *)addr - 1;
-   mempool_t *pool;
-   size_t total_size;
-
-   assert(block->tag == MEMBLOCK_TAG);
-   pool = block->pool;
-
-   /* remove this block from list */
-   memblock_delete(pool,block);
-
-   /* reallocate block with specified size */
-   total_size = new_size + sizeof(memblock_t);
-
-   if (!(ptr = realloc(block,total_size))) {
-      memblock_insert(pool,block);
-      return NULL;
-   }
-
-   ptr->block_size = new_size;
-   memblock_insert(pool,ptr);
-   return ptr->data;
-}
-
 /* Allocate a new memory block and copy data into it */
 void *mp_dup(mempool_t *pool,void *data,size_t size)
 {

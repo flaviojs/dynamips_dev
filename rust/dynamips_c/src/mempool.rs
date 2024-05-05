@@ -96,6 +96,28 @@ unsafe fn memblock_insert(pool: *mut mempool_t, block: *mut memblock_t) {
     MEMPOOL_UNLOCK(pool);
 }
 
+/// Remove block from linked list
+unsafe fn memblock_delete(pool: *mut mempool_t, block: *mut memblock_t) {
+    MEMPOOL_LOCK(pool);
+
+    (*pool).nr_blocks -= 1;
+    (*pool).total_size -= (*block).block_size;
+
+    if (*block).prev.is_null() {
+        (*pool).block_list = (*block).next;
+    } else {
+        (*(*block).prev).next = (*block).next;
+    }
+
+    if !(*block).next.is_null() {
+        (*(*block).next).prev = (*block).prev;
+    }
+
+    (*block).next = null_mut();
+    (*block).prev = null_mut();
+    MEMPOOL_UNLOCK(pool);
+}
+
 /// Allocate a new block in specified pool (internal function)
 unsafe fn mp_alloc_inline(pool: *mut mempool_t, size: size_t, zeroed: c_int) -> *mut c_void {
     let block: *mut memblock_t = memblock_alloc(size, zeroed);
@@ -120,5 +142,48 @@ pub unsafe extern "C" fn mp_alloc_n0(pool: *mut mempool_t, size: size_t) -> *mut
     mp_alloc_inline(pool, size, FALSE)
 }
 
+/// Reallocate a block
+#[no_mangle]
+pub unsafe extern "C" fn mp_realloc(addr: *mut c_void, new_size: size_t) -> *mut c_void {
+    let block: *mut memblock_t = addr.cast::<memblock_t>().sub(1);
+
+    assert!((*block).tag == MEMBLOCK_TAG);
+    let pool: *mut mempool_t = (*block).pool;
+
+    // remove this block from list
+    memblock_delete(pool, block);
+
+    // reallocate block with specified size
+    let total_size = new_size + size_of::<memblock_t>();
+
+    let ptr: *mut memblock_t = libc::realloc(block.cast::<_>(), total_size).cast::<_>();
+    if ptr.is_null() {
+        memblock_insert(pool, block);
+        return null_mut();
+    }
+
+    (*ptr).block_size = new_size;
+    memblock_insert(pool, ptr);
+    (*ptr).data.as_c_void_mut()
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_memblock_roundtrip() {
+        unsafe {
+            let mut memory = Box::new(zeroed::<memblock_t>());
+            let block: *mut memblock_t = addr_of_mut!(*memory);
+            // memblock to addr (mp_alloc_inline)
+            let addr: *mut c_void = (*block).data.as_c_void_mut();
+            // addr to memblock (mp_realloc)
+            let roundtrip_block: *mut memblock_t = addr.cast::<memblock_t>().sub(1);
+            assert!(block == roundtrip_block);
+        }
+    }
+}

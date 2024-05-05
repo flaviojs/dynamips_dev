@@ -207,6 +207,16 @@ pub unsafe extern "C" fn mp_free(addr: *mut c_void) -> c_int {
     0
 }
 
+/// Free block at specified address and clean pointer
+#[no_mangle]
+pub unsafe extern "C" fn mp_free_ptr(addr: *mut c_void) -> c_int {
+    assert!(!addr.is_null());
+    let p: *mut c_void = *addr.cast::<*mut c_void>();
+    *addr.cast::<*mut c_void>() = null_mut();
+    mp_free(p);
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
 

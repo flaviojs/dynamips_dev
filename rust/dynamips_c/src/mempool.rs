@@ -191,6 +191,22 @@ pub unsafe extern "C" fn mp_strdup(pool: *mut mempool_t, str_: *mut c_char) -> *
     new_str
 }
 
+/// Free block at specified address
+#[no_mangle]
+pub unsafe extern "C" fn mp_free(addr: *mut c_void) -> c_int {
+    if !addr.is_null() {
+        let block: *mut memblock_t = addr.cast::<memblock_t>().sub(1);
+        assert!((*block).tag == MEMBLOCK_TAG);
+        let pool: *mut mempool_t = (*block).pool;
+
+        memblock_delete(pool, block);
+        libc::memset(block.cast::<_>(), 0, size_of::<memblock_t>());
+        libc::free(block.cast::<_>());
+    }
+
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
 

@@ -97,24 +97,6 @@ static inline void *mp_alloc_inline(mempool_t *pool,size_t size,int zeroed)
    return(block->data);
 }
 
-/* Free block at specified address */
-int mp_free(void *addr)
-{
-   memblock_t *block = (memblock_t *)addr - 1;
-   mempool_t *pool;
-
-   if (addr != NULL) {
-      assert(block->tag == MEMBLOCK_TAG);
-      pool = block->pool;
-
-      memblock_delete(pool,block);
-      memset(block,0,sizeof(memblock_t));
-      free(block);
-   }
-
-   return(0);
-}
-
 /* Free block at specified address and clean pointer */
 int mp_free_ptr(void *addr)
 {

@@ -167,6 +167,17 @@ pub unsafe extern "C" fn mp_realloc(addr: *mut c_void, new_size: size_t) -> *mut
     (*ptr).data.as_c_void_mut()
 }
 
+/// Allocate a new memory block and copy data into it
+#[no_mangle]
+pub unsafe extern "C" fn mp_dup(pool: *mut mempool_t, data: *mut c_void, size: size_t) -> *mut c_void {
+    let p = mp_alloc_n0(pool, size);
+    if !p.is_null() {
+        libc::memcpy(p, data, size);
+    }
+
+    p
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
 

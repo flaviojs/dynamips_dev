@@ -153,3 +153,21 @@ fn test_memblock_roundtrip() {
         assert!(block == roundtrip_block);
     }
 }
+
+#[test]
+fn test_HASH_TABLE_FOREACH() {
+    use dynamips_c::_private::*;
+    use dynamips_c::hash::*;
+    unsafe {
+        let mut i: c_int;
+        let mut hn: *mut hash_node_t;
+
+        let ht: *mut hash_table_t = hash_u64_create(11);
+        let mut id: u64 = 1234;
+        hash_table_insert(ht, addr_of_mut!(id).cast::<_>(), null_mut());
+        HASH_TABLE_FOREACH!(i, ht, hn, {
+            println!("{:?} {:?}", i, hn);
+        });
+        hash_table_delete(ht);
+    }
+}

@@ -178,6 +178,19 @@ pub unsafe extern "C" fn mp_dup(pool: *mut mempool_t, data: *mut c_void, size: s
     p
 }
 
+/// Duplicate specified string and insert it in a memory pool
+#[no_mangle]
+pub unsafe extern "C" fn mp_strdup(pool: *mut mempool_t, str_: *mut c_char) -> *mut c_char {
+    let new_str: *mut c_char = mp_alloc(pool, libc::strlen(str_) + 1).cast::<_>();
+
+    if new_str.is_null() {
+        return null_mut();
+    }
+
+    libc::strcpy(new_str, str_);
+    new_str
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
 

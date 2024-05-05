@@ -97,18 +97,6 @@ static inline void *mp_alloc_inline(mempool_t *pool,size_t size,int zeroed)
    return(block->data);
 }
 
-/* Duplicate specified string and insert it in a memory pool */
-char *mp_strdup(mempool_t *pool,char *str)
-{
-   char *new_str;
-
-   if ((new_str = mp_alloc(pool,strlen(str)+1)) == NULL)
-      return NULL;
-
-   strcpy(new_str,str);
-   return new_str;
-}
-
 /* Free block at specified address */
 int mp_free(void *addr)
 {

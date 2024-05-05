@@ -16,9 +16,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Dummy value used to check if a memory block is invalid */
-#define MEMBLOCK_TAG  0xdeadbeef
-
 typedef struct memblock memblock_t;
 typedef struct mempool mempool_t;
 

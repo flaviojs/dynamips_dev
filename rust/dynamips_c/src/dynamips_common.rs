@@ -3,6 +3,7 @@
 use crate::prelude::*;
 
 // True/False definitions
+pub const FALSE: c_int = 0;
 pub const TRUE: c_int = 1;
 
 // Common types

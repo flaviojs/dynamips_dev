@@ -114,5 +114,11 @@ pub unsafe extern "C" fn mp_alloc(pool: *mut mempool_t, size: size_t) -> *mut c_
     mp_alloc_inline(pool, size, TRUE)
 }
 
+/// Allocate a new block which will not be zeroed
+#[no_mangle]
+pub unsafe extern "C" fn mp_alloc_n0(pool: *mut mempool_t, size: size_t) -> *mut c_void {
+    mp_alloc_inline(pool, size, FALSE)
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}

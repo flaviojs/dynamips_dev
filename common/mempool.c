@@ -97,12 +97,6 @@ static inline void *mp_alloc_inline(mempool_t *pool,size_t size,int zeroed)
    return(block->data);
 }
 
-/* Allocate a new block which will not be zeroed */
-void *mp_alloc_n0(mempool_t *pool,size_t size)
-{
-   return(mp_alloc_inline(pool,size,FALSE));
-}
-
 /* Reallocate a block */
 void *mp_realloc(void *addr,size_t new_size)
 {

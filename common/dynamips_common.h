@@ -39,11 +39,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* True/False definitions */
-#ifndef FALSE
-#define FALSE 0
-#endif
-
 /* Endianness */
 #define ARCH_BIG_ENDIAN     0x4321
 #define ARCH_LITTLE_ENDIAN  0x1234

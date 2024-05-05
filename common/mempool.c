@@ -97,15 +97,6 @@ static inline void *mp_alloc_inline(mempool_t *pool,size_t size,int zeroed)
    return(block->data);
 }
 
-/* Free specified memory pool */
-void mp_free_pool(mempool_t *pool)
-{
-   mp_free_all_blocks(pool);
-
-   if (!(pool->flags & MEMPOOL_FIXED))
-      free(pool);
-}
-
 /* Create a new pool in a fixed memory area */
 mempool_t *mp_create_fixed_pool(mempool_t *mp,char *name)
 {

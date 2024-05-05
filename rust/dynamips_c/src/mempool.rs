@@ -236,6 +236,16 @@ pub unsafe extern "C" fn mp_free_all_blocks(pool: *mut mempool_t) {
     MEMPOOL_UNLOCK(pool);
 }
 
+/// Free specified memory pool
+#[no_mangle]
+pub unsafe extern "C" fn mp_free_pool(pool: *mut mempool_t) {
+    mp_free_all_blocks(pool);
+
+    if ((*pool).flags & MEMPOOL_FIXED) == 0 {
+        libc::free(pool.cast::<_>());
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
 

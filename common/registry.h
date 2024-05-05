@@ -17,18 +17,6 @@ static const char rcsid_registry[] = "$Id$";
 
 #include "rust_dynamips_c.h"
 
-/* Object types for Registry */
-enum {
-   OBJ_TYPE_VM,          /* Virtual machine */
-   OBJ_TYPE_NIO,         /* Network IO descriptor */
-   OBJ_TYPE_NIO_BRIDGE,  /* Network IO bridge */
-   OBJ_TYPE_FRSW,        /* Frame-Relay switch */
-   OBJ_TYPE_ATMSW,       /* ATM switch */
-   OBJ_TYPE_ATM_BRIDGE,  /* ATM bridge */
-   OBJ_TYPE_ETHSW,       /* Ethernet switch */
-   OBJ_TYPE_STORE,       /* Hypervisor store */
-};
-
 /* Registry entry */
 typedef struct registry_entry registry_entry_t;
 struct registry_entry {

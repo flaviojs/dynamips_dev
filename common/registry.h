@@ -17,16 +17,6 @@ static const char rcsid_registry[] = "$Id$";
 
 #include "rust_dynamips_c.h"
 
-/* Registry info */
-typedef struct registry registry_t;
-struct registry {
-   pthread_mutex_t lock;
-   mempool_t mp;
-   int ht_name_entries,ht_type_entries;
-   registry_entry_t *ht_names;            /* Hash table for names */
-   registry_entry_t *ht_types;            /* Hash table for types */
-};
-
 /* Registry "foreach" callback */
 typedef void (*registry_foreach)(registry_entry_t *entry,void *opt_arg,
                                  int *err);

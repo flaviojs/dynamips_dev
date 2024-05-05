@@ -1,5 +1,6 @@
 //! Object Registry.
 
+use crate::mempool::*;
 use crate::prelude::*;
 
 pub const REGISTRY_HT_NAME_ENTRIES: c_int = 1024;
@@ -40,5 +41,18 @@ pub struct registry_entry {
     pub htype_prev: *mut registry_entry_t,
 }
 
+/// Registry info
+pub type registry_t = registry;
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct registry {
+    pub lock: libc::pthread_mutex_t,
+    pub mp: mempool,
+    pub ht_name_entries: c_int,
+    pub ht_type_entries: c_int,
+    pub ht_names: *mut registry_entry_t,
+    pub ht_types: *mut registry_entry_t,
+}
+
 #[no_mangle]
-pub extern "C" fn _export(_: *mut registry_entry_t) {}
+pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t) {}

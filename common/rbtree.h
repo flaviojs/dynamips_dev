@@ -14,7 +14,6 @@
 static const char rcsid_rbtree[] = "$Id$";
 
 #include <sys/types.h>
-#include "mempool.h"
 
 /* Comparison function for 2 keys */
 typedef int (*tree_fcompare)(void *key1,void *key2,void *opt);

@@ -74,7 +74,6 @@ endif()
 
 # dynamips_*_stable
 set ( _files
-   "${COMMON}/mempool.c"
    "${COMMON}/registry.c"
    "${COMMON}/rbtree.c"
    "${COMMON}/hash.c"

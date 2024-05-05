@@ -18,7 +18,6 @@
 #include <sys/types.h>
 
 #include "utils.h"
-#include "mempool.h"
 #include "registry.h"
 #include "net_io.h"
 #include "frame_relay.h"

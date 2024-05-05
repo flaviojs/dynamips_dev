@@ -11,8 +11,7 @@
 #include <sys/types.h>
 #include "utils.h"
 
-/* Key computation function */
-typedef u_int (*hash_fcompute)(void *key);
+#include "rust_dynamips_c.h"
 
 /* Comparison function for 2 keys */
 typedef int (*hash_fcompare)(void *key1,void *key2);

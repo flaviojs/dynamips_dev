@@ -9,6 +9,7 @@
 
 pub mod _ext;
 pub mod dynamips_common;
+pub mod hash;
 pub mod mempool;
 pub mod net;
 /// cbindgen:ignore

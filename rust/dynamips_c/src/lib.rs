@@ -6,6 +6,7 @@
 #![allow(dead_code)]
 
 pub mod _ext;
+pub mod mempool;
 pub mod net;
 /// cbindgen:ignore
 pub mod prelude;

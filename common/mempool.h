@@ -14,8 +14,7 @@
 
 #include "utils.h"
 
-/* Memory Pool "Fixed" Flag */
-#define MEMPOOL_FIXED  1
+#include "rust_dynamips_c.h"
 
 /* Dummy value used to check if a memory block is invalid */
 #define MEMBLOCK_TAG  0xdeadbeef

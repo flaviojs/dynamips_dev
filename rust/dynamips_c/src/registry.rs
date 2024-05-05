@@ -54,5 +54,8 @@ pub struct registry {
     pub ht_types: *mut registry_entry_t,
 }
 
+/// Registry "foreach" callback
+pub type registry_foreach = Option<unsafe extern "C" fn(entry: *mut registry_entry_t, opt_arg: *mut c_void, err: *mut c_int)>;
+
 #[no_mangle]
-pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t) {}
+pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach) {}

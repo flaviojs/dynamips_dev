@@ -17,10 +17,6 @@ static const char rcsid_registry[] = "$Id$";
 
 #include "rust_dynamips_c.h"
 
-/* Registry "foreach" callback */
-typedef void (*registry_foreach)(registry_entry_t *entry,void *opt_arg,
-                                 int *err);
-
 /* Registry "exec" callback */
 typedef int (*registry_exec)(void *data,void *opt_arg);
 

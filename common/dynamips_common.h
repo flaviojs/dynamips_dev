@@ -37,6 +37,8 @@
 
 #include <pthread.h>
 
+#include "rust_dynamips_c.h"
+
 /* True/False definitions */
 #ifndef FALSE
 #define FALSE 0
@@ -134,7 +136,6 @@ typedef signed short m_int16_t;
 typedef unsigned int m_uint32_t;
 typedef signed int m_int32_t;
 
-typedef unsigned long long m_uint64_t;
 typedef signed long long m_int64_t;
 
 typedef unsigned long m_iptr_t;

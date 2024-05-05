@@ -5,3 +5,9 @@ pragma_once = true
 documentation_style = "c++"
 style = "tag"
 sys_includes = ["pthread.h"]
+after_includes = """
+
+// forward declarations (cbindgen places typedefs after the struct definitions, preventing you from using them in the structs)
+typedef struct memblock memblock_t;
+typedef struct mempool mempool_t;
+"""

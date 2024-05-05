@@ -4,8 +4,10 @@
 //! Safe rust code will be developed and placed in other crates as needed.
 #![allow(clippy::missing_safety_doc)]
 #![allow(dead_code)]
+#![allow(non_camel_case_types)]
 
 pub mod _ext;
+pub mod dynamips_common;
 pub mod mempool;
 pub mod net;
 /// cbindgen:ignore

@@ -13,9 +13,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* User function to call when using hash_table_foreach */
-typedef void (*hash_fforeach)(void *key,void *value,void *opt_arg);
-
 /* Hash element (pair key,value) */
 typedef struct hash_node hash_node_t;
 struct hash_node {

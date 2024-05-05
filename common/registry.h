@@ -17,8 +17,6 @@ static const char rcsid_registry[] = "$Id$";
 
 #include "rust_dynamips_c.h"
 
-#define REGISTRY_MAX_TYPES  256
-
 /* Object types for Registry */
 enum {
    OBJ_TYPE_VM,          /* Virtual machine */

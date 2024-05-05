@@ -13,15 +13,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Hash Table definition */
-typedef struct hash_table hash_table_t;
-struct hash_table {
-   int size,nnodes;
-   hash_node_t **nodes;
-   hash_fcompute hash_func;
-   hash_fcompare key_cmp;
-};
-
 #define hash_string_create(hash_size) \
    hash_table_create(str_hash,str_equal,hash_size)
 

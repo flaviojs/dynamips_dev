@@ -9,6 +9,7 @@ after_includes = """
 
 // forward declarations (cbindgen places typedefs after the struct definitions, preventing you from using them in the structs)
 typedef struct hash_node hash_node_t;
+typedef struct hash_table hash_table_t;
 typedef struct memblock memblock_t;
 typedef struct mempool mempool_t;
 """

@@ -21,5 +21,17 @@ pub struct hash_node {
     pub next: *mut hash_node_t,
 }
 
+/// Hash Table definition
+pub type hash_table_t = hash_table;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct hash_table {
+    pub size: c_int,
+    pub nnodes: c_int,
+    pub nodes: *mut *mut hash_node_t,
+    pub hash_func: hash_fcompute,
+    pub key_cmp: hash_fcompare,
+}
+
 #[no_mangle]
-pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t) {}
+pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

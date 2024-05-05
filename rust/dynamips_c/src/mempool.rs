@@ -217,6 +217,25 @@ pub unsafe extern "C" fn mp_free_ptr(addr: *mut c_void) -> c_int {
     0
 }
 
+/// Free all blocks of specified pool
+#[no_mangle]
+pub unsafe extern "C" fn mp_free_all_blocks(pool: *mut mempool_t) {
+    MEMPOOL_LOCK(pool);
+
+    let mut block: *mut memblock_t = (*pool).block_list;
+    while !block.is_null() {
+        let next = (*block).next;
+        libc::free(block.cast::<_>());
+        block = next;
+    }
+
+    (*pool).block_list = null_mut();
+    (*pool).nr_blocks = 0;
+    (*pool).total_size = 0;
+
+    MEMPOOL_UNLOCK(pool);
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
 

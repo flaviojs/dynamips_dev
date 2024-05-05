@@ -97,25 +97,6 @@ static inline void *mp_alloc_inline(mempool_t *pool,size_t size,int zeroed)
    return(block->data);
 }
 
-/* Free all blocks of specified pool */
-void mp_free_all_blocks(mempool_t *pool)
-{
-   memblock_t *block,*next;
-
-   MEMPOOL_LOCK(pool);
-
-   for(block=pool->block_list;block;block=next) {
-      next = block->next;
-      free(block);
-   }
-
-   pool->block_list = NULL;
-   pool->nr_blocks = 0;
-   pool->total_size = 0;
-
-   MEMPOOL_UNLOCK(pool);
-}
-
 /* Free specified memory pool */
 void mp_free_pool(mempool_t *pool)
 {

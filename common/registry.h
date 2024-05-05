@@ -17,49 +17,6 @@ static const char rcsid_registry[] = "$Id$";
 #include <sys/time.h>
 #include <pthread.h>
 
-#define REGISTRY_HT_NAME_ENTRIES  1024
-#define REGISTRY_MAX_TYPES  256
-
-/* Object types for Registry */
-enum {
-   OBJ_TYPE_VM,          /* Virtual machine */
-   OBJ_TYPE_NIO,         /* Network IO descriptor */
-   OBJ_TYPE_NIO_BRIDGE,  /* Network IO bridge */
-   OBJ_TYPE_FRSW,        /* Frame-Relay switch */
-   OBJ_TYPE_ATMSW,       /* ATM switch */
-   OBJ_TYPE_ATM_BRIDGE,  /* ATM bridge */
-   OBJ_TYPE_ETHSW,       /* Ethernet switch */
-   OBJ_TYPE_STORE,       /* Hypervisor store */
-};
-
-/* Registry entry */
-typedef struct registry_entry registry_entry_t;
-struct registry_entry {
-   char *name;
-   void *data;
-   int object_type;
-   int ref_count;
-   registry_entry_t *hname_next,*hname_prev;
-   registry_entry_t *htype_next,*htype_prev;
-};
-
-/* Registry info */
-typedef struct registry registry_t;
-struct registry {
-   pthread_mutex_t lock;
-   mempool_t mp;
-   int ht_name_entries,ht_type_entries;
-   registry_entry_t *ht_names;            /* Hash table for names */
-   registry_entry_t *ht_types;            /* Hash table for types */
-};
-
-/* Registry "foreach" callback */
-typedef void (*registry_foreach)(registry_entry_t *entry,void *opt_arg,
-                                 int *err);
-
-/* Registry "exec" callback */
-typedef int (*registry_exec)(void *data,void *opt_arg);
-
 /* Initialize registry */
 int registry_init(void);
 

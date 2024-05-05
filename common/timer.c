@@ -25,7 +25,7 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "mempool.h"
+#include "rust_dynamips_c.h"
 #include "hash.h"
 #include "timer.h"
 

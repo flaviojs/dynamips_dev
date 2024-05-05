@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "mempool.h"
+#include "rust_dynamips_c.h"
 #include "net_io.h"
 
 /* ATM payload size */

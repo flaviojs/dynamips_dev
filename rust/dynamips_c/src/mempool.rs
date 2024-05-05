@@ -275,9 +275,6 @@ pub unsafe extern "C" fn mp_create_pool(name: *mut c_char) -> *mut mempool_t {
     mp
 }
 
-#[no_mangle]
-pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
-
 #[cfg(test)]
 mod test {
     use super::*;

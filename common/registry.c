@@ -26,7 +26,7 @@
 
 #include "utils.h"
 #include "hash.h"
-#include "mempool.h"
+#include "rust_dynamips_c.h"
 #include "registry.h"
 
 #define DEBUG_REGISTRY  0

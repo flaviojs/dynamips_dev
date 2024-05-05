@@ -13,9 +13,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Comparison function for 2 keys */
-typedef int (*hash_fcompare)(void *key1,void *key2);
-
 /* User function to call when using hash_table_foreach */
 typedef void (*hash_fforeach)(void *key,void *value,void *opt_arg);
 

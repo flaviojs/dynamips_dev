@@ -13,13 +13,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Hash element (pair key,value) */
-typedef struct hash_node hash_node_t;
-struct hash_node {
-   void *key, *value;
-   hash_node_t *next;
-};
-
 /* Hash Table definition */
 typedef struct hash_table hash_table_t;
 struct hash_table {

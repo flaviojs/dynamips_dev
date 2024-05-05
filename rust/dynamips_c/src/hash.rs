@@ -11,5 +11,15 @@ pub type hash_fcompare = Option<unsafe extern "C" fn(key1: *mut c_void, key2: *m
 /// User function to call when using hash_table_foreach
 pub type hash_fforeach = Option<unsafe extern "C" fn(key: *mut c_void, value: *mut c_void, opt_arg: *mut c_void)>;
 
+/// Hash element (pair key,value)
+pub type hash_node_t = hash_node;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct hash_node {
+    pub key: *mut c_void,
+    pub value: *mut c_void,
+    pub next: *mut hash_node_t,
+}
+
 #[no_mangle]
-pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach) {}
+pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t) {}

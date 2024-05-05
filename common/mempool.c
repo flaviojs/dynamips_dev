@@ -96,17 +96,3 @@ static inline void *mp_alloc_inline(mempool_t *pool,size_t size,int zeroed)
    memblock_insert(pool,block);
    return(block->data);
 }
-
-/* Create a new pool */
-mempool_t *mp_create_pool(char *name)
-{
-   mempool_t *mp = malloc(sizeof(*mp));
-
-   if (!mp || !mp_create_fixed_pool(mp,name)) {
-      free(mp);
-      return NULL;
-   }
-
-   mp->flags = 0;  /* clear "FIXED" flag */
-   return mp;
-}

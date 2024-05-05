@@ -261,6 +261,20 @@ pub unsafe extern "C" fn mp_create_fixed_pool(mp: *mut mempool_t, name: *mut c_c
     mp
 }
 
+/// Create a new pool
+#[no_mangle]
+pub unsafe extern "C" fn mp_create_pool(name: *mut c_char) -> *mut mempool_t {
+    let mp: *mut mempool_t = libc::malloc(size_of::<mempool_t>()).cast::<_>();
+
+    if mp.is_null() || mp_create_fixed_pool(mp, name).is_null() {
+        libc::free(mp.cast::<_>());
+        return null_mut();
+    }
+
+    (*mp).flags = 0; // clear "FIXED" flag
+    mp
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut memblock_t, _: *mut mempool_t) {}
 

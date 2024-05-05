@@ -33,5 +33,11 @@ pub struct hash_table {
     pub key_cmp: hash_fcompare,
 }
 
+/// Compare two strings
+#[no_mangle]
+pub unsafe extern "C" fn str_equal(s1: *mut c_void, s2: *mut c_void) -> c_int {
+    (libc::strcmp(s1.cast::<_>(), s2.cast::<_>()) == 0).into()
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

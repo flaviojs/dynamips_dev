@@ -16,12 +16,6 @@
 #include "utils.h"
 #include "hash.h"
 
-/* Compare two strings */
-int str_equal(void *s1, void *s2)
-{
-   return(strcmp((char *)s1, (char *)s2) == 0);
-}
-
 /* Hash function for a string */
 u_int str_hash(void *str)
 {

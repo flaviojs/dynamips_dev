@@ -25,6 +25,8 @@ typedef struct sockaddr sockaddr;
 // so structs that use that typedef internally need a forward declaration of the typedef
 typedef struct insn_exec_page insn_exec_page_t;
 typedef struct m_list m_list_t;
+typedef struct memblock memblock_t;
+typedef struct mempool mempool_t;
 """
 
 [defines]

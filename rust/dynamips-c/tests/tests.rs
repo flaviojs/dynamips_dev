@@ -135,3 +135,21 @@ fn test_N_ISL_HDR_SIZE() {
     // cbindgen 0.27.0 does not support size_of
     assert_eq!(N_ISL_HDR_SIZE, size_of::<n_eth_llc_hdr_t>() + size_of::<n_eth_isl_hdr_t>());
 }
+
+#[test]
+fn test_memblock_roundtrip() {
+    use dynamips_c::_private::*;
+    use dynamips_c::mempool::*;
+    unsafe {
+        let mut memory = Box::new(zeroed::<memblock_t>());
+        let block: *mut memblock_t = addr_of_mut!(*memory);
+
+        // memblock to addr (mp_alloc_inline)
+        let addr: *mut c_void = (*block).data.as_c_void_mut();
+
+        // addr to memblock (mp_realloc)
+        let roundtrip_block: *mut memblock_t = addr.cast::<memblock_t>().sub(1);
+
+        assert!(block == roundtrip_block);
+    }
+}

@@ -30,68 +30,8 @@
 
 #define DEBUG_REGISTRY  0
 
-static registry_t *registry = NULL;
-
 #define REGISTRY_LOCK()    pthread_mutex_lock(&registry->lock)
 #define REGISTRY_UNLOCK()  pthread_mutex_unlock(&registry->lock)
-
-/* Terminate the registry */
-static void registry_terminate(void)
-{
-   mp_free(registry->ht_types);
-   mp_free(registry->ht_names);
-   mp_free_pool(&registry->mp);
-   pthread_mutex_destroy(&registry->lock);
-   free(registry);
-   registry = NULL;
-}
-
-/* Initialize registry */
-int registry_init(void)
-{
-   registry_entry_t *p;
-   pthread_mutexattr_t attr;
-   size_t len;
-   int i;
-
-   registry = malloc(sizeof(*registry));
-   assert(registry != NULL);
-
-   pthread_mutexattr_init(&attr);
-   pthread_mutexattr_settype(&attr,PTHREAD_MUTEX_RECURSIVE);
-   pthread_mutex_init(&registry->lock,&attr);
-   pthread_mutexattr_destroy(&attr);
-
-   /* initialize registry memory pool */
-   mp_create_fixed_pool(&registry->mp,"registry");
-
-   registry->ht_name_entries = REGISTRY_HT_NAME_ENTRIES;
-   registry->ht_type_entries = REGISTRY_MAX_TYPES;
-
-   /* initialize hash table for names, with sentinels */
-   len = registry->ht_name_entries * sizeof(registry_entry_t);
-   registry->ht_names = mp_alloc(&registry->mp,len);
-   assert(registry->ht_names != NULL);
-
-   for(i=0;i<registry->ht_name_entries;i++) {
-      p = &registry->ht_names[i];
-      p->hname_next = p->hname_prev = p;
-   }
-
-   /* initialize hash table for types, with sentinels */
-   len = registry->ht_type_entries * sizeof(registry_entry_t);
-   registry->ht_types = mp_alloc(&registry->mp,len);
-   assert(registry->ht_types != NULL);
-
-   for(i=0;i<registry->ht_type_entries;i++) {
-      p = &registry->ht_types[i];
-      p->htype_next = p->htype_prev = p;
-   }
-
-   atexit(registry_terminate);
-
-   return(0);
-}
 
 /* Insert a new entry */
 static void registry_insert_entry(registry_entry_t *entry)

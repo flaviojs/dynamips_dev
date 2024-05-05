@@ -1,7 +1,12 @@
 //! Code that was not converted from C.
 
 use crate::prelude::*;
+use libc_alloc::LibcAlloc;
 use std::ffi::CString;
+
+/// Make rust memory compatible with C malloc/free/...
+#[global_allocator]
+static GLOBAL_ALLOCATOR: LibcAlloc = LibcAlloc;
 
 /// Macro that concatenates expressions and a nul terminator.
 #[macro_export]

@@ -2,6 +2,9 @@
 
 use crate::prelude::*;
 
+// True/False definitions
+pub const TRUE: c_int = 1;
+
 // Common types
 pub type m_uint64_t = c_ulonglong;
 

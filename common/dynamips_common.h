@@ -44,10 +44,6 @@
 #define FALSE 0
 #endif
 
-#ifndef TRUE
-#define TRUE  1
-#endif
-
 /* Endianness */
 #define ARCH_BIG_ENDIAN     0x4321
 #define ARCH_LITTLE_ENDIAN  0x1234

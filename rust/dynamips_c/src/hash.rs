@@ -103,6 +103,16 @@ unsafe fn hash_node_free(node: *mut hash_node_t) {
     libc::free(node.cast::<_>());
 }
 
+/// Allocate memory for a new node
+unsafe fn hash_node_alloc(_ht: *mut hash_table_t, key: *mut c_void, value: *mut c_void) -> *mut hash_node_t {
+    let node: *mut hash_node_t = libc::malloc(size_of::<hash_node_t>()).cast::<_>();
+    assert!(!node.is_null());
+    (*node).key = key;
+    (*node).value = value;
+    (*node).next = null_mut();
+    node
+}
+
 /// Create a new hash table
 #[no_mangle]
 pub unsafe extern "C" fn hash_table_create(hash_func: hash_fcompute, key_cmp: hash_fcompare, hash_size: c_int) -> *mut hash_table_t {
@@ -140,6 +150,29 @@ pub unsafe extern "C" fn hash_table_delete(ht: *mut hash_table_t) {
     }
     libc::free((*ht).nodes.cast::<_>());
     libc::free(ht.cast::<_>());
+}
+
+/// Insert a new (key,value). If key already exists in table, replace value
+#[no_mangle]
+pub unsafe extern "C" fn hash_table_insert(ht: *mut hash_table_t, key: *mut c_void, value: *mut c_void) -> c_int {
+    assert!(!ht.is_null());
+
+    let hash_val: usize = (*ht).hash_func.unwrap()(key) as usize % (*ht).size as usize;
+
+    let mut node: *mut hash_node_t = *(*ht).nodes.add(hash_val);
+    while !node.is_null() {
+        if (*ht).key_cmp.unwrap()((*node).key, key) != 0 {
+            (*node).value = value;
+            return 0;
+        }
+        node = (*node).next;
+    }
+
+    node = hash_node_alloc(ht, key, value);
+    (*node).next = *(*ht).nodes.add(hash_val);
+    *(*ht).nodes.add(hash_val) = node;
+    (*ht).nnodes += 1;
+    0
 }
 
 #[no_mangle]

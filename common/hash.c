@@ -35,29 +35,6 @@ static hash_node_t *hash_node_alloc(hash_table_t *ht,void *key,void *value)
    return node;
 }
 
-/* Insert a new (key,value). If key already exists in table, replace value */
-int hash_table_insert(hash_table_t *ht,void *key,void *value)
-{
-   hash_node_t *node;
-   u_int hash_val;
-
-   assert(ht!=NULL);
-
-   hash_val = ht->hash_func(key) % ht->size;
-
-   for(node=ht->nodes[hash_val];node;node=node->next)
-      if (ht->key_cmp(node->key,key)) {
-         node->value = value;
-         return(0);
-      }
-
-   node = hash_node_alloc(ht,key,value);
-   node->next = ht->nodes[hash_val];
-   ht->nodes[hash_val] = node;
-   ht->nnodes++;
-   return(0);
-}
-
 /* Remove a pair (key,value) from an hash table */
 void *hash_table_remove(hash_table_t *ht,void *key)
 {

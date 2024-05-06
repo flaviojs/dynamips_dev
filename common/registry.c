@@ -91,40 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Delete all objects of the specified type */
-int registry_delete_type(int object_type,registry_exec cb,void *opt)
-{
-   registry_entry_t *p,*bucket,*next;
-   int count = 0;
-   int status;
-
-   REGISTRY_LOCK();
-
-   bucket = &registry->ht_types[object_type];
-
-   for(p=bucket->htype_next;p!=bucket;p=next) {
-      next = p->htype_next;
-
-      if (p->ref_count == 0) {
-         status = TRUE;
-         
-         if (cb != NULL) 
-            status = cb(p->data,opt);
-
-         if (status) {
-            registry_remove_entry(p);
-            count++;
-         }
-      } else {
-         fprintf(stderr,"registry_delete_type: object \"%s\" (type %d) still "
-                 "referenced (count=%d)\n",p->name,object_type,p->ref_count);
-      }
-   }
-
-   REGISTRY_UNLOCK();
-   return(count);
-}
-
 /* Dump the registry */
 void registry_dump(void)
 {

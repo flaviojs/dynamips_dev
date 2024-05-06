@@ -413,5 +413,38 @@ pub unsafe extern "C" fn registry_foreach_type(object_type: c_int, cb: registry_
     count
 }
 
+/// Delete all objects of the specified type
+#[no_mangle]
+pub unsafe extern "C" fn registry_delete_type(object_type: c_int, cb: registry_exec, opt: *mut c_void) -> c_int {
+    REGISTRY_LOCK();
+
+    let bucket: *mut registry_entry_t = (*registry).ht_types.offset(object_type as isize);
+
+    let mut count: c_int = 0;
+    let mut p: *mut registry_entry_t = (*bucket).htype_next;
+    while p != bucket {
+        let next: *mut registry_entry_t = (*p).htype_next;
+
+        if (*p).ref_count == 0 {
+            let mut status: c_int = TRUE;
+
+            if let Some(cb) = cb {
+                status = cb((*p).data, opt);
+            }
+
+            if status != 0 {
+                registry_remove_entry(p);
+                count += 1;
+            }
+        } else {
+            libc::fprintf(c_stderr(), cstr!("registry_delete_type: object \"%s\" (type %d) still referenced (count=%d)\n"), (*p).name, object_type, (*p).ref_count);
+        }
+        p = next;
+    }
+
+    REGISTRY_UNLOCK();
+    count
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

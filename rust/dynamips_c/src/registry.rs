@@ -446,5 +446,44 @@ pub unsafe extern "C" fn registry_delete_type(object_type: c_int, cb: registry_e
     count
 }
 
+/// Dump the registry
+#[no_mangle]
+pub unsafe extern "C" fn registry_dump() {
+    REGISTRY_LOCK();
+
+    libc::printf(cstr!("Registry dump:\n"));
+
+    libc::printf(cstr!("  Objects (from name hash table):\n"));
+
+    // dump hash table of names
+    for i in 0..(*registry).ht_name_entries as isize {
+        let bucket: *mut registry_entry_t = (*registry).ht_names.offset(i);
+
+        let mut p: *mut registry_entry_t = (*bucket).hname_next;
+        while p != bucket {
+            libc::printf(cstr!("     %s (type %d, ref_count=%d)\n"), (*p).name, (*p).object_type, (*p).ref_count);
+            p = (*p).hname_next;
+        }
+    }
+
+    libc::printf(cstr!("\n  Objects classed by types:\n"));
+
+    // dump hash table of types
+    for i in 0..(*registry).ht_type_entries as isize {
+        libc::printf(cstr!("     Type %d: "), i);
+
+        let bucket = (*registry).ht_types.offset(i);
+        let mut p: *mut registry_entry_t = (*bucket).htype_next;
+        while p != bucket {
+            libc::printf(cstr!("%s(%d) "), (*p).name, (*p).ref_count);
+            p = (*p).htype_next;
+        }
+
+        libc::printf(cstr!("\n"));
+    }
+
+    REGISTRY_UNLOCK();
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

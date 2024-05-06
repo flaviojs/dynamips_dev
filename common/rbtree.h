@@ -14,9 +14,6 @@ static const char rcsid_rbtree[] = "$Id$";
 #include <sys/types.h>
 #include "rust_dynamips_c.h"
 
-/* User function to call when using rbtree_foreach */
-typedef void (*tree_fforeach)(void *key,void *value,void *opt);
-
 /* Node colors */
 enum {
    RBTREE_RED = 0,

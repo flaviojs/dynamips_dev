@@ -198,5 +198,23 @@ pub unsafe extern "C" fn hash_table_remove(ht: *mut hash_table_t, key: *mut c_vo
     null_mut()
 }
 
+/// Hash Table Lookup - key direct comparison
+#[no_mangle]
+pub unsafe extern "C" fn hash_table_lookup_dcmp(ht: *mut hash_table_t, key: *mut c_void) -> *mut c_void {
+    assert!(!ht.is_null());
+
+    let hash_val: usize = (*ht).hash_func.unwrap()(key) as usize % (*ht).size as usize;
+
+    let mut node: *mut hash_node_t = *(*ht).nodes.add(hash_val);
+    while !node.is_null() {
+        if (*node).key == key {
+            return (*node).value;
+        }
+        node = (*node).next;
+    }
+
+    null_mut()
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

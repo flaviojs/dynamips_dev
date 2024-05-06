@@ -65,5 +65,12 @@ pub unsafe extern "C" fn int_equal(i1: *mut c_void, i2: *mut c_void) -> c_int {
     (i1 as c_long as c_int == i2 as c_long as c_int).into()
 }
 
+/// Hash function for an integer (see above)
+#[no_mangle]
+pub unsafe extern "C" fn int_hash(i: *mut c_void) -> c_uint {
+    let val: c_uint = i as c_long as c_uint;
+    val ^ (val >> 16)
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

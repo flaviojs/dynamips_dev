@@ -16,13 +16,6 @@
 #include "utils.h"
 #include "hash.h"
 
-/* Hash function for an integer (see above) */
-u_int int_hash(void *i)
-{
-   u_int val = (u_int)(long)i;
-   return(val ^ (val >> 16));
-}
-
 /* Compare two u64 (yes, it's stupid) */
 int u64_equal(void *i1, void *i2)
 {

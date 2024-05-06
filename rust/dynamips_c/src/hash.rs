@@ -39,5 +39,25 @@ pub unsafe extern "C" fn str_equal(s1: *mut c_void, s2: *mut c_void) -> c_int {
     (libc::strcmp(s1.cast::<_>(), s2.cast::<_>()) == 0).into()
 }
 
+/// Hash function for a string
+#[no_mangle]
+pub unsafe extern "C" fn str_hash(str_: *mut c_void) -> c_uint {
+    let s: *mut c_char = str_.cast::<_>();
+
+    let mut h: c_uint = 0;
+    let mut p = s;
+    while *p != b'\0' as c_char {
+        h = (h << 4) + *p as c_int as c_uint; // i8->i32->u32
+        let g: c_uint = h & 0xf0000000;
+        if g != 0 {
+            h ^= g >> 24;
+            h ^= g;
+        }
+        p = p.add(1);
+    }
+
+    h
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

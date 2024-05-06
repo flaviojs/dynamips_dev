@@ -16,13 +16,6 @@
 #include "utils.h"
 #include "hash.h"
 
-/* Hash function for an u64 (see above) */
-u_int u64_hash(void *i)
-{
-   m_uint64_t val = *(m_uint64_t *)i;
-   return((u_int)(val ^ (val >> 32)));
-}
-
 /* Compare 2 pointers */
 int ptr_equal(void *i1,void *i2)
 {

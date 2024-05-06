@@ -78,5 +78,12 @@ pub unsafe extern "C" fn u64_equal(i1: *mut c_void, i2: *mut c_void) -> c_int {
     (*i1.cast::<u64>() == *i2.cast::<u64>()).into()
 }
 
+/// Hash function for an u64 (see above)
+#[no_mangle]
+pub unsafe extern "C" fn u64_hash(i: *mut c_void) -> c_uint {
+    let val: u64 = *i.cast::<u64>();
+    (val ^ (val >> 32)) as c_uint
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

@@ -15,52 +15,6 @@ static const char rcsid_rbtree[] = "$Id$";
 
 #include <sys/types.h>
 
-/* Comparison function for 2 keys */
-typedef int (*tree_fcompare)(void *key1,void *key2,void *opt);
-
-/* User function to call when using rbtree_foreach */
-typedef void (*tree_fforeach)(void *key,void *value,void *opt);
-
-/* Node colors */
-enum {
-   RBTREE_RED = 0,
-   RBTREE_BLACK,
-};
-
-/*
- * Description of a node in a Red/Black tree. To be more efficient, keys are
- * stored with a void * pointer, allowing to use different type keys.
- */
-typedef struct rbtree_node rbtree_node;
-struct rbtree_node {
-   /* Key and Value */
-   void *key,*value;
-
-   /* Left and right nodes */
-   rbtree_node *left,*right;
-
-   /* Parent node */
-   rbtree_node *parent;
-
-   /* Node color */
-   short color;
-};
-
-/*
- * Description of a Red/Black tree. For commodity, a name can be given to the
- * tree. "rbtree_comp" is a pointer to a function, defined by user, which
- * compares keys during node operations.
- */
-typedef struct rbtree_tree rbtree_tree;
-struct rbtree_tree {
-   int node_count;              /* Number of Nodes */
-   mempool_t mp;                  /* Memory pool */
-   rbtree_node nil;             /* Sentinel */
-   rbtree_node *root;           /* Root node */
-   tree_fcompare key_cmp;       /* Key comparison function */
-   void *opt_data;              /* Optional data for comparison */
-};
-
 /* Insert a node in an Red/Black tree */
 int rbtree_insert(rbtree_tree *tree,void *key,void *value);
 

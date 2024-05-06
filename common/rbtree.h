@@ -14,12 +14,6 @@ static const char rcsid_rbtree[] = "$Id$";
 #include <sys/types.h>
 #include "rust_dynamips_c.h"
 
-/* Node colors */
-enum {
-   RBTREE_RED = 0,
-   RBTREE_BLACK,
-};
-
 /*
  * Description of a node in a Red/Black tree. To be more efficient, keys are
  * stored with a void * pointer, allowing to use different type keys.

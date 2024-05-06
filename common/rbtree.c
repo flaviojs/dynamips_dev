@@ -233,52 +233,6 @@ static void rbtree_removal_fixup(rbtree_tree *tree,rbtree_node *x)
    x->color = RBTREE_BLACK;
 }
 
-/* Removes a node out of a tree */
-void *rbtree_remove(rbtree_tree *tree,void *key)
-{
-   rbtree_node *z = rbtree_lookup_node(tree,key);
-   rbtree_node *x,*y;
-   void *value;
-   
-   if (NIL(tree,z))
-      return NULL;
-   
-   value = z->value;
-
-   if (NIL(tree,z->left) || NIL(tree,z->right))
-      y = z;
-   else
-      y = rbtree_successor(tree,z);
-
-   if (!NIL(tree,y->left))
-      x = y->left;
-   else
-      x = y->right;
-
-   x->parent = y->parent;
-
-   if (NIL(tree,y->parent))
-      tree->root = x;
-   else {
-      if (y == y->parent->left)
-         y->parent->left = x;
-      else
-         y->parent->right = x;
-   }
-
-   if (y != z) {
-      z->key = y->key;
-      z->value = y->value;
-   }
-
-   if (y->color == RBTREE_BLACK)
-      rbtree_removal_fixup(tree,x);
-
-   rbtree_node_free(tree,y);
-   tree->node_count++;
-   return(value);
-}
-
 static void rbtree_foreach_node(rbtree_tree *tree,rbtree_node *node,
                                 tree_fforeach user_fn,void *opt)
 {

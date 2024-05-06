@@ -74,6 +74,35 @@ unsafe fn rbtree_node_alloc(tree: *mut rbtree_tree, key: *mut c_void, value: *mu
     node
 }
 
+/// Free memory used by a node
+unsafe fn rbtree_node_free(_tree: *mut rbtree_tree, node: *mut rbtree_node) {
+    mp_free(node.cast::<_>());
+}
+
+/// Returns the node which represents the minimum value
+unsafe fn rbtree_min(tree: *mut rbtree_tree, mut x: *mut rbtree_node) -> *mut rbtree_node {
+    while !NIL(tree, (*x).left) {
+        x = (*x).left;
+    }
+
+    x
+}
+
+/// Returns the successor of a node
+unsafe fn rbtree_successor(tree: *mut rbtree_tree, mut x: *mut rbtree_node) -> *mut rbtree_node {
+    if !NIL(tree, (*x).right) {
+        return rbtree_min(tree, (*x).right);
+    }
+
+    let mut y: *mut rbtree_node = (*x).parent;
+    while !NIL(tree, y) && x == (*y).right {
+        x = y;
+        y = (*y).parent;
+    }
+
+    y
+}
+
 /// Left rotation
 unsafe fn rbtree_left_rotate(tree: *mut rbtree_tree, x: *mut rbtree_node) {
     let y: *mut rbtree_node = (*x).right;
@@ -246,6 +275,108 @@ unsafe fn rbtree_lookup_node(tree: *mut rbtree_tree, key: *mut c_void) -> *mut r
 #[no_mangle]
 pub unsafe extern "C" fn rbtree_lookup(tree: *mut rbtree_tree, key: *mut c_void) -> *mut c_void {
     (*rbtree_lookup_node(tree, key)).value
+}
+
+/// Restore Red/black tree properties after a removal
+unsafe fn rbtree_removal_fixup(tree: *mut rbtree_tree, mut x: *mut rbtree_node) {
+    while x != (*tree).root && (*x).color == RBTREE_BLACK {
+        if x == (*(*x).parent).left {
+            let mut w: *mut rbtree_node = (*(*x).parent).right;
+
+            if (*w).color == RBTREE_RED {
+                (*w).color = RBTREE_BLACK;
+                (*(*x).parent).color = RBTREE_RED;
+                rbtree_left_rotate(tree, (*x).parent);
+                w = (*(*x).parent).right;
+            }
+
+            if (*(*w).left).color == RBTREE_BLACK && (*(*w).right).color == RBTREE_BLACK {
+                (*w).color = RBTREE_RED;
+                x = (*x).parent;
+            } else {
+                if (*(*w).right).color == RBTREE_BLACK {
+                    (*(*w).left).color = RBTREE_BLACK;
+                    (*w).color = RBTREE_RED;
+                    rbtree_right_rotate(tree, w);
+                    w = (*(*x).parent).right;
+                }
+
+                (*w).color = (*(*x).parent).color;
+                (*(*x).parent).color = RBTREE_BLACK;
+                (*(*w).right).color = RBTREE_BLACK;
+                rbtree_left_rotate(tree, (*x).parent);
+                x = (*tree).root;
+            }
+        } else {
+            let mut w: *mut rbtree_node = (*(*x).parent).left;
+
+            if (*w).color == RBTREE_RED {
+                (*w).color = RBTREE_BLACK;
+                (*(*x).parent).color = RBTREE_RED;
+                rbtree_right_rotate(tree, (*x).parent);
+                w = (*(*x).parent).left;
+            }
+
+            if (*(*w).right).color == RBTREE_BLACK && (*(*w).left).color == RBTREE_BLACK {
+                (*w).color = RBTREE_RED;
+                x = (*x).parent;
+            } else {
+                if (*(*w).left).color == RBTREE_BLACK {
+                    (*(*w).right).color = RBTREE_BLACK;
+                    (*w).color = RBTREE_RED;
+                    rbtree_left_rotate(tree, w);
+                    w = (*(*x).parent).left;
+                }
+
+                (*w).color = (*(*x).parent).color;
+                (*(*x).parent).color = RBTREE_BLACK;
+                (*(*w).left).color = RBTREE_BLACK;
+                rbtree_right_rotate(tree, (*x).parent);
+                x = (*tree).root;
+            }
+        }
+    }
+
+    (*x).color = RBTREE_BLACK;
+}
+
+/// Removes a node out of a tree
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_remove(tree: *mut rbtree_tree, key: *mut c_void) -> *mut c_void {
+    let z: *mut rbtree_node = rbtree_lookup_node(tree, key);
+
+    if NIL(tree, z) {
+        return null_mut();
+    }
+
+    let value: *mut c_void = (*z).value;
+
+    let y: *mut rbtree_node = if NIL(tree, (*z).left) || NIL(tree, (*z).right) { z } else { rbtree_successor(tree, z) };
+
+    let x: *mut rbtree_node = if !NIL(tree, (*y).left) { (*y).left } else { (*y).right };
+
+    (*x).parent = (*y).parent;
+
+    if NIL(tree, (*y).parent) {
+        (*tree).root = x;
+    } else if y == (*(*y).parent).left {
+        (*(*y).parent).left = x;
+    } else {
+        (*(*y).parent).right = x;
+    }
+
+    if y != z {
+        (*z).key = (*y).key;
+        (*z).value = (*y).value;
+    }
+
+    if (*y).color == RBTREE_BLACK {
+        rbtree_removal_fixup(tree, x);
+    }
+
+    rbtree_node_free(tree, y);
+    (*tree).node_count += 1;
+    value
 }
 
 #[no_mangle]

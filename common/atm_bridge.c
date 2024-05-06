@@ -18,7 +18,6 @@
 #include <sys/types.h>
 
 #include "utils.h"
-#include "registry.h"
 #include "net_io.h"
 #include "atm.h"
 #include "atm_vsar.h"

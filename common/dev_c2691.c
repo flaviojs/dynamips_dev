@@ -27,7 +27,6 @@
 #include "dev_c2691.h"
 #include "dev_c2691_iofpga.h"
 #include "dev_vtty.h"
-#include "registry.h"
 #include "fs_nvram.h"
 
 /* ======================================================================== */

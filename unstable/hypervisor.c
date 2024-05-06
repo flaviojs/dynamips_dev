@@ -28,7 +28,6 @@
 
 #include "utils.h"
 #include "parser.h"
-#include "registry.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

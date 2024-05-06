@@ -23,7 +23,6 @@
 #include <sys/types.h>
 
 #include "utils.h"
-#include "registry.h"
 #include "atm.h"
 #include "net_io.h"
 

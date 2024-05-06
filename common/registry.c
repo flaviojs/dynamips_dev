@@ -27,7 +27,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "hash.h"
 #include "registry.h"
 
 #define DEBUG_REGISTRY  0

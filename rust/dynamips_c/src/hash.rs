@@ -234,5 +234,21 @@ pub unsafe extern "C" fn hash_table_lookup_dcmp(ht: *mut hash_table_t, key: *mut
     null_mut()
 }
 
+/// Call the specified function for each node found in hash table
+#[no_mangle]
+pub unsafe extern "C" fn hash_table_foreach(ht: *mut hash_table_t, user_fn: hash_fforeach, opt_arg: *mut c_void) -> c_int {
+    assert!(!ht.is_null());
+
+    for i in 0..(*ht).size as isize {
+        let mut node: *mut hash_node_t = *(*ht).nodes.offset(i);
+        while !node.is_null() {
+            user_fn.unwrap()((*node).key, (*node).value, opt_arg);
+            node = (*node).next;
+        }
+    }
+
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

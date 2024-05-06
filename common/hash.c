@@ -34,18 +34,3 @@ static hash_node_t *hash_node_alloc(hash_table_t *ht,void *key,void *value)
    node->next = NULL;
    return node;
 }
-
-/* Call the specified function for each node found in hash table */
-int hash_table_foreach(hash_table_t *ht,hash_fforeach user_fn,void *opt_arg)
-{
-   hash_node_t *node;
-   int i;
-
-   assert(ht!=NULL);
-
-   for(i=0;i<ht->size;i++)
-      for(node=ht->nodes[i];node;node=node->next)
-         user_fn(node->key,node->value,opt_arg);
-   
-   return(0);
-}

@@ -98,6 +98,11 @@ pub unsafe extern "C" fn ptr_hash(i: *mut c_void) -> c_uint {
     ((val & 0xFFFF) ^ ((val >> 24) & 0xFFFF) ^ ((val >> 48) & 0xFFFF)) as c_uint
 }
 
+/// Free memory used by a node
+unsafe fn hash_node_free(node: *mut hash_node_t) {
+    libc::free(node.cast::<_>());
+}
+
 /// Create a new hash table
 #[no_mangle]
 pub unsafe extern "C" fn hash_table_create(hash_func: hash_fcompute, key_cmp: hash_fcompare, hash_size: c_int) -> *mut hash_table_t {
@@ -115,6 +120,26 @@ pub unsafe extern "C" fn hash_table_create(hash_func: hash_fcompute, key_cmp: ha
     (*ht).nodes = libc::calloc((*ht).size as usize, size_of::<*mut hash_node_t>()).cast::<_>();
     assert!(!(*ht).nodes.is_null());
     ht
+}
+
+/// Delete an existing Hash Table
+#[no_mangle]
+pub unsafe extern "C" fn hash_table_delete(ht: *mut hash_table_t) {
+    if ht.is_null() {
+        return;
+    }
+
+    for hash_val in 0..(*ht).size as isize {
+        let mut node: *mut hash_node_t = *(*ht).nodes.offset(hash_val);
+        while !node.is_null() {
+            let node_next: *mut hash_node_t = (*node).next;
+            hash_node_free(node);
+            node = node_next;
+        }
+        *(*ht).nodes.offset(hash_val) = null_mut();
+    }
+    libc::free((*ht).nodes.cast::<_>());
+    libc::free(ht.cast::<_>());
 }
 
 #[no_mangle]

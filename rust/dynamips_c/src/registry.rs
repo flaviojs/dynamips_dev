@@ -318,5 +318,35 @@ pub unsafe extern "C" fn registry_exists(name: *mut c_char, object_type: c_int) 
     data
 }
 
+/// Release a reference of an entry (decrement the reference count)
+#[no_mangle]
+pub unsafe extern "C" fn registry_unref(name: *mut c_char, object_type: c_int) -> c_int {
+    let mut res: c_int = -1;
+
+    if name.is_null() {
+        return -1;
+    }
+
+    REGISTRY_LOCK();
+
+    let entry: *mut registry_entry_t = registry_find_entry(name, object_type);
+    if !entry.is_null() {
+        (*entry).ref_count -= 1;
+
+        if DEBUG_REGISTRY {
+            libc::printf(cstr!("Registry: object %s: ref_count = %d after unref.\n"), name, (*entry).ref_count);
+        }
+
+        if (*entry).ref_count < 0 {
+            libc::fprintf(c_stderr(), cstr!("Registry: object %s (type %d): negative ref_count.\n"), name, object_type);
+        } else {
+            res = 0;
+        }
+    }
+
+    REGISTRY_UNLOCK();
+    res
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

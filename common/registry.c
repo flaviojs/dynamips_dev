@@ -91,36 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Release a reference of an entry (decrement the reference count) */
-int registry_unref(char *name,int object_type)
-{
-   registry_entry_t *entry;
-   int res = -1;
-
-   if (!name) return(-1);
-
-   REGISTRY_LOCK();
-
-   if ((entry = registry_find_entry(name,object_type)))
-   {
-      entry->ref_count--;
-
-#if DEBUG_REGISTRY
-      printf("Registry: object %s: ref_count = %d after unref.\n",
-             name, entry->ref_count);
-#endif
-
-      if (entry->ref_count < 0) {
-         fprintf(stderr,"Registry: object %s (type %d): negative ref_count.\n",
-                 name, object_type);
-      } else
-         res = 0;
-   }
-
-   REGISTRY_UNLOCK();
-   return(res);
-}
-
 /* 
  * Execute action on an object if its reference count is less or equal to
  * the specified count.

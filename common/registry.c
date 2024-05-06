@@ -91,33 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Rename an entry in the registry */
-int registry_rename(char *name,char *newname,int object_type)
-{
-   registry_entry_t *entry;
-
-   if (!name || !newname) return(-1);
-
-   REGISTRY_LOCK();
-
-   if (!(entry = registry_find_entry(name,object_type))) {
-      REGISTRY_UNLOCK();
-      return(-1);
-   }
-
-   if (registry_find_entry(newname,object_type)) {
-      REGISTRY_UNLOCK();
-      return(-1);
-   }
-
-   registry_detach_entry(entry);
-   entry->name = newname;
-   registry_insert_entry(entry);
-
-   REGISTRY_UNLOCK();
-   return(0);
-}
-
 /* Find an entry (increment the reference count) */
 void *registry_find(char *name,int object_type)
 {

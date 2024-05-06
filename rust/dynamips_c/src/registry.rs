@@ -249,5 +249,33 @@ pub unsafe extern "C" fn registry_delete(name: *mut c_char, object_type: c_int) 
     0
 }
 
+/// Rename an entry in the registry
+#[no_mangle]
+pub unsafe extern "C" fn registry_rename(name: *mut c_char, newname: *mut c_char, object_type: c_int) -> c_int {
+    if name.is_null() || newname.is_null() {
+        return -1;
+    }
+
+    REGISTRY_LOCK();
+
+    let entry: *mut registry_entry_t = registry_find_entry(name, object_type);
+    if entry.is_null() {
+        REGISTRY_UNLOCK();
+        return -1;
+    }
+
+    if !registry_find_entry(newname, object_type).is_null() {
+        REGISTRY_UNLOCK();
+        return -1;
+    }
+
+    registry_detach_entry(entry);
+    (*entry).name = newname;
+    registry_insert_entry(entry);
+
+    REGISTRY_UNLOCK();
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

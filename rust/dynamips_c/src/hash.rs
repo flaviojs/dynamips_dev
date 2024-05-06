@@ -261,4 +261,9 @@ pub unsafe extern "C" fn hash_int_create(hash_size: c_int) -> *mut hash_table_t 
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hash_u64_create(hash_size: c_int) -> *mut hash_table_t {
+    hash_table_create(Some(u64_hash), Some(u64_equal), hash_size)
+}
+
+#[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

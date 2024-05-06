@@ -13,12 +13,6 @@
 
 #include "rust_dynamips_c.h"
 
-#define hash_int_create(hash_size) \
-   hash_table_create(int_hash,int_equal,hash_size)
-
-#define hash_u64_create(hash_size) \
-   hash_table_create(u64_hash,u64_equal,hash_size)
-
 #define hash_ptr_create(hash_size) \
    hash_table_create(ptr_hash,ptr_equal,hash_size)
 

@@ -27,7 +27,7 @@
 #include "atm.h"
 #include "crc.h"
 #include "net_io.h"
-#include "registry.h"
+#include "rust_dynamips_c.h"
 #include "hypervisor.h"
 
 /* Create a new ATMSW object */

@@ -34,7 +34,7 @@
 #include <linux/if_tun.h>
 #endif
 
-#include "registry.h"
+#include "rust_dynamips_c.h"
 #include "net.h"
 #include "net_io.h"
 #include "net_io_filter.h"

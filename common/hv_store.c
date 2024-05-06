@@ -24,7 +24,7 @@
 
 #include "utils.h"
 #include "base64.h"
-#include "registry.h"
+#include "rust_dynamips_c.h"
 #include "hypervisor.h"
 
 struct store_object {

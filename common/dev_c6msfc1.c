@@ -29,7 +29,7 @@
 #include "dev_c6msfc1.h"
 #include "dev_c6msfc1_mpfpga.h"
 #include "dev_vtty.h"
-#include "registry.h"
+#include "rust_dynamips_c.h"
 #include "net.h"
 #include "fs_nvram.h"
 

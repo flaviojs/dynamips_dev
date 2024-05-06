@@ -46,7 +46,7 @@
 #include "ptask.h"
 #include "timer.h"
 #include "plugin.h"
-#include "registry.h"
+#include "rust_dynamips_c.h"
 #include "hypervisor.h"
 #include "net_io.h"
 #include "net_io_bridge.h"

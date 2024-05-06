@@ -25,7 +25,7 @@
 #include "dev_c3745.h"
 #include "dev_c3745_iofpga.h"
 #include "dev_vtty.h"
-#include "registry.h"
+#include "rust_dynamips_c.h"
 #include "fs_nvram.h"
 
 /* ======================================================================== */

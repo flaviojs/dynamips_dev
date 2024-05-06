@@ -18,7 +18,7 @@
 
 #include "utils.h"
 #include "net.h"
-#include "registry.h"
+#include "rust_dynamips_c.h"
 #include "net_io.h"
 #include "eth_switch.h"
 

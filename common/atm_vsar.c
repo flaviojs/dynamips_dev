@@ -17,7 +17,7 @@
 #include <sys/uio.h>
 
 #include "utils.h"
-#include "registry.h"
+#include "rust_dynamips_c.h"
 #include "crc.h"
 #include "atm.h"
 #include "net_io.h"

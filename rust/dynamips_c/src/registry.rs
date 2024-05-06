@@ -64,8 +64,7 @@ pub type registry_exec = Option<unsafe extern "C" fn(data: *mut c_void, opt_arg:
 
 const DEBUG_REGISTRY: bool = false;
 
-#[no_mangle]
-pub static mut registry: *mut registry_t = null_mut(); // TODO private
+static mut registry: *mut registry_t = null_mut();
 
 unsafe fn REGISTRY_LOCK() {
     libc::pthread_mutex_lock(addr_of_mut!((*registry).lock));
@@ -484,6 +483,3 @@ pub unsafe extern "C" fn registry_dump() {
 
     REGISTRY_UNLOCK();
 }
-
-#[no_mangle]
-pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

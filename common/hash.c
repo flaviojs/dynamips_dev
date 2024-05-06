@@ -35,30 +35,6 @@ static hash_node_t *hash_node_alloc(hash_table_t *ht,void *key,void *value)
    return node;
 }
 
-/* Remove a pair (key,value) from an hash table */
-void *hash_table_remove(hash_table_t *ht,void *key)
-{
-   hash_node_t **node,*tmp;
-   u_int hash_val;
-   void *value;
-
-   assert(ht!=NULL);
-
-   hash_val = ht->hash_func(key) % ht->size;
-
-   for(node=&ht->nodes[hash_val];*node;node=&(*node)->next)
-      if (ht->key_cmp((*node)->key,key)) {
-         tmp = *node;
-         value = tmp->value;
-         *node = tmp->next;
-
-         hash_node_free(tmp);
-         return(value);
-      }
-
-   return NULL;
-}
-
 /* Hash Table Lookup */
 void *hash_table_lookup(hash_table_t *ht,void *key)
 {

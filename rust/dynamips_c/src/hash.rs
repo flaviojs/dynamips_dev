@@ -175,5 +175,28 @@ pub unsafe extern "C" fn hash_table_insert(ht: *mut hash_table_t, key: *mut c_vo
     0
 }
 
+/// Remove a pair (key,value) from an hash table
+#[no_mangle]
+pub unsafe extern "C" fn hash_table_remove(ht: *mut hash_table_t, key: *mut c_void) -> *mut c_void {
+    assert!(!ht.is_null());
+
+    let hash_val: usize = (*ht).hash_func.unwrap()(key) as usize % (*ht).size as usize;
+
+    let mut node: *mut *mut hash_node_t = (*ht).nodes.add(hash_val);
+    while !(*node).is_null() {
+        if (*ht).key_cmp.unwrap()((*(*node)).key, key) != 0 {
+            let tmp: *mut hash_node_t = *node;
+            let value: *mut c_void = (*tmp).value;
+            *node = (*tmp).next;
+
+            hash_node_free(tmp);
+            return value;
+        }
+        node = addr_of_mut!((*(*node)).next);
+    }
+
+    null_mut()
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

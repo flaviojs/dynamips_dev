@@ -35,27 +35,6 @@ static hash_node_t *hash_node_alloc(hash_table_t *ht,void *key,void *value)
    return node;
 }
 
-/* Create a new hash table */
-hash_table_t *hash_table_create(hash_fcompute hash_func,hash_fcompare key_cmp,
-                                int hash_size)
-{
-   hash_table_t *ht;
-
-   if (!hash_func || (hash_size <= 0))
-      return NULL;   
-
-   ht = malloc(sizeof(*ht));
-   assert(ht!=NULL);
-
-   memset(ht,0,sizeof(*ht));
-   ht->hash_func = hash_func;
-   ht->key_cmp = key_cmp;
-   ht->size = hash_size;
-   ht->nodes = calloc(ht->size,sizeof(hash_node_t *));
-   assert(ht->nodes!=NULL);
-   return ht;
-}
-
 /* Delete an existing Hash Table */
 void hash_table_delete(hash_table_t *ht)
 {

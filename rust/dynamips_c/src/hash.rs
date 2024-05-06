@@ -98,5 +98,24 @@ pub unsafe extern "C" fn ptr_hash(i: *mut c_void) -> c_uint {
     ((val & 0xFFFF) ^ ((val >> 24) & 0xFFFF) ^ ((val >> 48) & 0xFFFF)) as c_uint
 }
 
+/// Create a new hash table
+#[no_mangle]
+pub unsafe extern "C" fn hash_table_create(hash_func: hash_fcompute, key_cmp: hash_fcompare, hash_size: c_int) -> *mut hash_table_t {
+    if hash_func.is_none() || hash_size <= 0 {
+        return null_mut();
+    }
+
+    let ht: *mut hash_table_t = libc::malloc(size_of::<hash_table_t>()).cast::<_>();
+    assert!(!ht.is_null());
+
+    libc::memset(ht.cast::<_>(), 0, size_of::<hash_table_t>());
+    (*ht).hash_func = hash_func;
+    (*ht).key_cmp = key_cmp;
+    (*ht).size = hash_size;
+    (*ht).nodes = libc::calloc((*ht).size as usize, size_of::<*mut hash_node_t>()).cast::<_>();
+    assert!(!(*ht).nodes.is_null());
+    ht
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

@@ -91,30 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Find an entry (increment the reference count) */
-void *registry_find(char *name,int object_type)
-{
-   registry_entry_t *entry;
-   void *data;
-
-   if (!name) return NULL;
-
-   REGISTRY_LOCK();
-
-   if ((entry = registry_find_entry(name,object_type))) {
-      entry->ref_count++;
-#if DEBUG_REGISTRY
-      printf("Registry: object %s: ref_count = %d after find.\n",
-             entry->name, entry->ref_count);
-#endif
-      data = entry->data;
-   } else
-      data = NULL;
-
-   REGISTRY_UNLOCK();
-   return data;
-}
-
 /* Check if entry exists (does not change reference count) */
 void *registry_exists(char *name,int object_type)
 {

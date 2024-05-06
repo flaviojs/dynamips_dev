@@ -277,5 +277,29 @@ pub unsafe extern "C" fn registry_rename(name: *mut c_char, newname: *mut c_char
     0
 }
 
+/// Find an entry (increment the reference count)
+#[no_mangle]
+pub unsafe extern "C" fn registry_find(name: *mut c_char, object_type: c_int) -> *mut c_void {
+    if name.is_null() {
+        return null_mut();
+    }
+
+    REGISTRY_LOCK();
+
+    let entry: *mut registry_entry_t = registry_find_entry(name, object_type);
+    let data: *mut c_void = if !entry.is_null() {
+        (*entry).ref_count += 1;
+        if DEBUG_REGISTRY {
+            libc::printf(cstr!("Registry: object %s: ref_count = %d after find.\n"), (*entry).name, (*entry).ref_count);
+        }
+        (*entry).data
+    } else {
+        null_mut()
+    };
+
+    REGISTRY_UNLOCK();
+    data
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

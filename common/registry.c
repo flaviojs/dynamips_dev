@@ -25,7 +25,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "hash.h"
 #include "rust_dynamips_c.h"
 #include "registry.h"
 

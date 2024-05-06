@@ -269,6 +269,3 @@ pub unsafe extern "C" fn hash_u64_create(hash_size: c_int) -> *mut hash_table_t 
 pub unsafe extern "C" fn hash_ptr_create(hash_size: c_int) -> *mut hash_table_t {
     hash_table_create(Some(ptr_hash), Some(ptr_equal), hash_size)
 }
-
-#[no_mangle]
-pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

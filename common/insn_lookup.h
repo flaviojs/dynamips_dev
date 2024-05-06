@@ -9,7 +9,7 @@
 #define __INSN_LOOKUP_H__
 
 #include "utils.h"
-#include "hash.h"
+#include "rust_dynamips_c.h"
 
 /* Forward declaration for instruction lookup table */
 typedef struct insn_lookup insn_lookup_t;

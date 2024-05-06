@@ -26,7 +26,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "hash.h"
 #include "timer.h"
 
 /* Lock and unlock access to global structures */

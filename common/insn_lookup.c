@@ -14,7 +14,7 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "hash.h"
+#include "rust_dynamips_c.h"
 #include "insn_lookup.h"
 #include "dynamips.h"
 

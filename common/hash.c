@@ -16,12 +16,6 @@
 #include "utils.h"
 #include "hash.h"
 
-/* Compare 2 pointers */
-int ptr_equal(void *i1,void *i2)
-{
-   return((int)(i1 == i2));
-}
-
 /* Hash function for a pointer (see above) */
 u_int ptr_hash(void *i)
 {

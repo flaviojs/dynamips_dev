@@ -16,14 +16,6 @@
 #include "utils.h"
 #include "hash.h"
 
-/* Hash function for a pointer (see above) */
-u_int ptr_hash(void *i)
-{
-   m_uint64_t val = (m_uint64_t)(m_iptr_t)i;
-   return((u_int)((val & 0xFFFF) ^ ((val >> 24) & 0xFFFF) ^ 
-                  ((val >> 48) & 0xFFFF)));
-}
-
 /* Free memory used by a node */
 static inline void hash_node_free(hash_node_t *node)
 {

@@ -91,5 +91,12 @@ pub unsafe extern "C" fn ptr_equal(i1: *mut c_void, i2: *mut c_void) -> c_int {
     (i1 == i2).into()
 }
 
+/// Hash function for a pointer (see above)
+#[no_mangle]
+pub unsafe extern "C" fn ptr_hash(i: *mut c_void) -> c_uint {
+    let val: u64 = i as usize as u64;
+    ((val & 0xFFFF) ^ ((val >> 24) & 0xFFFF) ^ ((val >> 48) & 0xFFFF)) as c_uint
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

@@ -1,5 +1,6 @@
 //! Red/Black Trees.
 
+use crate::dynamips_common::*;
 use crate::mempool::*;
 use crate::prelude::*;
 
@@ -48,6 +49,176 @@ pub struct rbtree_tree {
     pub key_cmp: tree_fcompare,
     /// Optional data for comparison
     pub opt_data: *mut c_void,
+}
+
+unsafe fn rbtree_nil(tree: *mut rbtree_tree) -> *mut rbtree_node {
+    addr_of_mut!((*tree).nil)
+}
+unsafe fn NIL(tree: *mut rbtree_tree, x: *mut rbtree_node) -> bool {
+    x == rbtree_nil(tree) || x.is_null()
+}
+
+/// Allocate memory for a new node
+unsafe fn rbtree_node_alloc(tree: *mut rbtree_tree, key: *mut c_void, value: *mut c_void) -> *mut rbtree_node {
+    let node: *mut rbtree_node = mp_alloc_n0(addr_of_mut!((*tree).mp), size_of::<rbtree_node>()).cast::<_>();
+    if node.is_null() {
+        return null_mut();
+    }
+
+    (*node).key = key;
+    (*node).value = value;
+    (*node).left = rbtree_nil(tree);
+    (*node).right = rbtree_nil(tree);
+    (*node).parent = rbtree_nil(tree);
+    (*node).color = -1;
+    node
+}
+
+/// Left rotation
+unsafe fn rbtree_left_rotate(tree: *mut rbtree_tree, x: *mut rbtree_node) {
+    let y: *mut rbtree_node = (*x).right;
+    (*x).right = (*y).left;
+
+    if !NIL(tree, (*x).right) {
+        (*(*x).right).parent = x;
+    }
+
+    (*y).parent = (*x).parent;
+
+    if NIL(tree, (*x).parent) {
+        (*tree).root = y;
+    } else if x == (*(*x).parent).left {
+        (*(*x).parent).left = y;
+    } else {
+        (*(*x).parent).right = y;
+    }
+
+    (*y).left = x;
+    (*x).parent = y;
+}
+
+/// Right rotation
+unsafe fn rbtree_right_rotate(tree: *mut rbtree_tree, y: *mut rbtree_node) {
+    let x: *mut rbtree_node = (*y).left;
+    (*y).left = (*x).right;
+
+    if !NIL(tree, (*y).left) {
+        (*(*y).left).parent = y;
+    }
+
+    (*x).parent = (*y).parent;
+
+    if NIL(tree, (*y).parent) {
+        (*tree).root = x;
+    } else if (*(*y).parent).left == y {
+        (*(*y).parent).left = x;
+    } else {
+        (*(*y).parent).right = x;
+    }
+
+    (*x).right = y;
+    (*y).parent = x;
+}
+
+/// insert a new node
+unsafe fn rbtree_insert_new(tree: *mut rbtree_tree, key: *mut c_void, value: *mut c_void, exists: *mut c_int) -> *mut rbtree_node {
+    let mut nodeplace: *mut *mut rbtree_node = addr_of_mut!((*tree).root);
+    let mut parent: *mut rbtree_node = null_mut();
+    *exists = FALSE;
+
+    loop {
+        let node: *mut rbtree_node = *nodeplace;
+
+        if NIL(tree, node) {
+            break;
+        }
+
+        let comp: c_int = (*tree).key_cmp.unwrap()(key, (*node).key, (*tree).opt_data);
+
+        if comp == 0 {
+            *exists = TRUE;
+            (*node).value = value;
+            return node;
+        }
+
+        parent = node;
+        nodeplace = if comp > 0 { addr_of_mut!((*node).right) } else { addr_of_mut!((*node).left) };
+    }
+
+    // create a new node
+    let new_node: *mut rbtree_node = rbtree_node_alloc(tree, key, value);
+    if new_node.is_null() {
+        return null_mut();
+    }
+
+    *nodeplace = new_node;
+    (*new_node).parent = parent;
+
+    (*tree).node_count += 1;
+    new_node
+}
+
+/// Insert a node in a Red/Black Tree
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_insert(tree: *mut rbtree_tree, key: *mut c_void, value: *mut c_void) -> c_int {
+    // insert a new node (if necessary)
+    let mut exists: c_int = 0;
+    let mut x: *mut rbtree_node = rbtree_insert_new(tree, key, value, addr_of_mut!(exists));
+
+    if exists != 0 {
+        return 0;
+    }
+    if x.is_null() {
+        return -1;
+    }
+
+    (*tree).node_count += 1;
+
+    // maintains red-black properties
+    (*x).color = RBTREE_RED;
+
+    while x != (*tree).root && (*(*x).parent).color == RBTREE_RED {
+        if (*x).parent == (*(*(*x).parent).parent).left {
+            let y: *mut rbtree_node = (*(*(*x).parent).parent).right;
+
+            if (*y).color == RBTREE_RED {
+                (*(*x).parent).color = RBTREE_BLACK;
+                (*y).color = RBTREE_BLACK;
+                (*(*(*x).parent).parent).color = RBTREE_RED;
+                x = (*(*x).parent).parent;
+            } else {
+                if x == (*(*x).parent).right {
+                    x = (*x).parent;
+                    rbtree_left_rotate(tree, x);
+                }
+
+                (*(*x).parent).color = RBTREE_BLACK;
+                (*(*(*x).parent).parent).color = RBTREE_RED;
+                rbtree_right_rotate(tree, (*(*x).parent).parent);
+            }
+        } else {
+            let y: *mut rbtree_node = (*(*(*x).parent).parent).left;
+
+            if (*y).color == RBTREE_RED {
+                (*(*x).parent).color = RBTREE_BLACK;
+                (*y).color = RBTREE_BLACK;
+                (*(*(*x).parent).parent).color = RBTREE_RED;
+                x = (*(*x).parent).parent;
+            } else {
+                if x == (*(*x).parent).left {
+                    x = (*x).parent;
+                    rbtree_right_rotate(tree, x);
+                }
+
+                (*(*x).parent).color = RBTREE_BLACK;
+                (*(*(*x).parent).parent).color = RBTREE_RED;
+                rbtree_left_rotate(tree, (*(*x).parent).parent);
+            }
+        }
+    }
+
+    (*(*tree).root).color = RBTREE_BLACK;
+    0
 }
 
 #[no_mangle]

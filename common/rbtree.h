@@ -15,25 +15,6 @@ static const char rcsid_rbtree[] = "$Id$";
 #include "rust_dynamips_c.h"
 
 /*
- * Description of a node in a Red/Black tree. To be more efficient, keys are
- * stored with a void * pointer, allowing to use different type keys.
- */
-typedef struct rbtree_node rbtree_node;
-struct rbtree_node {
-   /* Key and Value */
-   void *key,*value;
-
-   /* Left and right nodes */
-   rbtree_node *left,*right;
-
-   /* Parent node */
-   rbtree_node *parent;
-
-   /* Node color */
-   short color;
-};
-
-/*
  * Description of a Red/Black tree. For commodity, a name can be given to the
  * tree. "rbtree_comp" is a pointer to a function, defined by user, which
  * compares keys during node operations.

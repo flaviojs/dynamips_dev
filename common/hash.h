@@ -13,9 +13,6 @@
 
 #include "rust_dynamips_c.h"
 
-#define hash_ptr_create(hash_size) \
-   hash_table_create(ptr_hash,ptr_equal,hash_size)
-
 #define HASH_TABLE_FOREACH(i,ht,hn) \
    for(i=0;i<ht->size;i++) \
       for(hn=ht->nodes[i];hn;hn=hn->next)

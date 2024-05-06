@@ -12,6 +12,7 @@ pub use libc::size_t;
 pub use libc::ssize_t;
 pub use std::ffi::c_char;
 pub use std::ffi::c_int;
+pub use std::ffi::c_long;
 pub use std::ffi::c_uint;
 pub use std::ffi::c_ulonglong;
 pub use std::ffi::c_void;

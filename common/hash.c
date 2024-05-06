@@ -16,12 +16,6 @@
 #include "utils.h"
 #include "hash.h"
 
-/* Compare two integers (yes, it's stupid) */
-int int_equal(void *i1, void *i2)
-{
-   return(((int)(long)i1) == (int)(long)i2);
-}
-
 /* Hash function for an integer (see above) */
 u_int int_hash(void *i)
 {

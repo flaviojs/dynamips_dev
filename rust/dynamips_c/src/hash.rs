@@ -59,5 +59,11 @@ pub unsafe extern "C" fn str_hash(str_: *mut c_void) -> c_uint {
     h
 }
 
+/// Compare two integers (yes, it's stupid)
+#[no_mangle]
+pub unsafe extern "C" fn int_equal(i1: *mut c_void, i2: *mut c_void) -> c_int {
+    (i1 as c_long as c_int == i2 as c_long as c_int).into()
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

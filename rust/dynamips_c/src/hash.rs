@@ -72,5 +72,11 @@ pub unsafe extern "C" fn int_hash(i: *mut c_void) -> c_uint {
     val ^ (val >> 16)
 }
 
+/// Compare two u64 (yes, it's stupid)
+#[no_mangle]
+pub unsafe extern "C" fn u64_equal(i1: *mut c_void, i2: *mut c_void) -> c_int {
+    (*i1.cast::<u64>() == *i2.cast::<u64>()).into()
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

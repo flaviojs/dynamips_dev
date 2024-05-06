@@ -16,12 +16,6 @@
 #include "utils.h"
 #include "hash.h"
 
-/* Compare two u64 (yes, it's stupid) */
-int u64_equal(void *i1, void *i2)
-{
-   return((*(m_uint64_t *)i1) == (*(m_uint64_t *)i2));
-}
-
 /* Hash function for an u64 (see above) */
 u_int u64_hash(void *i)
 {

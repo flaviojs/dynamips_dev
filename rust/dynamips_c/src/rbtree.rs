@@ -221,5 +221,32 @@ pub unsafe extern "C" fn rbtree_insert(tree: *mut rbtree_tree, key: *mut c_void,
     0
 }
 
+/// Lookup for a node corresponding to "key"
+unsafe fn rbtree_lookup_node(tree: *mut rbtree_tree, key: *mut c_void) -> *mut rbtree_node {
+    let mut node: *mut rbtree_node = (*tree).root;
+
+    loop {
+        if NIL(tree, node) {
+            break; // key not found
+        }
+
+        let comp: c_int = (*tree).key_cmp.unwrap()(key, (*node).key, (*tree).opt_data);
+        if comp == 0 {
+            break; // exact match
+        }
+
+        node = if comp > 0 { (*node).right } else { (*node).left };
+    }
+
+    node
+}
+
+/// Lookup for a node corresponding to "key". If node does not exist,
+/// function returns null pointer.
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_lookup(tree: *mut rbtree_tree, key: *mut c_void) -> *mut c_void {
+    (*rbtree_lookup_node(tree, key)).value
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

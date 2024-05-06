@@ -155,15 +155,6 @@ static inline rbtree_node *rbtree_lookup_node(rbtree_tree *tree,void *key)
    return(node);
 }
 
-/* 
- * Lookup for a node corresponding to "key". If node does not exist, 
- * function returns null pointer.
- */
-void *rbtree_lookup(rbtree_tree *tree,void *key)
-{
-   return(rbtree_lookup_node(tree,key)->value);
-}
-
 /* Restore Red/black tree properties after a removal */
 static void rbtree_removal_fixup(rbtree_tree *tree,rbtree_node *x)
 {

@@ -301,5 +301,22 @@ pub unsafe extern "C" fn registry_find(name: *mut c_char, object_type: c_int) ->
     data
 }
 
+/// Check if entry exists (does not change reference count)
+#[no_mangle]
+pub unsafe extern "C" fn registry_exists(name: *mut c_char, object_type: c_int) -> *mut c_void {
+    if name.is_null() {
+        return null_mut();
+    }
+
+    REGISTRY_LOCK();
+    let entry: *mut registry_entry_t = registry_find_entry(name, object_type);
+    let mut data: *mut c_void = null_mut();
+    if !entry.is_null() {
+        data = (*entry).data;
+    }
+    REGISTRY_UNLOCK();
+    data
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

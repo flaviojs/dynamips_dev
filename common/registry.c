@@ -91,23 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Check if entry exists (does not change reference count) */
-void *registry_exists(char *name,int object_type)
-{
-   registry_entry_t *entry;
-   void *data = NULL;
-   
-   if (!name) 
-      return NULL;
-
-   REGISTRY_LOCK();
-   entry = registry_find_entry(name,object_type);
-   if (entry) 
-      data = entry->data;
-   REGISTRY_UNLOCK();
-   return data;
-}
-
 /* Release a reference of an entry (decrement the reference count) */
 int registry_unref(char *name,int object_type)
 {

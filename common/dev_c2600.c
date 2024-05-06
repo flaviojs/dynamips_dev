@@ -28,7 +28,6 @@
 #include "dev_c2600.h"
 #include "dev_c2600_iofpga.h"
 #include "dev_vtty.h"
-#include "registry.h"
 #include "fs_nvram.h"
 
 /* ======================================================================== */

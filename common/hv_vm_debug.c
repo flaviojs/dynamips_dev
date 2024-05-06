@@ -31,7 +31,6 @@
 #include "dev_c7200.h"
 #include "dev_vtty.h"
 #include "utils.h"
-#include "registry.h"
 #include "hypervisor.h"
 
 /* Show CPU registers */

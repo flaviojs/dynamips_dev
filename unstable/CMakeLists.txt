@@ -42,7 +42,6 @@ endif ( NOT BUILD_DYNAMIPS_UNSTABLE )
 add_definitions( "-DUSE_UNSTABLE" )
 
 set ( _files
-   "${COMMON}/registry.c"
    "${COMMON}/rbtree.c"
    "${COMMON}/sbox.c"
    "${COMMON}/utils.c"

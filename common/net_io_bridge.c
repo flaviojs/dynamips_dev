@@ -18,7 +18,6 @@
 #include <sys/types.h>
 
 #include "utils.h"
-#include "registry.h"
 #include "net_io.h"
 #include "net_io_bridge.h"
 

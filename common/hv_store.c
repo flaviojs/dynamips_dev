@@ -26,7 +26,6 @@
 
 #include "utils.h"
 #include "base64.h"
-#include "registry.h"
 #include "hypervisor.h"
 
 struct store_object {

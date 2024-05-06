@@ -29,7 +29,6 @@
 #include "frame_relay.h"
 #include "crc.h"
 #include "net_io.h"
-#include "registry.h"
 #include "hypervisor.h"
 
 /* Create a new FRSW object */

@@ -27,7 +27,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "hash.h"
 #include "timer.h"
 
 /* Lock and unlock access to global structures */

@@ -11,7 +11,6 @@
 #include "rust_dynamips_c.h"
 
 #include "utils.h"
-#include "hash.h"
 
 /* Forward declaration for instruction lookup table */
 typedef struct insn_lookup insn_lookup_t;

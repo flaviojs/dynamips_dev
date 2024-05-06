@@ -76,7 +76,6 @@ endif()
 set ( _files
    "${COMMON}/registry.c"
    "${COMMON}/rbtree.c"
-   "${COMMON}/hash.c"
    "${COMMON}/sbox.c"
    "${COMMON}/utils.c"
    "${COMMON}/parser.c"

@@ -251,4 +251,9 @@ pub unsafe extern "C" fn hash_table_foreach(ht: *mut hash_table_t, user_fn: hash
 }
 
 #[no_mangle]
+pub unsafe extern "C" fn hash_string_create(hash_size: c_int) -> *mut hash_table_t {
+    hash_table_create(Some(str_hash), Some(str_equal), hash_size)
+}
+
+#[no_mangle]
 pub extern "C" fn _export(_: hash_fcompute, _: hash_fcompare, _: hash_fforeach, _: *mut hash_node_t, _: *mut hash_table_t) {}

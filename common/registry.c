@@ -91,14 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Delete object if unused */
-int registry_delete_if_unused(char *name,int object_type,
-                              registry_exec obj_destructor,void *opt_arg)
-{
-   return(registry_exec_refcount(name,object_type,0,TRUE,
-                                 obj_destructor,opt_arg));
-}
-
 /* Execute a callback function for all objects of specified type */
 int registry_foreach_type(int object_type,registry_foreach cb,
                           void *opt,int *err)

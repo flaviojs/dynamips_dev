@@ -385,5 +385,11 @@ pub unsafe extern "C" fn registry_exec_refcount(name: *mut c_char, object_type: 
     res
 }
 
+/// Delete object if unused
+#[no_mangle]
+pub unsafe extern "C" fn registry_delete_if_unused(name: *mut c_char, object_type: c_int, obj_destructor: registry_exec, opt_arg: *mut c_void) -> c_int {
+    registry_exec_refcount(name, object_type, 0, TRUE, obj_destructor, opt_arg)
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

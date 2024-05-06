@@ -93,6 +93,22 @@ unsafe fn registry_insert_entry(entry: *mut registry_entry_t) {
     (*bucket).htype_next = entry;
 }
 
+/// Detach a registry entry
+unsafe fn registry_detach_entry(entry: *mut registry_entry_t) {
+    (*(*entry).hname_prev).hname_next = (*entry).hname_next;
+    (*(*entry).hname_next).hname_prev = (*entry).hname_prev;
+
+    (*(*entry).htype_prev).htype_next = (*entry).htype_next;
+    (*(*entry).htype_next).htype_prev = (*entry).htype_prev;
+}
+
+/// Remove a registry entry
+unsafe fn registry_remove_entry(entry: *mut registry_entry_t) {
+    registry_detach_entry(entry);
+
+    mp_free(entry.cast::<_>());
+}
+
 /// Locate an entry
 unsafe fn registry_find_entry(name: *mut c_char, object_type: c_int) -> *mut registry_entry_t {
     let h_index: usize = str_hash(name.cast::<_>()) as usize % (*registry).ht_name_entries as usize;
@@ -199,6 +215,36 @@ pub unsafe extern "C" fn registry_add(name: *mut c_char, object_type: c_int, dat
         libc::printf(cstr!("Registry: object %s: ref_count = %d after add.\n"), (*entry).name, (*entry).ref_count);
     }
 
+    REGISTRY_UNLOCK();
+    0
+}
+
+/// Delete an entry from the registry
+#[no_mangle]
+pub unsafe extern "C" fn registry_delete(name: *mut c_char, object_type: c_int) -> c_int {
+    if name.is_null() {
+        return -1;
+    }
+
+    REGISTRY_LOCK();
+
+    let entry: *mut registry_entry_t = registry_find_entry(name, object_type);
+    if entry.is_null() {
+        REGISTRY_UNLOCK();
+        return -1;
+    }
+
+    // if the entry is referenced, just decrement ref counter
+    (*entry).ref_count -= 1;
+    if (*entry).ref_count > 0 {
+        if DEBUG_REGISTRY {
+            libc::printf(cstr!("Registry: object %s: ref_count = %d after delete.\n"), (*entry).name, (*entry).ref_count);
+        }
+        REGISTRY_UNLOCK();
+        return 0;
+    }
+
+    registry_remove_entry(entry);
     REGISTRY_UNLOCK();
     0
 }

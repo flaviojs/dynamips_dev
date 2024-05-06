@@ -91,35 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Delete an entry from the registry */
-int registry_delete(char *name,int object_type)
-{
-   registry_entry_t *entry;
-
-   if (!name) return(-1);
-
-   REGISTRY_LOCK();
-
-   if (!(entry = registry_find_entry(name,object_type))) {
-      REGISTRY_UNLOCK();
-      return(-1);
-   }
-
-   /* if the entry is referenced, just decrement ref counter */
-   if (--entry->ref_count > 0) {
-#if DEBUG_REGISTRY
-      printf("Registry: object %s: ref_count = %d after delete.\n",
-             entry->name, entry->ref_count);
-#endif
-      REGISTRY_UNLOCK();
-      return(0);
-   }
-
-   registry_remove_entry(entry);
-   REGISTRY_UNLOCK();
-   return(0);
-}
-
 /* Rename an entry in the registry */
 int registry_rename(char *name,char *newname,int object_type)
 {

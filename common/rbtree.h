@@ -14,9 +14,6 @@ static const char rcsid_rbtree[] = "$Id$";
 #include <sys/types.h>
 #include "rust_dynamips_c.h"
 
-/* Comparison function for 2 keys */
-typedef int (*tree_fcompare)(void *key1,void *key2,void *opt);
-
 /* User function to call when using rbtree_foreach */
 typedef void (*tree_fforeach)(void *key,void *value,void *opt);
 

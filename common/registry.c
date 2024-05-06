@@ -91,44 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* 
- * Execute action on an object if its reference count is less or equal to
- * the specified count.
- */
-int registry_exec_refcount(char *name,int object_type,int max_ref,int reg_del,
-                           registry_exec obj_action,void *opt_arg)
-{
-   registry_entry_t *entry;
-   int res = -1;
-   int status;
-
-   if (!name) return(-1);
-
-   REGISTRY_LOCK();
-
-   entry = registry_find_entry(name,object_type);
-
-   if (entry) 
-   {
-      if (entry->ref_count <= max_ref)
-      {
-         status = TRUE;
-
-         if (obj_action != NULL)
-            status = obj_action(entry->data,opt_arg);
-
-         if (reg_del && status)
-            registry_remove_entry(entry);
-
-         res = 1;
-      } else
-         res = 0;
-   }
-
-   REGISTRY_UNLOCK();
-   return(res);
-}
-
 /* Delete object if unused */
 int registry_delete_if_unused(char *name,int object_type,
                               registry_exec obj_destructor,void *opt_arg)

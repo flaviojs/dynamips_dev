@@ -1,5 +1,6 @@
 //! Object Registry.
 
+use crate::dynamips_common::*;
 use crate::hash::*;
 use crate::mempool::*;
 use crate::prelude::*;
@@ -339,6 +340,42 @@ pub unsafe extern "C" fn registry_unref(name: *mut c_char, object_type: c_int) -
 
         if (*entry).ref_count < 0 {
             libc::fprintf(c_stderr(), cstr!("Registry: object %s (type %d): negative ref_count.\n"), name, object_type);
+        } else {
+            res = 0;
+        }
+    }
+
+    REGISTRY_UNLOCK();
+    res
+}
+
+/// Execute action on an object if its reference count is less or equal to
+/// the specified count.
+#[no_mangle]
+pub unsafe extern "C" fn registry_exec_refcount(name: *mut c_char, object_type: c_int, max_ref: c_int, reg_del: c_int, obj_action: registry_exec, opt_arg: *mut c_void) -> c_int {
+    let mut res: c_int = -1;
+
+    if name.is_null() {
+        return -1;
+    }
+
+    REGISTRY_LOCK();
+
+    let entry: *mut registry_entry_t = registry_find_entry(name, object_type);
+
+    if !entry.is_null() {
+        if (*entry).ref_count <= max_ref {
+            let mut status: c_int = TRUE;
+
+            if obj_action.is_some() {
+                status = obj_action.unwrap()((*entry).data, opt_arg);
+            }
+
+            if reg_del != 0 && status != 0 {
+                registry_remove_entry(entry);
+            }
+
+            res = 1;
         } else {
             res = 0;
         }

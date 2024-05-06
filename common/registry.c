@@ -91,27 +91,6 @@ static inline registry_entry_t *registry_find_entry(char *name,int object_type)
    return NULL;
 }
 
-/* Execute a callback function for all objects of specified type */
-int registry_foreach_type(int object_type,registry_foreach cb,
-                          void *opt,int *err)
-{
-   registry_entry_t *p,*bucket,*next;
-   int count = 0;
-
-   REGISTRY_LOCK();
-
-   bucket = &registry->ht_types[object_type];
-
-   for(p=bucket->htype_next;p!=bucket;p=next) {
-      next = p->htype_next;
-      if (cb) cb(p,opt,err);
-      count++;
-   }
-
-   REGISTRY_UNLOCK();
-   return(count);
-}
-
 /* Delete all objects of the specified type */
 int registry_delete_type(int object_type,registry_exec cb,void *opt)
 {

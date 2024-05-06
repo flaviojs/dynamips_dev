@@ -391,5 +391,27 @@ pub unsafe extern "C" fn registry_delete_if_unused(name: *mut c_char, object_typ
     registry_exec_refcount(name, object_type, 0, TRUE, obj_destructor, opt_arg)
 }
 
+/// Execute a callback function for all objects of specified type
+#[no_mangle]
+pub unsafe extern "C" fn registry_foreach_type(object_type: c_int, cb: registry_foreach, opt: *mut c_void, err: *mut c_int) -> c_int {
+    REGISTRY_LOCK();
+
+    let bucket: *mut registry_entry_t = (*registry).ht_types.offset(object_type as isize);
+
+    let mut count: c_int = 0;
+    let mut p: *mut registry_entry_t = (*bucket).htype_next;
+    while p != bucket {
+        let next: *mut registry_entry_t = (*p).htype_next;
+        if let Some(cb) = cb {
+            cb(p, opt, err);
+        }
+        count += 1;
+        p = next;
+    }
+
+    REGISTRY_UNLOCK();
+    count
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut registry_entry_t, _: *mut registry_t, _: registry_foreach, _: registry_exec) {}

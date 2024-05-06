@@ -1,5 +1,6 @@
 //! Red/Black Trees.
 
+use crate::mempool::*;
 use crate::prelude::*;
 
 /// Comparison function for 2 keys
@@ -29,5 +30,25 @@ pub struct rbtree_node {
     pub color: c_short,
 }
 
+/// Description of a Red/Black tree. For commodity, a name can be given to the
+/// tree. "rbtree_comp" is a pointer to a function, defined by user, which
+/// compares keys during node operations.
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct rbtree_tree {
+    /// Number of Nodes
+    pub node_count: c_int,
+    /// Memory pool
+    pub mp: mempool_t,
+    /// Sentinel
+    pub nil: rbtree_node,
+    /// Root node
+    pub root: *mut rbtree_node,
+    /// Key comparison function
+    pub key_cmp: tree_fcompare,
+    /// Optional data for comparison
+    pub opt_data: *mut c_void,
+}
+
 #[no_mangle]
-pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node) {}
+pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

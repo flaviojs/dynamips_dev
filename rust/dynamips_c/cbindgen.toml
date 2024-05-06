@@ -13,6 +13,7 @@ typedef struct hash_table hash_table_t;
 typedef struct memblock memblock_t;
 typedef struct mempool mempool_t;
 typedef struct rbtree_node rbtree_node;
+typedef struct rbtree_tree rbtree_tree;
 typedef struct registry registry_t;
 typedef struct registry_entry registry_entry_t;
 """

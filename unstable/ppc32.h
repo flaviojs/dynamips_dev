@@ -11,7 +11,6 @@
 #include <pthread.h>
 
 #include "utils.h" 
-#include "rbtree.h"
 
 /* CPU identifiers */
 #define PPC32_PVR_405     0x40110000

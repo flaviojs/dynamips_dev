@@ -317,68 +317,6 @@ static timer_id timer_enable(timer_entry_t *timer)
    return(timer->id);
 }
 
-/* Flush queues */
-void timer_flush_queues(void)
-{
-   timer_entry_t *timer,*next_timer;
-   timer_queue_t *queue,*next_queue;
-   pthread_t thread;
-
-   TIMER_LOCK();
-
-   for(queue=timer_queue_pool;queue;queue=next_queue)
-   {
-      TIMERQ_LOCK(queue);
-      next_queue = queue->next;
-      thread = queue->thread;
-
-      /* mark queue as not running */
-      queue->running = FALSE;
-
-      /* suppress all timers */
-      for(timer=queue->list;timer;timer=next_timer) {
-         next_timer = timer->next;
-         timer_free_id(timer->id);
-         free(timer);
-      }
-
-      /* signal changes to the queue thread */
-      pthread_cond_signal(&queue->schedule);
-
-      TIMERQ_UNLOCK(queue);
-
-      /* wait for thread to terminate */
-      pthread_join(thread,NULL);
-
-      pthread_cond_destroy(&queue->schedule);
-      pthread_mutex_destroy(&queue->lock);
-      free(queue);
-   }
-   timer_queue_pool = NULL;
-
-   TIMER_UNLOCK();
-}
-
-/* Add a specified number of queues to the pool */
-int timer_pool_add_queues(int nr_queues)
-{
-   timer_queue_t *queue;
-   int i;
-
-   for(i=0;i<nr_queues;i++)
-   {
-      if (!(queue = timer_create_queue()))
-         return(-1);
-
-      TIMER_LOCK();
-      queue->next = timer_queue_pool;
-      timer_queue_pool = queue;
-      TIMER_UNLOCK();
-   }
-
-   return(0);
-}
-
 /* Terminate timer sub-sytem */
 static void timer_terminate(void)
 {

@@ -508,5 +508,64 @@ pub unsafe extern "C" fn timer_create_queue() -> *mut timer_queue_t {
     queue
 }
 
+/// Flush queues
+#[no_mangle]
+pub unsafe extern "C" fn timer_flush_queues() {
+    TIMER_LOCK();
+
+    let mut queue: *mut timer_queue_t = timer_queue_pool;
+    while !queue.is_null() {
+        TIMERQ_LOCK(queue);
+        let next_queue: *mut timer_queue_t = (*queue).next;
+        let thread: libc::pthread_t = (*queue).thread;
+
+        // mark queue as not running
+        (*queue).running.set(0);
+
+        // suppress all timers
+        let mut timer: *mut timer_entry_t = (*queue).list.get();
+        while !timer.is_null() {
+            let next_timer: *mut timer_entry_t = (*timer).next;
+            timer_free_id((*timer).id);
+            libc::free(timer.cast::<_>());
+            timer = next_timer;
+        }
+
+        // signal changes to the queue thread
+        libc::pthread_cond_signal(addr_of_mut!((*queue).schedule));
+
+        TIMERQ_UNLOCK(queue);
+
+        // wait for thread to terminate
+        libc::pthread_join(thread, null_mut());
+
+        libc::pthread_cond_destroy(addr_of_mut!((*queue).schedule));
+        libc::pthread_mutex_destroy(addr_of_mut!((*queue).lock));
+        libc::free(queue.cast::<_>());
+        queue = next_queue;
+    }
+    timer_queue_pool = null_mut();
+
+    TIMER_UNLOCK();
+}
+
+/// Add a specified number of queues to the pool
+#[no_mangle]
+pub unsafe extern "C" fn timer_pool_add_queues(nr_queues: c_int) -> c_int {
+    for _ in 0..nr_queues {
+        let queue: *mut timer_queue_t = timer_create_queue();
+        if queue.is_null() {
+            return -1;
+        }
+
+        TIMER_LOCK();
+        (*queue).next = timer_queue_pool;
+        timer_queue_pool = queue;
+        TIMER_UNLOCK();
+    }
+
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: timer_id, _: *mut timer_entry_t, _: *mut timer_queue_t, _: timer_proc) {}

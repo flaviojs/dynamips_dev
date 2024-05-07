@@ -317,42 +317,6 @@ static timer_id timer_enable(timer_entry_t *timer)
    return(timer->id);
 }
 
-/* Create a new timer queue */
-timer_queue_t *timer_create_queue(void)
-{
-   timer_queue_t *queue;
-
-   /* Create new queue structure */
-   if (!(queue = malloc(sizeof(*queue))))
-      return NULL;
-
-   queue->running = TRUE;
-   queue->list = NULL;
-   queue->level = 0;
-
-   /* Create mutex */
-   if (pthread_mutex_init(&queue->lock,NULL))
-      goto err_mutex;
-
-   /* Create condition */
-   if (pthread_cond_init(&queue->schedule,NULL))
-      goto err_cond;
-
-   /* Create thread */
-   if (pthread_create(&queue->thread,NULL,(void *(*)(void *))timer_loop,queue))
-      goto err_create;
-
-   return queue;
-
-err_create:
-   pthread_cond_destroy(&queue->schedule);
-err_cond:
-   pthread_mutex_destroy(&queue->lock);
-err_mutex:
-   free(queue);
-   return NULL;
-}
-
 /* Flush queues */
 void timer_flush_queues(void)
 {

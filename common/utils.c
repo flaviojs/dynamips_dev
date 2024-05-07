@@ -373,15 +373,6 @@ void *m_memalign(size_t boundary,size_t size)
    return p;
 }
 
-/* Block specified signal for calling thread */
-int m_signal_block(int sig)
-{
-   sigset_t sig_mask;
-   sigemptyset(&sig_mask);
-   sigaddset(&sig_mask,sig);
-   return(pthread_sigmask(SIG_BLOCK,&sig_mask,NULL));
-}
-
 /* Unblock specified signal for calling thread */
 int m_signal_unblock(int sig)
 {

@@ -38,6 +38,15 @@ pub unsafe extern "C" fn m_gettime_adj() -> m_tmcnt_t {
     (tvp.tv_sec as m_tmcnt_t) * 1000 + (tvp.tv_usec as m_tmcnt_t) / 1000
 }
 
+/// Block specified signal for calling thread
+#[no_mangle]
+pub unsafe extern "C" fn m_signal_block(sig: c_int) -> c_int {
+    let mut sig_mask: libc::sigset_t = zeroed::<_>();
+    libc::sigemptyset(addr_of_mut!(sig_mask));
+    libc::sigaddset(addr_of_mut!(sig_mask), sig);
+    libc::pthread_sigmask(libc::SIG_BLOCK, addr_of_mut!(sig_mask), null_mut())
+}
+
 /// Set non-blocking mode on a file descriptor
 #[no_mangle]
 pub unsafe extern "C" fn m_fd_set_non_block(fd: c_int) -> c_int {

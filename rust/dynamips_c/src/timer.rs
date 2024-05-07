@@ -259,6 +259,11 @@ pub unsafe extern "C" fn timer_remove(id: timer_id) -> c_int {
     0
 }
 
+/// Run timer action
+unsafe fn timer_exec(timer: *mut timer_entry_t) -> c_int {
+    (*timer).callback.unwrap()((*timer).user_arg, timer)
+}
+
 /// Schedule a timer in a queue
 unsafe fn timer_schedule_in_queue(queue: *mut timer_queue_t, timer: *mut timer_entry_t) {
     // Set new expiration date and clear "run" flag
@@ -289,6 +294,77 @@ unsafe fn timer_schedule(timer: *mut timer_entry_t) -> c_int {
     timer_schedule_in_queue(queue, timer);
     TIMERQ_UNLOCK(queue);
     0
+}
+
+/// Timer loop
+extern "C" fn timer_loop(queue: *mut c_void) -> *mut c_void {
+    unsafe {
+        let queue: *mut timer_queue_t = queue.cast::<_>();
+        // Set signal properties
+        m_signal_block(libc::SIGINT);
+        m_signal_block(libc::SIGQUIT);
+        m_signal_block(libc::SIGTERM);
+
+        loop {
+            // Prevent asynchronous access problems
+            TIMERQ_LOCK(queue);
+
+            // We need to check "running" flags to know if we must stop
+            if (*queue).running.get() == 0 {
+                TIMERQ_UNLOCK(queue);
+                break;
+            }
+
+            // Get first event
+            let mut timer: *mut timer_entry_t = (*queue).list.get();
+
+            // If we have timers in queue, we setup a timer to wait for first one.
+            // In all cases, thread is woken up when a reschedule occurs.
+            if !timer.is_null() {
+                let mut t_spc: libc::timespec = zeroed::<_>();
+                t_spc.tv_sec = ((*timer).expire / 1000) as libc::time_t;
+                t_spc.tv_nsec = (((*timer).expire % 1000) * 1000000) as i64;
+                libc::pthread_cond_timedwait(addr_of_mut!((*queue).schedule), addr_of_mut!((*queue).lock), addr_of_mut!(t_spc));
+            } else {
+                // We just wait for reschedule since we don't have any timer
+                libc::pthread_cond_wait(addr_of_mut!((*queue).schedule), addr_of_mut!((*queue).lock));
+            }
+
+            // We need to check "running" flags to know if we must stop
+            if (*queue).running.get() == 0 {
+                TIMERQ_UNLOCK(queue);
+                break;
+            }
+
+            // Now, we need to find why we were woken up. So, we compare current
+            // time with first timer to see if we must execute action associated
+            // with it.
+            let c_time: m_tmcnt_t = m_gettime();
+
+            // Get first event
+            timer = (*queue).list.get();
+
+            // If there is nothing to do for now, wait again
+            if timer.is_null() || (*timer).expire > c_time {
+                TIMERQ_UNLOCK(queue);
+                continue;
+            }
+
+            // We have a timer to manage. Remove it from queue and mark it as
+            // running.
+            timer_remove_from_queue(queue, timer);
+            (*timer).flags |= TIMER_RUNNING;
+
+            // Execute user function and reschedule timer if required
+            if timer_exec(timer) != 0 {
+                timer_schedule_in_queue(queue, timer);
+            }
+
+            TIMERQ_UNLOCK(queue);
+        }
+
+        null_mut()
+    }
 }
 
 /// Enable a timer
@@ -392,6 +468,44 @@ pub unsafe extern "C" fn timer_set_interval(id: timer_id, interval: c_long) -> c
     // Reschedule
     libc::pthread_cond_signal(addr_of_mut!((*queue).schedule));
     0
+}
+
+/// Create a new timer queue
+#[no_mangle]
+pub unsafe extern "C" fn timer_create_queue() -> *mut timer_queue_t {
+    // Create new queue structure
+    let queue: *mut timer_queue_t = libc::malloc(size_of::<timer_queue_t>()).cast::<_>();
+    if queue.is_null() {
+        return null_mut();
+    }
+
+    (*queue).running.set(1);
+    (*queue).list.set(null_mut());
+    (*queue).level = 0;
+
+    // Create mutex
+    if libc::pthread_mutex_init(addr_of_mut!((*queue).lock), null_mut()) != 0 {
+        libc::free(queue.cast::<_>());
+        return null_mut();
+    }
+
+    // Create condition
+    if libc::pthread_cond_init(addr_of_mut!((*queue).schedule), null_mut()) != 0 {
+        libc::pthread_mutex_destroy(addr_of_mut!((*queue).lock));
+        libc::free(queue.cast::<_>());
+        return null_mut();
+    }
+
+    // Create thread
+    if libc::pthread_create(addr_of_mut!((*queue).thread), null_mut(), timer_loop, queue.cast::<_>()) != 0 {
+        // (void *(*)(void *))
+        libc::pthread_cond_destroy(addr_of_mut!((*queue).schedule));
+        libc::pthread_mutex_destroy(addr_of_mut!((*queue).lock));
+        libc::free(queue.cast::<_>());
+        return null_mut();
+    }
+
+    queue
 }
 
 #[no_mangle]

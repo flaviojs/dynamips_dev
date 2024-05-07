@@ -320,9 +320,6 @@ int m_read_file(const char *filename,u_char **buffer,size_t *length);
 /* Allocate aligned memory */
 void *m_memalign(size_t boundary,size_t size);
 
-/* Block specified signal for calling thread */
-int m_signal_block(int sig);
-
 /* Unblock specified signal for calling thread */
 int m_signal_unblock(int sig);
 

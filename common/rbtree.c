@@ -277,12 +277,6 @@ static int rbtree_check_node(rbtree_tree *tree,rbtree_node *node)
    return(0);
 }
 
-/* Check tree consistency */
-int rbtree_check(rbtree_tree *tree)
-{
-   return(rbtree_check_node(tree,tree->root));
-}
-
 /* Create a new Red/Black tree */
 rbtree_tree *rbtree_create(tree_fcompare key_cmp,void *opt_data)
 {

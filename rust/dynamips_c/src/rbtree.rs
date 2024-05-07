@@ -436,5 +436,40 @@ pub unsafe extern "C" fn rbtree_purge(tree: *mut rbtree_tree) {
     (*tree).root = rbtree_nil(tree);
 }
 
+/// Check a node
+unsafe fn rbtree_check_node(tree: *mut rbtree_tree, node: *mut rbtree_node) -> c_int {
+    if !NIL(tree, node) {
+        return 0;
+    }
+
+    if !NIL(tree, (*node).left) {
+        if (*tree).key_cmp.unwrap()((*node).key, (*(*node).left).key, (*tree).opt_data) <= 0 {
+            return -1;
+        }
+
+        if rbtree_check_node(tree, (*node).left) == -1 {
+            return -1;
+        }
+    }
+
+    if !NIL(tree, (*node).right) {
+        if (*tree).key_cmp.unwrap()((*node).key, (*(*node).right).key, (*tree).opt_data) >= 0 {
+            return -1;
+        }
+
+        if rbtree_check_node(tree, (*node).right) == -1 {
+            return -1;
+        }
+    }
+
+    0
+}
+
+/// Check tree consistency
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_check(tree: *mut rbtree_tree) -> c_int {
+    rbtree_check_node(tree, (*tree).root)
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

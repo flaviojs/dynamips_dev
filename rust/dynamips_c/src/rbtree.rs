@@ -422,5 +422,19 @@ pub unsafe extern "C" fn rbtree_node_count(tree: *mut rbtree_tree) -> c_int {
     (*tree).node_count
 }
 
+/// Purge all nodes
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_purge(tree: *mut rbtree_tree) {
+    mp_free_all_blocks(addr_of_mut!((*tree).mp));
+    (*tree).node_count = 0;
+
+    // just in case
+    libc::memset(rbtree_nil(tree).cast::<_>(), 0, size_of::<rbtree_node>());
+    (*rbtree_nil(tree)).color = RBTREE_BLACK;
+
+    // reset root
+    (*tree).root = rbtree_nil(tree);
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

@@ -253,20 +253,6 @@ static int rbtree_height_node(rbtree_tree *tree,rbtree_node *node)
    return(1 + m_max(lh,rh));
 }
 
-/* Purge all nodes */
-void rbtree_purge(rbtree_tree *tree)
-{
-   mp_free_all_blocks(&tree->mp);
-   tree->node_count = 0;
-
-   /* just in case */
-   memset(rbtree_nil(tree),0,sizeof(rbtree_node));
-   rbtree_nil(tree)->color = RBTREE_BLACK;
-
-   /* reset root */
-   tree->root = rbtree_nil(tree);
-}
-
 /* Check a node */
 static int rbtree_check_node(rbtree_tree *tree,rbtree_node *node)
 {

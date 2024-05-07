@@ -471,5 +471,31 @@ pub unsafe extern "C" fn rbtree_check(tree: *mut rbtree_tree) -> c_int {
     rbtree_check_node(tree, (*tree).root)
 }
 
+/// Create a new Red/Black tree
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_create(key_cmp: tree_fcompare, opt_data: *mut c_void) -> *mut rbtree_tree {
+    let tree: *mut rbtree_tree = libc::malloc(size_of::<rbtree_tree>()).cast::<_>();
+    if tree.is_null() {
+        return null_mut();
+    }
+
+    libc::memset(tree.cast::<_>(), 0, size_of::<rbtree_tree>());
+
+    // initialize the memory pool
+    if mp_create_fixed_pool(addr_of_mut!((*tree).mp), cstr!("Red-Black Tree")).is_null() {
+        libc::free(tree.cast::<_>());
+        return null_mut();
+    }
+
+    // initialize the "nil" pointer
+    libc::memset(rbtree_nil(tree).cast::<_>(), 0, size_of::<rbtree_node>());
+    (*rbtree_nil(tree)).color = RBTREE_BLACK;
+
+    (*tree).key_cmp = key_cmp;
+    (*tree).opt_data = opt_data;
+    (*tree).root = rbtree_nil(tree);
+    tree
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

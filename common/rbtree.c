@@ -277,32 +277,6 @@ static int rbtree_check_node(rbtree_tree *tree,rbtree_node *node)
    return(0);
 }
 
-/* Create a new Red/Black tree */
-rbtree_tree *rbtree_create(tree_fcompare key_cmp,void *opt_data)
-{
-   rbtree_tree *tree;
-
-   if (!(tree = malloc(sizeof(*tree))))
-      return NULL;
-
-   memset(tree,0,sizeof(*tree));
-
-   /* initialize the memory pool */
-   if (!mp_create_fixed_pool(&tree->mp,"Red-Black Tree")) {
-      free(tree);
-      return NULL;
-   }
-
-   /* initialize the "nil" pointer */
-   memset(rbtree_nil(tree),0,sizeof(rbtree_node));
-   rbtree_nil(tree)->color = RBTREE_BLACK;
-
-   tree->key_cmp = key_cmp;
-   tree->opt_data = opt_data;
-   tree->root = rbtree_nil(tree);
-   return tree;
-}
-
 /* Delete a Red/Black tree */
 void rbtree_delete(rbtree_tree *tree)
 {

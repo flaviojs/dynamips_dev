@@ -3,6 +3,8 @@
 use crate::prelude::*;
 use libc_alloc::LibcAlloc;
 use std::ffi::CString;
+use std::ptr::read_volatile;
+use std::ptr::write_volatile;
 
 /// Make rust memory compatible with C malloc/free/...
 #[global_allocator]
@@ -91,6 +93,20 @@ impl<T> std::ops::IndexMut<c_int> for CArray<T> {
 impl<T> std::convert::From<*mut T> for CArray<T> {
     fn from(x: *mut T) -> Self {
         Self(x)
+    }
+}
+
+/// Wrapper around a volatile type.
+/// cbindgen:no-export
+#[repr(transparent)]
+#[derive(Debug, Copy, Clone)]
+pub struct Volatile<T>(pub T);
+impl<T> Volatile<T> {
+    pub fn get(&self) -> T {
+        unsafe { read_volatile(addr_of!(self.0)) }
+    }
+    pub fn set(&mut self, x: T) {
+        unsafe { write_volatile(addr_of_mut!(self.0), x) }
     }
 }
 

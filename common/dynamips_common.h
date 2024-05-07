@@ -130,7 +130,6 @@ typedef signed int m_int32_t;
 typedef signed long long m_int64_t;
 
 typedef unsigned long m_iptr_t;
-typedef m_uint64_t m_tmcnt_t;
 
 /* Max and min macro */
 #define m_max(a,b) (((a) > (b)) ? (a) : (b))

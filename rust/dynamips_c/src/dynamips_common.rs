@@ -9,6 +9,8 @@ pub const TRUE: c_int = 1;
 // Common types
 pub type m_uint64_t = c_ulonglong;
 
+pub type m_tmcnt_t = m_uint64_t;
+
 #[cfg(test)]
 mod test {
     use super::*;

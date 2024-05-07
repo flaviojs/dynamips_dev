@@ -7,6 +7,7 @@ pub use crate::_ext::str0;
 pub use crate::_ext::AsC;
 pub use crate::_ext::AsCMut;
 pub use crate::_ext::CArray;
+pub use crate::_ext::Volatile;
 pub use libc;
 pub use libc::size_t;
 pub use libc::ssize_t;

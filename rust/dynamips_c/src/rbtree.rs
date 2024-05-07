@@ -379,5 +379,24 @@ pub unsafe extern "C" fn rbtree_remove(tree: *mut rbtree_tree, key: *mut c_void)
     value
 }
 
+unsafe fn rbtree_foreach_node(tree: *mut rbtree_tree, node: *mut rbtree_node, user_fn: tree_fforeach, opt: *mut c_void) {
+    if !NIL(tree, node) {
+        rbtree_foreach_node(tree, (*node).left, user_fn, opt);
+        user_fn.unwrap()((*node).key, (*node).value, opt);
+        rbtree_foreach_node(tree, (*node).right, user_fn, opt);
+    }
+}
+
+/// Call the specified function for each node
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_foreach(tree: *mut rbtree_tree, user_fn: tree_fforeach, opt: *mut c_void) -> c_int {
+    if tree.is_null() {
+        return -1;
+    }
+
+    rbtree_foreach_node(tree, (*tree).root, user_fn, opt);
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

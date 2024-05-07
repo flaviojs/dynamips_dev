@@ -243,15 +243,6 @@ static void rbtree_foreach_node(rbtree_tree *tree,rbtree_node *node,
    }
 }
 
-/* Call the specified function for each node */
-int rbtree_foreach(rbtree_tree *tree,tree_fforeach user_fn,void *opt)
-{
-   if (!tree) return(-1);
-
-   rbtree_foreach_node(tree,tree->root,user_fn,opt);
-   return(0);
-}
-
 /* Returns the maximum height of the right and left sub-trees */
 static int rbtree_height_node(rbtree_tree *tree,rbtree_node *node)
 {

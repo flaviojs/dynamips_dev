@@ -317,39 +317,6 @@ static timer_id timer_enable(timer_entry_t *timer)
    return(timer->id);
 }
 
-/* Set a new interval for a timer */
-int timer_set_interval(timer_id id,long interval)
-{
-   timer_queue_t *queue;
-   timer_entry_t *timer;
-
-   TIMER_LOCK();
-
-   /* Locate timer */
-   if (!(timer = timer_find_by_id(id))) {
-      TIMER_UNLOCK();
-      return(-1);
-   }
-
-   queue = timer->queue;
-
-   TIMERQ_LOCK(queue);
-
-   /* Compute new expiration date */
-   timer->interval = interval;
-   timer->expire = m_gettime() + (m_tmcnt_t)interval;
-
-   timer_remove_from_queue(queue,timer);
-   timer_schedule_in_queue(queue,timer);
-
-   TIMERQ_UNLOCK(queue);
-   TIMER_UNLOCK();
-
-   /* Reschedule */
-   pthread_cond_signal(&queue->schedule);
-   return(0);
-}
-
 /* Create a new timer queue */
 timer_queue_t *timer_create_queue(void)
 {

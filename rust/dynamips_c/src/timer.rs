@@ -363,5 +363,36 @@ pub unsafe extern "C" fn timer_create_with_offset(interval: m_tmcnt_t, _offset: 
     timer_enable(timer)
 }
 
+/// Set a new interval for a timer
+#[no_mangle]
+pub unsafe extern "C" fn timer_set_interval(id: timer_id, interval: c_long) -> c_int {
+    TIMER_LOCK();
+
+    // Locate timer
+    let timer: *mut timer_entry_t = timer_find_by_id(id);
+    if timer.is_null() {
+        TIMER_UNLOCK();
+        return -1;
+    }
+
+    let queue: *mut timer_queue_t = (*timer).queue;
+
+    TIMERQ_LOCK(queue);
+
+    // Compute new expiration date
+    (*timer).interval = interval;
+    (*timer).expire = m_gettime() + interval as m_tmcnt_t;
+
+    timer_remove_from_queue(queue, timer);
+    timer_schedule_in_queue(queue, timer);
+
+    TIMERQ_UNLOCK(queue);
+    TIMER_UNLOCK();
+
+    // Reschedule
+    libc::pthread_cond_signal(addr_of_mut!((*queue).schedule));
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: timer_id, _: *mut timer_entry_t, _: *mut timer_queue_t, _: timer_proc) {}

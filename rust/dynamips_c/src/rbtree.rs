@@ -505,6 +505,3 @@ pub unsafe extern "C" fn rbtree_delete(tree: *mut rbtree_tree) {
         libc::free(tree.cast::<_>());
     }
 }
-
-#[no_mangle]
-pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

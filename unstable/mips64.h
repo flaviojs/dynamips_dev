@@ -9,7 +9,7 @@
 #include <pthread.h>
 
 #include "utils.h" 
-#include "rbtree.h"
+#include "rust_dynamips_c.h"
 
 /* 
  * MIPS General Purpose Registers 

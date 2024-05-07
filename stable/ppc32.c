@@ -14,7 +14,7 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#include "rbtree.h"
+#include "rust_dynamips_c.h"
 #include "cpu.h"
 #include "dynamips.h"
 #include "memory.h"

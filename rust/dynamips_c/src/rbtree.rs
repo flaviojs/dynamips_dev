@@ -497,5 +497,14 @@ pub unsafe extern "C" fn rbtree_create(key_cmp: tree_fcompare, opt_data: *mut c_
     tree
 }
 
+/// Delete a Red/Black tree
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_delete(tree: *mut rbtree_tree) {
+    if !tree.is_null() {
+        mp_free_pool(addr_of_mut!((*tree).mp));
+        libc::free(tree.cast::<_>());
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

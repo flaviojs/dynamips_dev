@@ -276,12 +276,3 @@ static int rbtree_check_node(rbtree_tree *tree,rbtree_node *node)
 
    return(0);
 }
-
-/* Delete a Red/Black tree */
-void rbtree_delete(rbtree_tree *tree)
-{
-   if (tree) {
-      mp_free_pool(&tree->mp);
-      free(tree);
-   }
-}

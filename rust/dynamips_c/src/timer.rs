@@ -15,6 +15,14 @@ pub type timer_queue_t = timer_queue;
 /// Defines callback function format
 pub type timer_proc = Option<unsafe extern "C" fn(arg1: *mut c_void, arg2: *mut timer_entry_t) -> c_int>;
 
+/// Timer flags
+pub const TIMER_DELETED: c_int = 1;
+pub const TIMER_RUNNING: c_int = 2;
+pub const TIMER_BOUNDARY: c_int = 4;
+
+/// Number of entries in hash table
+pub const TIMER_HASH_SIZE: c_int = 512;
+
 /// Timer properties
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]

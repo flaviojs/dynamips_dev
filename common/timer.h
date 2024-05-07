@@ -14,14 +14,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Timer flags */
-#define TIMER_DELETED    1
-#define TIMER_RUNNING    2
-#define TIMER_BOUNDARY   4
-
-/* Number of entries in hash table */
-#define TIMER_HASH_SIZE  512
-
 /* Lock and unlock access to a timer queue */
 #define TIMERQ_LOCK(queue)    pthread_mutex_lock(&(queue)->lock)
 #define TIMERQ_UNLOCK(queue)  pthread_mutex_unlock(&(queue)->lock)

@@ -1,6 +1,42 @@
 //! Utility functions.
 
+use crate::dynamips_common::*;
 use crate::prelude::*;
+
+/// Get current time in number of msec since epoch
+#[no_mangle]
+pub unsafe extern "C" fn m_gettime() -> m_tmcnt_t {
+    let mut tvp: libc::timeval = zeroed::<_>();
+
+    libc::gettimeofday(addr_of_mut!(tvp), null_mut());
+    (tvp.tv_sec as m_tmcnt_t) * 1000 + (tvp.tv_usec as m_tmcnt_t) / 1000
+}
+
+/// Get current time in number of ms (localtime)
+#[no_mangle]
+pub unsafe extern "C" fn m_gettime_adj() -> m_tmcnt_t {
+    let mut tvp: libc::timeval = zeroed::<_>();
+    let mut tmx: libc::tm = zeroed::<_>();
+    let gmt_adjust: libc::time_t;
+    let mut ct: libc::time_t;
+
+    libc::gettimeofday(addr_of_mut!(tvp), null_mut());
+    ct = tvp.tv_sec;
+    libc::localtime_r(addr_of_mut!(ct), addr_of_mut!(tmx));
+
+    #[cfg(not(has_libc_tm_tm_gmtoff))]
+    {
+        // #if defined(__CYGWIN__) || defined(SUNOS)
+        gmt_adjust = -(if tmx.tm_isdst != 0 { c_timezone() - 3600 } else { c_timezone() });
+    }
+    #[cfg(has_libc_tm_tm_gmtoff)]
+    {
+        gmt_adjust = tmx.tm_gmtoff;
+    }
+
+    tvp.tv_sec += gmt_adjust;
+    (tvp.tv_sec as m_tmcnt_t) * 1000 + (tvp.tv_usec as m_tmcnt_t) / 1000
+}
 
 /// Set non-blocking mode on a file descriptor
 #[no_mangle]

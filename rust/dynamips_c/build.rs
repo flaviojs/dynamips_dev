@@ -25,4 +25,5 @@ fn main() {
     // sanity check: libc::size_t should always exist
     assert!(probe_dep_expr("libc", "{ use libc::size_t; }").status.success());
     emit_dep_expr_cfg("libc", "{ fn f(x: libc::sockaddr_in6) { let _ = x.sin6_len; } }", "has_libc_sockaddr_in6_sin6_len");
+    emit_dep_expr_cfg("libc", "{ fn f(x: libc::tm) { let _ = x.tm_gmtoff; } }", "has_libc_tm_tm_gmtoff");
 }

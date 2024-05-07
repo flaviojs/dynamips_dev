@@ -3,6 +3,7 @@
 use crate::dynamips_common::*;
 use crate::hash::*;
 use crate::prelude::*;
+use crate::utils::*;
 
 /// Default number of Timer Queues
 pub const TIMERQ_NUMBER: c_int = 10;
@@ -92,6 +93,14 @@ unsafe fn TIMER_UNLOCK() {
 #[no_mangle]
 pub static mut timer_id_hash: *mut hash_table_t = null_mut(); // TODO private
 
+/// Pool of Timer Queues
+#[no_mangle]
+pub static mut timer_queue_pool: *mut timer_queue_t = null_mut(); // TODO private
+
+/// Last ID used.
+#[no_mangle]
+pub static mut timer_next_id: timer_id = 1; // TODO private
+
 /// Mutex to access to global structures (Hash Tables, Pool of queues, ...)
 #[no_mangle]
 pub static mut timer_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER; // TODO private
@@ -101,9 +110,74 @@ unsafe fn timer_find_by_id(mut id: timer_id) -> *mut timer_entry_t {
     hash_table_lookup(timer_id_hash, addr_of_mut!(id).cast::<_>()).cast::<_>()
 }
 
+/// Allocate a new ID. Disgusting method but it should work.
+unsafe fn timer_alloc_id() -> timer_id {
+    while !hash_table_lookup(timer_id_hash, addr_of_mut!(timer_next_id).cast::<_>()).is_null() {
+        timer_next_id += 1;
+    }
+
+    timer_next_id
+}
+
 /// Free an ID
 unsafe fn timer_free_id(mut id: timer_id) {
     hash_table_remove(timer_id_hash, addr_of_mut!(id).cast::<_>());
+}
+
+/// Select the queue of the pool that has the lowest criticity level. This
+// is a stupid method.
+unsafe fn timer_select_queue_from_pool() -> *mut timer_queue_t {
+    // to begin, select the first queue of the pool
+    let mut s_queue: *mut timer_queue_t = timer_queue_pool;
+    let mut level: c_int = (*s_queue).level;
+
+    // walk through timer queues
+    let mut queue: *mut timer_queue_t = (*timer_queue_pool).next;
+    while !queue.is_null() {
+        if (*queue).level < level {
+            level = (*queue).level;
+            s_queue = queue;
+        }
+        queue = (*queue).next;
+    }
+
+    // returns selected queue
+    s_queue
+}
+
+/// Add a timer in a queue
+unsafe fn timer_add_to_queue(queue: *mut timer_queue_t, timer: *mut timer_entry_t) {
+    // Insert after the last timer with the same or earlier time
+    let mut t: *mut timer_entry_t = (*queue).list.get();
+    let mut prev: *mut timer_entry_t = null_mut();
+    while !t.is_null() {
+        if (*t).expire > (*timer).expire {
+            break;
+        }
+        prev = t;
+        t = (*t).next;
+    }
+
+    // Add it in linked list
+    (*timer).next = t;
+    (*timer).prev = prev;
+    (*timer).queue = queue;
+
+    if !(*timer).next.is_null() {
+        (*(*timer).next).prev = timer;
+    }
+
+    if !(*timer).prev.is_null() {
+        (*(*timer).prev).next = timer;
+    } else {
+        (*queue).list.set(timer);
+    }
+
+    // Increment number of timers in queue
+    (*queue).timer_count += 1;
+
+    // Increment criticity level
+    (*queue).level += (*timer).level;
 }
 
 /// Remove a timer from queue
@@ -133,6 +207,23 @@ unsafe fn timer_remove_from_queue_atomic(queue: *mut timer_queue_t, timer: *mut 
     TIMERQ_LOCK(queue);
     timer_remove_from_queue(queue, timer);
     TIMERQ_UNLOCK(queue);
+}
+
+/// Free ressources used by a timer
+unsafe fn timer_free(timer: *mut timer_entry_t, take_lock: c_int) {
+    if take_lock != 0 {
+        TIMER_LOCK();
+    }
+
+    // Remove ID from hash table
+    hash_table_remove(timer_id_hash, addr_of_mut!((*timer).id).cast::<_>());
+
+    if take_lock != 0 {
+        TIMER_UNLOCK();
+    }
+
+    // Free memory used by timer
+    libc::free(timer.cast::<_>());
 }
 
 /// Remove a timer
@@ -166,6 +257,90 @@ pub unsafe extern "C" fn timer_remove(id: timer_id) -> c_int {
         libc::pthread_cond_signal(addr_of_mut!((*queue).schedule));
     }
     0
+}
+
+/// Schedule a timer in a queue
+unsafe fn timer_schedule_in_queue(queue: *mut timer_queue_t, timer: *mut timer_entry_t) {
+    // Set new expiration date and clear "run" flag
+    if ((*timer).flags & TIMER_BOUNDARY) != 0 {
+        let current_adj: m_tmcnt_t = m_gettime_adj();
+        let current = m_gettime();
+
+        (*timer).expire = current + (*timer).offset + ((*timer).interval as m_tmcnt_t - (current_adj % (*timer).interval as m_tmcnt_t));
+    } else {
+        (*timer).expire += (*timer).interval as m_tmcnt_t;
+    }
+
+    (*timer).flags &= !TIMER_RUNNING;
+    timer_add_to_queue(queue, timer);
+}
+
+/// Schedule a timer
+unsafe fn timer_schedule(timer: *mut timer_entry_t) -> c_int {
+    // Select the least used queue of the pool
+    let queue: *mut timer_queue_t = timer_select_queue_from_pool();
+    if queue.is_null() {
+        libc::fprintf(c_stderr(), cstr!("timer_schedule: no pool available for timer with ID %llu"), (*timer).id as c_ulonglong);
+        return -1;
+    }
+
+    // Reschedule it in queue
+    TIMERQ_LOCK(queue);
+    timer_schedule_in_queue(queue, timer);
+    TIMERQ_UNLOCK(queue);
+    0
+}
+
+/// Enable a timer
+unsafe fn timer_enable(timer: *mut timer_entry_t) -> timer_id {
+    // Allocate a new ID
+    TIMER_LOCK();
+    (*timer).id = timer_alloc_id();
+
+    // Insert ID in hash table
+    if hash_table_insert(timer_id_hash, addr_of_mut!((*timer).id).cast::<_>(), timer.cast::<_>()) == -1 {
+        TIMER_UNLOCK();
+        libc::free(timer.cast::<_>());
+        return 0;
+    }
+
+    // Schedule event
+    if timer_schedule(timer) == -1 {
+        timer_free(timer, 0);
+        TIMER_UNLOCK();
+        return 0;
+    }
+
+    // Returns timer ID
+    TIMER_UNLOCK();
+    libc::pthread_cond_signal(addr_of_mut!((*(*timer).queue).schedule));
+    (*timer).id
+}
+
+/// Create a new timer
+#[no_mangle]
+pub unsafe extern "C" fn timer_create_entry(interval: m_tmcnt_t, boundary: c_int, level: c_int, callback: timer_proc, user_arg: *mut c_void) -> timer_id {
+    // Allocate memory for new timer entry
+    let timer: *mut timer_entry_t = libc::malloc(size_of::<timer_entry_t>()).cast::<_>();
+    if timer.is_null() {
+        return 0;
+    }
+
+    (*timer).interval = interval as c_long;
+    (*timer).offset = 0;
+    (*timer).callback = callback;
+    (*timer).user_arg = user_arg;
+    (*timer).flags = 0;
+    (*timer).level = level;
+
+    // Set expiration delay
+    if boundary != 0 {
+        (*timer).flags |= TIMER_BOUNDARY;
+    } else {
+        (*timer).expire = m_gettime();
+    }
+
+    timer_enable(timer)
 }
 
 #[no_mangle]

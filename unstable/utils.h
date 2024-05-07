@@ -12,6 +12,8 @@
 #include <netinet/in.h>
 #include <signal.h>
 
+#include "rust_dynamips_c.h"
+
 /* Host CPU Types */
 #define CPU_x86    0
 #define CPU_amd64  1
@@ -240,15 +242,6 @@ static forced_inline m_uint64_t swap64(m_uint64_t value)
    return(result);
 }
 
-/* Get current time in number of msec since epoch */
-static inline m_tmcnt_t m_gettime(void)
-{
-   struct timeval tvp;
-
-   gettimeofday(&tvp,NULL);
-   return(((m_tmcnt_t)tvp.tv_sec * 1000) + ((m_tmcnt_t)tvp.tv_usec / 1000));
-}
-
 /* Get current time in number of usec since epoch */
 static inline m_tmcnt_t m_gettime_usec(void)
 {
@@ -256,34 +249,6 @@ static inline m_tmcnt_t m_gettime_usec(void)
 
    gettimeofday(&tvp,NULL);
    return(((m_tmcnt_t)tvp.tv_sec * 1000000) + (m_tmcnt_t)tvp.tv_usec);
-}
-
-#ifdef __CYGWIN__
-#define GET_TIMEZONE _timezone
-#else
-#define GET_TIMEZONE timezone
-#endif
-
-/* Get current time in number of ms (localtime) */
-static inline m_tmcnt_t m_gettime_adj(void)
-{
-   struct timeval tvp;
-   struct tm tmx;
-   time_t gmt_adjust;
-   time_t ct;
-
-   gettimeofday(&tvp,NULL);
-   ct = tvp.tv_sec;
-   localtime_r(&ct,&tmx);
-
-#if defined(__CYGWIN__) || defined(SUNOS)
-   gmt_adjust = -(tmx.tm_isdst ? GET_TIMEZONE - 3600 : GET_TIMEZONE);
-#else
-   gmt_adjust = tmx.tm_gmtoff;
-#endif
-
-   tvp.tv_sec += gmt_adjust;
-   return(((m_tmcnt_t)tvp.tv_sec * 1000) + ((m_tmcnt_t)tvp.tv_usec / 1000));
 }
 
 /* Get a byte-swapped 16-bit value on a non-aligned area */

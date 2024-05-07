@@ -28,6 +28,7 @@ pub use std::ptr::null_mut;
 extern "C" {
     // _ext.c
     pub fn c_stderr() -> *mut libc::FILE;
+    pub fn c_timezone() -> c_long;
     // libc
     pub fn gethostbyname(name: *const c_char) -> *mut libc::hostent;
     pub fn htons(x: u16) -> u16;

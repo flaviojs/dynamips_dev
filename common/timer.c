@@ -32,12 +32,6 @@
 #define TIMER_LOCK()    pthread_mutex_lock(&timer_mutex)
 #define TIMER_UNLOCK()  pthread_mutex_unlock(&timer_mutex)
 
-/* Pool of Timer Queues */
-static timer_queue_t *timer_queue_pool = NULL;
-
-/* Last ID used. */
-static timer_id timer_next_id = 1;
-
 
 /* Find a timer by its ID */
 static inline timer_entry_t *timer_find_by_id(timer_id id)
@@ -321,32 +315,6 @@ static timer_id timer_enable(timer_entry_t *timer)
    TIMER_UNLOCK();      
    pthread_cond_signal(&timer->queue->schedule);
    return(timer->id);
-}
-
-/* Create a new timer */
-timer_id timer_create_entry(m_tmcnt_t interval,int boundary,int level,
-                            timer_proc callback,void *user_arg)
-{
-   timer_entry_t *timer;
-
-   /* Allocate memory for new timer entry */
-   if (!(timer = malloc(sizeof(*timer))))
-      return(0);
-
-   timer->interval = interval;
-   timer->offset = 0;
-   timer->callback = callback;
-   timer->user_arg = user_arg;
-   timer->flags = 0;
-   timer->level = level;
-
-   /* Set expiration delay */
-   if (boundary) {
-      timer->flags |= TIMER_BOUNDARY;
-   } else
-      timer->expire = m_gettime();
-
-   return(timer_enable(timer));
 }
 
 /* Create a timer on boundary, with an offset */

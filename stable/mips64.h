@@ -11,7 +11,6 @@
 #include <pthread.h>
 
 #include "utils.h" 
-#include "rbtree.h"
 
 /* 
  * MIPS General Purpose Registers 

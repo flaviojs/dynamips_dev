@@ -16,7 +16,6 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#include "rbtree.h"
 #include "cpu.h"
 #include "vm.h"
 #include "tcb.h"

@@ -14,9 +14,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Timer definitions */
-typedef m_uint64_t timer_id;
-
 typedef struct timer_entry timer_entry_t;
 typedef struct timer_queue timer_queue_t;
 

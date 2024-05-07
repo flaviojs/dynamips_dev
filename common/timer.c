@@ -35,14 +35,8 @@
 /* Pool of Timer Queues */
 static timer_queue_t *timer_queue_pool = NULL;
 
-/* Hash table to map Timer ID to timer entries */
-static hash_table_t *timer_id_hash = NULL;
-
 /* Last ID used. */
 static timer_id timer_next_id = 1;
-
-/* Mutex to access to global structures (Hash Tables, Pool of queues, ...) */
-static pthread_mutex_t timer_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 
 /* Find a timer by its ID */
@@ -299,39 +293,6 @@ static void *timer_loop(timer_queue_t *queue)
    }
 
    return NULL;
-}
-
-/* Remove a timer */
-int timer_remove(timer_id id)
-{
-   timer_queue_t *queue = NULL;
-   timer_entry_t *timer;
-
-   TIMER_LOCK();
-   
-   /* Find timer */
-   if (!(timer = timer_find_by_id(id))) {
-      TIMER_UNLOCK();
-      return(-1);
-   }
-
-   /* If we have a queue, remove timer from it atomically */
-   if (timer->queue) {
-      queue = timer->queue;
-      timer_remove_from_queue_atomic(queue,timer);
-   }
-
-   /* Release timer ID */
-   timer_free_id(id);
-
-   /* Free memory used by timer */
-   free(timer);
-   TIMER_UNLOCK();
-   
-   /* Signal to this queue that it has been modified */
-   if (queue)
-      pthread_cond_signal(&queue->schedule);
-   return(0);
 }
 
 /* Enable a timer */

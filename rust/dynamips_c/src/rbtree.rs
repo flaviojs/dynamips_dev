@@ -416,5 +416,11 @@ pub unsafe extern "C" fn rbtree_height(tree: *mut rbtree_tree) -> c_int {
     }
 }
 
+/// Returns the number of nodes
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_node_count(tree: *mut rbtree_tree) -> c_int {
+    (*tree).node_count
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: tree_fcompare, _: tree_fforeach, _: *mut rbtree_node, _: *mut rbtree_tree) {}

@@ -253,12 +253,6 @@ static int rbtree_height_node(rbtree_tree *tree,rbtree_node *node)
    return(1 + m_max(lh,rh));
 }
 
-/* Returns the number of nodes */
-int rbtree_node_count(rbtree_tree *tree)
-{
-   return(tree->node_count);
-}
-
 /* Purge all nodes */
 void rbtree_purge(rbtree_tree *tree)
 {

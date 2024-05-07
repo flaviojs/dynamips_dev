@@ -12,8 +12,7 @@
 #include <pthread.h>
 #include "utils.h"
 
-/* Default number of Timer Queues */
-#define TIMERQ_NUMBER   10
+#include "rust_dynamips_c.h"
 
 /* Timer definitions */
 typedef m_uint64_t timer_id;

@@ -17,4 +17,5 @@ pub mod net;
 pub mod prelude;
 pub mod rbtree;
 pub mod registry;
+pub mod timer;
 pub mod utils;

@@ -253,12 +253,6 @@ static int rbtree_height_node(rbtree_tree *tree,rbtree_node *node)
    return(1 + m_max(lh,rh));
 }
 
-/* Compute the height of a Red/Black tree */
-int rbtree_height(rbtree_tree *tree)
-{
-   return(!NIL(tree,tree->root) ? rbtree_height_node(tree,tree->root) : 0);
-}
-
 /* Returns the number of nodes */
 int rbtree_node_count(rbtree_tree *tree)
 {

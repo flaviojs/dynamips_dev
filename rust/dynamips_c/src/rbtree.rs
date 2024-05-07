@@ -3,6 +3,7 @@
 use crate::dynamips_common::*;
 use crate::mempool::*;
 use crate::prelude::*;
+use std::cmp::max;
 
 /// Comparison function for 2 keys
 pub type tree_fcompare = Option<unsafe extern "C" fn(key1: *mut c_void, key2: *mut c_void, opt: *mut c_void) -> c_int>;
@@ -396,6 +397,23 @@ pub unsafe extern "C" fn rbtree_foreach(tree: *mut rbtree_tree, user_fn: tree_ff
 
     rbtree_foreach_node(tree, (*tree).root, user_fn, opt);
     0
+}
+
+/// Returns the maximum height of the right and left sub-trees
+unsafe fn rbtree_height_node(tree: *mut rbtree_tree, node: *mut rbtree_node) -> c_int {
+    let lh: c_int = if !NIL(tree, (*node).left) { rbtree_height_node(tree, (*node).left) } else { 0 };
+    let rh: c_int = if !NIL(tree, (*node).right) { rbtree_height_node(tree, (*node).right) } else { 0 };
+    1 + max(lh, rh)
+}
+
+/// Compute the height of a Red/Black tree
+#[no_mangle]
+pub unsafe extern "C" fn rbtree_height(tree: *mut rbtree_tree) -> c_int {
+    if !NIL(tree, (*tree).root) {
+        rbtree_height_node(tree, (*tree).root)
+    } else {
+        0
+    }
 }
 
 #[no_mangle]

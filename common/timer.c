@@ -317,27 +317,6 @@ static timer_id timer_enable(timer_entry_t *timer)
    return(timer->id);
 }
 
-/* Create a timer on boundary, with an offset */
-timer_id timer_create_with_offset(m_tmcnt_t interval,m_tmcnt_t offset,
-                                  int level,timer_proc callback,void *user_arg)
-{
-   timer_entry_t *timer;
-
-   /* Allocate memory for new timer entry */
-   if (!(timer = malloc(sizeof(*timer))))
-      return(0);
-
-   timer->interval = interval;
-   timer->offset = 0;
-   timer->callback = callback;
-   timer->user_arg = user_arg;
-   timer->flags = 0;
-   timer->level = level;
-   timer->flags |= TIMER_BOUNDARY;
-
-   return(timer_enable(timer));
-}
-
 /* Set a new interval for a timer */
 int timer_set_interval(timer_id id,long interval)
 {

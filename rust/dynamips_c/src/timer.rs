@@ -343,5 +343,25 @@ pub unsafe extern "C" fn timer_create_entry(interval: m_tmcnt_t, boundary: c_int
     timer_enable(timer)
 }
 
+/// Create a timer on boundary, with an offset
+#[no_mangle]
+pub unsafe extern "C" fn timer_create_with_offset(interval: m_tmcnt_t, _offset: m_tmcnt_t, level: c_int, callback: timer_proc, user_arg: *mut c_void) -> timer_id {
+    // Allocate memory for new timer entry
+    let timer: *mut timer_entry_t = libc::malloc(size_of::<timer_entry_t>()).cast::<_>();
+    if timer.is_null() {
+        return 0;
+    }
+
+    (*timer).interval = interval as c_long;
+    (*timer).offset = 0; // FIXME offset argument is not used
+    (*timer).callback = callback;
+    (*timer).user_arg = user_arg;
+    (*timer).flags = 0;
+    (*timer).level = level;
+    (*timer).flags |= TIMER_BOUNDARY;
+
+    timer_enable(timer)
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: timer_id, _: *mut timer_entry_t, _: *mut timer_queue_t, _: timer_proc) {}

@@ -79,7 +79,6 @@ set ( _files
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"
    "${COMMON}/ptask.c"
-   "${COMMON}/timer.c"
    "${COMMON}/base64.c"
    "${COMMON}/net_io.c"
    "${COMMON}/net_io_bridge.c"

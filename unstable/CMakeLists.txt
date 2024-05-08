@@ -52,7 +52,6 @@ set ( _files
    "${COMMON}/plugin.c"
    "${COMMON}/ptask.c"
    "${COMMON}/timer.c"
-   "${COMMON}/crc.c"
    "${COMMON}/base64.c"
    "${COMMON}/net.c"
    "${COMMON}/net_io.c"

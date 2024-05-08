@@ -35,7 +35,6 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include "crc.h"
 #include "atm.h"
 #include "cpu.h"
 #include "vm.h"

@@ -44,7 +44,6 @@
 #include "ppc32_vmtest.h"
 #include "dev_vtty.h"
 #include "ptask.h"
-#include "timer.h"
 #include "plugin.h"
 #include "rust_dynamips_c.h"
 #include "hypervisor.h"

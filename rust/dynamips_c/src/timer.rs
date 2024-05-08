@@ -90,20 +90,16 @@ unsafe fn TIMER_UNLOCK() {
 }
 
 /// Hash table to map Timer ID to timer entries
-#[no_mangle]
-pub static mut timer_id_hash: *mut hash_table_t = null_mut(); // TODO private
+static mut timer_id_hash: *mut hash_table_t = null_mut();
 
 /// Pool of Timer Queues
-#[no_mangle]
-pub static mut timer_queue_pool: *mut timer_queue_t = null_mut(); // TODO private
+static mut timer_queue_pool: *mut timer_queue_t = null_mut();
 
 /// Last ID used.
-#[no_mangle]
-pub static mut timer_next_id: timer_id = 1; // TODO private
+static mut timer_next_id: timer_id = 1;
 
 /// Mutex to access to global structures (Hash Tables, Pool of queues, ...)
-#[no_mangle]
-pub static mut timer_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER; // TODO private
+static mut timer_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
 
 /// Find a timer by its ID
 unsafe fn timer_find_by_id(mut id: timer_id) -> *mut timer_entry_t {
@@ -598,6 +594,3 @@ pub unsafe extern "C" fn timer_init() -> c_int {
 
     0
 }
-
-#[no_mangle]
-pub extern "C" fn _export(_: timer_id, _: *mut timer_entry_t, _: *mut timer_queue_t, _: timer_proc) {}

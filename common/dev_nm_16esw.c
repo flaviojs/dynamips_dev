@@ -20,7 +20,7 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "timer.h"
+#include "rust_dynamips_c.h"
 #include "net.h"
 #include "net_io.h"
 #include "ptask.h"

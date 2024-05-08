@@ -73,6 +73,14 @@ pub unsafe extern "C" fn crc32_init() {
     }
 }
 
+/// Initialize CRC algorithms
+#[no_mangle]
+pub unsafe extern "C" fn crc_init() {
+    crc12_init();
+    crc16_init();
+    crc32_init();
+}
+
 /// Compute a CRC-12 hash on a 32-bit integer
 #[no_mangle]
 pub unsafe extern "C" fn crc12_hash_u32(mut val: m_uint32_t) -> m_uint32_t {

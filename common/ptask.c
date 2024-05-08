@@ -23,9 +23,6 @@
 #include "ptask.h"
 
 static pthread_t ptask_thread;
-static pthread_mutex_t ptask_mutex = PTHREAD_MUTEX_INITIALIZER;
-static ptask_t *ptask_list = NULL;
-static ptask_id_t ptask_current_id = 0;
 
 #define PTASK_LOCK() pthread_mutex_lock(&ptask_mutex)
 #define PTASK_UNLOCK() pthread_mutex_unlock(&ptask_mutex)
@@ -63,32 +60,6 @@ static void *ptask_run(void *arg)
    }
 
    return NULL;
-}
-
-/* Add a new task */
-ptask_id_t ptask_add(ptask_callback cbk,void *object,void *arg)
-{
-   ptask_t *task;
-   ptask_id_t id;
-
-   if (!(task = malloc(sizeof(*task)))) {
-      fprintf(stderr,"ptask_add: unable to add new task.\n");
-      return(-1);
-   }
-
-   memset(task,0,sizeof(*task));
-   task->cbk = cbk;
-   task->object = object;
-   task->arg = arg;
-
-   PTASK_LOCK();
-   id = ++ptask_current_id;
-   assert(id != 0);
-   task->id = id;
-   task->next = ptask_list;
-   ptask_list = task;
-   PTASK_UNLOCK();
-   return(id);
 }
 
 /* Remove a task */

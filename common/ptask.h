@@ -15,23 +15,6 @@
 #include <sys/un.h>
 #include "utils.h"
 
-/* ptask identifier */
-typedef m_int64_t ptask_id_t;
-
-/* periodic task callback prototype */
-typedef int (*ptask_callback)(void *object,void *arg);
-
-/* periodic task definition */
-typedef struct ptask ptask_t;
-struct ptask {
-   ptask_id_t id;
-   ptask_t *next;
-   ptask_callback cbk;
-   void *object,*arg;
-};
-
-extern u_int ptask_sleep_time;
-
 /* Add a new task */
 ptask_id_t ptask_add(ptask_callback cbk,void *object,void *arg);
 

@@ -13,15 +13,6 @@
 #include <sys/un.h>
 #include "utils.h"
 
-/* periodic task definition */
-typedef struct ptask ptask_t;
-struct ptask {
-   ptask_id_t id;
-   ptask_t *next;
-   ptask_callback cbk;
-   void *object,*arg;
-};
-
 extern u_int ptask_sleep_time;
 
 /* Add a new task */

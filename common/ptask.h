@@ -13,9 +13,6 @@
 #include <sys/un.h>
 #include "utils.h"
 
-/* ptask identifier */
-typedef m_int64_t ptask_id_t;
-
 /* periodic task callback prototype */
 typedef int (*ptask_callback)(void *object,void *arg);
 

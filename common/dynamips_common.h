@@ -127,8 +127,6 @@ typedef signed short m_int16_t;
 typedef unsigned int m_uint32_t;
 typedef signed int m_int32_t;
 
-typedef signed long long m_int64_t;
-
 typedef unsigned long m_iptr_t;
 
 /* Max and min macro */

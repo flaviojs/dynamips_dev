@@ -7,6 +7,7 @@ pub const FALSE: c_int = 0;
 pub const TRUE: c_int = 1;
 
 // Common types
+pub type m_int64_t = c_longlong;
 pub type m_uint64_t = c_ulonglong;
 
 pub type m_tmcnt_t = m_uint64_t;
@@ -17,6 +18,7 @@ mod test {
 
     #[test]
     fn test_common_type() {
+        assert_eq!(size_of::<m_int64_t>(), 64 / 8);
         assert_eq!(size_of::<m_uint64_t>(), 64 / 8);
     }
 }

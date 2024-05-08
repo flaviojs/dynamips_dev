@@ -7,7 +7,7 @@
 
 #include "utils.h"
 #include "net.h"
-#include "crc.h"
+#include "rust_dynamips_c.h"
 
 /* 
  * IP mask table, which allows to find quickly a network mask 

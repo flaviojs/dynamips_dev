@@ -25,7 +25,6 @@
 #include "utils.h"
 #include "net.h"
 #include "frame_relay.h"
-#include "crc.h"
 #include "net_io.h"
 #include "rust_dynamips_c.h"
 #include "hypervisor.h"

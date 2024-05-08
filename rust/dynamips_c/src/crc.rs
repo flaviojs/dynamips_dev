@@ -13,9 +13,7 @@ static mut crc16_array: [u16; 256] = [0; 256];
 static mut crc32_array: [u32; 256] = [0; 256];
 
 /// Initialize CRC-12 algorithm
-// TODO private
-#[no_mangle]
-pub unsafe extern "C" fn crc12_init() {
+unsafe fn crc12_init() {
     for (i, crc12) in crc12_array.iter_mut().enumerate() {
         let mut crc: u16 = 0;
         let mut c: u16 = i as u16;
@@ -35,9 +33,7 @@ pub unsafe extern "C" fn crc12_init() {
 }
 
 /// Initialize CRC-16 algorithm
-// TODO private
-#[no_mangle]
-pub unsafe extern "C" fn crc16_init() {
+unsafe fn crc16_init() {
     for (i, crc16) in crc16_array.iter_mut().enumerate() {
         let mut crc: u16 = 0;
         let mut c: u16 = i as u16;
@@ -57,9 +53,7 @@ pub unsafe extern "C" fn crc16_init() {
 }
 
 /// Initialize CRC-32 algorithm
-// TODO private
-#[no_mangle]
-pub unsafe extern "C" fn crc32_init() {
+unsafe fn crc32_init() {
     for (i, crc32) in crc32_array.iter_mut().enumerate() {
         let mut c: u32 = i as u32;
         for _ in 0..8 {

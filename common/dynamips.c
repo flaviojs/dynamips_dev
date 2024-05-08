@@ -49,7 +49,6 @@
 #include "net_io.h"
 #include "net_io_bridge.h"
 #include "net_io_filter.h"
-#include "crc.h"
 #include "atm.h"
 #include "atm_bridge.h"
 #include "frame_relay.h"

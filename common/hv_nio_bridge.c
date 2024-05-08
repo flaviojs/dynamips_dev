@@ -24,7 +24,6 @@
 
 #include "utils.h"
 #include "net.h"
-#include "crc.h"
 #include "net_io.h"
 #include "net_io_bridge.h"
 #include "rust_dynamips_c.h"

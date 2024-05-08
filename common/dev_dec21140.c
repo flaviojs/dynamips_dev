@@ -29,7 +29,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "crc.h"
 #include "utils.h"
 #include "cpu.h"
 #include "vm.h"

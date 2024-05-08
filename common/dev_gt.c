@@ -27,7 +27,6 @@
 #include "memory.h"
 #include "device.h"
 #include "net_io.h"
-#include "ptask.h"
 #include "dev_gt.h"
 
 /* Debugging flags */

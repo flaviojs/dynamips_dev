@@ -19,7 +19,6 @@
 #include "utils.h"
 #include "net.h"
 #include "net_io.h"
-#include "ptask.h"
 #include "dev_mueslix.h"
 #include "dev_c3600.h"
 #include "dev_c3600_bay.h"

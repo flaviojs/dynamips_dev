@@ -19,7 +19,6 @@
 #include "utils.h"
 #include "net.h"
 #include "net_io.h"
-#include "ptask.h"
 #include "vm.h"
 #include "dev_i8255x.h"
 #include "dev_c2600.h"

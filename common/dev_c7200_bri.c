@@ -31,7 +31,6 @@
 #include "device.h"
 #include "net.h"
 #include "net_io.h"
-#include "ptask.h"
 #include "dev_c7200.h"
 
 /* Debugging flags */

@@ -38,7 +38,6 @@
 
 #include "net_io.h"
 #include "net_io_filter.h"
-#include "ptask.h"
 
 /* Free a NetIO descriptor */
 static int netio_free(void *data,void *arg);

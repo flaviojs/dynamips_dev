@@ -38,7 +38,6 @@
 #include "memory.h"
 #include "device.h"
 #include "net_io.h"
-#include "ptask.h"
 #include "dev_dec21140.h"
 
 /* Debugging flags */

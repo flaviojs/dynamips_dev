@@ -19,7 +19,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "ptask.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

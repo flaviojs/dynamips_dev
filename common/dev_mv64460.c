@@ -20,7 +20,6 @@
 #include "memory.h"
 #include "device.h"
 #include "net_io.h"
-#include "ptask.h"
 #include "dev_vtty.h"
 #include "dev_mv64460.h"
 

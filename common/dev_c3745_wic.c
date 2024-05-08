@@ -18,7 +18,6 @@
 
 #include "utils.h"
 #include "net_io.h"
-#include "ptask.h"
 #include "vm.h"
 #include "dev_gt.h"
 #include "dev_c3745.h"

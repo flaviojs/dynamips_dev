@@ -18,7 +18,6 @@
 
 #include "utils.h"
 #include "net_io.h"
-#include "ptask.h"
 #include "dev_mueslix.h"
 #include "dev_c2691.h"
 

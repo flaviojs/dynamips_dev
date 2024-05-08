@@ -9,7 +9,6 @@
 
 #include "utils.h"
 #include "net.h"
-#include "crc.h"
 
 /* 
  * IP mask table, which allows to find quickly a network mask 

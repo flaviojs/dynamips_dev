@@ -9,7 +9,7 @@
 #define __PPC32_JIT_H__
 
 #include "utils.h"
-#include "sbox.h"
+#include "rust_dynamips_c.h"
 
 /* Size of executable page area (in Mb) */
 #ifndef __CYGWIN__

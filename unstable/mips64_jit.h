@@ -9,7 +9,7 @@
 #define __MIPS64_JIT_H__
 
 #include "utils.h"
-#include "sbox.h"
+#include "rust_dynamips_c.h"
 #include "tcb.h"
 
 /* Size of hash for virtual address lookup */

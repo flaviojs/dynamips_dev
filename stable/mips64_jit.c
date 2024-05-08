@@ -15,7 +15,6 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#include "sbox.h"
 #include "cpu.h"
 #include "device.h"
 #include "mips64.h"

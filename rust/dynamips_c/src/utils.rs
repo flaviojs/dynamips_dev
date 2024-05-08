@@ -12,6 +12,15 @@ pub unsafe extern "C" fn m_gettime() -> m_tmcnt_t {
     (tvp.tv_sec as m_tmcnt_t) * 1000 + (tvp.tv_usec as m_tmcnt_t) / 1000
 }
 
+/// Get current time in number of usec since epoch
+#[no_mangle]
+pub unsafe extern "C" fn m_gettime_usec() -> m_tmcnt_t {
+    let mut tvp: libc::timeval = zeroed::<_>();
+
+    libc::gettimeofday(addr_of_mut!(tvp), null_mut());
+    (tvp.tv_sec as m_tmcnt_t) * 1000000 + (tvp.tv_usec as m_tmcnt_t)
+}
+
 /// Get current time in number of ms (localtime)
 #[no_mangle]
 pub unsafe extern "C" fn m_gettime_adj() -> m_tmcnt_t {

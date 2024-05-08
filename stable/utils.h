@@ -213,15 +213,6 @@ static forced_inline m_uint64_t swap64(m_uint64_t value)
    return(result);
 }
 
-/* Get current time in number of usec since epoch */
-static inline m_tmcnt_t m_gettime_usec(void)
-{
-   struct timeval tvp;
-
-   gettimeofday(&tvp,NULL);
-   return(((m_tmcnt_t)tvp.tv_sec * 1000000) + (m_tmcnt_t)tvp.tv_usec);
-}
-
 /* Get a byte-swapped 16-bit value on a non-aligned area */
 static inline m_uint16_t m_ntoh16(m_uint8_t *ptr)
 {

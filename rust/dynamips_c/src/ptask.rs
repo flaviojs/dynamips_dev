@@ -2,6 +2,7 @@
 
 use crate::dynamips_common::*;
 use crate::prelude::*;
+use crate::utils::*;
 
 pub type ptask_t = ptask;
 
@@ -22,6 +23,7 @@ pub struct ptask {
     pub arg: *mut c_void,
 }
 
+static mut ptask_thread: libc::pthread_t = 0;
 #[no_mangle]
 pub static mut ptask_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER; // TODO private
 #[no_mangle]
@@ -36,6 +38,41 @@ unsafe fn PTASK_LOCK() {
 }
 unsafe fn PTASK_UNLOCK() {
     libc::pthread_mutex_unlock(addr_of_mut!(ptask_mutex));
+}
+
+/// Periodic task thread
+extern "C" fn ptask_run(_arg: *mut c_void) -> *mut c_void {
+    unsafe {
+        let mut umutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
+        let mut ucond: libc::pthread_cond_t = libc::PTHREAD_COND_INITIALIZER;
+
+        loop {
+            PTASK_LOCK();
+            let mut task: *mut ptask_t = ptask_list;
+            while !task.is_null() {
+                (*task).cbk.unwrap()((*task).object, (*task).arg);
+                task = (*task).next;
+            }
+            PTASK_UNLOCK();
+
+            // For testing!
+            {
+                let mut t_spc: libc::timespec = zeroed::<_>();
+                let expire: m_tmcnt_t = m_gettime_usec() + (ptask_sleep_time * 1000) as m_tmcnt_t;
+
+                libc::pthread_mutex_lock(addr_of_mut!(umutex));
+                t_spc.tv_sec = (expire / 1000000) as libc::time_t;
+                t_spc.tv_nsec = ((expire % 1000000) * 1000) as i64;
+                libc::pthread_cond_timedwait(addr_of_mut!(ucond), addr_of_mut!(umutex), addr_of_mut!(t_spc));
+                libc::pthread_mutex_unlock(addr_of_mut!(umutex));
+            }
+
+            // Old method...
+            if false {
+                libc::usleep(ptask_sleep_time * 1000);
+            }
+        }
+    }
 }
 
 /// Add a new task
@@ -84,6 +121,21 @@ pub unsafe extern "C" fn ptask_remove(id: ptask_id_t) -> c_int {
 
     PTASK_UNLOCK();
     res
+}
+
+/// Initialize ptask module
+#[no_mangle]
+pub unsafe extern "C" fn ptask_init(sleep_time: c_uint) -> c_int {
+    if sleep_time != 0 {
+        ptask_sleep_time = sleep_time;
+    }
+
+    if libc::pthread_create(addr_of_mut!(ptask_thread), null_mut(), ptask_run, null_mut()) != 0 {
+        libc::fprintf(c_stderr(), cstr!("ptask_init: unable to create thread.\n"));
+        return -1;
+    }
+
+    0
 }
 
 #[no_mangle]

@@ -326,24 +326,3 @@ static void timer_terminate(void)
    hash_table_delete(timer_id_hash);
    timer_id_hash = NULL;
 }
-
-/* Initialize timer sub-system */
-int timer_init(void)
-{
-   /* Initialize hash table which maps ID to timer entries */
-   assert(!timer_id_hash);
-   if (!(timer_id_hash = hash_u64_create(TIMER_HASH_SIZE))) {
-      fprintf(stderr,"timer_init: unable to create hash table.");
-      return(-1);
-   }
-
-   /* Initialize default queues. If this fails, try to continue. */
-   if (timer_pool_add_queues(TIMERQ_NUMBER) == -1) {
-      fprintf(stderr,
-              "timer_init: unable to initialize at least one timer queue.");
-   }
-
-   atexit(timer_terminate);
-
-   return(0);
-}

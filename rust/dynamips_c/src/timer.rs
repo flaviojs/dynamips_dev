@@ -567,5 +567,37 @@ pub unsafe extern "C" fn timer_pool_add_queues(nr_queues: c_int) -> c_int {
     0
 }
 
+/// Terminate timer sub-system
+extern "C" fn timer_terminate() {
+    unsafe {
+        timer_flush_queues();
+
+        assert!(!timer_id_hash.is_null());
+        hash_table_delete(timer_id_hash);
+        timer_id_hash = null_mut();
+    }
+}
+
+/// Initialize timer sub-system
+#[no_mangle]
+pub unsafe extern "C" fn timer_init() -> c_int {
+    // Initialize hash table which maps ID to timer entries
+    assert!(timer_id_hash.is_null());
+    timer_id_hash = hash_u64_create(TIMER_HASH_SIZE);
+    if timer_id_hash.is_null() {
+        libc::fprintf(c_stderr(), cstr!("timer_init: unable to create hash table."));
+        return -1;
+    }
+
+    // Initialize default queues. If this fails, try to continue.
+    if timer_pool_add_queues(TIMERQ_NUMBER) == -1 {
+        libc::fprintf(c_stderr(), cstr!("timer_init: unable to initialize at least one timer queue."));
+    }
+
+    libc::atexit(timer_terminate);
+
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: timer_id, _: *mut timer_entry_t, _: *mut timer_queue_t, _: timer_proc) {}

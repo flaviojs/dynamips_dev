@@ -24,7 +24,7 @@
 #include "device.h"
 #include "net.h"
 #include "net_io.h"
-#include "ptask.h"
+#include "rust_dynamips_c.h"
 #include "dev_c7200.h"
 #include "dev_plx.h"
 

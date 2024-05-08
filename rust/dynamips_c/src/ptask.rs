@@ -24,10 +24,8 @@ pub struct ptask {
 }
 
 static mut ptask_thread: libc::pthread_t = 0;
-#[no_mangle]
-pub static mut ptask_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER; // TODO private
-#[no_mangle]
-pub static mut ptask_list: *mut ptask_t = null_mut(); // TODO private
+static mut ptask_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
+static mut ptask_list: *mut ptask_t = null_mut();
 static mut ptask_current_id: ptask_id_t = 0;
 
 #[no_mangle]
@@ -137,6 +135,3 @@ pub unsafe extern "C" fn ptask_init(sleep_time: c_uint) -> c_int {
 
     0
 }
-
-#[no_mangle]
-pub extern "C" fn _export(_: ptask_id_t, _: ptask_callback, _: *mut ptask_t) {}

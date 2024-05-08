@@ -17,7 +17,7 @@
 #include "utils.h"
 #include "net.h"
 #include "net_io.h"
-#include "ptask.h"
+#include "rust_dynamips_c.h"
 #include "vm.h"
 #include "dev_mpc860.h"
 #include "dev_c1700.h"

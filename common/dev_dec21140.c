@@ -38,7 +38,7 @@
 #include "device.h"
 #include "net.h"
 #include "net_io.h"
-#include "ptask.h"
+#include "rust_dynamips_c.h"
 #include "dev_dec21140.h"
 
 /* Debugging flags */

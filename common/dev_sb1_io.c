@@ -17,7 +17,7 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "ptask.h"
+#include "rust_dynamips_c.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

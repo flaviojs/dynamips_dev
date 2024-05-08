@@ -22,7 +22,7 @@
 #include "ppc32_jit.h"
 #include "insn_lookup.h"
 #include "memory.h"
-#include "ptask.h"
+#include "rust_dynamips_c.h"
 
 #include PPC32_ARCH_INC_FILE
 

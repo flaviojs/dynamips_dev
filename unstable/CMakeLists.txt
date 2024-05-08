@@ -46,7 +46,6 @@ set ( _files
    "${COMMON}/utils.c"
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"
-   "${COMMON}/ptask.c"
    "${COMMON}/crc.c"
    "${COMMON}/base64.c"
    "${COMMON}/net.c"

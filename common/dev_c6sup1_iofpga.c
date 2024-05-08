@@ -20,7 +20,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 
-#include "ptask.h"
+#include "rust_dynamips_c.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
@@ -51,13 +51,13 @@
 /* Pack the NVRAM */
 #define NVRAM_PACKED   0x04
 
-/* Temperature: 22°C as default value */
+/* Temperature: 22Â°C as default value */
 #define C6SUP1_DEFAULT_TEMP  22
 #define DS1620_CHIP(d,id) (&(d)->router->ds1620_sensors[(id)])
 
 /* 2 temperature sensors in a MSFC1: chassis inlet and oulet */
 #define C6SUP1_TEMP_SENSORS  2
-#define C6SUP1_DEFAULT_TEMP  22    /* default temperature: 22°C */
+#define C6SUP1_DEFAULT_TEMP  22    /* default temperature: 22Â°C */
 
 /* IO FPGA structure */
 struct iofpga_data {

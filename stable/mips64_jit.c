@@ -24,7 +24,7 @@
 #include "mips64_jit.h"
 #include "insn_lookup.h"
 #include "memory.h"
-#include "ptask.h"
+#include "rust_dynamips_c.h"
 
 #include MIPS64_ARCH_INC_FILE
 

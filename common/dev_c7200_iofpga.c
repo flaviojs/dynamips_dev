@@ -19,7 +19,7 @@
 #include <fcntl.h>
 #include <pthread.h>
 
-#include "ptask.h"
+#include "rust_dynamips_c.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
@@ -67,7 +67,7 @@
 /* Pack the NVRAM */
 #define NVRAM_PACKED   0x04
 
-/* Temperature: 22°C as default value */
+/* Temperature: 22Â°C as default value */
 #define C7200_DEFAULT_TEMP  22
 #define DS1620_CHIP(d,id) (&(d)->router->ds1620_sensors[(id)])
 

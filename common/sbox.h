@@ -10,24 +10,4 @@
 
 #include "dynamips_common.h"
 
-static forced_inline m_uint32_t sbox_u32(m_uint32_t val)
-{
-   m_uint32_t hash = 0;
-
-   hash ^= sbox_array[(m_uint8_t)val];
-   hash *= 3;
-   val >>= 8;
-
-   hash ^= sbox_array[(m_uint8_t)val];
-   hash *= 3;
-   val >>= 8;
-
-   hash ^= sbox_array[(m_uint8_t)val];
-   hash *= 3;
-   val >>= 8;
-
-   hash ^= sbox_array[(m_uint8_t)val];
-   return(hash);
-}
-
 #endif

@@ -85,3 +85,23 @@ pub unsafe extern "C" fn sbox_compute(mut data: *mut m_uint8_t, mut len: c_int) 
 
     hash
 }
+
+#[no_mangle]
+pub unsafe extern "C" fn sbox_u32(mut val: m_uint32_t) -> m_uint32_t {
+    let mut hash: u32 = 0;
+
+    hash ^= sbox_array[val as u8 as usize];
+    hash *= 3;
+    val >>= 8;
+
+    hash ^= sbox_array[val as u8 as usize];
+    hash *= 3;
+    val >>= 8;
+
+    hash ^= sbox_array[val as u8 as usize];
+    hash *= 3;
+    val >>= 8;
+
+    hash ^= sbox_array[val as u8 as usize];
+    hash
+}

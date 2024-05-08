@@ -27,8 +27,6 @@ static pthread_mutex_t ptask_mutex = PTHREAD_MUTEX_INITIALIZER;
 static ptask_t *ptask_list = NULL;
 static ptask_id_t ptask_current_id = 0;
 
-u_int ptask_sleep_time = 10;
-
 #define PTASK_LOCK() pthread_mutex_lock(&ptask_mutex)
 #define PTASK_UNLOCK() pthread_mutex_unlock(&ptask_mutex)
 

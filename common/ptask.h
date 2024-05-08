@@ -13,8 +13,6 @@
 #include <sys/un.h>
 #include "utils.h"
 
-extern u_int ptask_sleep_time;
-
 /* Add a new task */
 ptask_id_t ptask_add(ptask_callback cbk,void *object,void *arg);
 

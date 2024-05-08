@@ -23,4 +23,7 @@ pub struct ptask {
 }
 
 #[no_mangle]
+pub static mut ptask_sleep_time: c_uint = 10;
+
+#[no_mangle]
 pub extern "C" fn _export(_: ptask_id_t, _: ptask_callback, _: *mut ptask_t) {}

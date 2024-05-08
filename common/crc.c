@@ -12,31 +12,7 @@
 #define CRC32_POLY  0xedb88320L
 
 /* CRC tables */
-m_uint16_t crc16_array[256];
 m_uint32_t crc32_array[256];
-
-/* Initialize CRC-16 algorithm */
-static void crc16_init(void)
-{
-   m_uint16_t crc,c;
-   int i,j;
-
-   for(i=0;i<256;i++) {
-      crc = 0;
-      c = (m_uint16_t)i;
-
-      for(j=0;j<8;j++) {
-         if ((crc ^ c) & 0x0001)
-            crc = (crc >> 1) ^ CRC16_POLY;
-         else
-            crc =  crc >> 1;
-         
-         c = c >> 1;
-      }
-
-      crc16_array[i] = crc;
-   }
-}
 
 /* Initialize CRC-32 algorithm */
 static void crc32_init(void)

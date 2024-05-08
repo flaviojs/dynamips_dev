@@ -13,9 +13,6 @@
 #include <sys/un.h>
 #include "utils.h"
 
-/* periodic task callback prototype */
-typedef int (*ptask_callback)(void *object,void *arg);
-
 /* periodic task definition */
 typedef struct ptask ptask_t;
 struct ptask {

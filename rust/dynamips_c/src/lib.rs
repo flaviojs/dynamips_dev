@@ -9,6 +9,7 @@
 #![allow(non_upper_case_globals)]
 
 pub mod _ext;
+pub mod base64;
 pub mod crc;
 pub mod dynamips_common;
 pub mod hash;

@@ -62,27 +62,6 @@ static void *ptask_run(void *arg)
    return NULL;
 }
 
-/* Remove a task */
-int ptask_remove(ptask_id_t id)
-{   
-   ptask_t **task,*p;
-   int res = -1;
-
-   PTASK_LOCK();
-
-   for(task=&ptask_list;*task;task=&(*task)->next)
-      if ((*task)->id == id) {
-         p = *task;
-         *task = (*task)->next;
-         free(p);
-         res = 0;
-         break;
-      }
-   
-   PTASK_UNLOCK();
-   return(res);
-}
-
 /* Initialize ptask module */
 int ptask_init(u_int sleep_time)
 {

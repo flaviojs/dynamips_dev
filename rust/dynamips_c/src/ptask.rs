@@ -63,5 +63,28 @@ pub unsafe extern "C" fn ptask_add(cbk: ptask_callback, object: *mut c_void, arg
     id
 }
 
+/// Remove a task
+#[no_mangle]
+pub unsafe extern "C" fn ptask_remove(id: ptask_id_t) -> c_int {
+    let mut res: c_int = -1;
+
+    PTASK_LOCK();
+
+    let mut task: *mut *mut ptask_t = addr_of_mut!(ptask_list);
+    while !(*task).is_null() {
+        if (**task).id == id {
+            let p: *mut ptask_t = *task;
+            *task = (**task).next;
+            libc::free(p.cast::<_>());
+            res = 0;
+            break;
+        }
+        task = addr_of_mut!((**task).next);
+    }
+
+    PTASK_UNLOCK();
+    res
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: ptask_id_t, _: ptask_callback, _: *mut ptask_t) {}

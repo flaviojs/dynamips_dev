@@ -74,7 +74,6 @@ endif()
 
 # dynamips_*_stable
 set ( _files
-   "${COMMON}/sbox.c"
    "${COMMON}/utils.c"
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"

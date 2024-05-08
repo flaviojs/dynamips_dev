@@ -11,7 +11,6 @@
 #include "rust_dynamips_c.h"
 
 #include "utils.h"
-#include "sbox.h"
 #include "tcb.h"
 
 /* Size of hash for virtual address lookup */

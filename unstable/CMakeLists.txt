@@ -42,7 +42,6 @@ endif ( NOT BUILD_DYNAMIPS_UNSTABLE )
 add_definitions( "-DUSE_UNSTABLE" )
 
 set ( _files
-   "${COMMON}/sbox.c"
    "${COMMON}/utils.c"
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"

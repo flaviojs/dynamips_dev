@@ -11,7 +11,6 @@
 #include "rust_dynamips_c.h"
 
 #include "utils.h"
-#include "sbox.h"
 
 /* Size of executable page area (in Mb) */
 #ifndef __CYGWIN__

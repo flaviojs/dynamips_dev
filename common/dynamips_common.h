@@ -118,7 +118,6 @@
 #endif
 
 /* Common types */
-typedef unsigned char m_uint8_t;
 typedef signed char m_int8_t;
 
 typedef unsigned short m_uint16_t;

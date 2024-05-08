@@ -1,6 +1,7 @@
 //! S-Box: http://bretm.home.comcast.net/hash/10.html
 
 use crate::dynamips_common::*;
+use crate::prelude::*;
 
 #[rustfmt::skip]
 #[no_mangle]
@@ -70,3 +71,17 @@ pub static sbox_array: [m_uint32_t; 256] = [
     0xA0B38F96, 0x51D39199, 0x37A6AD75, 0xDF84EE41,
     0x3C034CBA, 0xACDA62FC, 0x11923B8B, 0x45EF170A,
 ];
+
+#[no_mangle]
+pub unsafe extern "C" fn sbox_compute(mut data: *mut m_uint8_t, mut len: c_int) -> m_uint32_t {
+    let mut hash: u32 = 0;
+
+    while len > 0 {
+        hash ^= sbox_array[*data as usize];
+        hash *= 3;
+        data = data.add(1);
+        len -= 1;
+    }
+
+    hash
+}

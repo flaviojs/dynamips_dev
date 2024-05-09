@@ -49,5 +49,19 @@ pub struct parser_context {
     pub consumed_len: size_t,
 }
 
+/// Get a description given an error code
+#[no_mangle]
+pub unsafe extern "C" fn parser_strerror(ctx: *mut parser_context_t) -> *mut c_char {
+    libc::printf(cstr!("error = %d\n"), (*ctx).error);
+
+    match (*ctx).error {
+        0 => cstr!("no error"),
+        PARSER_ERROR_NOMEM => cstr!("insufficient memory"),
+        PARSER_ERROR_UNEXP_QUOTE => cstr!("unexpected quote"),
+        PARSER_ERROR_UNEXP_EOL => cstr!("unexpected end of line"),
+        _ => cstr!("unknown error"),
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut parser_token_t, _: *mut parser_context_t) {}

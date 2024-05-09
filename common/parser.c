@@ -35,25 +35,6 @@ enum {
    PARSER_CHAR_OTHER,
 };
 
-/* Get a description given an error code */
-char *parser_strerror(parser_context_t *ctx)
-{
-   printf("error = %d\n",ctx->error);
-
-   switch(ctx->error) {
-      case 0:
-         return "no error";
-      case PARSER_ERROR_NOMEM:
-         return "insufficient memory";
-      case PARSER_ERROR_UNEXP_QUOTE:
-         return "unexpected quote";
-      case PARSER_ERROR_UNEXP_EOL:
-         return "unexpected end of line";
-      default:
-         return "unknown error";
-   }
-}
-
 /* Dump a token list */
 void parser_dump_tokens(parser_context_t *ctx)
 {

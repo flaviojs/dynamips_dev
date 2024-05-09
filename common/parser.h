@@ -8,13 +8,6 @@
 
 #include <sys/types.h>
 
-/* Token */
-typedef struct parser_token parser_token_t;
-struct parser_token {
-   char *value;
-   struct parser_token *next;
-};
-
 /* Parser context */
 typedef struct parser_context parser_context_t;
 struct parser_context {

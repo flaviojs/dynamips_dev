@@ -30,7 +30,6 @@
 #include "dev_c7200.h"
 #include "dev_vtty.h"
 #include "utils.h"
-#include "base64.h"
 #include "net.h"
 #include "atm.h"
 #include "frame_relay.h"

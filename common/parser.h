@@ -8,24 +8,6 @@
 
 #include <sys/types.h>
 
-/* Parser context */
-typedef struct parser_context parser_context_t;
-struct parser_context {
-   /* Token list */
-   parser_token_t *tok_head,*tok_last;
-   int tok_count;
-
-   /* Temporary token */
-   char *tmp_tok;
-   size_t tmp_tot_len,tmp_cur_len;
-
-   /* Parser state and error */
-   int state,error;
-
-   /* Number of consumed chars */
-   size_t consumed_len;
-};
-
 /* Get a description given an error code */
 char *parser_strerror(parser_context_t *ctx);
 

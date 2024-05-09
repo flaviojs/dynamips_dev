@@ -3,6 +3,7 @@
 use crate::prelude::*;
 
 pub type parser_token_t = parser_token;
+pub type parser_context_t = parser_context;
 
 // Parser Errors // TODO enmm
 pub const PARSER_ERROR_NOMEM: c_int = 1;
@@ -26,5 +27,27 @@ pub struct parser_token {
     pub next: *mut parser_token_t,
 }
 
+/// Parser context
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct parser_context {
+    /// Token list
+    pub tok_head: *mut parser_token_t,
+    pub tok_last: *mut parser_token_t,
+    pub tok_count: c_int,
+
+    /// Temporary token
+    pub tmp_tok: *mut c_char,
+    pub tmp_tot_len: size_t,
+    pub tmp_cur_len: size_t,
+
+    /// Parser state and error
+    pub state: c_int,
+    pub error: c_int,
+
+    /// Number of consumed chars
+    pub consumed_len: size_t,
+}
+
 #[no_mangle]
-pub extern "C" fn _export(_: *mut parser_token_t) {}
+pub extern "C" fn _export(_: *mut parser_token_t, _: *mut parser_context_t) {}

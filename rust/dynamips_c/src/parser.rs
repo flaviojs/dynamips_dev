@@ -113,5 +113,28 @@ pub unsafe extern "C" fn parser_context_init(ctx: *mut parser_context_t) {
     (*ctx).consumed_len = 0;
 }
 
+/// Free a token list
+unsafe fn parser_free_tokens(tok_list: *mut parser_token_t) {
+    let mut t: *mut parser_token_t = tok_list;
+    while !t.is_null() {
+        let next: *mut parser_token_t = (*t).next;
+        libc::free((*t).value.cast::<_>());
+        libc::free(t.cast::<_>());
+        t = next;
+    }
+}
+
+/// Free memory used by a parser context
+#[no_mangle]
+pub unsafe extern "C" fn parser_context_free(ctx: *mut parser_context_t) {
+    parser_free_tokens((*ctx).tok_head);
+
+    if !(*ctx).tmp_tok.is_null() {
+        libc::free((*ctx).tmp_tok.cast::<_>());
+    }
+
+    parser_context_init(ctx);
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut parser_token_t, _: *mut parser_context_t) {}

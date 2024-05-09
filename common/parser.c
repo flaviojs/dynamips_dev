@@ -87,29 +87,6 @@ static int parser_move_tmp_token(parser_context_t *ctx)
    return(0);
 }
 
-/* Free a token list */
-void parser_free_tokens(parser_token_t *tok_list)
-{
-   parser_token_t *t,*next;
-
-   for(t=tok_list;t;t=next) {
-      next = t->next;
-      free(t->value);
-      free(t);
-   }
-}
-
-/* Free memory used by a parser context */
-void parser_context_free(parser_context_t *ctx)
-{
-   parser_free_tokens(ctx->tok_head);
-
-   if (ctx->tmp_tok != NULL)
-      free(ctx->tmp_tok);
-
-   parser_context_init(ctx);
-}
-
 /* Determine the type of the input character */
 static int parser_get_char_type(u_char c)
 {

@@ -63,5 +63,15 @@ pub unsafe extern "C" fn parser_strerror(ctx: *mut parser_context_t) -> *mut c_c
     }
 }
 
+/// Dump a token list
+#[no_mangle]
+pub unsafe extern "C" fn parser_dump_tokens(ctx: *mut parser_context_t) {
+    let mut tok: *mut parser_token_t = (*ctx).tok_head;
+    while !tok.is_null() {
+        libc::printf(cstr!("\"%s\" "), (*tok).value);
+        tok = (*tok).next;
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut parser_token_t, _: *mut parser_context_t) {}

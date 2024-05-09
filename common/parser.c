@@ -35,15 +35,6 @@ enum {
    PARSER_CHAR_OTHER,
 };
 
-/* Dump a token list */
-void parser_dump_tokens(parser_context_t *ctx)
-{
-   parser_token_t *tok;
-
-   for(tok=ctx->tok_head;tok;tok=tok->next)
-      printf("\"%s\" ",tok->value);
-}
-
 /* Map a token list to an array */
 char **parser_map_array(parser_context_t *ctx)
 {

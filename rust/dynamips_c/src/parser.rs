@@ -73,5 +73,28 @@ pub unsafe extern "C" fn parser_dump_tokens(ctx: *mut parser_context_t) {
     }
 }
 
+/// Map a token list to an array
+#[no_mangle]
+pub unsafe extern "C" fn parser_map_array(ctx: *mut parser_context_t) -> *mut *mut c_char {
+    if (*ctx).tok_count <= 0 {
+        return null_mut();
+    }
+
+    let map: *mut *mut c_char = libc::calloc((*ctx).tok_count as usize, size_of::<*mut c_char>()).cast::<_>();
+    if map.is_null() {
+        return null_mut();
+    }
+
+    let mut i: c_int = 0;
+    let mut tok: *mut parser_token_t = (*ctx).tok_head;
+    while i < (*ctx).tok_count && !tok.is_null() {
+        *map.offset(i as isize) = (*tok).value;
+        i += 1;
+        tok = (*tok).next;
+    }
+
+    map
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut parser_token_t, _: *mut parser_context_t) {}

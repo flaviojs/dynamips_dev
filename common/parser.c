@@ -35,25 +35,6 @@ enum {
    PARSER_CHAR_OTHER,
 };
 
-/* Map a token list to an array */
-char **parser_map_array(parser_context_t *ctx)
-{
-   parser_token_t *tok;
-   char **map;
-   int i;
-
-   if (ctx->tok_count <= 0)
-      return NULL;
-
-   if (!(map = calloc(ctx->tok_count,sizeof(char *))))
-      return NULL;
-
-   for(i=0,tok=ctx->tok_head;(i<ctx->tok_count) && tok;i++,tok=tok->next)
-      map[i] = tok->value;
-
-   return map;
-}
-
 /* Add a character to temporary token (resize if necessary) */
 static int tmp_token_add_char(parser_context_t *ctx,char c)
 {

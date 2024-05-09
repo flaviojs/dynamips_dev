@@ -171,3 +171,56 @@ fn test_HASH_TABLE_FOREACH() {
         hash_table_delete(ht);
     }
 }
+
+#[test]
+fn test_parser() {
+    use dynamips_c::_private::*;
+    use dynamips_c::parser::*;
+    unsafe {
+        // Parser tests
+        struct Test {
+            buf: *mut c_char,
+            error: c_int,
+        }
+        impl Test {
+            fn new(buf: *mut c_char, error: c_int) -> Self {
+                Self { buf, error }
+            }
+        }
+        let parser_test: [Test; 8] = [
+            Test::new(cstr!("c7200 show_hardware R1"), 0),
+            Test::new(cstr!("c7200 show_hardware \"R1\""), 0),
+            Test::new(cstr!("   c7200    show_hardware   \"R1\"    "), 0),
+            Test::new(cstr!("\"c7200\" \"show_hardware\" \"R1\""), 0),
+            Test::new(cstr!("hypervisor set_working_dir \"C:\\Program Files\\Dynamips Test\""), 0),
+            Test::new(cstr!("hypervisor # This is a comment set_working_dir \"C:\\Program Files\""), 0),
+            Test::new(cstr!("\"c7200\" \"show_hardware\" \"R1"), PARSER_ERROR_UNEXP_EOL),
+            Test::new(null_mut(), 0),
+        ];
+
+        let mut ctx: parser_context_t = zeroed::<_>();
+        let mut i = 0;
+        while !parser_test[i].buf.is_null() {
+            parser_context_init(addr_of_mut!(ctx));
+
+            let res: c_int = parser_scan_buffer(addr_of_mut!(ctx), parser_test[i].buf, libc::strlen(parser_test[i].buf) + 1);
+
+            libc::printf(cstr!("\n%d: Test string: [%s] => res=%d, state=%d\n"), i as c_int, parser_test[i].buf, res, ctx.state);
+
+            if res != 0 && ctx.error == 0 {
+                if !ctx.tok_head.is_null() {
+                    libc::printf(cstr!("Tokens: "));
+                    parser_dump_tokens(addr_of_mut!(ctx));
+                    libc::printf(cstr!("\n"));
+                }
+            }
+
+            assert_eq!(res, 1);
+            assert_eq!(ctx.state, PARSER_STATE_DONE);
+            assert_eq!(ctx.error, parser_test[i].error);
+
+            parser_context_free(addr_of_mut!(ctx));
+            i += 1;
+        }
+    }
+}

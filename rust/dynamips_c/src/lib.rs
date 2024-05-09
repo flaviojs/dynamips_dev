@@ -15,6 +15,7 @@ pub mod dynamips_common;
 pub mod hash;
 pub mod mempool;
 pub mod net;
+pub mod parser;
 /// cbindgen:ignore
 pub mod prelude;
 pub mod ptask;

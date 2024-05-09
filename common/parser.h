@@ -8,13 +8,6 @@
 
 #include <sys/types.h>
 
-/* Parser Errors */
-enum {
-   PARSER_ERROR_NOMEM = 1,
-   PARSER_ERROR_UNEXP_QUOTE,    /* Unexpected quote in a word */
-   PARSER_ERROR_UNEXP_EOL,      /* Unexpected end of line */
-};
-
 /* Parser states */
 enum {   
    PARSER_STATE_DONE,

@@ -25,7 +25,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "base64.h"
 #include "hypervisor.h"
 
 struct store_object {

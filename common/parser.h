@@ -8,15 +8,6 @@
 
 #include <sys/types.h>
 
-/* Parser states */
-enum {   
-   PARSER_STATE_DONE,
-   PARSER_STATE_SKIP,
-   PARSER_STATE_BLANK,
-   PARSER_STATE_STRING,
-   PARSER_STATE_QUOTED_STRING,
-};
-
 /* Token */
 typedef struct parser_token parser_token_t;
 struct parser_token {

@@ -87,21 +87,6 @@ static int parser_move_tmp_token(parser_context_t *ctx)
    return(0);
 }
 
-/* Initialize parser context */
-void parser_context_init(parser_context_t *ctx)
-{
-   ctx->tok_head = ctx->tok_last = NULL;
-   ctx->tok_count = 0;
-
-   ctx->tmp_tok = NULL;
-   ctx->tmp_tot_len = ctx->tmp_cur_len = 0;
-
-   ctx->state = PARSER_STATE_BLANK;
-   ctx->error = 0;
-
-   ctx->consumed_len = 0;
-}
-
 /* Free a token list */
 void parser_free_tokens(parser_token_t *tok_list)
 {

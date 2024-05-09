@@ -96,5 +96,22 @@ pub unsafe extern "C" fn parser_map_array(ctx: *mut parser_context_t) -> *mut *m
     map
 }
 
+/// Initialize parser context
+#[no_mangle]
+pub unsafe extern "C" fn parser_context_init(ctx: *mut parser_context_t) {
+    (*ctx).tok_head = null_mut();
+    (*ctx).tok_last = null_mut();
+    (*ctx).tok_count = 0;
+
+    (*ctx).tmp_tok = null_mut();
+    (*ctx).tmp_tot_len = 0;
+    (*ctx).tmp_cur_len = 0;
+
+    (*ctx).state = PARSER_STATE_BLANK;
+    (*ctx).error = 0;
+
+    (*ctx).consumed_len = 0;
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut parser_token_t, _: *mut parser_context_t) {}

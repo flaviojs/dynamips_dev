@@ -529,20 +529,6 @@ const struct cisco_eeprom *cisco_eeprom_find_c6k(char *name)
 /* Utility functions                                                      */
 /* ====================================================================== */
 
-/* Get an EEPROM region */
-int cisco_eeprom_get_region(struct cisco_eeprom *eeprom,size_t offset,
-                            m_uint8_t *data,size_t data_len)
-{
-   size_t i;
-
-   for(i=0;i<data_len;i++) {
-      if (cisco_eeprom_get_byte(eeprom,offset+i,&data[i]) == -1)
-         return(-1);
-   }
-
-   return(0);
-}
-
 /* Set an EEPROM region */
 int cisco_eeprom_set_region(struct cisco_eeprom *eeprom,size_t offset,
                             m_uint8_t *data,size_t data_len)

@@ -529,19 +529,6 @@ const struct cisco_eeprom *cisco_eeprom_find_c6k(char *name)
 /* Utility functions                                                      */
 /* ====================================================================== */
 
-/* Find an EEPROM in the specified EEPROM array */
-const struct cisco_eeprom *
-cisco_eeprom_find(const struct cisco_eeprom *eeproms,char *name)
-{
-   int i;
-
-   for(i=0;eeproms[i].name;i++)
-      if (!strcmp(eeproms[i].name,name))
-         return(&eeproms[i]);
-
-   return NULL;
-}
-
 /* Copy an EEPROM */
 int cisco_eeprom_copy(struct cisco_eeprom *dst,const struct cisco_eeprom *src)
 {

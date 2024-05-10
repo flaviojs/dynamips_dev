@@ -78,5 +78,24 @@ pub struct cisco_eeprom {
     pub len: size_t,
 }
 
+// ======================================================================
+// Utility functions
+// ======================================================================
+
+/// Find an EEPROM in the specified EEPROM array
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_find(eeproms: *const cisco_eeprom, name: *mut c_char) -> *const cisco_eeprom {
+    let mut i = 0;
+
+    while !(*eeproms.add(i)).name.is_null() {
+        if libc::strcmp((*eeproms.add(i)).name, name) == 0 {
+            return eeproms.add(i);
+        }
+        i += 1;
+    }
+
+    null_mut()
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cisco_eeprom) {}

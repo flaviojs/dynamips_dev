@@ -9,6 +9,8 @@ pub const TRUE: c_int = 1;
 // Common types
 pub type m_uint8_t = c_uchar;
 
+pub type m_uint16_t = c_ushort;
+
 pub type m_uint32_t = c_uint;
 
 pub type m_int64_t = c_longlong;
@@ -23,6 +25,7 @@ mod test {
     #[test]
     fn test_common_type() {
         assert_eq!(size_of::<m_uint8_t>(), 8 / 8);
+        assert_eq!(size_of::<m_uint16_t>(), 16 / 8);
         assert_eq!(size_of::<m_uint32_t>(), 32 / 8);
         assert_eq!(size_of::<m_int64_t>(), 64 / 8);
         assert_eq!(size_of::<m_uint64_t>(), 64 / 8);

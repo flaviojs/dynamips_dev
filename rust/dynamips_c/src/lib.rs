@@ -10,6 +10,7 @@
 
 pub mod _ext;
 pub mod base64;
+pub mod cisco_eeprom;
 pub mod crc;
 pub mod dynamips_common;
 pub mod hash;

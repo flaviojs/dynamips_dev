@@ -120,7 +120,6 @@
 /* Common types */
 typedef signed char m_int8_t;
 
-typedef unsigned short m_uint16_t;
 typedef signed short m_int16_t;
 
 typedef signed int m_int32_t;

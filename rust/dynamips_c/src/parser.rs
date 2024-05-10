@@ -136,5 +136,202 @@ pub unsafe extern "C" fn parser_context_free(ctx: *mut parser_context_t) {
     parser_context_init(ctx);
 }
 
+const TOKEN_MAX_SIZE: size_t = 512;
+
+// Character types // TODO enum
+const PARSER_CHAR_BLANK: c_int = 0;
+const PARSER_CHAR_NEWLINE: c_int = 1;
+const PARSER_CHAR_COMMENT: c_int = 2;
+const PARSER_CHAR_QUOTE: c_int = 3;
+const PARSER_CHAR_OTHER: c_int = 4;
+
+/// Add a character to temporary token (resize if necessary)
+unsafe fn tmp_token_add_char(ctx: *mut parser_context_t, c: c_char) -> c_int {
+    if (*ctx).tmp_tok.is_null() || ((*ctx).tmp_cur_len == ((*ctx).tmp_tot_len - 1)) {
+        let new_size: size_t = (*ctx).tmp_tot_len + TOKEN_MAX_SIZE;
+        let new_str: *mut c_char = libc::realloc((*ctx).tmp_tok.cast::<_>(), new_size).cast::<_>();
+
+        if new_str.is_null() {
+            return -1;
+        }
+
+        (*ctx).tmp_tok = new_str;
+        (*ctx).tmp_tot_len = new_size;
+    }
+
+    *(*ctx).tmp_tok.add((*ctx).tmp_cur_len) = c;
+    (*ctx).tmp_cur_len += 1;
+    *(*ctx).tmp_tok.add((*ctx).tmp_cur_len) = 0;
+    0
+}
+
+/// Move current token to the active token list
+unsafe fn parser_move_tmp_token(ctx: *mut parser_context_t) -> c_int {
+    // no token ...
+    if (*ctx).tmp_tok.is_null() {
+        return 0;
+    }
+
+    let tok: *mut parser_token_t = libc::malloc(size_of::<parser_token_t>()).cast::<_>();
+    if tok.is_null() {
+        return -1;
+    }
+
+    (*tok).value = (*ctx).tmp_tok;
+    (*tok).next = null_mut();
+
+    // add it to the token list
+    if !(*ctx).tok_last.is_null() {
+        (*(*ctx).tok_last).next = tok;
+    } else {
+        (*ctx).tok_head = tok;
+    }
+
+    (*ctx).tok_last = tok;
+    (*ctx).tok_count += 1;
+
+    // start a new token
+    (*ctx).tmp_tok = null_mut();
+    (*ctx).tmp_tot_len = 0;
+    (*ctx).tmp_cur_len = 0;
+    0
+}
+
+/// Determine the type of the input character
+fn parser_get_char_type(c: c_char) -> c_int {
+    match c as u8 {
+        b'\n' | b'\r' | 0 => PARSER_CHAR_NEWLINE,
+        b'\t' | b' ' => PARSER_CHAR_BLANK, // '\r'
+        b'!' | b'#' => PARSER_CHAR_COMMENT,
+        b'"' => PARSER_CHAR_QUOTE,
+        _ => PARSER_CHAR_OTHER,
+    }
+}
+
+/// Send a buffer to the tokenizer
+#[no_mangle]
+pub unsafe extern "C" fn parser_scan_buffer(ctx: *mut parser_context_t, buf: *mut c_char, buf_size: size_t) -> c_int {
+    let mut i: size_t = 0;
+    while i < buf_size && (*ctx).state != PARSER_STATE_DONE {
+        (*ctx).consumed_len += 1;
+        let c: c_char = *buf.add(i);
+
+        // Determine character type
+        let type_: c_int = parser_get_char_type(c);
+
+        // Basic finite state machine
+        match (*ctx).state {
+            PARSER_STATE_SKIP => {
+                if type_ == PARSER_CHAR_NEWLINE {
+                    (*ctx).state = PARSER_STATE_DONE;
+                }
+
+                // Simply ignore character until we reach end of line
+            }
+
+            PARSER_STATE_BLANK => {
+                match type_ {
+                    PARSER_CHAR_BLANK => {} // Eat space
+
+                    PARSER_CHAR_COMMENT => {
+                        (*ctx).state = PARSER_STATE_SKIP;
+                    }
+
+                    PARSER_CHAR_NEWLINE => {
+                        (*ctx).state = PARSER_STATE_DONE;
+                    }
+
+                    PARSER_CHAR_QUOTE => {
+                        (*ctx).state = PARSER_STATE_QUOTED_STRING;
+                    }
+
+                    _ => {
+                        // Begin a new string
+                        if tmp_token_add_char(ctx, c) == 0 {
+                            (*ctx).state = PARSER_STATE_STRING;
+                        } else {
+                            (*ctx).state = PARSER_STATE_SKIP;
+                            (*ctx).error = PARSER_ERROR_NOMEM;
+                        }
+                    }
+                }
+            }
+
+            PARSER_STATE_STRING => {
+                match type_ {
+                    PARSER_CHAR_BLANK => {
+                        if parser_move_tmp_token(ctx) == 0 {
+                            (*ctx).state = PARSER_STATE_BLANK;
+                        } else {
+                            (*ctx).state = PARSER_STATE_SKIP;
+                            (*ctx).error = PARSER_ERROR_NOMEM;
+                        }
+                    }
+
+                    PARSER_CHAR_NEWLINE => {
+                        if parser_move_tmp_token(ctx) == -1 {
+                            (*ctx).error = PARSER_ERROR_NOMEM;
+                        }
+
+                        (*ctx).state = PARSER_STATE_DONE;
+                    }
+
+                    PARSER_CHAR_COMMENT => {
+                        if parser_move_tmp_token(ctx) == -1 {
+                            (*ctx).error = PARSER_ERROR_NOMEM;
+                        }
+
+                        (*ctx).state = PARSER_STATE_SKIP;
+                    }
+
+                    PARSER_CHAR_QUOTE => {
+                        (*ctx).error = PARSER_ERROR_UNEXP_QUOTE;
+                        (*ctx).state = PARSER_STATE_SKIP;
+                    }
+
+                    _ => {
+                        // Add the character to the buffer
+                        if tmp_token_add_char(ctx, c) == -1 {
+                            (*ctx).state = PARSER_STATE_SKIP;
+                            (*ctx).error = PARSER_ERROR_NOMEM;
+                        }
+                    }
+                }
+            }
+
+            PARSER_STATE_QUOTED_STRING => {
+                match type_ {
+                    PARSER_CHAR_NEWLINE => {
+                        // Unterminated string!
+                        (*ctx).error = PARSER_ERROR_UNEXP_EOL;
+                        (*ctx).state = PARSER_STATE_DONE;
+                    }
+
+                    PARSER_CHAR_QUOTE => {
+                        if parser_move_tmp_token(ctx) == 0 {
+                            (*ctx).state = PARSER_STATE_BLANK;
+                        } else {
+                            (*ctx).state = PARSER_STATE_SKIP;
+                            (*ctx).error = PARSER_ERROR_NOMEM;
+                        }
+                    }
+
+                    _ => {
+                        // Add the character to the buffer
+                        if tmp_token_add_char(ctx, c) == -1 {
+                            (*ctx).state = PARSER_STATE_SKIP;
+                            (*ctx).error = PARSER_ERROR_NOMEM;
+                        }
+                    }
+                }
+            }
+            _ => unreachable!(),
+        }
+        i += 1;
+    }
+
+    ((*ctx).state == PARSER_STATE_DONE).into()
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut parser_token_t, _: *mut parser_context_t) {}

@@ -97,5 +97,15 @@ pub unsafe extern "C" fn cisco_eeprom_find(eeproms: *const cisco_eeprom, name: *
     null_mut()
 }
 
+/// Free resources used by an EEPROM
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_free(eeprom: *mut cisco_eeprom) {
+    if !eeprom.is_null() && !(*eeprom).data.is_null() {
+        libc::free((*eeprom).data.cast::<_>());
+        (*eeprom).data = null_mut();
+        (*eeprom).len = 0;
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cisco_eeprom) {}

@@ -549,16 +549,6 @@ int cisco_eeprom_copy(struct cisco_eeprom *dst,const struct cisco_eeprom *src)
    return(0);
 }
 
-/* Free resources used by an EEPROM */
-void cisco_eeprom_free(struct cisco_eeprom *eeprom)
-{
-   if (eeprom && eeprom->data) {
-      free(eeprom->data);
-      eeprom->data = NULL;
-      eeprom->len  = 0;
-   }
-}
-
 /* Return TRUE if the specified EEPROM contains usable data */
 int cisco_eeprom_valid(struct cisco_eeprom *eeprom)
 {

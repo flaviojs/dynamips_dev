@@ -333,9 +333,6 @@ pub unsafe extern "C" fn parser_scan_buffer(ctx: *mut parser_context_t, buf: *mu
     ((*ctx).state == PARSER_STATE_DONE).into()
 }
 
-#[no_mangle]
-pub extern "C" fn _export(_: *mut parser_token_t, _: *mut parser_context_t) {}
-
 #[cfg(test)]
 mod test {
     use super::*;

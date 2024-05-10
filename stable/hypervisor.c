@@ -25,7 +25,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "parser.h"
 #include "net.h"
 #include "rust_dynamips_c.h"
 #include "cpu.h"

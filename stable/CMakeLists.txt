@@ -77,7 +77,6 @@ endif()
 # dynamips_*_stable
 set ( _files
    "${COMMON}/utils.c"
-   "${COMMON}/parser.c"
    "${COMMON}/plugin.c"
    "${COMMON}/net.c"
    "${COMMON}/net_io.c"

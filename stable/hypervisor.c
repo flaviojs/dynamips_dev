@@ -27,7 +27,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "parser.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

@@ -529,26 +529,6 @@ const struct cisco_eeprom *cisco_eeprom_find_c6k(char *name)
 /* Utility functions                                                      */
 /* ====================================================================== */
 
-/* Copy an EEPROM */
-int cisco_eeprom_copy(struct cisco_eeprom *dst,const struct cisco_eeprom *src)
-{
-   m_uint16_t *data;
-
-   if (!dst || !src)
-      return(-1);
-
-   cisco_eeprom_free(dst);
-
-   if (!(data = malloc(src->len << 1)))
-      return(-1);
-
-   memcpy(data,src->data,src->len << 1);
-   dst->name = src->name;
-   dst->data = data;
-   dst->len  = src->len;
-   return(0);
-}
-
 /* Return TRUE if the specified EEPROM contains usable data */
 int cisco_eeprom_valid(struct cisco_eeprom *eeprom)
 {

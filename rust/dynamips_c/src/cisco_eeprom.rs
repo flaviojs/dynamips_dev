@@ -97,6 +97,27 @@ pub unsafe extern "C" fn cisco_eeprom_find(eeproms: *const cisco_eeprom, name: *
     null_mut()
 }
 
+/// Copy an EEPROM
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_copy(dst: *mut cisco_eeprom, src: *const cisco_eeprom) -> c_int {
+    if dst.is_null() || src.is_null() {
+        return -1;
+    }
+
+    cisco_eeprom_free(dst);
+
+    let data: *mut u16 = libc::malloc((*src).len << 1).cast::<_>();
+    if data.is_null() {
+        return -1;
+    }
+
+    libc::memcpy(data.cast::<_>(), (*src).data.cast::<_>(), (*src).len << 1);
+    (*dst).name = (*src).name;
+    (*dst).data = data;
+    (*dst).len = (*src).len;
+    0
+}
+
 /// Free resources used by an EEPROM
 #[no_mangle]
 pub unsafe extern "C" fn cisco_eeprom_free(eeprom: *mut cisco_eeprom) {

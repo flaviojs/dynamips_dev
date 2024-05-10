@@ -529,12 +529,6 @@ const struct cisco_eeprom *cisco_eeprom_find_c6k(char *name)
 /* Utility functions                                                      */
 /* ====================================================================== */
 
-/* Return TRUE if the specified EEPROM contains usable data */
-int cisco_eeprom_valid(struct cisco_eeprom *eeprom)
-{
-   return((eeprom && eeprom->data) ? TRUE : FALSE);
-}
-
 /* Get a byte from an EEPROM */
 int cisco_eeprom_get_byte(struct cisco_eeprom *eeprom,
                           size_t offset,m_uint8_t *val)

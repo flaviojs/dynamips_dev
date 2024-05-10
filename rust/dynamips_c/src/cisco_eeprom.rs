@@ -128,5 +128,15 @@ pub unsafe extern "C" fn cisco_eeprom_free(eeprom: *mut cisco_eeprom) {
     }
 }
 
+/// Return TRUE if the specified EEPROM contains usable data
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_valid(eeprom: *mut cisco_eeprom) -> c_int {
+    if !eeprom.is_null() && !(*eeprom).data.is_null() {
+        TRUE
+    } else {
+        FALSE
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cisco_eeprom) {}

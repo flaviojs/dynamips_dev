@@ -199,5 +199,40 @@ pub unsafe extern "C" fn cisco_eeprom_set_region(eeprom: *mut cisco_eeprom, offs
     0
 }
 
+/// Get a field of a Cisco EEPROM v4
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_v4_get_field(eeprom: *mut cisco_eeprom, type_: *mut m_uint8_t, len: *mut m_uint8_t, offset: *mut size_t) -> c_int {
+    // Read field type
+    let off = *offset;
+    *offset += 1;
+    if cisco_eeprom_get_byte(eeprom, off, type_) == -1 {
+        return -1;
+    }
+
+    // No more field
+    if *type_ == 0xFF {
+        return 0;
+    }
+
+    // Get field length */
+    let mut tmp: u8 = (*type_ >> 6) & 0x03;
+
+    if tmp == 0x03 {
+        // Variable len
+        let off = *offset;
+        *offset += 1;
+        if cisco_eeprom_get_byte(eeprom, off, addr_of_mut!(tmp)) == -1 {
+            return -1;
+        }
+
+        *len = tmp & 0x0F;
+    } else {
+        // Fixed len
+        *len = 1 << tmp;
+    }
+
+    1
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cisco_eeprom) {}

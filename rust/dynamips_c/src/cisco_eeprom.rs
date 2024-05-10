@@ -187,5 +187,17 @@ pub unsafe extern "C" fn cisco_eeprom_get_region(eeprom: *mut cisco_eeprom, offs
     0
 }
 
+/// Set an EEPROM region
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_set_region(eeprom: *mut cisco_eeprom, offset: size_t, data: *mut m_uint8_t, data_len: size_t) -> c_int {
+    for i in 0..data_len {
+        if cisco_eeprom_set_byte(eeprom, offset + i, *data.add(i)) == -1 {
+            return -1;
+        }
+    }
+
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cisco_eeprom) {}

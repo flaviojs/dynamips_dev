@@ -156,5 +156,24 @@ pub unsafe extern "C" fn cisco_eeprom_get_byte(eeprom: *mut cisco_eeprom, offset
     0
 }
 
+/// Set a byte to an EEPROM
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_set_byte(eeprom: *mut cisco_eeprom, offset: size_t, val: m_uint8_t) -> c_int {
+    if offset >= ((*eeprom).len << 1) {
+        return -1;
+    }
+
+    let mut tmp: u16 = *(*eeprom).data.add(offset >> 1);
+
+    if (offset & 1) != 0 {
+        tmp = (tmp & 0xFF00) | u16::from(val);
+    } else {
+        tmp = (tmp & 0x00FF) | (u16::from(val) << 8);
+    }
+
+    *(*eeprom).data.add(offset >> 1) = tmp;
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cisco_eeprom) {}

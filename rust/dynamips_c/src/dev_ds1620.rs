@@ -204,5 +204,23 @@ pub unsafe extern "C" fn ds1620_write_data_bit(d: *mut ds1620_data, data_bit: u_
     }
 }
 
+/// Read data bit
+#[no_mangle]
+pub unsafe extern "C" fn ds1620_read_data_bit(d: *mut ds1620_data) -> u_int {
+    if (*d).state != DS1620_STATE_DATA_OUT {
+        return 1;
+    }
+
+    let val: c_uint = (((*d).data >> (*d).data_pos) & 0x1) as c_uint;
+
+    (*d).data_pos += 1;
+    if (*d).data_pos == (*d).data_len {
+        // return in command input state
+        (*d).state = DS1620_STATE_CMD_IN;
+    }
+
+    val
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut ds1620_data) {}

@@ -39,24 +39,6 @@ enum {
    DS1620_STATE_DATA_OUT,
 };
 
-/* Read data bit */
-u_int ds1620_read_data_bit(struct ds1620_data *d)
-{
-   u_int val;
-
-   if (d->state != DS1620_STATE_DATA_OUT)
-      return(1);
-
-   val = (d->data >> d->data_pos) & 0x1;
-
-   if (++d->data_pos == d->data_len) {
-      /* return in command input state */
-      d->state = DS1620_STATE_CMD_IN;
-   }
-
-   return(val);
-}
-
 /* Initialize a DS1620 */
 void ds1620_init(struct ds1620_data *d,int temp)
 {

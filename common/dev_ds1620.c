@@ -38,18 +38,3 @@ enum {
    DS1620_STATE_DATA_IN,
    DS1620_STATE_DATA_OUT,
 };
-
-/* Initialize a DS1620 */
-void ds1620_init(struct ds1620_data *d,int temp)
-{
-   memset(d,0,sizeof(*d));
-
-   /* reset state */
-   ds1620_set_rst_bit(d,0);
-
-   /* set initial temperature */
-   ds1620_set_temp(d,temp);
-
-   /* chip in CPU mode (3-wire communications) */
-   d->reg_config = DS1620_CONFIG_STATUS_CPU;   
-}

@@ -222,5 +222,20 @@ pub unsafe extern "C" fn ds1620_read_data_bit(d: *mut ds1620_data) -> u_int {
     val
 }
 
+/// Initialize a DS1620
+#[no_mangle]
+pub unsafe extern "C" fn ds1620_init(d: *mut ds1620_data, temp: c_int) {
+    libc::memset(d.cast::<_>(), 0, size_of::<ds1620_data>());
+
+    // reset state
+    ds1620_set_rst_bit(d, 0);
+
+    // set initial temperature
+    ds1620_set_temp(d, temp);
+
+    // chip in CPU mode (3-wire communications)
+    (*d).reg_config = DS1620_CONFIG_STATUS_CPU;
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut ds1620_data) {}

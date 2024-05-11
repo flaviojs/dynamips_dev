@@ -71,7 +71,6 @@ set ( _files
    "${COMMON}/memory.c"
    "${COMMON}/device.c"
    "${COMMON}/nmc93cX6.c"
-   "${COMMON}/cisco_eeprom.c"
    "${COMMON}/cisco_card.c"
    "${COMMON}/pci_dev.c"
    "${COMMON}/pci_io.c"

@@ -118,31 +118,6 @@ static int rommon_var_set(struct rommon_var *var,char *value)
    return(0);
 }
 
-/* Add a new variable */
-int rommon_var_add(struct rommon_var_list *rvl,char *name,char *value)
-{
-   struct rommon_var *var;
-
-   /* if the variable already exists, overwrite it */
-   if (!(var = rommon_var_find(rvl,name))) {
-      var = rommon_var_create(name);
-      if (!var) return(-1);
-
-      if (rommon_var_set(var,value) == -1) {
-         rommon_var_delete(var);
-         return(-1);
-      }
-
-      var->next = rvl->var_list;
-      rvl->var_list = var;
-   } else {
-      rommon_var_set(var,value);
-   }
-   
-   /* synchronize disk file */
-   return(rommon_var_update_file(rvl));
-}
-
 /* 
  * Add a new variable, specified at the format: var=value.
  * The string is modified.

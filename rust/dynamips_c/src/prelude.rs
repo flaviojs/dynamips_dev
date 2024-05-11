@@ -2,6 +2,7 @@
 //!
 //! cbindgen will ignore the contents of this module.
 
+pub use crate::_ext::cfunc;
 pub use crate::_ext::cstr;
 pub use crate::_ext::str0;
 pub use crate::_ext::u_int;
@@ -9,6 +10,7 @@ pub use crate::_ext::AsC;
 pub use crate::_ext::AsCMut;
 pub use crate::_ext::CArray;
 pub use crate::_ext::Volatile;
+pub use function_name::named;
 pub use libc;
 pub use libc::size_t;
 pub use libc::ssize_t;
@@ -31,6 +33,7 @@ pub use std::ptr::null_mut;
 
 extern "C" {
     // _ext.c
+    pub fn c_errno() -> c_int;
     pub fn c_stderr() -> *mut libc::FILE;
     pub fn c_timezone() -> c_long;
     // libc

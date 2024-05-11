@@ -23,6 +23,7 @@ pub mod prelude;
 pub mod ptask;
 pub mod rbtree;
 pub mod registry;
+pub mod rommon_var;
 pub mod sbox;
 pub mod timer;
 pub mod utils;

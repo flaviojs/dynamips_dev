@@ -1,5 +1,6 @@
 //! Required C code for the crate dynamips_c.
 
+#include <errno.h>
 #include <stdio.h>
 #include <time.h>
 
@@ -8,6 +9,10 @@
 #else
 #define GET_TIMEZONE timezone
 #endif
+
+int c_errno(void) {
+   return(errno);
+}
 
 FILE *c_stderr(void) {
     return(stderr);

@@ -9,6 +9,7 @@ publish = false
 crate-type = ["staticlib","rlib"]
 
 [dependencies]
+function_name = "0.3"
 libc = "0.2"
 libc_alloc = "1.0"
 

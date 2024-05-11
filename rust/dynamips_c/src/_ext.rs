@@ -10,6 +10,17 @@ use std::ptr::write_volatile;
 #[global_allocator]
 static GLOBAL_ALLOCATOR: LibcAlloc = LibcAlloc;
 
+/// Macro that mimics `__func__`.
+/// Returns the function name as a C string (*mut c_char).
+/// The function must have `#[named]` or `function_name!`.
+#[macro_export]
+macro_rules! cfunc {
+    () => {
+        concat!(function_name!(), "\0").as_ptr().cast::<c_char>().cast_mut()
+    };
+}
+pub use cfunc;
+
 /// Macro that concatenates expressions and a nul terminator.
 #[macro_export]
 macro_rules! str0 {

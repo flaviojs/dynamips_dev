@@ -529,34 +529,6 @@ const struct cisco_eeprom *cisco_eeprom_find_c6k(char *name)
 /* Utility functions                                                      */
 /* ====================================================================== */
 
-/* Dump a Cisco EEPROM with format version 4 */
-void cisco_eeprom_v4_dump(struct cisco_eeprom *eeprom)
-{
-   m_uint8_t type,len,tmp;
-   size_t i,offset=2;
-
-   printf("Dumping EEPROM contents:\n");
-
-   do {
-      /* Read field */
-      if (cisco_eeprom_v4_get_field(eeprom,&type,&len,&offset) < 1)
-         break;
-
-      printf("  Field 0x%2.2x: ",type);
-
-      for(i=0;i<len;i++) {
-         if (cisco_eeprom_get_byte(eeprom,offset+i,&tmp) == -1)
-            break;
-
-         printf("%2.2x ",tmp);
-      }
-
-      printf("\n");
-
-      offset += len;
-   }while(offset < (eeprom->len << 1));
-}
-
 /* Returns the offset of the specified field */
 int cisco_eeprom_v4_find_field(struct cisco_eeprom *eeprom,
                                m_uint8_t field_type,

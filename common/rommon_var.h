@@ -12,19 +12,6 @@
 
 #include "dynamips_common.h"
 
-/* ROMMON variable */
-struct rommon_var {
-   struct rommon_var *next;
-   char *name;
-   char *value;
-};
-
-/* List of ROMMON variables */
-struct rommon_var_list {
-   char *filename;
-   struct rommon_var *var_list;
-};
-
 /* Load file containing ROMMON variables */
 int rommon_load_file(struct rommon_var_list *rvl);
 

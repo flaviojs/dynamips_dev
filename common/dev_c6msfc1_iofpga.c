@@ -29,7 +29,6 @@
 #include "device.h"
 #include "dev_vtty.h"
 #include "nmc93cX6.h"
-#include "dev_ds1620.h"
 #include "dev_c6msfc1.h"
 
 /* Debugging flags */

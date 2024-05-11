@@ -31,7 +31,6 @@
 #include "pci_dev.h"
 #include "nmc93cX6.h"
 #include "dev_mv64460.h"
-#include "dev_ds1620.h"
 #include "net_io.h"
 #include "vm.h"
 

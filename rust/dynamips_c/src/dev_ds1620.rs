@@ -236,6 +236,3 @@ pub unsafe extern "C" fn ds1620_init(d: *mut ds1620_data, temp: c_int) {
     // chip in CPU mode (3-wire communications)
     (*d).reg_config = DS1620_CONFIG_STATUS_CPU;
 }
-
-#[no_mangle]
-pub extern "C" fn _export(_: *mut ds1620_data) {}

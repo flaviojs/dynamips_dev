@@ -124,3 +124,21 @@ pub unsafe extern "C" fn rommon_var_add(rvl: *mut rommon_var_list, name: *mut c_
     // synchronize disk file
     rommon_var_update_file(rvl)
 }
+
+/// Add a new variable, specified at the format: var=value.
+/// The string is modified.
+#[no_mangle]
+pub unsafe extern "C" fn rommon_var_add_str(rvl: *mut rommon_var_list, str_: *mut c_char) -> c_int {
+    let eq_sym: *mut c_char = libc::strchr(str_, b'=' as c_int);
+    if eq_sym.is_null() {
+        return -1;
+    }
+
+    // The variable cannot be null
+    if str_ == eq_sym {
+        return -1;
+    }
+
+    *eq_sym = 0;
+    rommon_var_add(rvl, str_, eq_sym.add(1))
+}

@@ -118,25 +118,6 @@ static int rommon_var_set(struct rommon_var *var,char *value)
    return(0);
 }
 
-/* 
- * Add a new variable, specified at the format: var=value.
- * The string is modified.
- */
-int rommon_var_add_str(struct rommon_var_list *rvl,char *str)
-{
-   char *eq_sym;
-
-   if (!(eq_sym = strchr(str,'=')))
-      return(-1);
-   
-   /* The variable cannot be null */
-   if (str == eq_sym)
-      return(-1);
-
-   *eq_sym = 0;
-   return(rommon_var_add(rvl,str,eq_sym+1));
-}
-
 /* Get the specified variable */
 int rommon_var_get(struct rommon_var_list *rvl,char *name,
                    char *buffer,size_t len)

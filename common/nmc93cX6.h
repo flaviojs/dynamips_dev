@@ -12,7 +12,6 @@
 
 #include <sys/types.h>
 #include "utils.h"
-#include "cisco_eeprom.h"
 
 /* EEPROM types */
 enum {

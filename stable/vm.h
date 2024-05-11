@@ -16,7 +16,6 @@
 #include "memory.h"
 #include "cpu.h"
 #include "dev_vtty.h"
-#include "cisco_eeprom.h"
 #include "cisco_card.h"
 #include "rommon_var.h"
 

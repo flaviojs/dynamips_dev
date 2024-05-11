@@ -790,6 +790,3 @@ pub unsafe extern "C" fn cisco_eeprom_v4_find_field(eeprom: *mut cisco_eeprom, f
 
     -1
 }
-
-#[no_mangle]
-pub extern "C" fn _export(_: *mut cisco_eeprom) {}

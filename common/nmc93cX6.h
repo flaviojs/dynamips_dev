@@ -10,7 +10,7 @@
 
 #include <sys/types.h>
 #include "utils.h"
-#include "cisco_eeprom.h"
+#include "rust_dynamips_c.h"
 
 /* EEPROM types */
 enum {

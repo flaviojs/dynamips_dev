@@ -13,7 +13,7 @@
 #include "vm.h"
 #include "device.h"
 #include "net_io.h"
-#include "cisco_eeprom.h"
+#include "rust_dynamips_c.h"
 
 /* Forward declaration for NM-16ESW private data */
 struct nm_16esw_data;

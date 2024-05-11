@@ -273,9 +273,6 @@ void m_log(char *module,char *fmt,...);
 /* Write an array of string to a logfile */
 void m_flog_str_array(FILE *fd,int count,char *str[]);
 
-/* Returns a line from specified file (remove trailing '\n') */
-char *m_fgets(char *buffer,int size,FILE *fd);
-
 /* Read a file and returns it in a buffer */
 int m_read_file(const char *filename,u_char **buffer,size_t *length);
 

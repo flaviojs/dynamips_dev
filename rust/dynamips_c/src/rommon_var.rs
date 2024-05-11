@@ -1,6 +1,7 @@
 //! ROMMON Environment Variables.
 
 use crate::prelude::*;
+use crate::utils::*;
 
 /// ROMMON variable
 #[repr(C)]
@@ -17,6 +18,36 @@ pub struct rommon_var {
 pub struct rommon_var_list {
     pub filename: *mut c_char,
     pub var_list: *mut rommon_var,
+}
+
+const DEBUG_OPEN: bool = false;
+
+/// Load file containing ROMMON variables
+#[no_mangle]
+#[named]
+pub unsafe extern "C" fn rommon_load_file(rvl: *mut rommon_var_list) -> c_int {
+    let buffer: [c_char; 512] = [0; 512];
+
+    if (*rvl).filename.is_null() {
+        return -1;
+    }
+
+    let fd: *mut libc::FILE = libc::fopen((*rvl).filename, cstr!("r"));
+    if fd.is_null() {
+        if DEBUG_OPEN {
+            libc::fprintf(c_stderr(), cstr!("%s: unable to open file %s (%s)\n"), cfunc!(), (*rvl).filename, libc::strerror(c_errno()));
+        }
+        return -1;
+    }
+
+    while libc::feof(fd) == 0 {
+        if !m_fgets(buffer.as_ptr().cast_mut(), buffer.len() as c_int, fd).is_null() {
+            rommon_var_add_str(rvl, buffer.as_ptr().cast_mut());
+        }
+    }
+
+    libc::fclose(fd);
+    0
 }
 
 /// Write a file with all ROMMON variables

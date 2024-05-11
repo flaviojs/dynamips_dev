@@ -47,6 +47,25 @@ pub unsafe extern "C" fn m_gettime_adj() -> m_tmcnt_t {
     (tvp.tv_sec as m_tmcnt_t) * 1000 + (tvp.tv_usec as m_tmcnt_t) / 1000
 }
 
+/// Returns a line from specified file (remove trailing '\n')
+#[no_mangle]
+pub unsafe extern "C" fn m_fgets(buffer: *mut c_char, size: c_int, fd: *mut libc::FILE) -> *mut c_char {
+    *buffer = 0;
+    libc::fgets(buffer, size, fd);
+
+    let len = libc::strlen(buffer);
+    if len == 0 {
+        return null_mut();
+    }
+
+    // remove trailing '\n'
+    if *buffer.add(len - 1) == b'\n' as c_char {
+        *buffer.add(len - 1) = 0;
+    }
+
+    buffer
+}
+
 /// Block specified signal for calling thread
 #[no_mangle]
 pub unsafe extern "C" fn m_signal_block(sig: c_int) -> c_int {

@@ -8,34 +8,6 @@
 #include "utils.h"
 #include "rommon_var.h"
 
-#define DEBUG_OPEN  0
-
-/* Load file containing ROMMON variables */
-int rommon_load_file(struct rommon_var_list *rvl)
-{
-   char buffer[512];
-   FILE *fd;
-
-   if (!rvl->filename)
-      return(-1);
-
-   if (!(fd = fopen(rvl->filename,"r"))) {
-#if DEBUG_OPEN
-      fprintf(stderr,"%s: unable to open file %s (%s)\n",
-              __func__,rvl->filename,strerror(errno));
-#endif
-      return(-1);
-   }
-
-   while(!feof(fd)) {
-      if (m_fgets(buffer,sizeof(buffer),fd))
-         rommon_var_add_str(rvl,buffer);
-   }
-
-   fclose(fd);
-   return(0);
-}
-
 /* Write a file with all ROMMON variables */
 int rommon_var_update_file(struct rommon_var_list *rvl)
 {

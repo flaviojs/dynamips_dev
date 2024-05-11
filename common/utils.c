@@ -294,24 +294,6 @@ void m_flog_str_array(FILE *fd,int count,char *str[])
    fflush(fd);
 }
 
-/* Returns a line from specified file (remove trailing '\n') */
-char *m_fgets(char *buffer,int size,FILE *fd)
-{
-   int len;
-
-   buffer[0] = '\0';
-   fgets(buffer,size,fd);
-
-   if ((len = strlen(buffer)) == 0)
-      return NULL;
-
-   /* remove trailing '\n' */
-   if (buffer[len-1] == '\n')
-      buffer[len-1] = '\0';
-
-   return buffer;
-}
-
 /* Read a file and returns it in a buffer */
 int m_read_file(const char *filename,u_char **buffer,size_t *length)
 {

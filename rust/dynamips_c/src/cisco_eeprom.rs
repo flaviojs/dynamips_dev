@@ -288,5 +288,32 @@ pub unsafe extern "C" fn cisco_eeprom_v4_dump(eeprom: *mut cisco_eeprom) {
     }
 }
 
+/// Returns the offset of the specified field
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_v4_find_field(eeprom: *mut cisco_eeprom, field_type: m_uint8_t, field_offset: *mut size_t) -> c_int {
+    let mut type_: u8 = 0;
+    let mut len: u8 = 0;
+    let mut offset: size_t = 2;
+
+    loop {
+        // Read field
+        if cisco_eeprom_v4_get_field(eeprom, addr_of_mut!(type_), addr_of_mut!(len), addr_of_mut!(offset)) < 1 {
+            break;
+        }
+
+        if type_ == field_type {
+            *field_offset = offset;
+            return 0;
+        }
+
+        offset += len as size_t;
+        if offset >= ((*eeprom).len << 1) {
+            break;
+        }
+    }
+
+    -1
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cisco_eeprom) {}

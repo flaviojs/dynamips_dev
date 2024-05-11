@@ -528,27 +528,3 @@ const struct cisco_eeprom *cisco_eeprom_find_c6k(char *name)
 /* ====================================================================== */
 /* Utility functions                                                      */
 /* ====================================================================== */
-
-/* Returns the offset of the specified field */
-int cisco_eeprom_v4_find_field(struct cisco_eeprom *eeprom,
-                               m_uint8_t field_type,
-                               size_t *field_offset)
-{
-   m_uint8_t type,len;
-   size_t offset=2;
-
-   do {
-      /* Read field */
-      if (cisco_eeprom_v4_get_field(eeprom,&type,&len,&offset) < 1)
-         break;
-
-      if (type == field_type) {
-         *field_offset = offset;
-         return(0);
-      }
-
-      offset += len;
-   }while(offset < (eeprom->len << 1));
-
-   return(-1);
-}

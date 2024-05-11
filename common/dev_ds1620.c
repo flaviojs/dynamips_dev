@@ -39,23 +39,6 @@ enum {
    DS1620_STATE_DATA_OUT,
 };
 
-/* Update status register (TH/TL values) */
-static void ds1620_update_status(struct ds1620_data *d)
-{
-   if (d->temp >= d->reg_th)
-      d->reg_config |= DS1620_CONFIG_STATUS_THF;
-
-   if (d->temp <= d->reg_tl)
-      d->reg_config |= DS1620_CONFIG_STATUS_TLF;
-}
-
-/* Set temperature */
-void ds1620_set_temp(struct ds1620_data *d,int temp)
-{
-   d->temp = temp << 1;
-   ds1620_update_status(d);
-}
-
 /* Set reset bit */
 void ds1620_set_rst_bit(struct ds1620_data *d,u_int rst_bit)
 {

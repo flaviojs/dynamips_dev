@@ -310,74 +310,8 @@ const struct cisco_eeprom *cisco_eeprom_find_pa(char *name)
 }
 
 /* ====================================================================== */
-/* WIC-1T: 1 Serial port Module EEPROM                                    */
-/* ====================================================================== */
-static m_uint16_t eeprom_wic_1t_data[] = {
-   0x0102, 0x0100, 0x0000, 0x0000, 0x5005, 0xEA01, 0x0000, 0x0000,
-   0xB000, 0x0000, 0x0303, 0x0401, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-};
-
-/* ====================================================================== */
-/* WIC-2T: 2 Serial ports Module EEPROM                                   */
-/* ====================================================================== */
-static m_uint16_t eeprom_wic_2t_data[] = {
-   0x0112, 0x0100, 0x0000, 0x0000, 0x5005, 0xEA01, 0x0000, 0x0000,
-   0xB000, 0x0000, 0x0303, 0x0401, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-};
-
-/* ====================================================================== */
-/* WIC-1B-S/T: 1 BRI port Module EEPROM                                   */
-/* ====================================================================== */
-static m_uint16_t eeprom_wic_1b_st_data[] = {
-   0x0107, 0x0100, 0x0000, 0x0000, 0x5005, 0xEA01, 0x0000, 0x0000,
-   0xB000, 0x0000, 0x0303, 0x0401, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-};
-
-/* ====================================================================== */
-/* WIC-4ESW: 4 Ethernet port switch module EEPROM                         */
-/* ====================================================================== */
-static m_uint16_t eeprom_wic_4esw_data[] = {
-   0x04FF, 0x4000, 0x6441, 0x0100, 0x8249, 0x22FE, 0x0142, 0x4430,
-   0x8000, 0x0000, 0x0002, 0x01C1, 0x8B46, 0x4F43, 0x3039, 0x3435,
-   0x344C, 0x5345, 0x0300, 0x8100, 0x0000, 0x0004, 0x00C0, 0x4603,
-   0x2000, 0x60F1, 0x0105, 0x01CF, 0x0600, 0x1646, 0x37F4, 0x6843,
-   0x0014, 0xCB88, 0x5749, 0x432D, 0x3445, 0x5357, 0xC68A, 0x4950,
-   0x4D45, 0x4430, 0x3042, 0x5241, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-   0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-   0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-};
-
-/* ====================================================================== */
-/* WIC-1ENET: 1 Ethernet port module EEPROM                               */
-/* ====================================================================== */
-static m_uint16_t eeprom_wic_1enet_data[] = {
-   0x04FF, 0x4000, 0x3941, 0x0101, 0xC18B, 0x464F, 0x4330, 0x3830,
-   0x3832, 0x4330, 0x3682, 0x4923, 0x0901, 0x4242, 0x3002, 0x04CB,
-   0x8957, 0x4943, 0x2D31, 0x454E, 0x4554, 0x0700, 0x0300, 0x8100,
-   0x0000, 0x0005, 0x0104, 0x00CF, 0x0644, 0x5566, 0x7788, 0xAA43,
-   0x0001, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-   0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-   0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF,
-};
-
-/* ====================================================================== */
 /* WIC EEPROMs                                                            */
 /* ====================================================================== */
-
-static const struct cisco_eeprom eeprom_wic_array[] = {
-   { "WIC-1T", eeprom_wic_1t_data, sizeof(eeprom_wic_1t_data)/2 },
-   { "WIC-2T", eeprom_wic_2t_data, sizeof(eeprom_wic_2t_data)/2 },
-   { "WIC-1B", eeprom_wic_1b_st_data, sizeof(eeprom_wic_1b_st_data)/2 },
-   { "WIC-4ESW", eeprom_wic_4esw_data, sizeof(eeprom_wic_4esw_data)/2 },
-   { "WIC-1ENET", eeprom_wic_1enet_data, sizeof(eeprom_wic_1enet_data)/2 },
-   { NULL, NULL, 0 },
-};
-
-/* Find a WIC EEPROM */
-const struct cisco_eeprom *cisco_eeprom_find_wic(char *name)
-{
-   return(cisco_eeprom_find(eeprom_wic_array,name));
-}
 
 /* ====================================================================== */
 /* C6k EEPROMs                                                            */

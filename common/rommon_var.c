@@ -89,17 +89,3 @@ static int rommon_var_set(struct rommon_var *var,char *value)
    var->value = new_value;
    return(0);
 }
-
-/* Clear all the variables */
-void rommon_var_clear(struct rommon_var_list *rvl)
-{
-   struct rommon_var *var, *next_var;
-
-   if (!rvl)
-      return;
-
-   for (var = rvl->var_list; var; var = next_var) {
-      next_var = rommon_var_delete(var);
-   }
-   rvl->var_list = NULL;
-}

@@ -186,3 +186,18 @@ pub unsafe extern "C" fn rommon_var_get(rvl: *mut rommon_var_list, name: *mut c_
     *buffer.add(len - 1) = 0;
     0
 }
+
+/// Clear all the variables
+#[no_mangle]
+pub unsafe extern "C" fn rommon_var_clear(rvl: *mut rommon_var_list) {
+    if rvl.is_null() {
+        return;
+    }
+
+    let mut var: *mut rommon_var = (*rvl).var_list;
+    while !var.is_null() {
+        let next_var: *mut rommon_var = rommon_var_delete(var);
+        var = next_var;
+    }
+    (*rvl).var_list = null_mut();
+}

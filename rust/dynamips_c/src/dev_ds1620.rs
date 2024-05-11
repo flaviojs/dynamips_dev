@@ -25,5 +25,11 @@ pub struct ds1620_data {
     pub reg_tl: m_uint16_t,
 }
 
+/// Set CLK bit
+#[no_mangle]
+pub unsafe extern "C" fn ds1620_set_clk_bit(d: *mut ds1620_data, clk_bit: u_int) {
+    (*d).clk_bit = clk_bit;
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut ds1620_data) {}

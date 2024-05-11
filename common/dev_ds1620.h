@@ -13,12 +13,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Set CLK bit */
-static inline void ds1620_set_clk_bit(struct ds1620_data *d,u_int clk_bit)
-{
-   d->clk_bit = clk_bit;
-}
-
 /* Set temperature */
 void ds1620_set_temp(struct ds1620_data *d,int temp);
 

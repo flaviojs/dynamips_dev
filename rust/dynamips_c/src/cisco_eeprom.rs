@@ -234,5 +234,24 @@ pub unsafe extern "C" fn cisco_eeprom_v4_get_field(eeprom: *mut cisco_eeprom, ty
     1
 }
 
+/// Dump a Cisco EEPROM unformatted
+#[no_mangle]
+pub unsafe extern "C" fn cisco_eeprom_dump(eeprom: *mut cisco_eeprom) {
+    libc::printf(cstr!("Dumping EEPROM contents:\n"));
+    let mut i: size_t = 0;
+    loop {
+        let mut tmp: u8 = 0;
+        if cisco_eeprom_get_byte(eeprom, i, addr_of_mut!(tmp)) == -1 {
+            break;
+        }
+        libc::printf(cstr!(" 0x%2.2x"), tmp as c_uint);
+        i += 1;
+        if i % 16 == 0 {
+            libc::printf(cstr!("\n"));
+        }
+    }
+    libc::printf(cstr!("\n"));
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cisco_eeprom) {}

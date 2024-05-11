@@ -90,20 +90,6 @@ static int rommon_var_set(struct rommon_var *var,char *value)
    return(0);
 }
 
-/* Get the specified variable */
-int rommon_var_get(struct rommon_var_list *rvl,char *name,
-                   char *buffer,size_t len)
-{
-   struct rommon_var *var;
-   
-   if (!(var = rommon_var_find(rvl,name)) || !var->value)
-      return(-1);
-
-   strncpy(buffer,var->value,len-1);
-   buffer[len-1] = '\0';
-   return(0);
-}
-
 /* Clear all the variables */
 void rommon_var_clear(struct rommon_var_list *rvl)
 {

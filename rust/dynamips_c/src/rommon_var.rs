@@ -173,3 +173,16 @@ pub unsafe extern "C" fn rommon_var_add_str(rvl: *mut rommon_var_list, str_: *mu
     *eq_sym = 0;
     rommon_var_add(rvl, str_, eq_sym.add(1))
 }
+
+/// Get the specified variable
+#[no_mangle]
+pub unsafe extern "C" fn rommon_var_get(rvl: *mut rommon_var_list, name: *mut c_char, buffer: *mut c_char, len: size_t) -> c_int {
+    let var: *mut rommon_var = rommon_var_find(rvl, name);
+    if var.is_null() || (*var).value.is_null() {
+        return -1;
+    }
+
+    libc::strncpy(buffer, (*var).value, len - 1);
+    *buffer.add(len - 1) = 0;
+    0
+}

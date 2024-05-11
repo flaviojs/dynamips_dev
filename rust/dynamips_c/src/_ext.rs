@@ -31,6 +31,9 @@ macro_rules! cstr {
 }
 pub use cstr;
 
+/// Non-standard unsigned int
+pub type u_int = std::ffi::c_uint;
+
 /// Trait that converts a rust type to a C representation.
 pub trait AsC<T, V> {
     fn as_c(&self) -> T;

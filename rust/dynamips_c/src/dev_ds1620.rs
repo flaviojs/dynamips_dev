@@ -92,5 +92,117 @@ pub unsafe extern "C" fn ds1620_set_rst_bit(d: *mut ds1620_data, rst_bit: u_int)
     }
 }
 
+/// Set state after command
+unsafe fn ds1620_cmd_set_state(d: *mut ds1620_data) {
+    (*d).data = 0;
+    (*d).data_pos = 0;
+
+    match (*d).cmd {
+        DS1620_READ_TEMP => {
+            (*d).state = DS1620_STATE_DATA_OUT;
+            (*d).data_len = DS1620_TEMP_SIZE;
+            (*d).data = (*d).temp as u16;
+        }
+
+        DS1620_READ_COUNTER | DS1620_READ_SLOPE => {
+            (*d).state = DS1620_STATE_DATA_OUT;
+            (*d).data_len = DS1620_TEMP_SIZE;
+            (*d).data = 0;
+        }
+
+        DS1620_WRITE_TH | DS1620_WRITE_TL => {
+            (*d).state = DS1620_STATE_DATA_IN;
+            (*d).data_len = DS1620_TEMP_SIZE;
+        }
+
+        DS1620_READ_TH => {
+            (*d).state = DS1620_STATE_DATA_OUT;
+            (*d).data_len = DS1620_TEMP_SIZE;
+            (*d).data = (*d).reg_th;
+        }
+
+        DS1620_READ_TL => {
+            (*d).state = DS1620_STATE_DATA_OUT;
+            (*d).data_len = DS1620_TEMP_SIZE;
+            (*d).data = (*d).reg_tl;
+        }
+
+        DS1620_START_CONVT | DS1620_STOP_CONVT => {
+            (*d).state = DS1620_STATE_CMD_IN;
+        }
+
+        DS1620_WRITE_CONFIG => {
+            (*d).state = DS1620_STATE_DATA_IN;
+            (*d).data_len = DS1620_CONFIG_SIZE;
+        }
+
+        DS1620_READ_CONFIG => {
+            (*d).state = DS1620_STATE_DATA_OUT;
+            (*d).data_len = DS1620_CONFIG_SIZE;
+            (*d).data = (*d).reg_config as u16;
+        }
+
+        _ => {}
+    }
+}
+
+/// Execute command
+unsafe fn ds1620_exec_cmd(d: *mut ds1620_data) {
+    match (*d).cmd {
+        DS1620_WRITE_TH => {
+            (*d).reg_th = (*d).data;
+        }
+        DS1620_WRITE_TL => {
+            (*d).reg_tl = (*d).data;
+        }
+        DS1620_WRITE_CONFIG => {
+            (*d).reg_config = (*d).data as u8;
+        }
+        _ => {}
+    }
+
+    // return in command input state
+    (*d).state = DS1620_STATE_CMD_IN;
+}
+
+/// Write data bit
+#[no_mangle]
+pub unsafe extern "C" fn ds1620_write_data_bit(d: *mut ds1620_data, data_bit: u_int) {
+    // CLK must be low
+    if (*d).clk_bit != 0 {
+        return;
+    }
+
+    match (*d).state {
+        DS1620_STATE_CMD_IN => {
+            if data_bit != 0 {
+                (*d).cmd |= 1 << (*d).cmd_pos;
+            }
+
+            (*d).cmd_pos += 1;
+            if (*d).cmd_pos == DS1620_CMD_SIZE {
+                ds1620_cmd_set_state(d);
+            }
+        }
+
+        DS1620_STATE_DATA_OUT => {
+            // ignore input since it shouldn't happen
+        }
+
+        DS1620_STATE_DATA_IN => {
+            if data_bit != 0 {
+                (*d).data |= 1 << (*d).data_pos;
+            }
+
+            (*d).data_pos += 1;
+            if (*d).data_pos == (*d).data_len {
+                ds1620_exec_cmd(d);
+            }
+        }
+
+        _ => {}
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut ds1620_data) {}

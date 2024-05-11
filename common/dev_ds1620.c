@@ -39,19 +39,6 @@ enum {
    DS1620_STATE_DATA_OUT,
 };
 
-/* Set reset bit */
-void ds1620_set_rst_bit(struct ds1620_data *d,u_int rst_bit)
-{
-   if (!rst_bit) {
-      d->state = DS1620_STATE_CMD_IN;
-      d->cmd_pos = 0;
-      d->cmd = 0;
-      d->data = 0;
-      d->data_pos = 0;
-      d->data_len = 0;
-   }
-}
-
 /* Set state after command */
 static void ds1620_cmd_set_state(struct ds1620_data *d)
 {

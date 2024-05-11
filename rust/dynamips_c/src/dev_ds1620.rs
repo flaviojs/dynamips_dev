@@ -79,5 +79,18 @@ pub unsafe extern "C" fn ds1620_set_temp(d: *mut ds1620_data, temp: c_int) {
     ds1620_update_status(d);
 }
 
+/// Set reset bit
+#[no_mangle]
+pub unsafe extern "C" fn ds1620_set_rst_bit(d: *mut ds1620_data, rst_bit: u_int) {
+    if rst_bit == 0 {
+        (*d).state = DS1620_STATE_CMD_IN;
+        (*d).cmd_pos = 0;
+        (*d).cmd = 0;
+        (*d).data = 0;
+        (*d).data_pos = 0;
+        (*d).data_len = 0;
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut ds1620_data) {}

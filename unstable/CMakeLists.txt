@@ -175,7 +175,6 @@ set ( _files
    "${COMMON}/get_cpu_time.c"
    "${COMMON}/fs_fat.c"
    "${COMMON}/fs_mbr.c"
-   "${COMMON}/fs_nvram.c"
    "${COMMON}/dev_lxt970a.c"
    )
 if ( ENABLE_LINUX_ETH )

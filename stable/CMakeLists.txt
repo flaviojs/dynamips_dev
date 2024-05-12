@@ -51,7 +51,6 @@ add_custom_target ( ppc32_microcode_dump_stable
 # nvram_export
 if ( BUILD_NVRAM_EXPORT )
 add_executable ( nvram_export
-   "${COMMON}/fs_nvram.c"
    "${COMMON}/nvram_export.c"
    )
 target_link_libraries ( nvram_export ${DYNAMIPS_LIBRARIES} )
@@ -206,7 +205,6 @@ set ( _files
    "${COMMON}/get_cpu_time.c"
    "${COMMON}/fs_fat.c"
    "${COMMON}/fs_mbr.c"
-   "${COMMON}/fs_nvram.c"
    "${COMMON}/dev_lxt970a.c"
    )
 if ( ENABLE_LINUX_ETH )

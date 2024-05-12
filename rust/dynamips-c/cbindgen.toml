@@ -23,6 +23,7 @@ typedef struct sockaddr sockaddr;
 
 // cbindgen 0.27.0 puts the typedef of a struct after the struct declaration,
 // so structs that use that typedef internally need a forward declaration of the typedef
+typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;
 typedef struct insn_exec_page insn_exec_page_t;

@@ -42,6 +42,9 @@ macro_rules! cstr {
 }
 pub use cstr;
 
+/// Non-standard unsigned char
+pub type u_char = std::ffi::c_uchar;
+
 /// Non-standard unsigned int
 pub type u_int = std::ffi::c_uint;
 

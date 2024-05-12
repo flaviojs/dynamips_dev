@@ -5,6 +5,7 @@
 pub use crate::_ext::cfunc;
 pub use crate::_ext::cstr;
 pub use crate::_ext::str0;
+pub use crate::_ext::u_char;
 pub use crate::_ext::u_int;
 pub use crate::_ext::AsC;
 pub use crate::_ext::AsCMut;

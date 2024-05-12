@@ -7,6 +7,7 @@
 
 use crate::dynamips_common::*;
 use crate::prelude::*;
+use std::cmp::min;
 
 //=========================================================
 // Filesystem
@@ -283,6 +284,140 @@ unsafe fn native_to_be_header_private(head: *mut fs_nvram_header_private_config)
     native_to_be32(addr_of_mut!((*head).len));
 }
 
+/// Uncompress data in .Z file format.
+/// Adapted from 7zip's ZDecoder.cpp, which is licensed under LGPL 2.1.
+unsafe fn uncompress_LZC(in_data: *const u8, in_len: size_t, out_data: *mut u8, out_len: size_t) -> c_int {
+    const LZC_MAGIC_1: u8 = 0x1F;
+    const LZC_MAGIC_2: u8 = 0x9D;
+    const LZC_NUM_BITS_MASK: u8 = 0x1F;
+    const LZC_BLOCK_MODE_MASK: u8 = 0x80;
+    const LZC_NUM_BITS_MIN: size_t = 9;
+    const LZC_NUM_BITS_MAX: size_t = 16;
+
+    if in_len < 3 || (in_data.is_null() && in_len > 0) || (out_data.is_null() && out_len > 0) {
+        return libc::EINVAL; // invalid argument
+    }
+
+    if *in_data.add(0) != LZC_MAGIC_1 || *in_data.add(1) != LZC_MAGIC_2 {
+        return libc::ENOTSUP; // no magic
+    }
+
+    let maxbits: size_t = (*in_data.add(2) & LZC_NUM_BITS_MASK) as size_t;
+    if !(LZC_NUM_BITS_MIN..=LZC_NUM_BITS_MAX).contains(&maxbits) {
+        return libc::ENOTSUP; // maxbits not supported
+    }
+
+    let numItems: size_t = 1 << maxbits;
+    let blockMode: bool = (*in_data.add(2) & LZC_BLOCK_MODE_MASK) != 0;
+
+    let parents: *mut u16 = libc::malloc(numItems * size_of::<u16>()).cast::<_>();
+    if parents.is_null() {
+        return libc::ENOMEM; // out of memory
+    }
+    let suffixes: *mut u8 = libc::malloc(numItems * size_of::<u8>()).cast::<_>();
+    if suffixes.is_null() {
+        libc::free(parents.cast::<_>());
+        return libc::ENOMEM; // out of memory
+    }
+    let stack: *mut u8 = libc::malloc(numItems * size_of::<u8>()).cast::<_>();
+    if stack.is_null() {
+        libc::free(parents.cast::<_>());
+        libc::free(suffixes.cast::<_>());
+        return libc::ENOMEM; // out of memory
+    }
+
+    let mut in_pos: size_t = 3;
+    let mut out_pos: size_t = 0;
+    let mut numBits: size_t = LZC_NUM_BITS_MIN;
+    let mut head: size_t = if blockMode { 257 } else { 256 };
+
+    let mut needPrev: bool = false;
+
+    let mut bitPos: size_t = 0;
+    let mut numBufBits: size_t = 0;
+
+    let buf = [0_u8; LZC_NUM_BITS_MAX + 4];
+
+    *parents.add(256) = 0;
+    *suffixes.add(256) = 0;
+
+    loop {
+        if numBufBits == bitPos {
+            let len: size_t = min(in_len - in_pos, numBits);
+            libc::memcpy(buf.as_ptr().cast_mut().cast::<_>(), in_data.add(in_pos).cast::<_>(), len);
+            numBufBits = len << 3;
+            bitPos = 0;
+            in_pos += len;
+        }
+        let bytePos: size_t = bitPos >> 3;
+        let mut symbol: size_t = (buf[bytePos] as size_t) | ((buf[bytePos + 1] as size_t) << 8) | ((buf[bytePos + 2] as size_t) << 16);
+        symbol >>= bitPos & 7;
+        symbol &= (1 << numBits) - 1;
+        bitPos += numBits;
+        if bitPos > numBufBits {
+            break;
+        }
+        if symbol >= head {
+            libc::free(parents.cast::<_>());
+            libc::free(suffixes.cast::<_>());
+            libc::free(stack.cast::<_>());
+            return libc::EIO; // invalid data
+        }
+        if blockMode && symbol == 256 {
+            numBufBits = 0;
+            bitPos = 0;
+            numBits = LZC_NUM_BITS_MIN;
+            head = 257;
+            needPrev = false;
+            continue;
+        }
+        let mut cur: size_t = symbol;
+        let mut i: size_t = 0;
+        while cur >= 256 {
+            *stack.add(i) = *suffixes.add(cur);
+            i += 1;
+            cur = *parents.add(cur) as size_t;
+        }
+        *stack.add(i) = cur as u8;
+        i += 1;
+        if needPrev {
+            *suffixes.add(head - 1) = cur as u8;
+            if symbol == head - 1 {
+                *stack.add(0) = cur as u8;
+            }
+        }
+        loop {
+            if out_pos < out_len {
+                i -= 1;
+                *out_data.add(out_pos) = *stack.add(i);
+                out_pos += 1;
+            } else {
+                i = 0;
+            }
+            if i == 0 {
+                break;
+            }
+        }
+        if head < numItems {
+            needPrev = true;
+            *parents.add(head) = symbol as u16;
+            head += 1;
+            if head > (1 << numBits) && numBits < maxbits {
+                numBufBits = 0;
+                bitPos = 0;
+                numBits += 1;
+            }
+        } else {
+            needPrev = false;
+        }
+    }
+
+    libc::free(parents.cast::<_>());
+    libc::free(suffixes.cast::<_>());
+    libc::free(stack.cast::<_>());
+    0
+}
+
 //=========================================================
 // Private
 
@@ -389,6 +524,19 @@ unsafe fn fs_nvram_update_checksum(fs: *mut fs_nvram_t) {
     fs_nvram_write16(fs, size_of::<fs_nvram_header>() + offset_of!(fs_nvram_header_startup_config, checksum), sum as u16);
 }
 
+/// Read data from NVRAM.
+unsafe fn fs_nvram_read_data(fs: *mut fs_nvram_t, offset: size_t, len: size_t) -> *mut u8 {
+    let data: *mut u8 = libc::malloc(len + 1).cast::<_>();
+    if data.is_null() {
+        return null_mut(); // out of memory
+    }
+
+    fs_nvram_memcpy_from(fs, offset, data, len);
+    *data.add(len) = 0;
+
+    data
+}
+
 /// Returns the normal offset of the NVRAM filesystem with backup.
 unsafe fn fs_nvram_offset1_with_backup(fs: *mut fs_nvram_t, offset: size_t) -> size_t {
     if offset < FS_NVRAM_NORMAL_FILESYSTEM_BLOCK1 {
@@ -409,6 +557,146 @@ unsafe fn fs_nvram_offset2_with_backup(fs: *mut fs_nvram_t, offset: size_t) -> s
 
 //=========================================================
 // Public
+
+/// Read startup-config and/or private-config from NVRAM.
+/// Returns 0 on success.
+#[no_mangle]
+pub unsafe extern "C" fn fs_nvram_read_config(fs: *mut fs_nvram_t, startup_config: *mut *mut u_char, startup_len: *mut size_t, private_config: *mut *mut u_char, private_len: *mut size_t) -> c_int {
+    if fs.is_null() {
+        return libc::EINVAL; // invalid argument
+    }
+
+    // initial values
+    if !startup_config.is_null() {
+        *startup_config = null_mut();
+    }
+
+    if !startup_len.is_null() {
+        *startup_len = 0;
+    }
+
+    if !private_config.is_null() {
+        *private_config = null_mut();
+    }
+
+    if !private_len.is_null() {
+        *private_len = 0;
+    }
+
+    // read headers
+    let mut off = size_of::<fs_nvram_header>();
+    let mut startup_head: fs_nvram_header_startup_config = zeroed::<_>();
+    fs_nvram_memcpy_from(fs, off, addr_of_mut!(startup_head).cast::<_>(), size_of::<fs_nvram_header_startup_config>());
+    be_to_native_header_startup(addr_of_mut!(startup_head));
+    if FS_NVRAM_MAGIC_STARTUP_CONFIG != startup_head.magic {
+        return 0; // done, no startup-config and no private-config
+    }
+
+    unsafe fn reset(startup_config: *mut *mut u8, startup_len: *mut size_t, private_config: *mut *mut u8, private_len: *mut size_t) {
+        if !startup_config.is_null() && !(*startup_config).is_null() {
+            libc::free((*startup_config).cast::<_>());
+            *startup_config = null_mut();
+        }
+
+        if !startup_len.is_null() {
+            *startup_len = 0;
+        }
+
+        if !private_config.is_null() && !(*private_config).is_null() {
+            libc::free((*private_config).cast::<_>());
+            *private_config = null_mut();
+        }
+
+        if !private_len.is_null() {
+            *private_len = 0;
+        }
+    }
+
+    off = fs_nvram_offset_of(fs, (startup_head.start + startup_head.len) as size_t);
+    off += fs_nvram_padding_at(fs, off);
+
+    if off + size_of::<fs_nvram_header_private_config>() > (*fs).len {
+        reset(startup_config, startup_len, private_config, private_len);
+        return libc::ENOMEM; // out of memory
+    }
+
+    let mut private_head: fs_nvram_header_private_config = zeroed::<_>();
+    fs_nvram_memcpy_from(fs, off, addr_of_mut!(private_head).cast::<_>(), size_of::<fs_nvram_header_private_config>());
+    be_to_native_header_private(addr_of_mut!(private_head));
+
+    // read startup-config
+    if FS_NVRAM_FORMAT_RAW == startup_head.format {
+        if !startup_config.is_null() {
+            off = fs_nvram_offset_of(fs, startup_head.start as size_t);
+            *startup_config = fs_nvram_read_data(fs, off, startup_head.len as size_t);
+            if (*startup_config).is_null() {
+                reset(startup_config, startup_len, private_config, private_len);
+                return libc::ENOMEM; // out of memory
+            }
+        }
+
+        if !startup_len.is_null() {
+            *startup_len = startup_head.len as size_t;
+        }
+    } else if FS_NVRAM_FORMAT_LZC == startup_head.format {
+        if !startup_config.is_null() {
+            off = fs_nvram_offset_of(fs, startup_head.start as size_t);
+            *startup_config = libc::malloc((startup_head.uncompressed_len + 1) as size_t).cast::<_>();
+            if (*startup_config).is_null() {
+                reset(startup_config, startup_len, private_config, private_len);
+                return libc::ENOMEM; // out of memory
+            }
+
+            let buf: *mut u8 = fs_nvram_read_data(fs, off, startup_head.len as size_t);
+            if buf.is_null() {
+                reset(startup_config, startup_len, private_config, private_len);
+                return libc::ENOMEM; // out of memory
+            }
+
+            let err = uncompress_LZC(buf, startup_head.len as size_t, *startup_config, startup_head.uncompressed_len as size_t);
+            if err != 0 {
+                libc::free(buf.cast::<_>());
+                reset(startup_config, startup_len, private_config, private_len);
+                return err;
+            }
+
+            *(*startup_config).add(startup_head.uncompressed_len as size_t) = 0;
+            libc::free(buf.cast::<_>());
+        }
+
+        if !startup_len.is_null() {
+            *startup_len = startup_head.uncompressed_len as size_t;
+        }
+    } else {
+        reset(startup_config, startup_len, private_config, private_len);
+        return libc::ENOTSUP; // unsupported format
+    }
+
+    // read private-config
+    if fs_nvram_offset_of(fs, (private_head.start + private_head.len) as size_t) > (*fs).len || FS_NVRAM_MAGIC_PRIVATE_CONFIG != private_head.magic {
+        return 0; // done, no private-config
+    }
+
+    if FS_NVRAM_FORMAT_RAW == private_head.format {
+        if !private_config.is_null() {
+            off = fs_nvram_offset_of(fs, private_head.start as size_t);
+            *private_config = fs_nvram_read_data(fs, off, private_head.len as size_t);
+            if (*private_config).is_null() {
+                reset(startup_config, startup_len, private_config, private_len);
+                return libc::ENOMEM; // out of memory
+            }
+        }
+
+        if !private_len.is_null() {
+            *private_len = private_head.len as size_t;
+        }
+    } else {
+        reset(startup_config, startup_len, private_config, private_len);
+        return libc::ENOTSUP; // unsupported format
+    }
+
+    0 // done
+}
 
 /// Write startup-config and private-config to NVRAM.
 /// Returns 0 on success.

@@ -300,6 +300,16 @@ unsafe fn fs_nvram_offset2_with_backup(fs: *mut fs_nvram_t, offset: size_t) -> s
 //=========================================================
 // Public
 
+/// Returns the number of sectors in the NVRAM filesystem.
+#[no_mangle]
+pub unsafe extern "C" fn fs_nvram_num_sectors(fs: *mut fs_nvram_t) -> size_t {
+    if fs.is_null() {
+        return 0;
+    }
+
+    (*fs).len / FS_NVRAM_SECTOR_SIZE
+}
+
 /// Verify the contents of the filesystem.
 /// Returns 0 on success.
 #[no_mangle]

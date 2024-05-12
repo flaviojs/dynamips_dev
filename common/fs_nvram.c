@@ -786,12 +786,3 @@ int fs_nvram_write_config(fs_nvram_t *fs, const u_char *startup_config, size_t s
    return(0);
 }
 
-
-/** Returns the number of sectors in the NVRAM filesystem. */
-size_t fs_nvram_num_sectors(fs_nvram_t *fs)
-{
-   if (fs == NULL)
-      return(0);
-
-   return( fs->len / FS_NVRAM_SECTOR_SIZE );
-}

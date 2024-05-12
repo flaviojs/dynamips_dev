@@ -22,7 +22,7 @@
 #include "dev_c2600.h"
 #include "dev_c1700.h"
 #include "dev_c6msfc1.h"
-#include "fs_nvram.h"
+#include "rust_dynamips_c.h"
 
 
 struct nvram_format {

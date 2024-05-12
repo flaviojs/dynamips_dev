@@ -25,7 +25,6 @@
 #include "dev_c3725_iofpga.h"
 #include "dev_vtty.h"
 #include "rust_dynamips_c.h"
-#include "fs_nvram.h"
 
 /* ======================================================================== */
 /* EEPROM definitions                                                       */

@@ -30,7 +30,6 @@
 #include "dev_vtty.h"
 #include "rust_dynamips_c.h"
 #include "net.h"
-#include "fs_nvram.h"
 
 /* MSFC1 EEPROM */
 static m_uint16_t eeprom_msfc1_data[128] = {

@@ -26,7 +26,6 @@
 #include "dev_c1700_iofpga.h"
 #include "dev_vtty.h"
 #include "rust_dynamips_c.h"
-#include "fs_nvram.h"
 
 /* ======================================================================== */
 /* EEPROM definitions                                                       */

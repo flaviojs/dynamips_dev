@@ -28,7 +28,6 @@
 #include "dev_vtty.h"
 #include "rust_dynamips_c.h"
 #include "net.h"
-#include "fs_nvram.h"
 
 /* ======================================================================== */
 /* CPU EEPROM definitions                                                   */

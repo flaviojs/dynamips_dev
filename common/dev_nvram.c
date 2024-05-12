@@ -23,7 +23,7 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "fs_nvram.h"
+#include "rust_dynamips_c.h"
 
 #define DEBUG_ACCESS  0
 

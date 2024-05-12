@@ -26,7 +26,6 @@
 #include "dev_c3725.h"
 #include "dev_c3725_iofpga.h"
 #include "dev_vtty.h"
-#include "fs_nvram.h"
 
 /* ======================================================================== */
 /* EEPROM definitions                                                       */

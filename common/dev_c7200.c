@@ -29,7 +29,6 @@
 #include "dev_c7200_mpfpga.h"
 #include "dev_vtty.h"
 #include "net.h"
-#include "fs_nvram.h"
 
 /* ======================================================================== */
 /* CPU EEPROM definitions                                                   */

@@ -558,6 +558,14 @@ unsafe fn fs_nvram_offset2_with_backup(fs: *mut fs_nvram_t, offset: size_t) -> s
 //=========================================================
 // Public
 
+/// Close NVRAM filesystem.
+#[no_mangle]
+pub unsafe extern "C" fn fs_nvram_close(fs: *mut fs_nvram_t) {
+    if !fs.is_null() {
+        libc::free(fs.cast::<_>());
+    }
+}
+
 /// Read startup-config and/or private-config from NVRAM.
 /// Returns 0 on success.
 #[no_mangle]

@@ -563,11 +563,3 @@ fs_nvram_t *fs_nvram_open(u_char *base, size_t len, m_uint32_t addr, u_int flags
    errno = 0;
    return fs;
 }
-
-
-/** Close NVRAM filesystem. */
-void fs_nvram_close(fs_nvram_t *fs)
-{
-   if (fs)
-      free(fs);
-}

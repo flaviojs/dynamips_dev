@@ -203,7 +203,6 @@ set ( _files
    "${COMMON}/hv_c2600.c"
    "${COMMON}/hv_c1700.c"
    "${COMMON}/get_cpu_time.c"
-   "${COMMON}/fs_fat.c"
    "${COMMON}/fs_mbr.c"
    "${COMMON}/dev_lxt970a.c"
    )

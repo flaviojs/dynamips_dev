@@ -14,6 +14,10 @@ int c_errno(void) {
    return(errno);
 }
 
+void c_set_errno(int x) {
+   errno = x;
+}
+
 FILE *c_stderr(void) {
     return(stderr);
 }

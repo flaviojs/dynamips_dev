@@ -25,6 +25,7 @@ pub use std::ffi::c_ulonglong;
 pub use std::ffi::c_ushort;
 pub use std::ffi::c_void;
 pub use std::marker::PhantomData;
+pub use std::mem::offset_of;
 pub use std::mem::size_of;
 pub use std::mem::zeroed;
 pub use std::ptr::addr_of;
@@ -34,6 +35,7 @@ pub use std::ptr::null_mut;
 extern "C" {
     // _ext.c
     pub fn c_errno() -> c_int;
+    pub fn c_set_errno(x: c_int);
     pub fn c_stderr() -> *mut libc::FILE;
     pub fn c_timezone() -> c_long;
     // libc

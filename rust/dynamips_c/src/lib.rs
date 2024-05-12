@@ -14,6 +14,7 @@ pub mod cisco_eeprom;
 pub mod crc;
 pub mod dev_ds1620;
 pub mod dynamips_common;
+pub mod fs_nvram;
 pub mod hash;
 pub mod mempool;
 pub mod net;

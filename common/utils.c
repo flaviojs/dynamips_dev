@@ -32,7 +32,8 @@
 
 #include "utils.h"
 
-extern FILE *log_file;
+/* Global logfile */
+FILE *log_file = NULL;
 
 /* Add an element to a list */
 m_list_t *m_list_add(m_list_t **head,void *data)

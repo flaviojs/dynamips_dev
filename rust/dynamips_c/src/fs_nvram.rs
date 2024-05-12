@@ -211,6 +211,8 @@ pub struct fs_nvram {
     pub write_byte: Option<unsafe extern "C" fn(fs: *mut fs_nvram_t, offset: u_int, val: m_uint8_t)>,
 }
 
+const DEBUG_BACKUP: bool = false;
+
 //=========================================================
 // Auxiliary
 
@@ -537,6 +539,25 @@ unsafe fn fs_nvram_read_data(fs: *mut fs_nvram_t, offset: size_t, len: size_t) -
     data
 }
 
+/// Create a NVRAM filesystem.
+unsafe fn fs_nvram_create(fs: *mut fs_nvram_t) {
+    fs_nvram_clear(fs, 0, (*fs).len);
+    fs_nvram_write16(fs, offset_of!(fs_nvram_header, magic), FS_NVRAM_MAGIC_FILESYSTEM);
+    fs_nvram_write16(fs, size_of::<fs_nvram_header>() + offset_of!(fs_nvram_header_startup_config, checksum), 0xFFFF);
+}
+
+/// Read a byte from the NVRAM filesystem.
+unsafe extern "C" fn fs_nvram_read_byte(fs: *mut fs_nvram_t, offset: c_uint) -> u8 {
+    let ptr: *mut u8 = (*fs).base.add((offset << (*fs).shift) as size_t);
+    *ptr
+}
+
+/// Write a byte to the NVRAM filesystem.
+unsafe extern "C" fn fs_nvram_write_byte(fs: *mut fs_nvram_t, offset: c_uint, val: u8) {
+    let ptr: *mut u8 = (*fs).base.add((offset << (*fs).shift) as size_t);
+    *ptr = val;
+}
+
 /// Returns the normal offset of the NVRAM filesystem with backup.
 unsafe fn fs_nvram_offset1_with_backup(fs: *mut fs_nvram_t, offset: size_t) -> size_t {
     if offset < FS_NVRAM_NORMAL_FILESYSTEM_BLOCK1 {
@@ -555,8 +576,86 @@ unsafe fn fs_nvram_offset2_with_backup(fs: *mut fs_nvram_t, offset: size_t) -> s
     }
 }
 
+/// Read a byte from the NVRAM filesystem with backup.
+unsafe extern "C" fn fs_nvram_read_byte_with_backup(fs: *mut fs_nvram_t, offset: c_uint) -> u8 {
+    let ptr1: *mut u8 = (*fs).base.add(fs_nvram_offset1_with_backup(fs, offset as size_t));
+    if DEBUG_BACKUP {
+        let ptr2: *mut u8 = (*fs).base.add(fs_nvram_offset2_with_backup(fs, offset as size_t));
+        if *ptr1 != *ptr2 {
+            libc::fprintf(
+                c_stderr(),
+                cstr!("fs_nvram_read_byte_with_backup: data in backup filesystem doesn't match (offset=%u, offset1=%u, offset2=%u, normal=0x%02X, backup=0x%02X)\n"),
+                offset,
+                fs_nvram_offset1_with_backup(fs, offset as size_t) as c_uint,
+                fs_nvram_offset2_with_backup(fs, offset as size_t) as c_uint,
+                *ptr1 as c_uint,
+                *ptr2 as c_uint,
+            );
+        }
+    }
+
+    *ptr1
+}
+
+/// Write a byte to the NVRAM filesystem with backup.
+unsafe extern "C" fn fs_nvram_write_byte_with_backup(fs: *mut fs_nvram_t, offset: c_uint, val: u8) {
+    let ptr1: *mut u8 = (*fs).base.add(fs_nvram_offset1_with_backup(fs, offset as size_t));
+    let ptr2: *mut u8 = (*fs).base.add(fs_nvram_offset2_with_backup(fs, offset as size_t));
+
+    *ptr1 = val;
+    *ptr2 = val;
+}
+
 //=========================================================
 // Public
+
+/// Open NVRAM filesystem. Sets errno.
+#[no_mangle]
+pub unsafe extern "C" fn fs_nvram_open(base: *mut u_char, len: size_t, addr: m_uint32_t, flags: u_int) -> *mut fs_nvram_t {
+    let mut len_div: size_t = 1;
+
+    if (flags & FS_NVRAM_FLAG_SCALE_4) != 0 {
+        len_div *= 4; // a quarter of the size
+    }
+
+    if (flags & FS_NVRAM_FLAG_WITH_BACKUP) != 0 {
+        len_div *= 2; // half the size is for the backup
+    }
+
+    if base.is_null() || len < size_of::<fs_nvram_header>() * len_div || len % (FS_NVRAM_SECTOR_SIZE * len_div) != 0 {
+        c_set_errno(libc::EINVAL);
+        return null_mut(); // invalid argument
+    }
+
+    let fs: *mut fs_nvram = libc::malloc(size_of::<fs_nvram>()).cast::<_>();
+    if fs.is_null() {
+        c_set_errno(libc::ENOMEM);
+        return null_mut(); // out of memory
+    }
+
+    (*fs).base = base;
+    (*fs).len = len / len_div;
+    (*fs).addr = addr;
+    (*fs).flags = flags;
+    (*fs).shift = if (flags & FS_NVRAM_FLAG_SCALE_4) != 0 { 2 } else { 0 };
+    (*fs).padding = if (flags & FS_NVRAM_FLAG_ALIGN_4_PAD_4) != 0 { 4 } else { 8 };
+    (*fs).backup = if (flags & FS_NVRAM_FLAG_WITH_BACKUP) != 0 { min((*fs).len, FS_NVRAM_NORMAL_FILESYSTEM_BLOCK1) } else { 0 };
+    (*fs).read_byte = if (flags & FS_NVRAM_FLAG_WITH_BACKUP) != 0 { Some(fs_nvram_read_byte_with_backup) } else { Some(fs_nvram_read_byte) };
+    (*fs).write_byte = if (flags & FS_NVRAM_FLAG_WITH_BACKUP) != 0 { Some(fs_nvram_write_byte_with_backup) } else { Some(fs_nvram_write_byte) };
+
+    if FS_NVRAM_MAGIC_FILESYSTEM != fs_nvram_read16(fs, offset_of!(fs_nvram_header, magic)) {
+        if (flags & FS_NVRAM_FLAG_OPEN_CREATE) == 0 {
+            fs_nvram_close(fs);
+            c_set_errno(FS_NVRAM_ERR_NO_MAGIC);
+            return null_mut(); // no magic
+        }
+
+        fs_nvram_create(fs);
+    }
+
+    c_set_errno(0);
+    fs
+}
 
 /// Close NVRAM filesystem.
 #[no_mangle]

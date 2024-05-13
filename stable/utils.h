@@ -62,7 +62,6 @@ typedef struct vm_instance vm_instance_t;
 typedef struct vm_platform vm_platform_t;
 typedef struct mips64_jit_tcb mips64_jit_tcb_t;
 typedef struct ppc32_jit_tcb ppc32_jit_tcb_t;
-typedef struct jit_op jit_op_t;
 
 /* Translated block function pointer */
 typedef void (*insn_tblock_fptr)(void);

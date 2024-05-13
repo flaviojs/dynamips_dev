@@ -189,21 +189,21 @@ extern void ppc32_update_cr_set_altered_hreg(cpu_ppc_t *cpu);
 static inline void ppc32_op_set(cpu_ppc_t *cpu,jit_op_t *op)
 {
    cpu_gen_t *c = cpu->gen;
-   *c->jit_op_current = op;
-   c->jit_op_current = &op->next;
+   *c->jit_op_data.current = op;
+   c->jit_op_data.current = &op->next;
 }
 
 /* EMIT_BASIC_OPCODE */
 static inline void ppc32_op_emit_basic_opcode(cpu_ppc_t *cpu,u_int opcode)
 {
-   jit_op_t *op = jit_op_get(cpu->gen,0,opcode);
+   jit_op_t *op = jit_op_get(&cpu->gen->jit_op_data,0,opcode);
    ppc32_op_set(cpu,op);
 }
 
 /* Trash the specified host register */
 static inline void ppc32_op_emit_alter_host_reg(cpu_ppc_t *cpu,int host_reg)
 {
-   jit_op_t *op = jit_op_get(cpu->gen,0,JIT_OP_ALTER_HOST_REG);
+   jit_op_t *op = jit_op_get(&cpu->gen->jit_op_data,0,JIT_OP_ALTER_HOST_REG);
    op->param[0] = host_reg;
    ppc32_op_set(cpu,op);
 }
@@ -212,7 +212,7 @@ static inline void ppc32_op_emit_alter_host_reg(cpu_ppc_t *cpu,int host_reg)
 static inline jit_op_t *
 ppc32_op_emit_insn_output(cpu_ppc_t *cpu,u_int size_index,char *insn_name)
 {
-   jit_op_t *op = jit_op_get(cpu->gen,size_index,JIT_OP_INSN_OUTPUT);
+   jit_op_t *op = jit_op_get(&cpu->gen->jit_op_data,size_index,JIT_OP_INSN_OUTPUT);
    op->arg_ptr = NULL;
    op->insn_name = insn_name;
    ppc32_op_set(cpu,op);
@@ -223,7 +223,7 @@ ppc32_op_emit_insn_output(cpu_ppc_t *cpu,u_int size_index,char *insn_name)
 static inline 
 void ppc32_op_emit_load_gpr(cpu_ppc_t *cpu,int host_reg,int ppc_reg)
 {
-   jit_op_t *op = jit_op_get(cpu->gen,0,JIT_OP_LOAD_GPR);
+   jit_op_t *op = jit_op_get(&cpu->gen->jit_op_data,0,JIT_OP_LOAD_GPR);
    op->param[0] = host_reg;
    op->param[1] = ppc_reg;
    op->param[2] = host_reg;
@@ -234,7 +234,7 @@ void ppc32_op_emit_load_gpr(cpu_ppc_t *cpu,int host_reg,int ppc_reg)
 static inline 
 void ppc32_op_emit_store_gpr(cpu_ppc_t *cpu,int ppc_reg,int host_reg)
 {
-   jit_op_t *op = jit_op_get(cpu->gen,0,JIT_OP_STORE_GPR);
+   jit_op_t *op = jit_op_get(&cpu->gen->jit_op_data,0,JIT_OP_STORE_GPR);
    op->param[0] = host_reg;
    op->param[1] = ppc_reg;
    op->param[2] = host_reg;
@@ -245,7 +245,7 @@ void ppc32_op_emit_store_gpr(cpu_ppc_t *cpu,int ppc_reg,int host_reg)
 static inline 
 void ppc32_op_emit_update_flags(cpu_ppc_t *cpu,int field,int is_signed)
 {
-   jit_op_t *op = jit_op_get(cpu->gen,0,JIT_OP_UPDATE_FLAGS);
+   jit_op_t *op = jit_op_get(&cpu->gen->jit_op_data,0,JIT_OP_UPDATE_FLAGS);
 
    op->param[0] = field;
    op->param[1] = is_signed;
@@ -257,7 +257,7 @@ void ppc32_op_emit_update_flags(cpu_ppc_t *cpu,int field,int is_signed)
 /* EMIT_REQUIRE_FLAGS */
 static inline void ppc32_op_emit_require_flags(cpu_ppc_t *cpu,int field)
 {
-   jit_op_t *op = jit_op_get(cpu->gen,0,JIT_OP_REQUIRE_FLAGS);
+   jit_op_t *op = jit_op_get(&cpu->gen->jit_op_data,0,JIT_OP_REQUIRE_FLAGS);
    op->param[0] = field;
    ppc32_op_set(cpu,op);
 }
@@ -269,12 +269,12 @@ static inline void ppc32_op_emit_branch_target(cpu_ppc_t *cpu,
 {
    if ((ia & PPC32_MIN_PAGE_MASK) == b->start_ia) {
       cpu_gen_t *c = cpu->gen;
-      jit_op_t *op = jit_op_get(c,0,JIT_OP_BRANCH_TARGET);
+      jit_op_t *op = jit_op_get(&c->jit_op_data,0,JIT_OP_BRANCH_TARGET);
       u_int pos = (ia & PPC32_MIN_PAGE_IMASK) >> 2;
 
       /* Insert in head */
-      op->next = c->jit_op_array[pos];
-      c->jit_op_array[pos] = op;
+      op->next = c->jit_op_data.array[pos];
+      c->jit_op_data.array[pos] = op;
    }
 }
 
@@ -282,7 +282,7 @@ static inline void ppc32_op_emit_branch_target(cpu_ppc_t *cpu,
 static inline void 
 ppc32_op_emit_set_host_reg_imm32(cpu_ppc_t *cpu,int reg,m_uint32_t val)
 {
-   jit_op_t *op = jit_op_get(cpu->gen,0,JIT_OP_SET_HOST_REG_IMM32);
+   jit_op_t *op = jit_op_get(&cpu->gen->jit_op_data,0,JIT_OP_SET_HOST_REG_IMM32);
    op->param[0] = reg;
    op->param[1] = val;
    ppc32_op_set(cpu,op);

@@ -44,6 +44,25 @@ pub struct jit_op_data {
 #[no_mangle]
 pub static mut jit_op_blk_sizes: [u_int; JIT_OP_POOL_NR] = [0, 32, 64, 128, 256, 384, 512, 1024];
 
+/// Release a JIT op
+#[no_mangle]
+pub unsafe extern "C" fn jit_op_free(data: *mut jit_op_data_t, op: *mut jit_op_t) {
+    assert!(((*op).ob_size_index as usize) < JIT_OP_POOL_NR);
+    (*op).next = (*data).pool[(*op).ob_size_index as usize];
+    (*data).pool[(*op).ob_size_index as usize] = op;
+}
+
+/// Free a list of JIT ops
+#[no_mangle]
+pub unsafe extern "C" fn jit_op_free_list(data: *mut jit_op_data_t, op_list: *mut jit_op_t) {
+    let mut op: *mut jit_op_t = op_list;
+    while !op.is_null() {
+        let opn: *mut jit_op_t = (*op).next;
+        jit_op_free(data, op);
+        op = opn;
+    }
+}
+
 /// Initialize JIT op pools for the specified CPU
 #[no_mangle]
 pub unsafe extern "C" fn jit_op_init_cpu(data: *mut jit_op_data_t) -> c_int {

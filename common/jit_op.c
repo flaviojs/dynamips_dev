@@ -49,22 +49,3 @@ jit_op_t *jit_op_get(jit_op_data_t *data,int size_index,u_int opcode)
    op->insn_name = NULL;
    return op;
 }
-
-/* Release a JIT op */
-void jit_op_free(jit_op_data_t *data,jit_op_t *op)
-{  
-   assert(op->ob_size_index < JIT_OP_POOL_NR);
-   op->next = data->pool[op->ob_size_index];
-   data->pool[op->ob_size_index] = op;
-}
-
-/* Free a list of JIT ops */
-void jit_op_free_list(jit_op_data_t *data,jit_op_t *op_list)
-{
-   jit_op_t *op,*opn;
-   
-   for(op=op_list;op;op=opn) {
-      opn = op->next;
-      jit_op_free(data,op);
-   }
-}

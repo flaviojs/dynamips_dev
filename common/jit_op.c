@@ -80,19 +80,3 @@ int jit_op_init_cpu(jit_op_data_t *data)
    memset(data->pool,0,sizeof(data->pool));
    return(0);
 }
-
-/* Free memory used by pools */
-void jit_op_free_pools(jit_op_data_t *data)
-{
-   jit_op_t *op,*opn;
-   int i;
-
-   for(i=0;i<JIT_OP_POOL_NR;i++) {
-      for(op=data->pool[i];op;op=opn) {
-         opn = op->next;
-         free(op);
-      }
-      
-      data->pool[i] = NULL;
-   }
-}

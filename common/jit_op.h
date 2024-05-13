@@ -41,32 +41,6 @@ enum {
    JIT_OP_SET_HOST_REG_IMM32,
 };
 
-/* JIT operation */
-struct jit_op {
-   u_int opcode;
-   int param[3];
-   void *arg_ptr;
-   char *insn_name;
-   struct jit_op *next;
-   
-   /* JIT output buffer */
-   u_int ob_size_index;
-   u_char *ob_final;
-   u_char *ob_ptr;
-   u_char ob_data[0];
-};
-
-/* JIT operation data */
-struct jit_op_data {
-   /* JIT op array for current compiled page */
-   u_int array_size;
-   jit_op_t **array;
-   jit_op_t **current;
-   
-   /* JIT op pool */
-   jit_op_t *pool[JIT_OP_POOL_NR];
-};
-
 extern u_int jit_op_blk_sizes[];
 
 /* Find a specific opcode in a JIT op list */

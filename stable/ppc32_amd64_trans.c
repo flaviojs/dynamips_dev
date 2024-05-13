@@ -184,14 +184,14 @@ void ppc32_set_page_jump(cpu_ppc_t *cpu,ppc32_jit_tcb_t *b)
 {
    jit_op_t *iop,*op_list = NULL;
 
-   cpu->gen->jit_op_current = &op_list;
+   cpu->gen->jit_op_data.current = &op_list;
 
    iop = ppc32_op_emit_insn_output(cpu,4,"set_page_jump");
    ppc32_set_jump(cpu,b,iop,b->start_ia + PPC32_MIN_PAGE_SIZE,FALSE);
    ppc32_op_insn_output(b,iop);
 
-   jit_op_free_list(cpu->gen,op_list);
-   cpu->gen->jit_op_current = NULL;
+   jit_op_free_list(&cpu->gen->jit_op_data,op_list);
+   cpu->gen->jit_op_data.current = NULL;
 }
 
 /* Load a GPR into the specified host register */

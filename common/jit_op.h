@@ -10,6 +10,9 @@
 
 #include "utils.h"
 
+typedef struct jit_op jit_op_t;
+typedef struct jit_op_data jit_op_data_t;
+
 /* Number of JIT pools */
 #define JIT_OP_POOL_NR  8
 
@@ -54,6 +57,17 @@ struct jit_op {
    u_char ob_data[0];
 };
 
+/* JIT operation data */
+struct jit_op_data {
+   /* JIT op array for current compiled page */
+   u_int array_size;
+   jit_op_t **array;
+   jit_op_t **current;
+   
+   /* JIT op pool */
+   jit_op_t *pool[JIT_OP_POOL_NR];
+};
+
 extern u_int jit_op_blk_sizes[];
 
 /* Find a specific opcode in a JIT op list */
@@ -69,18 +83,18 @@ static inline jit_op_t *jit_op_find_opcode(jit_op_t *op_list,u_int opcode)
 }
 
 /* Get a JIT op (allocate one if necessary) */
-jit_op_t *jit_op_get(cpu_gen_t *cpu,int size_index,u_int opcode);
+jit_op_t *jit_op_get(jit_op_data_t *data,int size_index,u_int opcode);
 
 /* Release a JIT op */
-void jit_op_free(cpu_gen_t *cpu,jit_op_t *op);
+void jit_op_free(jit_op_data_t *data,jit_op_t *op);
 
 /* Free a list of JIT ops */
-void jit_op_free_list(cpu_gen_t *cpu,jit_op_t *op_list);
+void jit_op_free_list(jit_op_data_t *data,jit_op_t *op_list);
 
 /* Initialize JIT op pools for the specified CPU */
-int jit_op_init_cpu(cpu_gen_t *cpu);
+int jit_op_init_cpu(jit_op_data_t *data);
 
 /* Free memory used by pools */
-void jit_op_free_pools(cpu_gen_t *cpu);
+void jit_op_free_pools(jit_op_data_t *data);
 
 #endif

@@ -25,17 +25,17 @@ u_int jit_op_blk_sizes[JIT_OP_POOL_NR] = {
 };
 
 /* Get a JIT op (allocate one if necessary) */
-jit_op_t *jit_op_get(cpu_gen_t *cpu,int size_index,u_int opcode)
+jit_op_t *jit_op_get(jit_op_data_t *data,int size_index,u_int opcode)
 {
    jit_op_t *op;
    size_t len;
 
    assert(size_index < JIT_OP_POOL_NR);
-   op = cpu->jit_op_pool[size_index];
+   op = data->pool[size_index];
 
    if (op != NULL) {
       assert(op->ob_size_index == size_index);
-      cpu->jit_op_pool[size_index] = op->next;
+      data->pool[size_index] = op->next;
    } else {
       /* no block found, allocate one */
       len = sizeof(*op) + jit_op_blk_sizes[size_index];
@@ -55,48 +55,48 @@ jit_op_t *jit_op_get(cpu_gen_t *cpu,int size_index,u_int opcode)
 }
 
 /* Release a JIT op */
-void jit_op_free(cpu_gen_t *cpu,jit_op_t *op)
+void jit_op_free(jit_op_data_t *data,jit_op_t *op)
 {  
    assert(op->ob_size_index < JIT_OP_POOL_NR);
-   op->next = cpu->jit_op_pool[op->ob_size_index];
-   cpu->jit_op_pool[op->ob_size_index] = op;
+   op->next = data->pool[op->ob_size_index];
+   data->pool[op->ob_size_index] = op;
 }
 
 /* Free a list of JIT ops */
-void jit_op_free_list(cpu_gen_t *cpu,jit_op_t *op_list)
+void jit_op_free_list(jit_op_data_t *data,jit_op_t *op_list)
 {
    jit_op_t *op,*opn;
    
    for(op=op_list;op;op=opn) {
       opn = op->next;
-      jit_op_free(cpu,op);
+      jit_op_free(data,op);
    }
 }
 
 /* Initialize JIT op pools for the specified CPU */
-int jit_op_init_cpu(cpu_gen_t *cpu)
+int jit_op_init_cpu(jit_op_data_t *data)
 {
-   cpu->jit_op_array = calloc(cpu->jit_op_array_size,sizeof(jit_op_t *));
+   data->array = calloc(data->array_size,sizeof(jit_op_t *));
 
-   if (!cpu->jit_op_array)
+   if (!data->array)
       return(-1);
 
-   memset(cpu->jit_op_pool,0,sizeof(cpu->jit_op_pool));
+   memset(data->pool,0,sizeof(data->pool));
    return(0);
 }
 
 /* Free memory used by pools */
-void jit_op_free_pools(cpu_gen_t *cpu)
+void jit_op_free_pools(jit_op_data_t *data)
 {
    jit_op_t *op,*opn;
    int i;
 
    for(i=0;i<JIT_OP_POOL_NR;i++) {
-      for(op=cpu->jit_op_pool[i];op;op=opn) {
+      for(op=data->pool[i];op;op=opn) {
          opn = op->next;
          free(op);
       }
       
-      cpu->jit_op_pool[i] = NULL;
+      data->pool[i] = NULL;
    }
 }

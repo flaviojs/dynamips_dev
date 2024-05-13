@@ -811,7 +811,7 @@ _Unused static void ppc32_op_dump(cpu_gen_t *cpu,ppc32_jit_tcb_t *tcb)
    for(i=0;i<PPC32_INSN_PER_PAGE;i++,ia+=sizeof(ppc_insn_t)) {
       printf("  0x%8.8x: ", ia);
 
-      for(op=cpu->jit_op_array[i];op;op=op->next) {
+      for(op=cpu->jit_op_data.array[i];op;op=op->next) {
          ppc32_op_dump_opcode(op);
          printf(" ");
       }
@@ -929,7 +929,7 @@ static void ppc32_op_optimize(cpu_gen_t *cpu,ppc32_jit_tcb_t *tcb)
       last_cr_update[i] = NULL;
 
    for(i=0;i<PPC32_INSN_PER_PAGE;i++) {
-      for(op=cpu->jit_op_array[i];op;op=op->next) 
+      for(op=cpu->jit_op_data.array[i];op;op=op->next) 
       {
          //ppc32_check_reg_map(ppc_map,host_map);
          cur_ia = tcb->start_ia + (i << 2);
@@ -1077,11 +1077,11 @@ static inline void ppc32_op_emit_start(cpu_ppc_t *cpu,ppc32_jit_tcb_t *tcb)
    cpu_gen_t *c = cpu->gen;
    jit_op_t *op;
 
-   if (c->jit_op_array[tcb->ppc_trans_pos] == NULL)
-      c->jit_op_current = &c->jit_op_array[tcb->ppc_trans_pos];
+   if (c->jit_op_data.array[tcb->ppc_trans_pos] == NULL)
+      c->jit_op_data.current = &c->jit_op_data.array[tcb->ppc_trans_pos];
    else {
-      for(op=c->jit_op_array[tcb->ppc_trans_pos];op;op=op->next)
-         c->jit_op_current = &op->next;
+      for(op=c->jit_op_data.array[tcb->ppc_trans_pos];op;op=op->next)
+         c->jit_op_data.current = &op->next;
    }
 }
 
@@ -1137,7 +1137,7 @@ static int ppc32_op_gen_page(cpu_ppc_t *cpu,ppc32_jit_tcb_t *tcb)
       jit_ptr = tcb->jit_ptr;
 
       /* Generate output code */
-      ppc32_op_gen_list(tcb,i,gcpu->jit_op_array[i],jit_ptr);
+      ppc32_op_gen_list(tcb,i,gcpu->jit_op_data.array[i],jit_ptr);
 
       /* Adjust the JIT buffer if its size is not sufficient */
       ppc32_jit_tcb_adjust_buffer(cpu,tcb);
@@ -1145,12 +1145,12 @@ static int ppc32_op_gen_page(cpu_ppc_t *cpu,ppc32_jit_tcb_t *tcb)
 
    /* Apply patches and free opcodes */
    for(i=0;i<PPC32_INSN_PER_PAGE;i++) {
-      for(iop=gcpu->jit_op_array[i];iop;iop=iop->next)
+      for(iop=gcpu->jit_op_data.array[i];iop;iop=iop->next)
          if (iop->opcode == JIT_OP_INSN_OUTPUT)
             ppc32_jit_tcb_apply_patches(cpu,tcb,iop);
 
-      jit_op_free_list(gcpu,gcpu->jit_op_array[i]);
-      gcpu->jit_op_array[i] = NULL;
+      jit_op_free_list(&gcpu->jit_op_data,gcpu->jit_op_data.array[i]);
+      gcpu->jit_op_data.array[i] = NULL;
    }
 
    /* Add end of page (returns to caller) */

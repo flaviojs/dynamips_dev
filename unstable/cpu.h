@@ -115,10 +115,8 @@ struct cpu_gen {
    /* Statistics */
    m_uint64_t dev_access_counter;
 
-   /* JIT op array for current compiled pages */
-   u_int jit_op_array_size;
-   jit_op_t **jit_op_array;
-   jit_op_t **jit_op_current;
+   /* JIT op data */
+   jit_op_data_t jit_op_data;
    
    /* Translation group ID and TCB descriptor local list */
    int tsg;
@@ -132,9 +130,6 @@ struct cpu_gen {
 
    /* CPU List for a Translation Sharing Group */
    cpu_gen_t **tsg_pprev,*tsg_next;
-
-   /* JIT op pool */
-   jit_op_t *jit_op_pool[JIT_OP_POOL_NR];
 };
 
 /* CPU group definition */

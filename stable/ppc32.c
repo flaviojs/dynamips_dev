@@ -43,7 +43,7 @@ int ppc32_reset(cpu_ppc_t *cpu)
 int ppc32_init(cpu_ppc_t *cpu)
 {
    /* Initialize JIT operations */
-   jit_op_init_cpu(cpu->gen);
+   jit_op_init_cpu(&cpu->gen->jit_op_data);
 
    /* Initialize idle timer */
    cpu->gen->idle_max = 500;

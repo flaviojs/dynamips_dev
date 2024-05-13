@@ -199,7 +199,7 @@ cpu_gen_t *cpu_create(vm_instance_t *vm,u_int type,u_int id)
 
    switch(cpu->type) {
       case CPU_TYPE_MIPS64:
-         cpu->jit_op_array_size = MIPS_INSN_PER_PAGE;
+         cpu->jit_op_data.array_size = MIPS_INSN_PER_PAGE;
          CPU_MIPS64(cpu)->vm = vm;
          CPU_MIPS64(cpu)->gen = cpu;
          mips64_init(CPU_MIPS64(cpu));
@@ -213,7 +213,7 @@ cpu_gen_t *cpu_create(vm_instance_t *vm,u_int type,u_int id)
          break;
 
       case CPU_TYPE_PPC32:
-         cpu->jit_op_array_size = PPC32_INSN_PER_PAGE;
+         cpu->jit_op_data.array_size = PPC32_INSN_PER_PAGE;
          CPU_PPC32(cpu)->vm = vm;
          CPU_PPC32(cpu)->gen = cpu;
          ppc32_init(CPU_PPC32(cpu));
@@ -261,7 +261,7 @@ void cpu_delete(cpu_gen_t *cpu)
             break;
       }
 
-      free(cpu->jit_op_array);
+      free(cpu->jit_op_data.array);
       free(cpu);
    }
 }

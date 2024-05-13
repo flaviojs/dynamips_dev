@@ -44,6 +44,35 @@ pub struct jit_op_data {
 #[no_mangle]
 pub static mut jit_op_blk_sizes: [u_int; JIT_OP_POOL_NR] = [0, 32, 64, 128, 256, 384, 512, 1024];
 
+/// Get a JIT op (allocate one if necessary)
+#[no_mangle]
+pub unsafe extern "C" fn jit_op_get(data: *mut jit_op_data_t, size_index: c_int, opcode: u_int) -> *mut jit_op_t {
+    assert!((size_index as size_t) < JIT_OP_POOL_NR);
+    let mut op: *mut jit_op_t = (*data).pool[size_index as size_t];
+
+    if !op.is_null() {
+        assert!((*op).ob_size_index == size_index as c_uint);
+        (*data).pool[size_index as size_t] = (*op).next;
+    } else {
+        // no block found, allocate one
+        let len: size_t = size_of::<jit_op_t>() + jit_op_blk_sizes[size_index as size_t] as size_t;
+
+        op = libc::malloc(len).cast::<_>();
+        assert!(!op.is_null());
+        (*op).ob_size_index = size_index as c_uint;
+    }
+
+    (*op).opcode = opcode;
+    (*op).param[0] = -1;
+    (*op).param[1] = -1;
+    (*op).param[2] = -1;
+    (*op).next = null_mut();
+    (*op).ob_ptr = (*op).ob_data.as_ptr().cast_mut();
+    (*op).arg_ptr = null_mut();
+    (*op).insn_name = null_mut();
+    op
+}
+
 /// Release a JIT op
 #[no_mangle]
 pub unsafe extern "C" fn jit_op_free(data: *mut jit_op_data_t, op: *mut jit_op_t) {

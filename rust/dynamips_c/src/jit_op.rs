@@ -11,6 +11,30 @@ pub type jit_op_data_t = jit_op_data;
 /// Number of JIT pools
 pub const JIT_OP_POOL_NR: size_t = 8;
 
+/// Invalid register in op
+pub const JIT_OP_INV_REG: c_int = -1;
+
+/// All flags
+pub const JIT_OP_PPC_ALL_FLAGS: c_int = -1;
+
+/// All registers
+pub const JIT_OP_ALL_REGS: c_int = -1;
+
+/// JIT opcodes // TODO enum
+pub const JIT_OP_INVALID: c_uint = 0;
+pub const JIT_OP_INSN_OUTPUT: c_uint = 1;
+pub const JIT_OP_BRANCH_TARGET: c_uint = 2;
+pub const JIT_OP_BRANCH_JUMP: c_uint = 3;
+pub const JIT_OP_EOB: c_uint = 4;
+pub const JIT_OP_LOAD_GPR: c_uint = 5;
+pub const JIT_OP_STORE_GPR: c_uint = 6;
+pub const JIT_OP_UPDATE_FLAGS: c_uint = 7;
+pub const JIT_OP_REQUIRE_FLAGS: c_uint = 8;
+pub const JIT_OP_TRASH_FLAGS: c_uint = 9;
+pub const JIT_OP_ALTER_HOST_REG: c_uint = 10;
+pub const JIT_OP_MOVE_HOST_REG: c_uint = 11;
+pub const JIT_OP_SET_HOST_REG_IMM32: c_uint = 12;
+
 /* JIT operation */
 #[repr(C)]
 #[derive(Debug)]
@@ -43,6 +67,20 @@ pub struct jit_op_data {
 
 #[no_mangle]
 pub static mut jit_op_blk_sizes: [u_int; JIT_OP_POOL_NR] = [0, 32, 64, 128, 256, 384, 512, 1024];
+
+/// Find a specific opcode in a JIT op list
+#[no_mangle]
+pub unsafe extern "C" fn jit_op_find_opcode(op_list: *mut jit_op_t, opcode: u_int) -> *mut jit_op_t {
+    let mut op: *mut jit_op_t = op_list;
+    while !op.is_null() {
+        if (*op).opcode == opcode {
+            return op;
+        }
+        op = (*op).next
+    }
+
+    null_mut()
+}
 
 /// Get a JIT op (allocate one if necessary)
 #[no_mangle]

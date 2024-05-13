@@ -20,10 +20,6 @@
 #include "cpu.h"
 #include "jit_op.h"
 
-u_int jit_op_blk_sizes[JIT_OP_POOL_NR] = {
-   0, 32, 64, 128, 256, 384, 512, 1024,
-};
-
 /* Get a JIT op (allocate one if necessary) */
 jit_op_t *jit_op_get(jit_op_data_t *data,int size_index,u_int opcode)
 {

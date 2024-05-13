@@ -13,8 +13,7 @@
 typedef struct jit_op jit_op_t;
 typedef struct jit_op_data jit_op_data_t;
 
-/* Number of JIT pools */
-#define JIT_OP_POOL_NR  8
+#include "rust_dynamips_c.h"
 
 /* Invalid register in op */
 #define JIT_OP_INV_REG  -1

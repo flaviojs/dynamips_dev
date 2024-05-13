@@ -11,7 +11,6 @@
 #include <pthread.h>
 #include <setjmp.h>
 #include "utils.h"
-#include "jit_op.h"
 
 #include "mips64.h"
 #include "mips64_cp0.h"

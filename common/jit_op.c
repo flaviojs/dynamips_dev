@@ -68,15 +68,3 @@ void jit_op_free_list(jit_op_data_t *data,jit_op_t *op_list)
       jit_op_free(data,op);
    }
 }
-
-/* Initialize JIT op pools for the specified CPU */
-int jit_op_init_cpu(jit_op_data_t *data)
-{
-   data->array = calloc(data->array_size,sizeof(jit_op_t *));
-
-   if (!data->array)
-      return(-1);
-
-   memset(data->pool,0,sizeof(data->pool));
-   return(0);
-}

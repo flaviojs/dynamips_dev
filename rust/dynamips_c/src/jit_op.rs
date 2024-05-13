@@ -44,6 +44,19 @@ pub struct jit_op_data {
 #[no_mangle]
 pub static mut jit_op_blk_sizes: [u_int; JIT_OP_POOL_NR] = [0, 32, 64, 128, 256, 384, 512, 1024];
 
+/// Initialize JIT op pools for the specified CPU
+#[no_mangle]
+pub unsafe extern "C" fn jit_op_init_cpu(data: *mut jit_op_data_t) -> c_int {
+    (*data).array = libc::calloc((*data).array_size as size_t, size_of::<*mut jit_op_t>()).cast::<_>();
+
+    if (*data).array.is_null() {
+        return -1;
+    }
+
+    libc::memset(addr_of_mut!((*data).pool).cast::<_>(), 0, size_of::<[*mut jit_op_t; JIT_OP_POOL_NR]>());
+    0
+}
+
 /// Free memory used by pools
 #[no_mangle]
 pub unsafe extern "C" fn jit_op_free_pools(data: *mut jit_op_data_t) {

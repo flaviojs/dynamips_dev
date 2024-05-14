@@ -14,17 +14,6 @@
 /* Forward declaration for instruction lookup table */
 typedef struct insn_lookup insn_lookup_t;
 
-/* CBM (Class BitMap) array */
-#define CBM_SHIFT       5                 /* log2(32) */
-#define CBM_SIZE        (1 << CBM_SHIFT)  /* Arrays of 32-bits Integers */
-#define CBM_HASH_SIZE   256               /* Size for Hash Tables */
-
-typedef struct cbm_array cbm_array_t;
-struct cbm_array {
-   int nr_entries;   /* Number of entries */
-   int tab[0];       /* Values... */
-};
-
 #define CBM_ARRAY(array,i) ((array)->tab[(i)])
 #define CBM_CSIZE(count)   (((count)*sizeof(int))+sizeof(cbm_array_t))
 

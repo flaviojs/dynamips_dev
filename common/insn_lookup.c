@@ -18,25 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Hash function for a CBM */
-static inline u_int cbm_hash_f(void *ccbm)
-{
-   cbm_array_t *cbm = (cbm_array_t *)ccbm;
-   char *p,*s = (char *)(cbm->tab);
-   u_int h,g,i;
-
-   for(h=0,i=0,p=s;i<(cbm->nr_entries*sizeof(int));p+=1,i++)
-   {
-      h = (h << 4) + *p;
-      if ((g = h & 0xf0000000)) {
-         h = h ^ (g >> 24);
-         h = h ^ g;
-      }
-   }
-
-   return(h);
-}
-
 /* Comparison function for 2 CBM */
 static inline int cbm_cmp_f(void *b1,void *b2)
 {

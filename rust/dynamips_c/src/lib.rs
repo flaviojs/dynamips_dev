@@ -17,6 +17,7 @@ pub mod dynamips_common;
 pub mod fs_fat;
 pub mod fs_nvram;
 pub mod hash;
+pub mod insn_lookup;
 pub mod jit_op;
 pub mod mempool;
 pub mod net;

@@ -1,0 +1,53 @@
+//! Instruction Lookup Tables.
+
+use crate::prelude::*;
+
+pub type cbm_array_t = cbm_array;
+
+/// log2(32)
+pub const CBM_SHIFT: size_t = 5;
+/// Arrays of 32-bits Integers
+pub const CBM_SIZE: size_t = 1 << CBM_SHIFT;
+/// Size for Hash Tables
+pub const CBM_HASH_SIZE: size_t = 256;
+
+/// CBM (Class BitMap) array
+#[repr(C)]
+#[derive(Debug)]
+pub struct cbm_array {
+    /// Number of entries
+    nr_entries: c_int,
+    /// Values...
+    tab: [c_int; 0],
+}
+
+unsafe fn CBM_ARRAY<'a>(array: *mut cbm_array, i: c_int) -> &'a mut c_int {
+    (*array).tab.as_ptr().cast_mut().offset(i as isize).as_mut().unwrap()
+}
+unsafe fn CBM_CSIZE(count: c_int) -> c_int {
+    count * size_of::<c_int>() as c_int + size_of::<cbm_array_t>() as c_int
+}
+
+/// Hash function for a CBM
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn cbm_hash_f(ccbm: *mut c_void) -> c_uint {
+    let cbm: *mut cbm_array_t = ccbm.cast::<_>();
+    let s: *mut c_char = (*cbm).tab.as_ptr().cast_mut().cast::<_>();
+
+    let mut h: c_uint = 0;
+    let mut p: *mut c_char = s;
+    for _ in 0..(*cbm).nr_entries * size_of::<c_int>() as c_int {
+        h = (h << 4) + *p as c_int as c_uint;
+        let g: c_uint = h & 0xf0000000;
+        if g != 0 {
+            h ^= g >> 24;
+            h ^= g;
+        }
+        p = p.add(1);
+    }
+
+    h
+}
+
+#[no_mangle]
+pub extern "C" fn _export(_: *mut cbm_array_t) {}

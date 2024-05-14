@@ -18,12 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Set bit corresponding to a rule number in a CBM */
-static inline void cbm_set_rule(cbm_array_t *cbm,int rule_id)
-{
-   CBM_ARRAY(cbm,(rule_id >> CBM_SHIFT)) |= 1 << (rule_id & (CBM_SIZE-1));
-}
-
 /* Clear bit corresponding to a rule number in a CBM */
 static inline void cbm_unset_rule(cbm_array_t *cbm,int rule_id)
 {

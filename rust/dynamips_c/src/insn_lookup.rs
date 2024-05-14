@@ -64,5 +64,11 @@ pub unsafe extern "C" fn cbm_cmp_f(b1: *mut c_void, b2: *mut c_void) -> c_int {
     1
 }
 
+/// Set bit corresponding to a rule number in a CBM
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn cbm_set_rule(cbm: *mut cbm_array_t, rule_id: c_int) {
+    *CBM_ARRAY(cbm, rule_id >> CBM_SHIFT) |= 1 << (rule_id & (CBM_SIZE - 1) as c_int);
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

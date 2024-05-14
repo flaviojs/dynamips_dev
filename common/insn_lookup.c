@@ -18,13 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Returns TRUE if  bit corresponding to a rule number in a CBM is set */
-static inline int cbm_check_rule(cbm_array_t *cbm,int rule_id)
-{
-   return(CBM_ARRAY(cbm,(rule_id >> CBM_SHIFT)) & 
-	  (1 << (rule_id & (CBM_SIZE-1))));
-}
-
 /* Compute bitwise ANDing of two CBM */
 static inline void 
 cbm_bitwise_and(cbm_array_t *result,cbm_array_t *a1,cbm_array_t *a2)

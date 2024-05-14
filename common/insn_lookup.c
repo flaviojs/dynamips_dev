@@ -18,17 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Compute bitwise ANDing of two CBM */
-static inline void 
-cbm_bitwise_and(cbm_array_t *result,cbm_array_t *a1,cbm_array_t *a2)
-{
-   int i;
-
-   /* Compute bitwise ANDing */
-   for(i=0;i<a1->nr_entries;i++)
-      CBM_ARRAY(result,i) = CBM_ARRAY(a1,i) & CBM_ARRAY(a2,i);
-}
-
 /* Get first matching rule number */
 static inline int cbm_first_match(insn_lookup_t *ilt,cbm_array_t *cbm)
 {

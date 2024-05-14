@@ -82,5 +82,14 @@ pub unsafe extern "C" fn cbm_check_rule(cbm: *mut cbm_array_t, rule_id: c_int) -
     *CBM_ARRAY(cbm, rule_id >> CBM_SHIFT) & (1 << (rule_id & (CBM_SIZE - 1) as c_int))
 }
 
+/// Compute bitwise ANDing of two CBM
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn cbm_bitwise_and(result: *mut cbm_array_t, a1: *mut cbm_array_t, a2: *mut cbm_array_t) {
+    // Compute bitwise ANDing
+    for i in 0..(*a1).nr_entries {
+        *CBM_ARRAY(result, i) = *CBM_ARRAY(a1, i) & *CBM_ARRAY(a2, i);
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

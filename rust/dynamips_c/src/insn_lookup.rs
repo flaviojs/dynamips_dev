@@ -1,8 +1,11 @@
 //! Instruction Lookup Tables.
 
+use crate::hash::*;
 use crate::prelude::*;
 
 pub type cbm_array_t = cbm_array;
+pub type rfc_array_t = rfc_array;
+pub type insn_lookup_t = insn_lookup;
 
 /// log2(32)
 pub const CBM_SHIFT: size_t = 5;
@@ -19,6 +22,52 @@ pub struct cbm_array {
     nr_entries: c_int,
     /// Values...
     tab: [c_int; 0],
+}
+
+// callback function prototype for instruction checking
+pub type ilt_check_cbk_t = Option<unsafe extern "C" fn(arg1: *mut c_void, value: c_int) -> c_int>;
+pub type ilt_get_insn_cbk_t = Option<unsafe extern "C" fn(index: c_int) -> *mut c_void>;
+
+pub const RFC_ARRAY_MAXSIZE: size_t = 65536;
+pub const RFC_ARRAY_MAXBITS: size_t = 16;
+pub const RFC_ARRAY_NUMBER: size_t = 3;
+
+/// RFC (Recursive Flow Classification) arrays
+#[repr(C)]
+#[derive(Debug)]
+pub struct rfc_array {
+    pub parent0: *mut rfc_array_t,
+    pub parent1: *mut rfc_array_t,
+    pub nr_elements: c_int,
+
+    /// Number of Equivalent ID
+    pub nr_eqid: c_int,
+
+    /// Hash Table for Class Bitmaps
+    pub cbm_hash: *mut hash_table_t,
+
+    /// Array to get Class Bitmaps from IDs
+    pub id2cbm: *mut *mut cbm_array_t,
+
+    /// Equivalent ID (eqID) array
+    pub eqID: [c_int; 0],
+}
+
+/// Instruction lookup table
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct insn_lookup {
+    /// Number of instructions
+    pub nr_insn: c_int,
+    /// Size of Class Bitmaps
+    pub cbm_size: c_int,
+
+    pub get_insn: ilt_get_insn_cbk_t,
+    pub chk_lo: ilt_check_cbk_t,
+    pub chk_hi: ilt_check_cbk_t,
+
+    /// RFC tables
+    pub rfct: [*mut rfc_array_t; RFC_ARRAY_NUMBER],
 }
 
 unsafe fn CBM_ARRAY<'a>(array: *mut cbm_array, i: c_int) -> &'a mut c_int {
@@ -89,6 +138,18 @@ pub unsafe extern "C" fn cbm_bitwise_and(result: *mut cbm_array_t, a1: *mut cbm_
     for i in 0..(*a1).nr_entries {
         *CBM_ARRAY(result, i) = *CBM_ARRAY(a1, i) & *CBM_ARRAY(a2, i);
     }
+}
+
+/// Get first matching rule number
+#[no_mangle] // TODO ptivate
+pub unsafe extern "C" fn cbm_first_match(ilt: *mut insn_lookup_t, cbm: *mut cbm_array_t) -> c_int {
+    for i in 0..(*ilt).nr_insn {
+        if cbm_check_rule(cbm, i) != 0 {
+            return i;
+        }
+    }
+
+    -1
 }
 
 #[no_mangle]

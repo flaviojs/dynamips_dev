@@ -17,50 +17,11 @@ typedef struct insn_lookup insn_lookup_t;
 #define CBM_ARRAY(array,i) ((array)->tab[(i)])
 #define CBM_CSIZE(count)   (((count)*sizeof(int))+sizeof(cbm_array_t))
 
-/* callback function prototype for instruction checking */
-typedef int (*ilt_check_cbk_t)(void *,int value);
-typedef void *(*ilt_get_insn_cbk_t)(int index);
-
-/* RFC (Recursive Flow Classification) arrays */
-#define RFC_ARRAY_MAXSIZE  65536
-#define RFC_ARRAY_MAXBITS  16
-#define RFC_ARRAY_NUMBER   3
-
-typedef struct rfc_array rfc_array_t;
-struct rfc_array {
-   rfc_array_t *parent0,*parent1;
-   int nr_elements;
-
-   /* Number of Equivalent ID */
-   int nr_eqid;
-
-   /* Hash Table for Class Bitmaps */
-   hash_table_t *cbm_hash;
-
-   /* Array to get Class Bitmaps from IDs */
-   cbm_array_t **id2cbm;
-
-   /* Equivalent ID (eqID) array */
-   int eqID[0];
-};
-
 /* Equivalent Classes */
 typedef struct rfc_eqclass rfc_eqclass_t;
 struct rfc_eqclass {
    cbm_array_t *cbm;   /* Class Bitmap */
    int eqID;           /* Index associated to this class */
-};
-
-/* Instruction lookup table */
-struct insn_lookup {
-   int nr_insn;    /* Number of instructions */
-   int cbm_size;   /* Size of Class Bitmaps */
-
-   ilt_get_insn_cbk_t get_insn;
-   ilt_check_cbk_t chk_lo,chk_hi;
-
-   /* RFC tables */
-   rfc_array_t *rfct[RFC_ARRAY_NUMBER];
 };
 
 /* Instruction lookup */

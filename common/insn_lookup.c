@@ -18,18 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Get first matching rule number */
-static inline int cbm_first_match(insn_lookup_t *ilt,cbm_array_t *cbm)
-{
-   int i;
-
-   for(i=0;i<ilt->nr_insn;i++)
-      if (cbm_check_rule(cbm,i)) 
-         return(i);
-   
-   return(-1);
-}
-
 /* Create a class bitmap (CBM) */
 static cbm_array_t *cbm_create(insn_lookup_t *ilt)
 {

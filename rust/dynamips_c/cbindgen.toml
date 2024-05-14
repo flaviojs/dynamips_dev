@@ -12,6 +12,7 @@ typedef struct cbm_array cbm_array_t;
 typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;
+typedef struct insn_lookup insn_lookup_t;
 typedef struct jit_op jit_op_t;
 typedef struct jit_op_data jit_op_data_t;
 typedef struct memblock memblock_t;
@@ -23,6 +24,7 @@ typedef struct rbtree_node rbtree_node;
 typedef struct rbtree_tree rbtree_tree;
 typedef struct registry registry_t;
 typedef struct registry_entry registry_entry_t;
+typedef struct rfc_array rfc_array_t;
 typedef struct timer_entry timer_entry_t;
 typedef struct timer_queue timer_queue_t;
 

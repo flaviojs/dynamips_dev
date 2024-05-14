@@ -49,5 +49,20 @@ pub unsafe extern "C" fn cbm_hash_f(ccbm: *mut c_void) -> c_uint {
     h
 }
 
+/// Comparison function for 2 CBM
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn cbm_cmp_f(b1: *mut c_void, b2: *mut c_void) -> c_int {
+    let cbm1: *mut cbm_array_t = b1.cast::<_>();
+    let cbm2: *mut cbm_array_t = b2.cast::<_>();
+
+    for i in 0..(*cbm1).nr_entries as isize {
+        if *(*cbm1).tab.as_ptr().offset(i) != *(*cbm2).tab.as_ptr().offset(i) {
+            return 0;
+        }
+    }
+
+    1
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

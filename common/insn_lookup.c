@@ -18,20 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Comparison function for 2 CBM */
-static inline int cbm_cmp_f(void *b1,void *b2)
-{
-   cbm_array_t *cbm1 = (cbm_array_t *)b1;
-   cbm_array_t *cbm2 = (cbm_array_t *)b2;
-   int i;
-   
-   for(i=0;i<cbm1->nr_entries;i++)
-      if (cbm1->tab[i] != cbm2->tab[i])
-         return(FALSE);
-   
-   return(TRUE);
-}
-
 /* Set bit corresponding to a rule number in a CBM */
 static inline void cbm_set_rule(cbm_array_t *cbm,int rule_id)
 {

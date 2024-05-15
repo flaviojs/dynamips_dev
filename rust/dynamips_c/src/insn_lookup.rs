@@ -512,6 +512,12 @@ pub unsafe extern "C" fn ilt_load_table(fd: *mut libc::FILE) -> *mut insn_lookup
     ilt
 }
 
+/// Build a filename for a cached ILT table on disk
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_build_filename(table_name: *mut c_char) -> *mut c_char {
+    dyn_sprintf!(cstr!("ilt_%s_%s"), sw_version_tag, table_name)
+}
+
 /// Destroy an instruction lookup table
 #[no_mangle]
 pub unsafe extern "C" fn ilt_destroy(ilt: *mut insn_lookup_t) {

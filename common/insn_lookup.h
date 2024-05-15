@@ -17,13 +17,6 @@ typedef struct insn_lookup insn_lookup_t;
 #define CBM_ARRAY(array,i) ((array)->tab[(i)])
 #define CBM_CSIZE(count)   (((count)*sizeof(int))+sizeof(cbm_array_t))
 
-/* Instruction lookup */
-static forced_inline int ilt_get_index(rfc_array_t *a1,rfc_array_t *a2,
-                                       int i1,int i2)
-{
-   return((a1->eqID[i1]*a2->nr_eqid) + a2->eqID[i2]);
-}
-
 static forced_inline int ilt_get_idx(insn_lookup_t *ilt,int a1,int a2,
                                      int i1,int i2)
 {

@@ -558,6 +558,12 @@ pub unsafe extern "C" fn ilt_cache_store(table_name: *mut c_char, ilt: *mut insn
     0
 }
 
+/// Instruction lookup
+#[no_mangle]
+pub unsafe extern "C" fn ilt_get_index(a1: *mut rfc_array_t, a2: *mut rfc_array_t, i1: c_int, i2: c_int) -> c_int {
+    (*(*a1).eqID.as_ptr().offset(i1 as isize) * (*a2).nr_eqid) + *(*a2).eqID.as_ptr().offset(i2 as isize)
+}
+
 /// Create an instruction lookup table
 #[no_mangle]
 pub unsafe extern "C" fn ilt_create(table_name: *mut c_char, nr_insn: c_int, get_insn: ilt_get_insn_cbk_t, chk_lo: ilt_check_cbk_t, chk_hi: ilt_check_cbk_t) -> *mut insn_lookup_t {

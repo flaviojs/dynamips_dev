@@ -18,27 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Try to load a cached ILT table from disk */
-static insn_lookup_t *ilt_cache_load(char *table_name)
-{
-   insn_lookup_t *ilt;
-   char *filename;
-   FILE *fd;
-
-   if (!(filename = ilt_build_filename(table_name)))
-      return NULL;
-
-   if (!(fd = fopen(filename,"rb"))) {
-      free(filename);
-      return NULL;
-   }
-
-   ilt = ilt_load_table(fd);
-   fclose(fd);
-   free(filename);
-   return ilt;
-}
-
 /* Store the specified ILT table on disk for future use (cache) */
 static int ilt_cache_store(char *table_name,insn_lookup_t *ilt)
 {

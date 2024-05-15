@@ -518,6 +518,26 @@ pub unsafe extern "C" fn ilt_build_filename(table_name: *mut c_char) -> *mut c_c
     dyn_sprintf!(cstr!("ilt_%s_%s"), sw_version_tag, table_name)
 }
 
+/// Try to load a cached ILT table from disk
+#[no_mangle] // TOD private
+pub unsafe extern "C" fn ilt_cache_load(table_name: *mut c_char) -> *mut insn_lookup_t {
+    let filename: *mut c_char = ilt_build_filename(table_name);
+    if filename.is_null() {
+        return null_mut();
+    }
+
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("rb"));
+    if fd.is_null() {
+        libc::free(filename.cast::<_>());
+        return null_mut();
+    }
+
+    let ilt: *mut insn_lookup_t = ilt_load_table(fd);
+    libc::fclose(fd);
+    libc::free(filename.cast::<_>());
+    ilt
+}
+
 /// Destroy an instruction lookup table
 #[no_mangle]
 pub unsafe extern "C" fn ilt_destroy(ilt: *mut insn_lookup_t) {

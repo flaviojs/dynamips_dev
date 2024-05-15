@@ -486,5 +486,21 @@ pub unsafe extern "C" fn ilt_check_cached_table(ilt: *mut insn_lookup_t) -> c_in
     0
 }
 
+/// Destroy an instruction lookup table
+#[no_mangle]
+pub unsafe extern "C" fn ilt_destroy(ilt: *mut insn_lookup_t) {
+    assert!(!ilt.is_null());
+
+    // Free instruction opcodes
+    for i in 0..RFC_ARRAY_NUMBER {
+        if !(*ilt).rfct[i].is_null() {
+            rfc_free_array((*ilt).rfct[i]);
+        }
+    }
+
+    // Free instruction lookup table
+    libc::free(ilt.cast::<_>());
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

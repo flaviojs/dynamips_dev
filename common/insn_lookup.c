@@ -123,20 +123,3 @@ insn_lookup_t *ilt_create(char *table_name,
    ilt_cache_store(table_name,ilt);
    return(ilt);
 }
-
-/* Destroy an instruction lookup table */
-void ilt_destroy(insn_lookup_t *ilt)
-{
-   int i;
-
-   assert(ilt);
-
-   /* Free instruction opcodes */
-   for (i = 0; i < RFC_ARRAY_NUMBER; i++) {
-      if (ilt->rfct[i])
-         rfc_free_array(ilt->rfct[i]);
-   }
-
-   /* Free instruction lookup table */
-   free(ilt);
-}

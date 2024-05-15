@@ -18,16 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Postprocessing */
-static void ilt_postprocessing(insn_lookup_t *ilt)
-{
-   rfc_array_t *rfct = ilt->rfct[2];
-   int i;
-
-   for(i=0;i<rfct->nr_elements;i++)
-      rfct->eqID[i] = cbm_first_match(ilt,rfct->id2cbm[rfct->eqID[i]]);
-}
-
 /* Instruction lookup table compilation */
 static void ilt_compile(insn_lookup_t *ilt)
 {  

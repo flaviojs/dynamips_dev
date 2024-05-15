@@ -368,5 +368,15 @@ pub unsafe extern "C" fn ilt_phase_j(ilt: *mut insn_lookup_t, p0: c_int, p1: c_i
     (*ilt).rfct[res as usize] = rfct;
 }
 
+/// Postprocessing
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_postprocessing(ilt: *mut insn_lookup_t) {
+    let rfct: *mut rfc_array_t = (*ilt).rfct[2];
+
+    for i in 0..(*rfct).nr_elements as isize {
+        *(*rfct).eqID.as_ptr().cast_mut().offset(i) = cbm_first_match(ilt, *(*rfct).id2cbm.offset(*(*rfct).eqID.as_ptr().offset(i) as isize));
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

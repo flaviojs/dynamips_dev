@@ -12,6 +12,7 @@ crate-type = ["staticlib","rlib"]
 function_name = "0.3"
 libc = "0.2"
 libc_alloc = "1.0"
+sprintf = "0.3"
 
 [build-dependencies]
 autocfg = "1"

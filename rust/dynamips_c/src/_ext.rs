@@ -113,6 +113,59 @@ impl<T> std::convert::From<*mut T> for CArray<T> {
     }
 }
 
+/// Wrapper to allow formatting of std::ffi types by the sprintf crate.
+pub struct Printf<T>(pub T);
+macro_rules! impl_Printf {
+    ($($T:ident),*) => {
+        $(
+            impl sprintf::Printf for Printf<$T> {
+                fn format(&self, x: &sprintf::ConversionSpecifier) -> Result<String, sprintf::PrintfError> {
+                    self.0.format(x)
+                }
+                fn as_int(&self) -> Option<i32> {
+                    self.0.as_int()
+                }
+            }
+        )*
+    };
+    ($(&$T:ident),*) => {
+        $(
+            impl sprintf::Printf for Printf<&$T> {
+                fn format(&self, x: &sprintf::ConversionSpecifier) -> Result<String, sprintf::PrintfError> {
+                    self.0.format(x)
+                }
+                fn as_int(&self) -> Option<i32> {
+                    self.0.as_int()
+                }
+            }
+        )*
+    };
+}
+impl_Printf!(u64, i64, u32, i32, u16, i16, u8, i8, usize, isize, f64, f32, char, String, CString);
+impl_Printf!(&str, &CStr);
+impl sprintf::Printf for Printf<*const c_char> {
+    fn format(&self, x: &sprintf::ConversionSpecifier) -> Result<String, sprintf::PrintfError> {
+        Printf(self.0.cast_mut()).format(x)
+    }
+    fn as_int(&self) -> Option<i32> {
+        Printf(self.0.cast_mut()).as_int()
+    }
+}
+impl sprintf::Printf for Printf<*mut c_char> {
+    fn format(&self, x: &sprintf::ConversionSpecifier) -> Result<String, sprintf::PrintfError> {
+        if self.0.is_null() {
+            Err(sprintf::PrintfError::WrongType) // null
+        } else if let Ok(s) = unsafe { CStr::from_ptr(self.0).to_str() } {
+            s.format(x)
+        } else {
+            Err(sprintf::PrintfError::WrongType) // not utf8
+        }
+    }
+    fn as_int(&self) -> Option<i32> {
+        None
+    }
+}
+
 /// Wrapper around a volatile type.
 /// cbindgen:no-export
 #[repr(transparent)]

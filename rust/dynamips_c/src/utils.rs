@@ -3,6 +3,36 @@
 use crate::dynamips_common::*;
 use crate::prelude::*;
 
+/// Dynamic sprintf
+#[macro_export]
+macro_rules! dyn_sprintf {
+    ($fmt:expr$(, $arg:expr)*) => {
+        {
+            let fmt: *const c_char = $fmt;
+            let args: &[&dyn sprintf::Printf] = &[$(&Printf($arg)),*];
+            match sprintf::vsprintf(CStr::from_ptr(fmt).to_str().unwrap(), args) {
+                Ok(s) => {
+                    let p = libc::malloc(s.len() + 1);
+                    if !p.is_null() {
+                        libc::memcpy(p, s.as_str().as_ptr().cast::<_>(), s.len());
+                        *p.cast::<u8>().add(s.len()) = 0;
+                        p.cast::<c_char>()
+                    } else {
+                        libc::perror(cstr!("dyn_sprintf: malloc"));
+                        null_mut()
+                    }
+                }
+                Err(err) => {
+                    let msg = CString::new(format!("dyn_sprintf: {}", err)).unwrap();
+                    libc::fputs(msg.as_c_str().as_ptr(), c_stderr());
+                    null_mut()
+                }
+            }
+        }
+    }
+}
+pub use dyn_sprintf;
+
 /// Get current time in number of msec since epoch
 #[no_mangle]
 pub unsafe extern "C" fn m_gettime() -> m_tmcnt_t {

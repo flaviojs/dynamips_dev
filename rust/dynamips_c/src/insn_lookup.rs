@@ -1,7 +1,9 @@
 //! Instruction Lookup Tables.
 
+use crate::dynamips::*;
 use crate::hash::*;
 use crate::prelude::*;
+use crate::utils::*;
 
 pub type cbm_array_t = cbm_array;
 pub type rfc_array_t = rfc_array;
@@ -385,6 +387,31 @@ pub unsafe extern "C" fn ilt_compile(ilt: *mut insn_lookup_t) {
     ilt_phase_0(ilt, 1, (*ilt).chk_lo);
     ilt_phase_j(ilt, 0, 1, 2);
     ilt_postprocessing(ilt);
+}
+
+/// Dump an instruction lookup table
+unsafe fn ilt_dump(table_name: *mut c_char, ilt: *mut insn_lookup_t) -> c_int {
+    let filename: *mut c_char = dyn_sprintf!(cstr!("ilt_dump_%s_%s.txt"), sw_version_tag, table_name);
+    assert!(!filename.is_null());
+
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("w"));
+    assert!(!fd.is_null());
+
+    libc::fprintf(fd, cstr!("ILT %p: nr_insn=%d, cbm_size=%d\n"), ilt, (*ilt).nr_insn, (*ilt).cbm_size);
+
+    for i in 0..RFC_ARRAY_NUMBER {
+        let rfct: *mut rfc_array_t = (*ilt).rfct[i];
+
+        libc::fprintf(fd, cstr!("RFCT %d: nr_elements=%d, nr_eqid=%d\n"), i as c_int, (*rfct).nr_elements, (*rfct).nr_eqid);
+
+        for j in 0..(*rfct).nr_elements {
+            libc::fprintf(fd, cstr!("  (0x%4.4x,0x%4.4x) = 0x%4.4x\n"), i as c_int, j, *(*rfct).eqID.as_ptr().offset(j as isize));
+        }
+    }
+
+    libc::fclose(fd);
+    libc::free(filename.cast::<_>());
+    0
 }
 
 #[no_mangle]

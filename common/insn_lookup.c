@@ -18,38 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Dump an instruction lookup table */
-_Unused static int ilt_dump(char *table_name,insn_lookup_t *ilt)
-{
-   rfc_array_t *rfct;
-   char *filename;
-   FILE *fd;
-   int i,j;
-   
-   filename = dyn_sprintf("ilt_dump_%s_%s.txt",sw_version_tag,table_name);
-   assert(filename != NULL);
-
-   fd = fopen(filename,"w");
-   assert(fd != NULL);
-   
-   fprintf(fd,"ILT %p: nr_insn=%d, cbm_size=%d\n",
-         ilt,ilt->nr_insn,ilt->cbm_size);
-
-   for(i=0;i<RFC_ARRAY_NUMBER;i++) {
-      rfct = ilt->rfct[i];
-      
-      fprintf(fd,"RFCT %d: nr_elements=%d, nr_eqid=%d\n",
-              i,rfct->nr_elements,rfct->nr_eqid);
-      
-      for(j=0;j<rfct->nr_elements;j++)
-         fprintf(fd,"  (0x%4.4x,0x%4.4x) = 0x%4.4x\n",i,j,rfct->eqID[j]);
-   }
-   
-   fclose(fd);
-   free(filename);
-   return(0);
-}
-
 /* Write the specified RFC array to disk */
 static void ilt_store_rfct(FILE *fd,int id,rfc_array_t *rfct)
 {

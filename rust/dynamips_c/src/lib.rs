@@ -13,6 +13,7 @@ pub mod base64;
 pub mod cisco_eeprom;
 pub mod crc;
 pub mod dev_ds1620;
+pub mod dynamips;
 pub mod dynamips_common;
 pub mod fs_fat;
 pub mod fs_nvram;

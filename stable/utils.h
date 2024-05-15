@@ -178,12 +178,6 @@ static inline int bits(m_uint32_t val,int start,int end)
    return((val >> start) & ((1 << (end-start+1)) - 1));
 }
 
-/* Normalize a size */
-static inline u_int normalize_size(u_int val,u_int nb,int shift) 
-{
-   return(((val+nb-1) & ~(nb-1)) >> shift);
-}
-
 /* Convert a 16-bit number between little and big endian */
 static forced_inline m_uint16_t swap16(m_uint16_t value)
 {

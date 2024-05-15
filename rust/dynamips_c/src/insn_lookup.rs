@@ -558,6 +558,35 @@ pub unsafe extern "C" fn ilt_cache_store(table_name: *mut c_char, ilt: *mut insn
     0
 }
 
+/// Create an instruction lookup table
+#[no_mangle]
+pub unsafe extern "C" fn ilt_create(table_name: *mut c_char, nr_insn: c_int, get_insn: ilt_get_insn_cbk_t, chk_lo: ilt_check_cbk_t, chk_hi: ilt_check_cbk_t) -> *mut insn_lookup_t {
+    // Try to load a cached table from disk
+    let mut ilt: *mut insn_lookup_t = ilt_cache_load(table_name);
+    if !ilt.is_null() {
+        libc::printf(cstr!("ILT: loaded table \"%s\" from cache.\n"), table_name);
+        return ilt;
+    }
+
+    // We have to build the full table...
+    ilt = libc::malloc(size_of::<insn_lookup_t>()).cast::<_>();
+    assert!(!ilt.is_null());
+    libc::memset(ilt.cast::<_>(), 0, size_of::<insn_lookup_t>());
+
+    (*ilt).cbm_size = normalize_size(nr_insn as c_uint, CBM_SIZE as c_uint, CBM_SHIFT as c_int) as c_int;
+    (*ilt).nr_insn = nr_insn;
+    (*ilt).get_insn = get_insn;
+    (*ilt).chk_lo = chk_lo;
+    (*ilt).chk_hi = chk_hi;
+
+    // Compile the instruction opcodes
+    ilt_compile(ilt);
+
+    // Store the result on disk for future exec
+    ilt_cache_store(table_name, ilt);
+    ilt
+}
+
 /// Destroy an instruction lookup table
 #[no_mangle]
 pub unsafe extern "C" fn ilt_destroy(ilt: *mut insn_lookup_t) {

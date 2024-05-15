@@ -33,6 +33,12 @@ macro_rules! dyn_sprintf {
 }
 pub use dyn_sprintf;
 
+/// Normalize a size
+#[no_mangle]
+pub unsafe extern "C" fn normalize_size(val: u_int, nb: u_int, shift: c_int) -> u_int {
+    ((val + nb - 1) & !(nb - 1)) >> shift
+}
+
 /// Get current time in number of msec since epoch
 #[no_mangle]
 pub unsafe extern "C" fn m_gettime() -> m_tmcnt_t {

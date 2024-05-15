@@ -241,5 +241,37 @@ pub unsafe extern "C" fn rfc_alloc_array(nr_elements: c_int) -> *mut rfc_array_t
     array
 }
 
+/// Free value of cbm_hash
+unsafe extern "C" fn rfc_free_array_cbm_hash_value(_key: *mut c_void, value: *mut c_void, _opt_arg: *mut c_void) {
+    libc::free(value); // rfc_eqclass_t *
+}
+
+/// Free an array for Recursive Flow Classification
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn rfc_free_array(array: *mut rfc_array_t) {
+    assert!(!array.is_null());
+
+    // Free hash table for Class Bitmaps
+    if !(*array).cbm_hash.is_null() {
+        hash_table_foreach((*array).cbm_hash, Some(rfc_free_array_cbm_hash_value), array.cast::<_>());
+        hash_table_delete((*array).cbm_hash);
+        (*array).cbm_hash = null_mut();
+    }
+
+    // Free table for converting ID to CBM
+    if !(*array).id2cbm.is_null() {
+        for i in 0..(*array).nr_elements as isize {
+            if !(*(*array).id2cbm.offset(i)).is_null() {
+                libc::free((*(*array).id2cbm.offset(i)).cast::<_>());
+            }
+        }
+        libc::free((*array).id2cbm.cast::<_>());
+        (*array).id2cbm = null_mut();
+    }
+
+    // Free array
+    libc::free(array.cast::<_>());
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

@@ -273,5 +273,19 @@ pub unsafe extern "C" fn rfc_free_array(array: *mut rfc_array_t) {
     libc::free(array.cast::<_>());
 }
 
+/// Check an instruction with specified parameter
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn rfc_check_insn(ilt: *mut insn_lookup_t, cbm: *mut cbm_array_t, pcheck: ilt_check_cbk_t, value: c_int) {
+    for i in 0..(*ilt).nr_insn {
+        let p: *mut c_void = (*ilt).get_insn.unwrap()(i);
+
+        if pcheck.unwrap()(p, value) != 0 {
+            cbm_set_rule(cbm, i);
+        } else {
+            cbm_unset_rule(cbm, i);
+        }
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

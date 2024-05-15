@@ -18,23 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Check an instruction with specified parameter */
-static void rfc_check_insn(insn_lookup_t *ilt,cbm_array_t *cbm,
-                           ilt_check_cbk_t pcheck,int value)
-{
-   void *p;
-   int i;
-
-   for(i=0;i<ilt->nr_insn;i++) {
-      p = ilt->get_insn(i);
-
-      if (pcheck(p,value)) 
-         cbm_set_rule(cbm,i);
-      else
-         cbm_unset_rule(cbm,i);
-   }
-}
-
 /* RFC Chunk preprocessing: phase 0 */
 static rfc_array_t *rfc_phase_0(insn_lookup_t *ilt,ilt_check_cbk_t pcheck)
 {

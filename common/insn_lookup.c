@@ -18,39 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* RFC Chunk preprocessing: phase 0 */
-static rfc_array_t *rfc_phase_0(insn_lookup_t *ilt,ilt_check_cbk_t pcheck)
-{
-   rfc_eqclass_t *eqcl;
-   rfc_array_t *rfct;
-   cbm_array_t *bmp;
-   int i;
-
-   /* allocate a temporary class bitmap */
-   bmp = cbm_create(ilt);
-   assert(bmp);
-
-   /* Allocate a new RFC array of 16-bits entries */
-   rfct = rfc_alloc_array(RFC_ARRAY_MAXSIZE);
-   assert(rfct);
-
-   for(i=0;i<RFC_ARRAY_MAXSIZE;i++)
-   {
-      /* determine all instructions that match this value */
-      rfc_check_insn(ilt,bmp,pcheck,i);
-
-      /* get equivalent class for this bitmap */
-      eqcl = cbm_get_eqclass(rfct,bmp);
-      assert(eqcl);
-
-      /* fill the RFC table */
-      rfct->eqID[i] = eqcl->eqID;
-   }
-
-   free(bmp);
-   return rfct;
-}
-
 /* RFC Chunk preprocessing: phase j (j > 0) */
 static rfc_array_t *rfc_phase_j(insn_lookup_t *ilt,rfc_array_t *p0,
                                 rfc_array_t *p1)

@@ -287,5 +287,32 @@ pub unsafe extern "C" fn rfc_check_insn(ilt: *mut insn_lookup_t, cbm: *mut cbm_a
     }
 }
 
+/// RFC Chunk preprocessing: phase 0
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn rfc_phase_0(ilt: *mut insn_lookup_t, pcheck: ilt_check_cbk_t) -> *mut rfc_array_t {
+    // allocate a temporary class bitmap
+    let bmp: *mut cbm_array_t = cbm_create(ilt);
+    assert!(!bmp.is_null());
+
+    // Allocate a new RFC array of 16-bits entries
+    let rfct: *mut rfc_array_t = rfc_alloc_array(RFC_ARRAY_MAXSIZE as c_int);
+    assert!(!rfct.is_null());
+
+    for i in 0..RFC_ARRAY_MAXSIZE {
+        // determine all instructions that match this value
+        rfc_check_insn(ilt, bmp, pcheck, i as c_int);
+
+        // get equivalent class for this bitmap */
+        let eqcl: *mut rfc_eqclass_t = cbm_get_eqclass(rfct, bmp);
+        assert!(!eqcl.is_null());
+
+        // fill the RFC table
+        *(*rfct).eqID.as_ptr().cast_mut().add(i) = (*eqcl).eqID;
+    }
+
+    libc::free(bmp.cast::<_>());
+    rfct
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

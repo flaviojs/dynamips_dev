@@ -378,5 +378,14 @@ pub unsafe extern "C" fn ilt_postprocessing(ilt: *mut insn_lookup_t) {
     }
 }
 
+/// Instruction lookup table compilation
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_compile(ilt: *mut insn_lookup_t) {
+    ilt_phase_0(ilt, 0, (*ilt).chk_hi);
+    ilt_phase_0(ilt, 1, (*ilt).chk_lo);
+    ilt_phase_j(ilt, 0, 1, 2);
+    ilt_postprocessing(ilt);
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

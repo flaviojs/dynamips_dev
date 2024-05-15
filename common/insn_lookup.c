@@ -18,15 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Instruction lookup table compilation */
-static void ilt_compile(insn_lookup_t *ilt)
-{  
-   ilt_phase_0(ilt,0,ilt->chk_hi);
-   ilt_phase_0(ilt,1,ilt->chk_lo);
-   ilt_phase_j(ilt,0,1,2);
-   ilt_postprocessing(ilt);
-}
-
 /* Dump an instruction lookup table */
 _Unused static int ilt_dump(char *table_name,insn_lookup_t *ilt)
 {

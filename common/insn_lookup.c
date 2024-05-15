@@ -18,16 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Compute RFC phase 0 */
-static void ilt_phase_0(insn_lookup_t *ilt,int idx,ilt_check_cbk_t pcheck)
-{
-   rfc_array_t *rfct;
-
-   rfct = rfc_phase_0(ilt,pcheck);
-   assert(rfct);
-   ilt->rfct[idx] = rfct;
-}
-
 /* Compute RFC phase j */
 static void ilt_phase_j(insn_lookup_t *ilt,int p0,int p1,int res)
 {

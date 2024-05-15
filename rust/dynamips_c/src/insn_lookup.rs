@@ -352,5 +352,13 @@ pub unsafe extern "C" fn rfc_phase_j(ilt: *mut insn_lookup_t, p0: *mut rfc_array
     rfct
 }
 
+/// Compute RFC phase 0
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_phase_0(ilt: *mut insn_lookup_t, idx: c_int, pcheck: ilt_check_cbk_t) {
+    let rfct: *mut rfc_array_t = rfc_phase_0(ilt, pcheck);
+    assert!(!rfct.is_null());
+    (*ilt).rfct[idx as usize] = rfct;
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

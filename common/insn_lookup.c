@@ -18,42 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Load an RFC array from disk */
-static int ilt_load_rfct(FILE *fd,insn_lookup_t *ilt)
-{
-   u_int id,nr_elements,nr_eqid;
-   rfc_array_t *rfct;
-   size_t len;
-
-   /* Read ID and number of elements */
-   if ((fread(&id,sizeof(id),1,fd) != 1) ||
-       (fread(&nr_elements,sizeof(nr_elements),1,fd) != 1) ||
-       (fread(&nr_eqid,sizeof(nr_eqid),1,fd) != 1))
-      return(-1);
-      
-   if ((id >= RFC_ARRAY_NUMBER) || (nr_elements > RFC_ARRAY_MAXSIZE))
-      return(-1);
-
-   /* Allocate the RFC array with the eqID table */
-   len = sizeof(*rfct) + (nr_elements * sizeof(int));
-
-   if (!(rfct = malloc(len)))
-      return(-1);
-
-   memset(rfct,0,sizeof(*rfct));
-   rfct->nr_elements = nr_elements;
-   rfct->nr_eqid = nr_eqid;
-   
-   /* Read the equivalent ID array */
-   if (fread(rfct->eqID,sizeof(int),nr_elements,fd) != nr_elements) {
-      free(rfct);
-      return(-1);
-   }
-
-   ilt->rfct[id] = rfct;
-   return(0);
-}
-
 /* Check an instruction table loaded from disk */
 static int ilt_check_cached_table(insn_lookup_t *ilt)
 {

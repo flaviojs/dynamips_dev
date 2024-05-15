@@ -435,5 +435,43 @@ pub unsafe extern "C" fn ilt_store_table(fd: *mut libc::FILE, ilt: *mut insn_loo
     }
 }
 
+/// Load an RFC array from disk
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_load_rfct(fd: *mut libc::FILE, ilt: *mut insn_lookup_t) -> c_int {
+    let mut id: c_int = 0;
+    let mut nr_elements: c_int = 0;
+    let mut nr_eqid: c_int = 0;
+
+    // Read ID and number of elements
+    if libc::fread(addr_of_mut!(id).cast::<_>(), size_of::<c_int>(), 1, fd) != 1 || libc::fread(addr_of_mut!(nr_elements).cast::<_>(), size_of::<c_int>(), 1, fd) != 1 || libc::fread(addr_of_mut!(nr_eqid).cast::<_>(), size_of::<c_int>(), 1, fd) != 1 {
+        return -1;
+    }
+
+    if id >= RFC_ARRAY_NUMBER as c_int || nr_elements > RFC_ARRAY_MAXSIZE as c_int {
+        return -1;
+    }
+
+    // Allocate the RFC array with the eqID table
+    let len: size_t = size_of::<rfc_array_t>() + (nr_elements as size_t * size_of::<c_int>());
+
+    let rfct: *mut rfc_array_t = libc::malloc(len).cast::<_>();
+    if !rfct.is_null() {
+        return -1;
+    }
+
+    libc::memset(rfct.cast::<_>(), 0, size_of::<rfc_array_t>());
+    (*rfct).nr_elements = nr_elements;
+    (*rfct).nr_eqid = nr_eqid;
+
+    // Read the equivalent ID array
+    if libc::fread((*rfct).eqID.as_ptr().cast_mut().cast::<_>(), size_of::<c_int>(), nr_elements as size_t, fd) != nr_elements as size_t {
+        libc::free(rfct.cast::<_>());
+        return -1;
+    }
+
+    (*ilt).rfct[id as usize] = rfct;
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

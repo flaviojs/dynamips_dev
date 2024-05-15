@@ -19,7 +19,7 @@
 #include "ppc32_exec.h"
 #include "ppc32_mem.h"
 #include "memory.h"
-#include "insn_lookup.h"
+#include "rust_dynamips_c.h"
 #include "dynamips.h"
 
 /* Forward declaration of instruction array */

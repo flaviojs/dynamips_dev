@@ -20,7 +20,7 @@
 #include "vm.h"
 #include "mips64_exec.h"
 #include "memory.h"
-#include "insn_lookup.h"
+#include "rust_dynamips_c.h"
 #include "dynamips.h"
 
 /* Forward declaration of instruction array */

@@ -21,7 +21,6 @@
 #include "mips64_cp0.h"
 #include "mips64_exec.h"
 #include "mips64_jit.h"
-#include "insn_lookup.h"
 #include "memory.h"
 #include "rust_dynamips_c.h"
 

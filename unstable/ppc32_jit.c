@@ -20,7 +20,6 @@
 #include "ppc32.h"
 #include "ppc32_exec.h"
 #include "ppc32_jit.h"
-#include "insn_lookup.h"
 #include "memory.h"
 #include "rust_dynamips_c.h"
 

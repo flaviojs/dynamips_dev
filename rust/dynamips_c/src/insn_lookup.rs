@@ -5,6 +5,7 @@ use crate::prelude::*;
 
 pub type cbm_array_t = cbm_array;
 pub type rfc_array_t = rfc_array;
+pub type rfc_eqclass_t = rfc_eqclass;
 pub type insn_lookup_t = insn_lookup;
 
 /// log2(32)
@@ -51,6 +52,16 @@ pub struct rfc_array {
 
     /// Equivalent ID (eqID) array
     pub eqID: [c_int; 0],
+}
+
+/// Equivalent Classes
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rfc_eqclass {
+    /// Class Bitmap
+    pub cbm: *mut cbm_array_t,
+    /// Index associated to this class
+    pub eqID: c_int,
 }
 
 /// Instruction lookup table
@@ -175,6 +186,38 @@ pub unsafe extern "C" fn cbm_duplicate(cbm: *mut cbm_array_t) -> *mut cbm_array_
     assert!(!array.is_null());
     libc::memcpy(array.cast::<_>(), cbm.cast::<_>(), size);
     array
+}
+
+/// Get equivalent class corresponding to a class bitmap. Create eqclass
+/// structure if needed (CBM not previously seen).
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn cbm_get_eqclass(rfct: *mut rfc_array_t, cbm: *mut cbm_array_t) -> *mut rfc_eqclass_t {
+    // Lookup for CBM into hash table
+    let mut eqcl: *mut rfc_eqclass_t = hash_table_lookup((*rfct).cbm_hash, cbm.cast::<_>()).cast::<_>();
+    if eqcl.is_null() {
+        // Duplicate CBM
+        let bmp: *mut cbm_array_t = cbm_duplicate(cbm);
+        assert!(!bmp.is_null());
+
+        // CBM is not already known
+        eqcl = libc::malloc(size_of::<rfc_eqclass_t>()).cast::<_>();
+        assert!(!eqcl.is_null());
+
+        assert!((*rfct).nr_eqid < (*rfct).nr_elements);
+
+        // Get a new equivalent ID
+        (*eqcl).eqID = (*rfct).nr_eqid;
+        (*rfct).nr_eqid += 1;
+        (*eqcl).cbm = bmp;
+        *(*rfct).id2cbm.offset((*eqcl).eqID as isize) = bmp;
+
+        // Insert it in hash table
+        if hash_table_insert((*rfct).cbm_hash, bmp.cast::<_>(), eqcl.cast::<_>()) == -1 {
+            return null_mut();
+        }
+    }
+
+    eqcl
 }
 
 #[no_mangle]

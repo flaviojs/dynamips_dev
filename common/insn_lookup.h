@@ -17,13 +17,6 @@ typedef struct insn_lookup insn_lookup_t;
 #define CBM_ARRAY(array,i) ((array)->tab[(i)])
 #define CBM_CSIZE(count)   (((count)*sizeof(int))+sizeof(cbm_array_t))
 
-/* Equivalent Classes */
-typedef struct rfc_eqclass rfc_eqclass_t;
-struct rfc_eqclass {
-   cbm_array_t *cbm;   /* Class Bitmap */
-   int eqID;           /* Index associated to this class */
-};
-
 /* Instruction lookup */
 static forced_inline int ilt_get_index(rfc_array_t *a1,rfc_array_t *a2,
                                        int i1,int i2)

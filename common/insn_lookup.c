@@ -18,41 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* 
- * Get equivalent class corresponding to a class bitmap. Create eqclass 
- * structure if needed (CBM not previously seen).
- */
-static rfc_eqclass_t *cbm_get_eqclass(rfc_array_t *rfct,cbm_array_t *cbm)
-{
-   rfc_eqclass_t *eqcl;
-   cbm_array_t *bmp;
-
-   /* Lookup for CBM into hash table */
-   if ((eqcl = hash_table_lookup(rfct->cbm_hash,cbm)) == NULL)
-   {
-      /* Duplicate CBM */
-      bmp = cbm_duplicate(cbm);
-      assert(bmp);
-
-      /* CBM is not already known */
-      eqcl = malloc(sizeof(rfc_eqclass_t));
-      assert(eqcl);
-
-      assert(rfct->nr_eqid < rfct->nr_elements);
-
-      /* Get a new equivalent ID */
-      eqcl->eqID = rfct->nr_eqid++;
-      eqcl->cbm = bmp;
-      rfct->id2cbm[eqcl->eqID] = bmp;
-
-      /* Insert it in hash table */
-      if (hash_table_insert(rfct->cbm_hash,bmp,eqcl) == -1)
-         return NULL;
-   }
-
-   return eqcl;
-}
-
 /* Allocate an array for Recursive Flow Classification */
 static rfc_array_t *rfc_alloc_array(int nr_elements)
 {

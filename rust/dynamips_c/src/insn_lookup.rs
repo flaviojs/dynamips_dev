@@ -538,6 +538,26 @@ pub unsafe extern "C" fn ilt_cache_load(table_name: *mut c_char) -> *mut insn_lo
     ilt
 }
 
+/// Store the specified ILT table on disk for future use (cache)
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_cache_store(table_name: *mut c_char, ilt: *mut insn_lookup_t) -> c_int {
+    let filename: *mut c_char = ilt_build_filename(table_name);
+    if filename.is_null() {
+        return -1;
+    }
+
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("wb"));
+    if fd.is_null() {
+        libc::free(filename.cast::<_>());
+        return -1;
+    }
+
+    ilt_store_table(fd, ilt);
+    libc::fclose(fd);
+    libc::free(filename.cast::<_>());
+    0
+}
+
 /// Destroy an instruction lookup table
 #[no_mangle]
 pub unsafe extern "C" fn ilt_destroy(ilt: *mut insn_lookup_t) {

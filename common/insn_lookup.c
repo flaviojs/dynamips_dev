@@ -18,26 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Store the specified ILT table on disk for future use (cache) */
-static int ilt_cache_store(char *table_name,insn_lookup_t *ilt)
-{
-   char *filename;
-   FILE *fd;
-
-   if (!(filename = ilt_build_filename(table_name)))
-      return(-1);
-
-   if (!(fd = fopen(filename,"wb"))) {
-      free(filename);
-      return(-1);
-   }
-
-   ilt_store_table(fd,ilt);
-   fclose(fd);
-   free(filename);
-   return(0);
-}
-
 /* Create an instruction lookup table */
 insn_lookup_t *ilt_create(char *table_name,
                           int nr_insn,ilt_get_insn_cbk_t get_insn,

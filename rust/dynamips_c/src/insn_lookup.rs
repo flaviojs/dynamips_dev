@@ -314,5 +314,43 @@ pub unsafe extern "C" fn rfc_phase_0(ilt: *mut insn_lookup_t, pcheck: ilt_check_
     rfct
 }
 
+/// RFC Chunk preprocessing: phase j (j > 0)
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn rfc_phase_j(ilt: *mut insn_lookup_t, p0: *mut rfc_array_t, p1: *mut rfc_array_t) -> *mut rfc_array_t {
+    let mut index: isize = 0;
+
+    // allocate a temporary class bitmap
+    let bmp: *mut cbm_array_t = cbm_create(ilt);
+    assert!(!bmp.is_null());
+
+    // compute number of elements
+    let nr_elements: c_int = (*p0).nr_eqid * (*p1).nr_eqid;
+
+    // allocate a new RFC array
+    let rfct: *mut rfc_array_t = rfc_alloc_array(nr_elements);
+    assert!(!rfct.is_null());
+    (*rfct).parent0 = p0;
+    (*rfct).parent1 = p1;
+
+    // make a cross product between p0 and p1
+    for i in 0..(*p0).nr_eqid as isize {
+        for j in 0..(*p1).nr_eqid as isize {
+            // compute bitwise AND
+            cbm_bitwise_and(bmp, *(*p0).id2cbm.offset(i), *(*p1).id2cbm.offset(j));
+
+            // get equivalent class for this bitmap
+            let eqcl: *mut rfc_eqclass_t = cbm_get_eqclass(rfct, bmp);
+            assert!(!eqcl.is_null());
+
+            // fill RFC table
+            *(*rfct).eqID.as_ptr().cast_mut().offset(index) = (*eqcl).eqID;
+            index += 1;
+        }
+    }
+
+    libc::free(bmp.cast::<_>());
+    rfct
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

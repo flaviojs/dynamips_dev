@@ -18,49 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* RFC Chunk preprocessing: phase j (j > 0) */
-static rfc_array_t *rfc_phase_j(insn_lookup_t *ilt,rfc_array_t *p0,
-                                rfc_array_t *p1)
-{
-   rfc_eqclass_t *eqcl;
-   rfc_array_t *rfct;
-   cbm_array_t *bmp;
-   int nr_elements;
-   int index = 0;
-   int i,j;
-
-   /* allocate a temporary class bitmap */
-   bmp = cbm_create(ilt);
-   assert(bmp);
-
-   /* compute number of elements */
-   nr_elements = p0->nr_eqid * p1->nr_eqid;
-
-   /* allocate a new RFC array */
-   rfct = rfc_alloc_array(nr_elements);
-   assert(rfct);
-   rfct->parent0 = p0;
-   rfct->parent1 = p1;
-
-   /* make a cross product between p0 and p1 */
-   for(i=0;i<p0->nr_eqid;i++)
-      for(j=0;j<p1->nr_eqid;j++)
-      {
-         /* compute bitwise AND */
-         cbm_bitwise_and(bmp,p0->id2cbm[i],p1->id2cbm[j]);
-
-         /* get equivalent class for this bitmap */
-         eqcl = cbm_get_eqclass(rfct,bmp);
-         assert(eqcl);
-
-         /* fill RFC table */
-         rfct->eqID[index++] = eqcl->eqID;
-      }
-
-   free(bmp);
-   return rfct;
-}
-
 /* Compute RFC phase 0 */
 static void ilt_phase_0(insn_lookup_t *ilt,int idx,ilt_check_cbk_t pcheck)
 {

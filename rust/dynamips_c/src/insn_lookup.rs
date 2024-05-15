@@ -220,5 +220,26 @@ pub unsafe extern "C" fn cbm_get_eqclass(rfct: *mut rfc_array_t, cbm: *mut cbm_a
     eqcl
 }
 
+/// Allocate an array for Recursive Flow Classification
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn rfc_alloc_array(nr_elements: c_int) -> *mut rfc_array_t {
+    // Compute size of memory chunk needed to store the array
+    let total_size: size_t = (nr_elements as size_t * size_of::<c_int>()) + size_of::<rfc_array_t>();
+    let array: *mut rfc_array_t = libc::malloc(total_size).cast::<_>();
+    assert!(!array.is_null());
+    libc::memset(array.cast::<_>(), 0, total_size);
+    (*array).nr_elements = nr_elements;
+
+    // Initialize hash table for Class Bitmaps
+    (*array).cbm_hash = hash_table_create(Some(cbm_hash_f), Some(cbm_cmp_f), CBM_HASH_SIZE as c_int);
+    assert!(!(*array).cbm_hash.is_null());
+
+    // Initialize table for converting ID to CBM
+    (*array).id2cbm = libc::calloc(nr_elements as size_t, size_of::<*mut cbm_array_t>()).cast::<_>();
+    assert!(!(*array).id2cbm.is_null());
+
+    array
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

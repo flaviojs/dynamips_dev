@@ -18,30 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Allocate an array for Recursive Flow Classification */
-static rfc_array_t *rfc_alloc_array(int nr_elements)
-{
-   rfc_array_t *array;
-   int total_size;
-
-   /* Compute size of memory chunk needed to store the array */
-   total_size = (nr_elements * sizeof(int)) + sizeof(rfc_array_t);
-   array = malloc(total_size);
-   assert(array);
-   memset(array,0,total_size);
-   array->nr_elements = nr_elements;
-   
-   /* Initialize hash table for Class Bitmaps */
-   array->cbm_hash = hash_table_create(cbm_hash_f,cbm_cmp_f,CBM_HASH_SIZE);
-   assert(array->cbm_hash);
-
-   /* Initialize table for converting ID to CBM */
-   array->id2cbm = calloc(nr_elements,sizeof(cbm_array_t *));
-   assert(array->id2cbm);
-
-   return(array);
-}
-
 /* Free value of cbm_hash */
 static void rfc_free_array_cbm_hash_value(void *key,void *value,void *opt_arg)
 {

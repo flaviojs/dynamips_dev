@@ -94,8 +94,7 @@ unsafe fn CBM_CSIZE(count: c_int) -> c_int {
 }
 
 /// Hash function for a CBM
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_hash_f(ccbm: *mut c_void) -> c_uint {
+unsafe extern "C" fn cbm_hash_f(ccbm: *mut c_void) -> c_uint {
     let cbm: *mut cbm_array_t = ccbm.cast::<_>();
     let s: *mut c_char = (*cbm).tab.as_ptr().cast_mut().cast::<_>();
 
@@ -115,8 +114,7 @@ pub unsafe extern "C" fn cbm_hash_f(ccbm: *mut c_void) -> c_uint {
 }
 
 /// Comparison function for 2 CBM
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_cmp_f(b1: *mut c_void, b2: *mut c_void) -> c_int {
+unsafe extern "C" fn cbm_cmp_f(b1: *mut c_void, b2: *mut c_void) -> c_int {
     let cbm1: *mut cbm_array_t = b1.cast::<_>();
     let cbm2: *mut cbm_array_t = b2.cast::<_>();
 
@@ -130,26 +128,22 @@ pub unsafe extern "C" fn cbm_cmp_f(b1: *mut c_void, b2: *mut c_void) -> c_int {
 }
 
 /// Set bit corresponding to a rule number in a CBM
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_set_rule(cbm: *mut cbm_array_t, rule_id: c_int) {
+unsafe fn cbm_set_rule(cbm: *mut cbm_array_t, rule_id: c_int) {
     *CBM_ARRAY(cbm, rule_id >> CBM_SHIFT) |= 1 << (rule_id & (CBM_SIZE - 1) as c_int);
 }
 
 /// Clear bit corresponding to a rule number in a CBM
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_unset_rule(cbm: *mut cbm_array_t, rule_id: c_int) {
+unsafe fn cbm_unset_rule(cbm: *mut cbm_array_t, rule_id: c_int) {
     *CBM_ARRAY(cbm, rule_id >> CBM_SHIFT) &= !(1 << (rule_id & (CBM_SIZE - 1) as c_int));
 }
 
 /// Returns TRUE if  bit corresponding to a rule number in a CBM is set
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_check_rule(cbm: *mut cbm_array_t, rule_id: c_int) -> c_int {
+unsafe fn cbm_check_rule(cbm: *mut cbm_array_t, rule_id: c_int) -> c_int {
     *CBM_ARRAY(cbm, rule_id >> CBM_SHIFT) & (1 << (rule_id & (CBM_SIZE - 1) as c_int))
 }
 
 /// Compute bitwise ANDing of two CBM
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_bitwise_and(result: *mut cbm_array_t, a1: *mut cbm_array_t, a2: *mut cbm_array_t) {
+unsafe fn cbm_bitwise_and(result: *mut cbm_array_t, a1: *mut cbm_array_t, a2: *mut cbm_array_t) {
     // Compute bitwise ANDing
     for i in 0..(*a1).nr_entries {
         *CBM_ARRAY(result, i) = *CBM_ARRAY(a1, i) & *CBM_ARRAY(a2, i);
@@ -157,8 +151,7 @@ pub unsafe extern "C" fn cbm_bitwise_and(result: *mut cbm_array_t, a1: *mut cbm_
 }
 
 /// Get first matching rule number
-#[no_mangle] // TODO ptivate
-pub unsafe extern "C" fn cbm_first_match(ilt: *mut insn_lookup_t, cbm: *mut cbm_array_t) -> c_int {
+unsafe fn cbm_first_match(ilt: *mut insn_lookup_t, cbm: *mut cbm_array_t) -> c_int {
     for i in 0..(*ilt).nr_insn {
         if cbm_check_rule(cbm, i) != 0 {
             return i;
@@ -169,8 +162,7 @@ pub unsafe extern "C" fn cbm_first_match(ilt: *mut insn_lookup_t, cbm: *mut cbm_
 }
 
 /// Create a class bitmap (CBM)
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_create(ilt: *mut insn_lookup_t) -> *mut cbm_array_t {
+unsafe fn cbm_create(ilt: *mut insn_lookup_t) -> *mut cbm_array_t {
     let size: size_t = CBM_CSIZE((*ilt).cbm_size) as size_t;
 
     // CBM are simply bit arrays
@@ -183,8 +175,7 @@ pub unsafe extern "C" fn cbm_create(ilt: *mut insn_lookup_t) -> *mut cbm_array_t
 }
 
 /// Duplicate a class bitmap
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_duplicate(cbm: *mut cbm_array_t) -> *mut cbm_array_t {
+unsafe fn cbm_duplicate(cbm: *mut cbm_array_t) -> *mut cbm_array_t {
     let size: size_t = CBM_CSIZE((*cbm).nr_entries) as size_t;
 
     let array: *mut cbm_array_t = libc::malloc(size).cast::<_>();
@@ -195,8 +186,7 @@ pub unsafe extern "C" fn cbm_duplicate(cbm: *mut cbm_array_t) -> *mut cbm_array_
 
 /// Get equivalent class corresponding to a class bitmap. Create eqclass
 /// structure if needed (CBM not previously seen).
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cbm_get_eqclass(rfct: *mut rfc_array_t, cbm: *mut cbm_array_t) -> *mut rfc_eqclass_t {
+unsafe fn cbm_get_eqclass(rfct: *mut rfc_array_t, cbm: *mut cbm_array_t) -> *mut rfc_eqclass_t {
     // Lookup for CBM into hash table
     let mut eqcl: *mut rfc_eqclass_t = hash_table_lookup((*rfct).cbm_hash, cbm.cast::<_>()).cast::<_>();
     if eqcl.is_null() {
@@ -226,8 +216,7 @@ pub unsafe extern "C" fn cbm_get_eqclass(rfct: *mut rfc_array_t, cbm: *mut cbm_a
 }
 
 /// Allocate an array for Recursive Flow Classification
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn rfc_alloc_array(nr_elements: c_int) -> *mut rfc_array_t {
+unsafe fn rfc_alloc_array(nr_elements: c_int) -> *mut rfc_array_t {
     // Compute size of memory chunk needed to store the array
     let total_size: size_t = (nr_elements as size_t * size_of::<c_int>()) + size_of::<rfc_array_t>();
     let array: *mut rfc_array_t = libc::malloc(total_size).cast::<_>();
@@ -252,8 +241,7 @@ unsafe extern "C" fn rfc_free_array_cbm_hash_value(_key: *mut c_void, value: *mu
 }
 
 /// Free an array for Recursive Flow Classification
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn rfc_free_array(array: *mut rfc_array_t) {
+unsafe fn rfc_free_array(array: *mut rfc_array_t) {
     assert!(!array.is_null());
 
     // Free hash table for Class Bitmaps
@@ -279,8 +267,7 @@ pub unsafe extern "C" fn rfc_free_array(array: *mut rfc_array_t) {
 }
 
 /// Check an instruction with specified parameter
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn rfc_check_insn(ilt: *mut insn_lookup_t, cbm: *mut cbm_array_t, pcheck: ilt_check_cbk_t, value: c_int) {
+unsafe fn rfc_check_insn(ilt: *mut insn_lookup_t, cbm: *mut cbm_array_t, pcheck: ilt_check_cbk_t, value: c_int) {
     for i in 0..(*ilt).nr_insn {
         let p: *mut c_void = (*ilt).get_insn.unwrap()(i);
 
@@ -293,8 +280,7 @@ pub unsafe extern "C" fn rfc_check_insn(ilt: *mut insn_lookup_t, cbm: *mut cbm_a
 }
 
 /// RFC Chunk preprocessing: phase 0
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn rfc_phase_0(ilt: *mut insn_lookup_t, pcheck: ilt_check_cbk_t) -> *mut rfc_array_t {
+unsafe fn rfc_phase_0(ilt: *mut insn_lookup_t, pcheck: ilt_check_cbk_t) -> *mut rfc_array_t {
     // allocate a temporary class bitmap
     let bmp: *mut cbm_array_t = cbm_create(ilt);
     assert!(!bmp.is_null());
@@ -320,8 +306,7 @@ pub unsafe extern "C" fn rfc_phase_0(ilt: *mut insn_lookup_t, pcheck: ilt_check_
 }
 
 /// RFC Chunk preprocessing: phase j (j > 0)
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn rfc_phase_j(ilt: *mut insn_lookup_t, p0: *mut rfc_array_t, p1: *mut rfc_array_t) -> *mut rfc_array_t {
+unsafe fn rfc_phase_j(ilt: *mut insn_lookup_t, p0: *mut rfc_array_t, p1: *mut rfc_array_t) -> *mut rfc_array_t {
     let mut index: isize = 0;
 
     // allocate a temporary class bitmap
@@ -358,24 +343,21 @@ pub unsafe extern "C" fn rfc_phase_j(ilt: *mut insn_lookup_t, p0: *mut rfc_array
 }
 
 /// Compute RFC phase 0
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_phase_0(ilt: *mut insn_lookup_t, idx: c_int, pcheck: ilt_check_cbk_t) {
+unsafe fn ilt_phase_0(ilt: *mut insn_lookup_t, idx: c_int, pcheck: ilt_check_cbk_t) {
     let rfct: *mut rfc_array_t = rfc_phase_0(ilt, pcheck);
     assert!(!rfct.is_null());
     (*ilt).rfct[idx as usize] = rfct;
 }
 
 /// Compute RFC phase j
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_phase_j(ilt: *mut insn_lookup_t, p0: c_int, p1: c_int, res: c_int) {
+unsafe fn ilt_phase_j(ilt: *mut insn_lookup_t, p0: c_int, p1: c_int, res: c_int) {
     let rfct: *mut rfc_array_t = rfc_phase_j(ilt, (*ilt).rfct[p0 as usize], (*ilt).rfct[p1 as usize]);
     assert!(!rfct.is_null());
     (*ilt).rfct[res as usize] = rfct;
 }
 
 /// Postprocessing
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_postprocessing(ilt: *mut insn_lookup_t) {
+unsafe fn ilt_postprocessing(ilt: *mut insn_lookup_t) {
     let rfct: *mut rfc_array_t = (*ilt).rfct[2];
 
     for i in 0..(*rfct).nr_elements as isize {
@@ -384,8 +366,7 @@ pub unsafe extern "C" fn ilt_postprocessing(ilt: *mut insn_lookup_t) {
 }
 
 /// Instruction lookup table compilation
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_compile(ilt: *mut insn_lookup_t) {
+unsafe fn ilt_compile(ilt: *mut insn_lookup_t) {
     ilt_phase_0(ilt, 0, (*ilt).chk_hi);
     ilt_phase_0(ilt, 1, (*ilt).chk_lo);
     ilt_phase_j(ilt, 0, 1, 2);
@@ -418,8 +399,7 @@ unsafe fn ilt_dump(table_name: *mut c_char, ilt: *mut insn_lookup_t) -> c_int {
 }
 
 /// Write the specified RFC array to disk
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_store_rfct(fd: *mut libc::FILE, id: c_int, rfct: *mut rfc_array_t) {
+unsafe fn ilt_store_rfct(fd: *mut libc::FILE, id: c_int, rfct: *mut rfc_array_t) {
     // Store RFC array ID + number of elements
     libc::fwrite(addr_of!(id).cast::<_>(), size_of::<c_int>(), 1, fd);
     libc::fwrite(addr_of!((*rfct).nr_elements).cast::<_>(), size_of::<c_int>(), 1, fd);
@@ -429,8 +409,7 @@ pub unsafe extern "C" fn ilt_store_rfct(fd: *mut libc::FILE, id: c_int, rfct: *m
 }
 
 /// Write the full instruction lookup table
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_store_table(fd: *mut libc::FILE, ilt: *mut insn_lookup_t) {
+unsafe fn ilt_store_table(fd: *mut libc::FILE, ilt: *mut insn_lookup_t) {
     for i in 0..RFC_ARRAY_NUMBER {
         if !(*ilt).rfct[i].is_null() {
             ilt_store_rfct(fd, i as c_int, (*ilt).rfct[i]);
@@ -439,8 +418,7 @@ pub unsafe extern "C" fn ilt_store_table(fd: *mut libc::FILE, ilt: *mut insn_loo
 }
 
 /// Load an RFC array from disk
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_load_rfct(fd: *mut libc::FILE, ilt: *mut insn_lookup_t) -> c_int {
+unsafe fn ilt_load_rfct(fd: *mut libc::FILE, ilt: *mut insn_lookup_t) -> c_int {
     let mut id: c_int = 0;
     let mut nr_elements: c_int = 0;
     let mut nr_eqid: c_int = 0;
@@ -477,8 +455,7 @@ pub unsafe extern "C" fn ilt_load_rfct(fd: *mut libc::FILE, ilt: *mut insn_looku
 }
 
 /// Check an instruction table loaded from disk
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_check_cached_table(ilt: *mut insn_lookup_t) -> c_int {
+unsafe fn ilt_check_cached_table(ilt: *mut insn_lookup_t) -> c_int {
     // All arrays must have been loaded
     for i in 0..RFC_ARRAY_NUMBER {
         if (*ilt).rfct[i].is_null() {
@@ -490,8 +467,7 @@ pub unsafe extern "C" fn ilt_check_cached_table(ilt: *mut insn_lookup_t) -> c_in
 }
 
 /// Load a full instruction table from disk
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_load_table(fd: *mut libc::FILE) -> *mut insn_lookup_t {
+unsafe fn ilt_load_table(fd: *mut libc::FILE) -> *mut insn_lookup_t {
     let ilt: *mut insn_lookup_t = libc::malloc(size_of::<insn_lookup_t>()).cast::<_>();
     if ilt.is_null() {
         return null_mut();
@@ -522,8 +498,7 @@ pub unsafe extern "C" fn ilt_build_filename(table_name: *mut c_char) -> *mut c_c
 }
 
 /// Try to load a cached ILT table from disk
-#[no_mangle] // TOD private
-pub unsafe extern "C" fn ilt_cache_load(table_name: *mut c_char) -> *mut insn_lookup_t {
+unsafe fn ilt_cache_load(table_name: *mut c_char) -> *mut insn_lookup_t {
     let filename: *mut c_char = ilt_build_filename(table_name);
     if filename.is_null() {
         return null_mut();
@@ -542,8 +517,7 @@ pub unsafe extern "C" fn ilt_cache_load(table_name: *mut c_char) -> *mut insn_lo
 }
 
 /// Store the specified ILT table on disk for future use (cache)
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn ilt_cache_store(table_name: *mut c_char, ilt: *mut insn_lookup_t) -> c_int {
+unsafe fn ilt_cache_store(table_name: *mut c_char, ilt: *mut insn_lookup_t) -> c_int {
     let filename: *mut c_char = ilt_build_filename(table_name);
     if filename.is_null() {
         return -1;
@@ -622,6 +596,3 @@ pub unsafe extern "C" fn ilt_destroy(ilt: *mut insn_lookup_t) {
     // Free instruction lookup table
     libc::free(ilt.cast::<_>());
 }
-
-#[no_mangle]
-pub extern "C" fn _export(_: *mut cbm_array_t) {}

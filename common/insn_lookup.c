@@ -18,18 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Duplicate a class bitmap */
-static cbm_array_t *cbm_duplicate(cbm_array_t *cbm)
-{
-   int size = CBM_CSIZE(cbm->nr_entries);
-   cbm_array_t *array;
-
-   array = malloc(size);
-   assert(array);
-   memcpy(array,cbm,size);
-   return array;
-}
-
 /* 
  * Get equivalent class corresponding to a class bitmap. Create eqclass 
  * structure if needed (CBM not previously seen).

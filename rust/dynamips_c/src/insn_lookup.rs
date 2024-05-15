@@ -166,5 +166,16 @@ pub unsafe extern "C" fn cbm_create(ilt: *mut insn_lookup_t) -> *mut cbm_array_t
     array
 }
 
+/// Duplicate a class bitmap
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn cbm_duplicate(cbm: *mut cbm_array_t) -> *mut cbm_array_t {
+    let size: size_t = CBM_CSIZE((*cbm).nr_entries) as size_t;
+
+    let array: *mut cbm_array_t = libc::malloc(size).cast::<_>();
+    assert!(!array.is_null());
+    libc::memcpy(array.cast::<_>(), cbm.cast::<_>(), size);
+    array
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

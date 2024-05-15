@@ -564,6 +564,11 @@ pub unsafe extern "C" fn ilt_get_index(a1: *mut rfc_array_t, a2: *mut rfc_array_
     (*(*a1).eqID.as_ptr().offset(i1 as isize) * (*a2).nr_eqid) + *(*a2).eqID.as_ptr().offset(i2 as isize)
 }
 
+#[no_mangle]
+pub unsafe extern "C" fn ilt_get_idx(ilt: *mut insn_lookup_t, a1: c_int, a2: c_int, i1: c_int, i2: c_int) -> c_int {
+    ilt_get_index((*ilt).rfct[a1 as usize], (*ilt).rfct[a2 as usize], i1, i2)
+}
+
 /// Create an instruction lookup table
 #[no_mangle]
 pub unsafe extern "C" fn ilt_create(table_name: *mut c_char, nr_insn: c_int, get_insn: ilt_get_insn_cbk_t, chk_lo: ilt_check_cbk_t, chk_hi: ilt_check_cbk_t) -> *mut insn_lookup_t {

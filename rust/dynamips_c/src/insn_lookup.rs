@@ -473,5 +473,18 @@ pub unsafe extern "C" fn ilt_load_rfct(fd: *mut libc::FILE, ilt: *mut insn_looku
     0
 }
 
+/// Check an instruction table loaded from disk
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_check_cached_table(ilt: *mut insn_lookup_t) -> c_int {
+    // All arrays must have been loaded
+    for i in 0..RFC_ARRAY_NUMBER {
+        if (*ilt).rfct[i].is_null() {
+            return -1;
+        }
+    }
+
+    0
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

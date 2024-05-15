@@ -18,19 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Check an instruction table loaded from disk */
-static int ilt_check_cached_table(insn_lookup_t *ilt)
-{
-   int i;
-
-   /* All arrays must have been loaded */
-   for(i=0;i<RFC_ARRAY_NUMBER;i++)
-      if (!ilt->rfct[i])
-         return(-1);
-
-   return(0);
-}
-
 /* Load a full instruction table from disk */
 static insn_lookup_t *ilt_load_table(FILE *fd)
 {

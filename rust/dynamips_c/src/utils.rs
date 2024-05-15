@@ -3,6 +3,9 @@
 use crate::dynamips_common::*;
 use crate::prelude::*;
 
+/// MIPS instruction
+pub type mips_insn_t = m_uint32_t;
+
 /// Dynamic sprintf
 #[macro_export]
 macro_rules! dyn_sprintf {

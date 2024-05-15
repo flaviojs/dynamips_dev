@@ -76,9 +76,6 @@ struct insn_exec_page {
    int flags;
 };
 
-/* MIPS instruction */
-typedef m_uint32_t mips_insn_t;
-
 /* PowerPC instruction */
 typedef m_uint32_t ppc_insn_t;
 

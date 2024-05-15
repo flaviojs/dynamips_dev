@@ -152,5 +152,19 @@ pub unsafe extern "C" fn cbm_first_match(ilt: *mut insn_lookup_t, cbm: *mut cbm_
     -1
 }
 
+/// Create a class bitmap (CBM)
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn cbm_create(ilt: *mut insn_lookup_t) -> *mut cbm_array_t {
+    let size: size_t = CBM_CSIZE((*ilt).cbm_size) as size_t;
+
+    // CBM are simply bit arrays
+    let array: *mut cbm_array_t = libc::malloc(size).cast::<_>();
+    assert!(!array.is_null());
+
+    libc::memset(array.cast::<_>(), 0, size);
+    (*array).nr_entries = (*ilt).cbm_size;
+    array
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

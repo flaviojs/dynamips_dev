@@ -18,23 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Create a class bitmap (CBM) */
-static cbm_array_t *cbm_create(insn_lookup_t *ilt)
-{
-   cbm_array_t *array;
-   int size;
-
-   size = CBM_CSIZE(ilt->cbm_size);
-
-   /* CBM are simply bit arrays */
-   array = malloc(size);
-   assert(array);
-
-   memset(array,0,size);
-   array->nr_entries = ilt->cbm_size;
-   return array;
-}
-
 /* Duplicate a class bitmap */
 static cbm_array_t *cbm_duplicate(cbm_array_t *cbm)
 {

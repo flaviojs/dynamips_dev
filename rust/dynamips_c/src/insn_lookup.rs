@@ -425,5 +425,15 @@ pub unsafe extern "C" fn ilt_store_rfct(fd: *mut libc::FILE, id: c_int, rfct: *m
     libc::fwrite((*rfct).eqID.as_ptr().cast::<_>(), size_of::<c_int>(), (*rfct).nr_elements as size_t, fd);
 }
 
+/// Write the full instruction lookup table
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_store_table(fd: *mut libc::FILE, ilt: *mut insn_lookup_t) {
+    for i in 0..RFC_ARRAY_NUMBER {
+        if !(*ilt).rfct[i].is_null() {
+            ilt_store_rfct(fd, i as c_int, (*ilt).rfct[i]);
+        }
+    }
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

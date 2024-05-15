@@ -18,16 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Write the full instruction lookup table */
-static void ilt_store_table(FILE *fd,insn_lookup_t *ilt)
-{
-   int i;
-
-   for(i=0;i<RFC_ARRAY_NUMBER;i++)
-      if (ilt->rfct[i] != NULL)
-         ilt_store_rfct(fd,i,ilt->rfct[i]);
-}
-
 /* Load an RFC array from disk */
 static int ilt_load_rfct(FILE *fd,insn_lookup_t *ilt)
 {

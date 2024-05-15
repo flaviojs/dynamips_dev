@@ -18,33 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Load a full instruction table from disk */
-static insn_lookup_t *ilt_load_table(FILE *fd)
-{
-   insn_lookup_t *ilt;
-   int i;
-   
-   if (!(ilt = malloc(sizeof(*ilt))))
-      return NULL;
-
-   memset(ilt,0,sizeof(*ilt));
-   fseek(fd,0,SEEK_SET);
-
-   for(i=0;i<RFC_ARRAY_NUMBER;i++) {
-      if (ilt_load_rfct(fd,ilt) == -1) {
-         ilt_destroy(ilt);
-         return NULL;
-      }
-   }
-
-   if (ilt_check_cached_table(ilt) == -1) {
-      ilt_destroy(ilt);
-      return NULL;
-   }
-
-   return ilt;
-}
-
 /* Build a filename for a cached ILT table on disk */
 static char *ilt_build_filename(char *table_name)
 {

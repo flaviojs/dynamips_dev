@@ -486,6 +486,32 @@ pub unsafe extern "C" fn ilt_check_cached_table(ilt: *mut insn_lookup_t) -> c_in
     0
 }
 
+/// Load a full instruction table from disk
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_load_table(fd: *mut libc::FILE) -> *mut insn_lookup_t {
+    let ilt: *mut insn_lookup_t = libc::malloc(size_of::<insn_lookup_t>()).cast::<_>();
+    if ilt.is_null() {
+        return null_mut();
+    }
+
+    libc::memset(ilt.cast::<_>(), 0, size_of::<insn_lookup_t>());
+    libc::fseek(fd, 0, libc::SEEK_SET);
+
+    for _ in 0..RFC_ARRAY_NUMBER {
+        if ilt_load_rfct(fd, ilt) == -1 {
+            ilt_destroy(ilt);
+            return null_mut();
+        }
+    }
+
+    if ilt_check_cached_table(ilt) == -1 {
+        ilt_destroy(ilt);
+        return null_mut();
+    }
+
+    ilt
+}
+
 /// Destroy an instruction lookup table
 #[no_mangle]
 pub unsafe extern "C" fn ilt_destroy(ilt: *mut insn_lookup_t) {

@@ -414,5 +414,16 @@ unsafe fn ilt_dump(table_name: *mut c_char, ilt: *mut insn_lookup_t) -> c_int {
     0
 }
 
+/// Write the specified RFC array to disk
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn ilt_store_rfct(fd: *mut libc::FILE, id: c_int, rfct: *mut rfc_array_t) {
+    // Store RFC array ID + number of elements
+    libc::fwrite(addr_of!(id).cast::<_>(), size_of::<c_int>(), 1, fd);
+    libc::fwrite(addr_of!((*rfct).nr_elements).cast::<_>(), size_of::<c_int>(), 1, fd);
+    libc::fwrite(addr_of!((*rfct).nr_eqid).cast::<_>(), size_of::<c_int>(), 1, fd);
+
+    libc::fwrite((*rfct).eqID.as_ptr().cast::<_>(), size_of::<c_int>(), (*rfct).nr_elements as size_t, fd);
+}
+
 #[no_mangle]
 pub extern "C" fn _export(_: *mut cbm_array_t) {}

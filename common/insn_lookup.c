@@ -18,17 +18,6 @@
 #include "insn_lookup.h"
 #include "dynamips.h"
 
-/* Write the specified RFC array to disk */
-static void ilt_store_rfct(FILE *fd,int id,rfc_array_t *rfct)
-{
-   /* Store RFC array ID + number of elements */
-   fwrite(&id,sizeof(id),1,fd);
-   fwrite(&rfct->nr_elements,sizeof(rfct->nr_elements),1,fd);
-   fwrite(&rfct->nr_eqid,sizeof(rfct->nr_eqid),1,fd);
-
-   fwrite(rfct->eqID,sizeof(int),rfct->nr_elements,fd);
-}
-
 /* Write the full instruction lookup table */
 static void ilt_store_table(FILE *fd,insn_lookup_t *ilt)
 {

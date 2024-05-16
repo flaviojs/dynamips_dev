@@ -4,6 +4,7 @@ resolver = "2"
 members = [
     "dynamips_c",
     "dynamips_c_unstable",
+    "udp_recv",
 ]
 
 [profile.release-with-debug]

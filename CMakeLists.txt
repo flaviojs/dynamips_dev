@@ -51,6 +51,7 @@ corrosion_import_crate (
   CRATES
     dynamips_c
     dynamips_c_unstable
+    udp_recv
 )
 function ( _set_features _crate )
    set ( _features )
@@ -63,6 +64,7 @@ function ( _set_features _crate )
 endfunction ()
 _set_features( dynamips_c ENABLE_LINUX_ETH ENABLE_GEN_ETH ENABLE_IPV6 )
 _set_features( dynamips_c_unstable ENABLE_LINUX_ETH ENABLE_GEN_ETH ENABLE_IPV6 )
+_set_features( udp_recv ENABLE_IPV6 )
 corrosion_experimental_cbindgen( MANIFEST_PATH "${CMAKE_SOURCE_DIR}/rust/dynamips_c/Cargo.toml" TARGET dynamips_c HEADER_NAME "rust_dynamips_c.h" )
 target_include_directories ( dynamips_c_unstable INTERFACE "${CMAKE_CURRENT_BINARY_DIR}/corrosion_generated/cbindgen/dynamips_c/include" ) 
 add_dependencies ( dynamips_c_unstable "_corrosion_cbindgen_dynamips_c_bindings" )

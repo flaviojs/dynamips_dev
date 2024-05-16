@@ -55,13 +55,6 @@ static pthread_t vtty_thread;
 
 static struct termios tios,tios_orig;
 
-/* Send Telnet command: Don't use linemode */
-static void vtty_telnet_dont_linemode(int fd)
-{
-   u_char cmd[] = { IAC, DONT, TELOPT_LINEMODE };
-   write(fd,cmd,sizeof(cmd));
-}
-
 /* Send Telnet command: does the client support terminal type message? */
 static void vtty_telnet_do_ttype(int fd)
 {

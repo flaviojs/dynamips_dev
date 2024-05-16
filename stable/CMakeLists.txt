@@ -8,14 +8,8 @@ include_directories ( "${CMAKE_CURRENT_SOURCE_DIR}" "${COMMON}" "${CMAKE_CURRENT
 
 # udp_send
 if ( BUILD_UDP_SEND )
-add_executable ( udp_send
-   "${COMMON}/crc.c"
-   "${COMMON}/net.c"
-   "${COMMON}/udp_send.c"
-   "${COMMON}/utils.c"
-   )
-target_link_libraries ( udp_send ${DYNAMIPS_LIBRARIES} )
-install_executable ( udp_send )
+# TODO IMPORTED_RUNTIME_ARTIFACTS requires cmake 3.21
+install ( IMPORTED_RUNTIME_ARTIFACTS udp_send )
 endif ( BUILD_UDP_SEND )
 
 # udp_recv

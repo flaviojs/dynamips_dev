@@ -522,27 +522,6 @@ void m_randomize_block(m_uint8_t *buf,size_t len)
       buf[i] = rand() & 0xFF;
 }
 
-/* Free an FD pool */
-void fd_pool_free(fd_pool_t *pool)
-{
-   fd_pool_t *p,*next;
-   int i;
-   
-   for(p=pool;p;p=next) {
-      next = p->next;
-      
-      for(i=0;i<FD_POOL_MAX;i++) {
-         if (p->fd[i] != -1) {
-            shutdown(p->fd[i],2);
-            close(p->fd[i]);
-         }
-      }
-               
-      if (pool != p)
-         free(p);
-   }
-}
-
 /* Initialize an empty pool */
 void fd_pool_init(fd_pool_t *pool)
 {

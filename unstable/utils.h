@@ -14,15 +14,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* FD pool */
-#define FD_POOL_MAX  16
-
-typedef struct fd_pool fd_pool_t;
-struct fd_pool {
-   int fd[FD_POOL_MAX];
-   struct fd_pool *next;
-};
-
 /* Forward declarations */
 typedef struct cpu_gen cpu_gen_t;
 typedef struct vm_instance vm_instance_t;

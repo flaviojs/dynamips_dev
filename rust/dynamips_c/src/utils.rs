@@ -3,6 +3,7 @@
 use crate::dynamips_common::*;
 use crate::prelude::*;
 
+pub type fd_pool_t = fd_pool;
 pub type insn_exec_page_t = insn_exec_page;
 pub type mts32_entry_t = mts32_entry;
 pub type mts64_entry_t = mts64_entry;
@@ -65,6 +66,16 @@ pub extern "C" fn vmtoh32(x: u32) -> u32 {
 #[no_mangle]
 pub extern "C" fn vmtoh64(x: u64) -> u64 {
     u64::from_be(x)
+}
+
+pub const FD_POOL_MAX: usize = 16;
+
+/// FD pool
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct fd_pool {
+    fd: [c_int; FD_POOL_MAX],
+    next: *mut fd_pool_t,
 }
 
 /// MIPS instruction
@@ -299,4 +310,25 @@ pub unsafe fn sign_extend(x: m_int64_t, mut len: c_int) -> m_int64_t {
 #[inline]
 pub unsafe fn bits(val: m_uint32_t, start: c_int, end: c_int) -> c_int {
     ((val >> start) & ((1 << (end - start + 1)) - 1)) as c_int
+}
+
+/// Free an FD pool
+#[no_mangle]
+pub unsafe extern "C" fn fd_pool_free(pool: *mut fd_pool_t) {
+    let mut next_p: *mut fd_pool_t = pool;
+    while !next_p.is_null() {
+        let p: *mut fd_pool_t = next_p;
+        next_p = (*p).next;
+
+        for i in 0..FD_POOL_MAX {
+            if (*p).fd[i] != -1 {
+                libc::shutdown((*p).fd[i], 2);
+                libc::close((*p).fd[i]);
+            }
+        }
+
+        if pool != p {
+            libc::free(p.cast::<_>());
+        }
+    }
 }

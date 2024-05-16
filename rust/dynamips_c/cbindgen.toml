@@ -13,6 +13,7 @@ typedef struct cpu_gen cpu_gen_t;
 typedef struct cpu_group cpu_group_t;
 typedef struct cpu_mips cpu_mips_t;
 typedef struct cpu_ppc cpu_ppc_t;
+typedef struct fd_pool fd_pool_t;
 typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;

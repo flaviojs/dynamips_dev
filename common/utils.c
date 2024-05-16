@@ -522,33 +522,6 @@ void m_randomize_block(m_uint8_t *buf,size_t len)
       buf[i] = rand() & 0xFF;
 }
 
-/* Get a free slot for a FD in a pool */
-int fd_pool_get_free_slot(fd_pool_t *pool,int **slot)
-{
-   fd_pool_t *p;
-   int i;
-   
-   for(p=pool;p;p=p->next) {
-      for(i=0;i<FD_POOL_MAX;i++) {
-         if (p->fd[i] == -1) {
-            *slot = &p->fd[i];
-            return(0);
-         }
-      }
-   }
-   
-   /* No free slot, allocate a new pool */
-   if (!(p = malloc(sizeof(*p))))
-      return(-1);
-
-   fd_pool_init(p);      
-   *slot = &p->fd[0];
-      
-   p->next = pool->next;
-   pool->next = p;
-   return(0);
-}
-
 /* Fill a FD set and get the maximum FD in order to use with select */
 int fd_pool_set_fds(fd_pool_t *pool,fd_set *fds)
 {

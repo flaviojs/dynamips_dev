@@ -342,3 +342,31 @@ pub unsafe extern "C" fn fd_pool_init(pool: *mut fd_pool_t) {
 
     (*pool).next = null_mut();
 }
+
+/// Get a free slot for a FD in a pool
+#[no_mangle]
+pub unsafe extern "C" fn fd_pool_get_free_slot(pool: *mut fd_pool_t, slot: *mut *mut c_int) -> c_int {
+    let mut p: *mut fd_pool_t = pool;
+    while !p.is_null() {
+        for i in 0..FD_POOL_MAX {
+            if (*p).fd[i] == -1 {
+                *slot = addr_of_mut!((*p).fd[i]);
+                return 0;
+            }
+        }
+        p = (*p).next;
+    }
+
+    // No free slot, allocate a new pool
+    p = libc::malloc(size_of::<fd_pool_t>()).cast::<_>();
+    if p.is_null() {
+        return -1;
+    }
+
+    fd_pool_init(p);
+    *slot = addr_of_mut!((*p).fd[0]);
+
+    (*p).next = (*pool).next;
+    (*pool).next = p;
+    0
+}

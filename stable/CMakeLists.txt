@@ -18,12 +18,7 @@ endif ( BUILD_UDP_SEND )
 
 # udp_recv
 if ( BUILD_UDP_RECV )
-add_executable ( udp_recv
-   "${COMMON}/udp_recv.c"
-   "${COMMON}/utils.c"
-   )
-target_link_libraries ( udp_recv ${DYNAMIPS_LIBRARIES} )
-install_executable ( udp_recv )
+install ( IMPORTED_RUNTIME_ARTIFACTS udp_recv ) # TODO IMPORTED_RUNTIME_ARTIFACTS requires cmake 3.21
 endif ( BUILD_UDP_RECV )
 
 # rom2c

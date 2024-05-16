@@ -8,6 +8,10 @@ publish = false
 [lib]
 crate-type = ["staticlib","rlib"]
 
+[[bin]]
+name = "udp_recv"
+path = "bin/udp_recv.rs"
+
 [dependencies]
 compile-time = "0.2"
 constcat = "0.5"

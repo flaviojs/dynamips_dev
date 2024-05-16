@@ -73,7 +73,7 @@ corrosion_import_crate(
    MANIFEST_PATH "${CMAKE_SOURCE_DIR}/rust/Cargo.toml"
    PROFILE release-with-debug
    CRATES
-      dynamips-c
+      dynamips-c # bins: udp_recv
       dynamips-c-unstable
    FEATURES ${_features}
 )

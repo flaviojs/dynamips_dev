@@ -75,6 +75,7 @@ corrosion_import_crate(
    CRATES
       dynamips-c # bins: udp_recv
       dynamips-c-unstable
+      udp_send
    FEATURES ${_features}
 )
 corrosion_experimental_cbindgen( MANIFEST_PATH "${CMAKE_SOURCE_DIR}/rust/dynamips-c/Cargo.toml" TARGET dynamips_c HEADER_NAME "rust_dynamips_c.h" )

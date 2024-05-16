@@ -5,6 +5,7 @@ members = [
     "dynamips-c",
     "dynamips-c-stable",
     "dynamips-c-unstable",
+    "udp_send",
 ]
 
 [profile.release-with-debug]

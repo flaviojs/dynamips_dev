@@ -55,13 +55,6 @@ static pthread_t vtty_thread;
 
 static struct termios tios,tios_orig;
 
-/* Send Telnet command: WILL TELOPT_ECHO */
-static void vtty_telnet_will_echo(int fd)
-{
-   u_char cmd[] = { IAC, WILL, TELOPT_ECHO };
-   write(fd,cmd,sizeof(cmd));
-}
-
 /* Send Telnet command: Suppress Go-Ahead */
 static void vtty_telnet_will_suppress_go_ahead(int fd)
 {

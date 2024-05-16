@@ -55,6 +55,9 @@ pub static mut ctrl_code_ok: c_int = 1;
 #[no_mangle] // TODO private
 pub static mut telnet_message_ok: c_int = 1;
 
+pub static mut tios: libc::termios = unsafe { zeroed::<_>() };
+pub static mut tios_orig: libc::termios = unsafe { zeroed::<_>() };
+
 /// Allow the user to disable the CTRL code for the monitor interface
 #[no_mangle]
 pub unsafe extern "C" fn vtty_set_ctrlhandler(n: c_int) {
@@ -93,6 +96,36 @@ pub unsafe extern "C" fn vtty_telnet_dont_linemode(fd: c_int) {
 pub unsafe extern "C" fn vtty_telnet_do_ttype(fd: c_int) {
     let cmd: [u8; 3] = [IAC, DO, TELOPT_TTYPE];
     libc::write(fd, cmd.as_ptr().cast::<_>(), cmd.len());
+}
+
+/// Restore TTY original settings
+extern "C" fn vtty_term_reset() {
+    unsafe {
+        libc::tcsetattr(libc::STDIN_FILENO, libc::TCSANOW, addr_of_mut!(tios_orig));
+    }
+}
+
+/// Initialize real TTY
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn vtty_term_init() {
+    libc::tcgetattr(libc::STDIN_FILENO, addr_of_mut!(tios));
+
+    libc::memcpy(addr_of_mut!(tios_orig).cast::<_>(), addr_of!(tios).cast::<_>(), size_of::<libc::termios>());
+    libc::atexit(vtty_term_reset);
+
+    tios.c_cc[libc::VTIME] = 0;
+    tios.c_cc[libc::VMIN] = 1;
+
+    // Disable Ctrl-C, Ctrl-S, Ctrl-Q and Ctrl-Z
+    tios.c_cc[libc::VINTR] = 0;
+    tios.c_cc[libc::VSTART] = 0;
+    tios.c_cc[libc::VSTOP] = 0;
+    tios.c_cc[libc::VSUSP] = 0;
+
+    tios.c_lflag &= !(libc::ICANON | libc::ECHO);
+    tios.c_iflag &= !libc::ICRNL;
+    libc::tcsetattr(libc::STDIN_FILENO, libc::TCSANOW, addr_of_mut!(tios));
+    libc::tcflush(libc::STDIN_FILENO, libc::TCIFLUSH);
 }
 
 /// Parse serial interface descriptor string, return 0 if success

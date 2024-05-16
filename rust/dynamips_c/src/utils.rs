@@ -370,3 +370,24 @@ pub unsafe extern "C" fn fd_pool_get_free_slot(pool: *mut fd_pool_t, slot: *mut 
     (*pool).next = p;
     0
 }
+
+/// Fill a FD set and get the maximum FD in order to use with select
+#[no_mangle]
+pub unsafe extern "C" fn fd_pool_set_fds(pool: *mut fd_pool_t, fds: *mut libc::fd_set) -> c_int {
+    let mut p: *mut fd_pool_t = pool;
+    let mut max_fd: c_int = -1;
+    while !p.is_null() {
+        for i in 0..FD_POOL_MAX {
+            if (*p).fd[i] != -1 {
+                libc::FD_SET((*p).fd[i], fds);
+
+                if (*p).fd[i] > max_fd {
+                    max_fd = (*p).fd[i];
+                }
+            }
+        }
+        p = (*p).next;
+    }
+
+    max_fd
+}

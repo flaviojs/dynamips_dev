@@ -522,25 +522,6 @@ void m_randomize_block(m_uint8_t *buf,size_t len)
       buf[i] = rand() & 0xFF;
 }
 
-/* Fill a FD set and get the maximum FD in order to use with select */
-int fd_pool_set_fds(fd_pool_t *pool,fd_set *fds)
-{
-   fd_pool_t *p;
-   int i,max_fd = -1;
-   
-   for(p=pool;p;p=p->next)
-      for(i=0;i<FD_POOL_MAX;i++) {
-         if (p->fd[i] != -1) {
-            FD_SET(p->fd[i],fds);
-            
-            if (p->fd[i] > max_fd)
-               max_fd = p->fd[i];
-         }
-      }
-      
-   return(max_fd);
-}
-
 /* Send a buffer to all FDs of a pool */
 int fd_pool_send(fd_pool_t *pool,void *buffer,size_t len,int flags)
 {

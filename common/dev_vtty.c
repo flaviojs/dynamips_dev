@@ -53,37 +53,6 @@ static pthread_t vtty_thread;
 #define VTTY_LIST_LOCK()   pthread_mutex_lock(&vtty_list_mutex);
 #define VTTY_LIST_UNLOCK() pthread_mutex_unlock(&vtty_list_mutex);
 
-static struct termios tios,tios_orig;
-
-/* Restore TTY original settings */
-static void vtty_term_reset(void)
-{
-   tcsetattr(STDIN_FILENO,TCSANOW,&tios_orig);
-}
-
-/* Initialize real TTY */
-static void vtty_term_init(void)
-{
-   tcgetattr(STDIN_FILENO,&tios);
-
-   memcpy(&tios_orig,&tios,sizeof(struct termios));
-   atexit(vtty_term_reset);
-
-   tios.c_cc[VTIME] = 0;
-   tios.c_cc[VMIN] = 1;
-
-   /* Disable Ctrl-C, Ctrl-S, Ctrl-Q and Ctrl-Z */
-   tios.c_cc[VINTR] = 0;
-   tios.c_cc[VSTART] = 0;
-   tios.c_cc[VSTOP] = 0;
-   tios.c_cc[VSUSP] = 0;
-
-   tios.c_lflag &= ~(ICANON|ECHO);
-   tios.c_iflag &= ~ICRNL;
-   tcsetattr(STDIN_FILENO, TCSANOW, &tios);
-   tcflush(STDIN_FILENO,TCIFLUSH);
-}
-
 #if HAS_RFC2553
 /* Wait for a TCP connection */
 static int vtty_tcp_conn_wait(vtty_t *vtty)

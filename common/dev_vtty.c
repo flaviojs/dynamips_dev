@@ -55,13 +55,6 @@ static pthread_t vtty_thread;
 
 static struct termios tios,tios_orig;
 
-/* Send Telnet command: does the client support terminal type message? */
-static void vtty_telnet_do_ttype(int fd)
-{
-   u_char cmd[] = { IAC, DO, TELOPT_TTYPE };
-   write(fd,cmd,sizeof(cmd));
-}
-
 /* Restore TTY original settings */
 static void vtty_term_reset(void)
 {

@@ -34,11 +34,21 @@ pub struct virtual_tty {
 #[no_mangle] // TODO private
 pub static mut ctrl_code_ok: c_int = 1;
 
+#[no_mangle] // TODO private
+pub static mut telnet_message_ok: c_int = 1;
+
 /// Allow the user to disable the CTRL code for the monitor interface
 #[no_mangle]
 pub unsafe extern "C" fn vtty_set_ctrlhandler(n: c_int) {
     ctrl_code_ok = n;
 }
+
+/// Allow the user to disable the telnet message for AUX and CONSOLE
+#[no_mangle]
+pub unsafe extern "C" fn vtty_set_telnetmsg(n: c_int) {
+    telnet_message_ok = n;
+}
+
 /// Parse serial interface descriptor string, return 0 if success
 /// string takes the form "device:baudrate:databits:parity:stopbits:hwflow"
 /// device is mandatory, other options are optional (default=9600,8,N,1,0).

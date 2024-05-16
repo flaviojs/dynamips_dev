@@ -56,14 +56,6 @@ static pthread_t vtty_thread;
 
 static struct termios tios,tios_orig;
 
-static int telnet_message_ok = 1;
-
-/* Allow the user to disable the telnet message for AUX and CONSOLE */
-void vtty_set_telnetmsg(int n)
-{
-  telnet_message_ok = n;
-}
-
 /* Send Telnet command: WILL TELOPT_ECHO */
 static void vtty_telnet_will_echo(int fd)
 {

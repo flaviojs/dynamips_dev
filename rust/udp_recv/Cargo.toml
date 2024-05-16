@@ -1,0 +1,16 @@
+[package]
+name = "udp_recv"
+version = "0.2.23"
+edition = "2021"
+workspace = ".."
+publish = false
+
+[[bin]]
+name = "udp_recv"
+path = "src/udp_recv.rs"
+
+[dependencies]
+dynamips_c = { path = "../dynamips_c" }
+
+[features]
+"ENABLE_IPV6" = ["dynamips_c/ENABLE_IPV6"]

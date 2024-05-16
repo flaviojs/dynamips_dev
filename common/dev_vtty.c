@@ -56,14 +56,8 @@ static pthread_t vtty_thread;
 
 static struct termios tios,tios_orig;
 
-static int ctrl_code_ok = 1;
 static int telnet_message_ok = 1;
 
-/* Allow the user to disable the CTRL code for the monitor interface */
-void vtty_set_ctrlhandler(int n)
-{
-  ctrl_code_ok = n;
-}
 /* Allow the user to disable the telnet message for AUX and CONSOLE */
 void vtty_set_telnetmsg(int n)
 {

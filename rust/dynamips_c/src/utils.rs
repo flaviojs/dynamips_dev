@@ -332,3 +332,13 @@ pub unsafe extern "C" fn fd_pool_free(pool: *mut fd_pool_t) {
         }
     }
 }
+
+/// Initialize an empty pool
+#[no_mangle]
+pub unsafe extern "C" fn fd_pool_init(pool: *mut fd_pool_t) {
+    for i in 0..FD_POOL_MAX {
+        (*pool).fd[i] = -1;
+    }
+
+    (*pool).next = null_mut();
+}

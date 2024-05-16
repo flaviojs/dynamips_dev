@@ -522,17 +522,6 @@ void m_randomize_block(m_uint8_t *buf,size_t len)
       buf[i] = rand() & 0xFF;
 }
 
-/* Initialize an empty pool */
-void fd_pool_init(fd_pool_t *pool)
-{
-   int i;
-   
-   for(i=0;i<FD_POOL_MAX;i++)
-      pool->fd[i] = -1;
-
-   pool->next = NULL;
-}
-
 /* Get a free slot for a FD in a pool */
 int fd_pool_get_free_slot(fd_pool_t *pool,int **slot)
 {

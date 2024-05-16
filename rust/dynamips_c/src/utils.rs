@@ -391,3 +391,30 @@ pub unsafe extern "C" fn fd_pool_set_fds(pool: *mut fd_pool_t, fds: *mut libc::f
 
     max_fd
 }
+
+/// Send a buffer to all FDs of a pool
+#[no_mangle]
+pub unsafe extern "C" fn fd_pool_send(pool: *mut fd_pool_t, buffer: *mut c_void, len: size_t, flags: c_int) -> c_int {
+    let mut err: c_int = 0;
+    let mut next_p: *mut fd_pool_t = pool;
+    while !next_p.is_null() {
+        let p: *mut fd_pool_t = next_p;
+        next_p = (*p).next;
+        for i in 0..FD_POOL_MAX {
+            if (*p).fd[i] == -1 {
+                continue;
+            }
+
+            let res: ssize_t = libc::send((*p).fd[i], buffer, len, flags);
+
+            if res != len as ssize_t {
+                libc::shutdown((*p).fd[i], 2);
+                libc::close((*p).fd[i]);
+                (*p).fd[i] = -1;
+                err += 1;
+            }
+        }
+    }
+
+    err
+}

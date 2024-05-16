@@ -522,31 +522,6 @@ void m_randomize_block(m_uint8_t *buf,size_t len)
       buf[i] = rand() & 0xFF;
 }
 
-/* Send a buffer to all FDs of a pool */
-int fd_pool_send(fd_pool_t *pool,void *buffer,size_t len,int flags)
-{
-   fd_pool_t *p;
-   ssize_t res;
-   int i,err;
-   
-   for(p=pool,err=0;p;p=p->next)
-      for(i=0;i<FD_POOL_MAX;i++) {
-         if (p->fd[i] == -1)
-            continue;
-         
-         res = send(p->fd[i],buffer,len,flags);
-         
-         if (res != len) {
-            shutdown(p->fd[i],2);
-            close(p->fd[i]);
-            p->fd[i] = -1;
-            err++;
-         }
-      }
-      
-   return(err);
-}
-
 /* Call a function for each FD having incoming data */
 int fd_pool_check_input(fd_pool_t *pool,fd_set *fds,
                         void (*cbk)(int *fd_slot,void *opt),void *opt)

@@ -12,6 +12,7 @@ crate-type = ["staticlib","rlib"]
 libc = "0.2"
 
 [build-dependencies]
+autocfg = "1"
 cc = "1.0"
 
 [features]

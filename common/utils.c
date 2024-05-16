@@ -391,17 +391,6 @@ int m_signal_unblock(int sig)
    return(pthread_sigmask(SIG_UNBLOCK,&sig_mask,NULL));
 }
 
-/* Set non-blocking mode on a file descriptor */
-int m_fd_set_non_block(int fd)
-{
-   int flags;
-
-   if ((flags = fcntl(fd,F_GETFL,0)) < 0)
-      return(-1);
-
-   return(fcntl(fd,F_SETFL, flags | O_NONBLOCK));
-}
-
 /* Sync a memory zone */
 int memzone_sync(void *addr, size_t len)
 {

@@ -52,6 +52,7 @@ corrosion_import_crate (
     dynamips_c
     dynamips_c_unstable
     udp_recv
+    udp_send
 )
 function ( _set_features _crate )
    set ( _features )

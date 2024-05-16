@@ -9,3 +9,4 @@ pub mod _ext;
 pub mod net;
 /// cbindgen:ignore
 pub mod prelude;
+pub mod utils;

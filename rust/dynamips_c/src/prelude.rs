@@ -23,6 +23,7 @@ extern "C" {
     // _ext.c
     pub fn c_stderr() -> *mut libc::FILE;
     // libc
+    pub fn gethostbyname(name: *const c_char) -> *mut libc::hostent;
     pub fn htons(x: u16) -> u16;
     pub fn inet_addr(cp: *const libc::c_char) -> libc::in_addr_t;
 }

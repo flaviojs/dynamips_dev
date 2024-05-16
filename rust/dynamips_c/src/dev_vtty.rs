@@ -31,6 +31,14 @@ pub struct virtual_tty {
     _todo: u8,
 }
 
+// Definitions for the TELNET protocol from arpa/telnet.h
+/// interpret as command:
+const IAC: u8 = 255;
+/// I will use option
+const WILL: u8 = 251;
+/// echo
+const TELOPT_ECHO: u8 = 1;
+
 #[no_mangle] // TODO private
 pub static mut ctrl_code_ok: c_int = 1;
 
@@ -47,6 +55,13 @@ pub unsafe extern "C" fn vtty_set_ctrlhandler(n: c_int) {
 #[no_mangle]
 pub unsafe extern "C" fn vtty_set_telnetmsg(n: c_int) {
     telnet_message_ok = n;
+}
+
+/// Send Telnet command: WILL TELOPT_ECHO
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn vtty_telnet_will_echo(fd: c_int) {
+    let cmd: [u8; 3] = [IAC, WILL, TELOPT_ECHO];
+    libc::write(fd, cmd.as_ptr().cast::<_>(), cmd.len());
 }
 
 /// Parse serial interface descriptor string, return 0 if success

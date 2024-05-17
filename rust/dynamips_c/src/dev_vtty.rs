@@ -30,6 +30,12 @@ pub const VTTY_BUFFER_SIZE: usize = 4096;
 /// Maximum listening socket number
 pub const VTTY_MAX_FD: usize = 10;
 
+// VTTY connection types // TODO enum
+pub const VTTY_TYPE_NONE: c_int = 0;
+pub const VTTY_TYPE_TERM: c_int = 1;
+pub const VTTY_TYPE_TCP: c_int = 2;
+pub const VTTY_TYPE_SERIAL: c_int = 3;
+
 /// Virtual TTY structure
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -340,5 +346,18 @@ pub unsafe extern "C" fn vtty_tcp_conn_wait(vtty: *mut vtty_t) -> c_int {
         vtty_tcp_conn_wait_ipv4_ipv6(vtty)
     } else {
         vtty_tcp_conn_wait_ipv4(vtty)
+    }
+}
+
+/// Flush VTTY output
+#[no_mangle]
+pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {
+    match (*vtty).type_ {
+        VTTY_TYPE_TERM | VTTY_TYPE_SERIAL => {
+            if (*vtty).fd_array[0] != -1 {
+                libc::fsync((*vtty).fd_array[0]);
+            }
+        }
+        _ => {}
     }
 }

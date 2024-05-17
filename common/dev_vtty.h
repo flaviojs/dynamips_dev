@@ -14,14 +14,6 @@
 #include "vm.h"
 #include <stdio.h>
 
-/* VTTY connection types */
-enum {
-   VTTY_TYPE_NONE = 0,
-   VTTY_TYPE_TERM,
-   VTTY_TYPE_TCP,
-   VTTY_TYPE_SERIAL,
-};
-
 /* VTTY connection states (for TCP) */
 enum {
    VTTY_STATE_TCP_INVALID,    /* connection is not working */

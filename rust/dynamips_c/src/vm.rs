@@ -221,6 +221,20 @@ pub unsafe fn vm_flog(vm: *mut vm_instance_t, module: *mut c_char, format: *mut 
     }
 }
 
+#[macro_export]
+macro_rules! vm_log {
+    ($vm:expr, $module:expr, $format: expr$(, $arg:expr)*) => {
+        let vm: *mut vm_instance_t = $vm;
+        let module: *mut c_char = $module;
+        let format: *mut c_char = $format;
+        let args: &[&dyn sprintf::Printf] = &[$(&Printf($arg)),*];
+        if !(*vm).log_fd.is_null() {
+            m_flog((*vm).log_fd, module, format, args);
+        }
+    };
+}
+pub use vm_log;
+
 /// Close the log file
 #[no_mangle]
 pub unsafe extern "C" fn vm_close_log(vm: *mut vm_instance_t) -> c_int {

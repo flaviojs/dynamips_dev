@@ -72,6 +72,14 @@ impl<T> AsC<*const T, *const c_void> for &[T] {
         self.as_c().cast::<_>()
     }
 }
+impl AsC<*const c_char, *const c_void> for CStr {
+    fn as_c(&self) -> *const c_char {
+        self.as_ptr()
+    }
+    fn as_c_void(&self) -> *const c_void {
+        self.as_c().cast::<_>()
+    }
+}
 impl AsC<*const c_char, *const c_void> for CString {
     fn as_c(&self) -> *const c_char {
         self.as_c_str().as_ptr()

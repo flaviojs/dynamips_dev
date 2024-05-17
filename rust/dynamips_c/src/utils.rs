@@ -418,3 +418,21 @@ pub unsafe extern "C" fn fd_pool_send(pool: *mut fd_pool_t, buffer: *mut c_void,
 
     err
 }
+
+/// Call a function for each FD having incoming data
+#[no_mangle]
+pub unsafe extern "C" fn fd_pool_check_input(pool: *mut fd_pool_t, fds: *mut libc::fd_set, cbk: Option<unsafe extern "C" fn(fd_slot: *mut c_int, opt: *mut c_void)>, opt: *mut c_void) -> c_int {
+    let mut count: c_int = 0;
+    let mut p: *mut fd_pool_t = pool;
+    while !p.is_null() {
+        for i in 0..FD_POOL_MAX {
+            if (*p).fd[i] != -1 && libc::FD_ISSET((*p).fd[i], fds) {
+                cbk.unwrap()(addr_of_mut!((*p).fd[i]), opt);
+                count += 1;
+            }
+        }
+        p = (*p).next;
+    }
+
+    count
+}

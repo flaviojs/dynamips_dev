@@ -522,24 +522,6 @@ void m_randomize_block(m_uint8_t *buf,size_t len)
       buf[i] = rand() & 0xFF;
 }
 
-/* Call a function for each FD having incoming data */
-int fd_pool_check_input(fd_pool_t *pool,fd_set *fds,
-                        void (*cbk)(int *fd_slot,void *opt),void *opt)
-{
-   fd_pool_t *p;
-   int i,count;
-   
-   for(p=pool,count=0;p;p=p->next)
-      for(i=0;i<FD_POOL_MAX;i++) {
-         if ((p->fd[i] != -1) && FD_ISSET(p->fd[i],fds)) {
-            cbk(&p->fd[i],opt);
-            count++;
-         }
-      }
-   
-   return(count);
-}
-
 /* Equivalent to fprintf, but for a posix fd */
 ssize_t fd_printf(int fd,int flags,char *fmt,...)
 {

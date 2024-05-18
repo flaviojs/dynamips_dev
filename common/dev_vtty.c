@@ -52,45 +52,6 @@ static pthread_t vtty_thread;
 #define VTTY_LIST_LOCK()   pthread_mutex_lock(&vtty_list_mutex);
 #define VTTY_LIST_UNLOCK() pthread_mutex_unlock(&vtty_list_mutex);
 
-/* Delete a virtual tty */
-void vtty_delete(vtty_t *vtty)
-{
-   int i;
-
-   if (vtty != NULL) {
-      VTTY_LIST_LOCK();
-      if (vtty->pprev != NULL) {
-         if (vtty->next)
-            vtty->next->pprev = vtty->pprev;
-         *(vtty->pprev) = vtty->next;
-      }
-      VTTY_LIST_UNLOCK();
-
-      switch(vtty->type_) {
-           case VTTY_TYPE_TCP:
-               
-               for(i=0;i<vtty->fd_count;i++)
-                   if (vtty->fd_array[i] != -1) {
-                       vm_log(vtty->vm,"VTTY","%s: closing FD %d\n",vtty->name,vtty->fd_array[i]);
-                       close(vtty->fd_array[i]);
-                   }
-
-           fd_pool_free(&vtty->fd_pool);
-           vtty->fd_count = 0;
-           break;
-        
-           default:
-               
-               /* We don't close FD 0 since it is stdin */
-               if (vtty->fd_array[0] > 0) {
-                   vm_log(vtty->vm,"VTTY","%s: closing FD %d\n",vtty->name,vtty->fd_array[0]);
-                   close(vtty->fd_array[0]);
-               }
-       }
-      free(vtty);
-   }
-}
-
 /* Store a character in the FIFO buffer */
 static int vtty_store(vtty_t *vtty,u_char c)
 {

@@ -210,6 +210,28 @@ pub unsafe fn m_flog(fd: *mut libc::FILE, module: *mut c_char, fmt: *mut c_char,
     }
 }
 
+/// Equivalent to fprintf, but for a posix fd
+#[macro_export]
+macro_rules! fd_printf {
+    ($fd:expr, $flags:expr, $fmt:expr$(, $arg:expr)*) => {
+        {
+            let fd: c_int = $fd;
+            let flags: c_int = $flags;
+            let fmt: *mut c_char = $fmt;
+            let args: &[&dyn sprintf::Printf] = &[$(&Printf($arg)),*];
+            match sprintf::vsprintf(CStr::from_ptr(fmt).to_str().unwrap(), args) {
+                Ok(s) => {
+                    libc::send(fd, s.as_c_void(), s.len(), flags)
+                }
+                Err(_) => {
+                    libc::EINVAL as ssize_t
+                }
+            }
+        }
+    };
+}
+pub use fd_printf;
+
 /// Normalize a size
 #[no_mangle]
 pub unsafe extern "C" fn normalize_size(val: u_int, nb: u_int, shift: c_int) -> u_int {

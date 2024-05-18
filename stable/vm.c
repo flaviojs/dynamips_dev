@@ -134,12 +134,6 @@ void vm_object_dump(vm_instance_t *vm)
    printf("\n");
 }
 
-/* Get VM type */
-char *vm_get_type(vm_instance_t *vm)
-{
-   return vm->platform->name;
-}
-
 /* Get log name */
 static char *vm_get_log_name(vm_instance_t *vm)
 {

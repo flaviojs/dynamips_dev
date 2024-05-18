@@ -33,14 +33,6 @@ struct vm_ghost_image {
    vm_ghost_image_t *next;
 };
 
-/* VM instance status */
-enum {   
-   VM_STATUS_HALTED = 0,      /* VM is halted and no HW resources are used */
-   VM_STATUS_SHUTDOWN,        /* Shutdown procedure engaged */
-   VM_STATUS_RUNNING,         /* VM is running */
-   VM_STATUS_SUSPENDED,       /* VM is suspended */
-};
-
 /* Ghost RAM status */
 enum {
    VM_GHOST_RAM_NONE = 0,

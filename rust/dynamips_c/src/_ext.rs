@@ -88,6 +88,22 @@ impl AsC<*const c_char, *const c_void> for CString {
         self.as_c().cast::<_>()
     }
 }
+impl AsC<*const c_char, *const c_void> for &str {
+    fn as_c(&self) -> *const c_char {
+        self.as_ptr().cast::<_>()
+    }
+    fn as_c_void(&self) -> *const c_void {
+        self.as_c().cast::<_>()
+    }
+}
+impl AsC<*const c_char, *const c_void> for String {
+    fn as_c(&self) -> *const c_char {
+        self.as_str().as_c()
+    }
+    fn as_c_void(&self) -> *const c_void {
+        self.as_c().cast::<_>()
+    }
+}
 
 /// Trait that converts a mutable rust type to a C representation.
 pub trait AsCMut<T, V> {

@@ -425,6 +425,156 @@ pub unsafe extern "C" fn vtty_tcp_conn_accept(vtty: *mut vtty_t, nsock: c_int) -
     0
 }
 
+/// Setup serial port, return 0 if success.
+#[no_mangle]
+pub unsafe extern "C" fn vtty_serial_setup(vtty: *mut vtty_t, option: *const vtty_serial_option_t) -> c_int {
+    let mut tio: libc::termios = zeroed::<_>();
+
+    if libc::tcgetattr((*vtty).fd_array[0], addr_of_mut!(tio)) != 0 {
+        libc::fprintf(c_stderr(), cstr!("error: tcgetattr failed\n"));
+        return -1;
+    }
+
+    #[cfg(has_libc_cfmakeraw)]
+    libc::cfmakeraw(addr_of_mut!(tio));
+    #[cfg(not(has_libc_cfmakeraw))]
+    {
+        // #if defined(__CYGWIN__) || defined(SUNOS)
+        unsafe fn cfmakeraw(termios_p: *mut libc::termios) {
+            (*termios_p).c_iflag &= !(libc::IGNBRK | libc::BRKINT | libc::PARMRK | libc::ISTRIP | libc::INLCR | libc::IGNCR | libc::ICRNL | libc::IXON);
+            (*termios_p).c_oflag &= !libc::OPOST;
+            (*termios_p).c_lflag &= !(libc::ECHO | libc::ECHONL | libc::ICANON | libc::ISIG | libc::IEXTEN);
+            (*termios_p).c_cflag &= !(libc::CSIZE | libc::PARENB);
+            (*termios_p).c_cflag |= libc::CS8;
+        }
+        cfmakeraw(addr_of_mut!(tio));
+    }
+
+    tio.c_cflag = libc::CLOCAL // ignore modem control lines
+        ;
+
+    tio.c_cflag &= !libc::CREAD;
+    tio.c_cflag |= libc::CREAD;
+
+    let tio_baudrate: libc::speed_t = match (*option).baudrate {
+        50 => libc::B50,
+        75 => libc::B75,
+        110 => libc::B110,
+        134 => libc::B134,
+        150 => libc::B150,
+        200 => libc::B200,
+        300 => libc::B300,
+        600 => libc::B600,
+        1200 => libc::B1200,
+        1800 => libc::B1800,
+        2400 => libc::B2400,
+        4800 => libc::B4800,
+        9600 => libc::B9600,
+        19200 => libc::B19200,
+        38400 => libc::B38400,
+        57600 => libc::B57600,
+        #[cfg(has_libc_B76800)]
+        76800 => libc::B76800,
+        115200 => libc::B115200,
+        #[cfg(has_libc_B230400)]
+        230400 => libc::B230400,
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("error: unsupported baudrate\n"));
+            return -1;
+        }
+    };
+
+    libc::cfsetospeed(addr_of_mut!(tio), tio_baudrate);
+    libc::cfsetispeed(addr_of_mut!(tio), tio_baudrate);
+
+    // clear size flag
+    tio.c_cflag &= !libc::CSIZE;
+    match (*option).databits {
+        5 => tio.c_cflag |= libc::CS5,
+        6 => tio.c_cflag |= libc::CS6,
+        7 => tio.c_cflag |= libc::CS7,
+        8 => tio.c_cflag |= libc::CS8,
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("error: unsupported databits\n"));
+            return -1;
+        }
+    }
+
+    // clear parity flag
+    tio.c_iflag &= !libc::INPCK;
+    tio.c_cflag &= !(libc::PARENB | libc::PARODD);
+    match (*option).parity {
+        0 => {}
+        2 => {
+            // even
+            tio.c_iflag |= libc::INPCK;
+            tio.c_cflag |= libc::PARENB;
+        }
+        1 => {
+            /* odd */
+            tio.c_iflag |= libc::INPCK;
+            tio.c_cflag |= libc::PARENB | libc::PARODD;
+        }
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("error: unsupported parity\n"));
+            return -1;
+        }
+    }
+
+    tio.c_cflag &= !libc::CSTOPB; /* clear stop flag */
+    match (*option).stopbits {
+        1 => {}
+        2 => tio.c_cflag |= libc::CSTOPB,
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("error: unsupported stopbits\n"));
+            return -1;
+        }
+    }
+
+    #[cfg(has_libc_CRTSCTS)]
+    {
+        tio.c_cflag &= !libc::CRTSCTS;
+    }
+    #[cfg(has_libc_CNEW_RTSCTS)]
+    {
+        tio.c_cflag &= !libc::CNEW_RTSCTS;
+    }
+    if (*option).hwflow != 0 {
+        #[cfg(has_libc_CRTSCTS)]
+        {
+            tio.c_cflag |= libc::CRTSCTS;
+        }
+        #[cfg(has_libc_CNEW_RTSCTS)]
+        {
+            tio.c_cflag |= libc::CNEW_RTSCTS;
+        }
+    }
+
+    tio.c_cc[libc::VTIME] = 0;
+    tio.c_cc[libc::VMIN] = 1; // block read() until one character is available
+
+    if false {
+        // not neccessary unless O_NONBLOCK used
+        if libc::fcntl((*vtty).fd_array[0], libc::F_SETFL, 0) != 0 {
+            // enable blocking mode
+            libc::fprintf(c_stderr(), cstr!("error: fnctl F_SETFL failed\n"));
+            return -1;
+        }
+    }
+
+    if libc::tcflush((*vtty).fd_array[0], libc::TCIOFLUSH) != 0 {
+        libc::fprintf(c_stderr(), cstr!("error: tcflush failed\n"));
+        return -1;
+    }
+
+    if libc::tcsetattr((*vtty).fd_array[0], libc::TCSANOW, addr_of!(tio)) != 0 {
+        libc::fprintf(c_stderr(), cstr!("error: tcsetattr failed\n"));
+        return -1;
+    }
+
+    0
+}
+
 /// Flush VTTY output
 #[no_mangle]
 pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {

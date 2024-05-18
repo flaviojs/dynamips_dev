@@ -80,6 +80,13 @@ pub struct virtual_tty {
     pub replay_full: u_char,
 }
 
+unsafe fn VTTY_LOCK(tty: *mut vtty_t) {
+    libc::pthread_mutex_lock(addr_of_mut!((*tty).lock));
+}
+unsafe fn VTTY_UNLOCK(tty: *mut vtty_t) {
+    libc::pthread_mutex_unlock(addr_of_mut!((*tty).lock));
+}
+
 // Definitions for the TELNET protocol from arpa/telnet.h
 /// interpret as command:
 const IAC: u8 = 255;
@@ -692,6 +699,26 @@ pub unsafe extern "C" fn vtty_delete(vtty: *mut vtty_t) {
         }
         libc::free(vtty.cast::<_>());
     }
+}
+
+/// Store a character in the FIFO buffer
+#[no_mangle]
+pub unsafe extern "C" fn vtty_store(vtty: *mut vtty_t, c: c_uchar) -> c_int {
+    VTTY_LOCK(vtty);
+    let mut nwptr: c_uint = (*vtty).write_ptr + 1;
+    if nwptr == VTTY_BUFFER_SIZE as c_uint {
+        nwptr = 0;
+    }
+
+    if nwptr == (*vtty).read_ptr {
+        VTTY_UNLOCK(vtty);
+        return -1;
+    }
+
+    (*vtty).buffer[(*vtty).write_ptr as usize] = c;
+    (*vtty).write_ptr = nwptr;
+    VTTY_UNLOCK(vtty);
+    0
 }
 
 /// Flush VTTY output

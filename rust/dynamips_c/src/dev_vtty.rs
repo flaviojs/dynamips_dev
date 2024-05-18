@@ -101,6 +101,19 @@ const TELOPT_TTYPE: u8 = 24;
 /// Linemode option
 const TELOPT_LINEMODE: u8 = 34;
 
+// VTTY list
+#[no_mangle] // TODO private
+pub static mut vtty_list_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
+#[no_mangle] // TODO private
+pub static mut vtty_list: *mut vtty_t = null_mut();
+
+unsafe fn VTTY_LIST_LOCK() {
+    libc::pthread_mutex_lock(addr_of_mut!(vtty_list_mutex));
+}
+unsafe fn VTTY_LIST_UNLOCK() {
+    libc::pthread_mutex_unlock(addr_of_mut!(vtty_list_mutex));
+}
+
 #[no_mangle] // TODO private
 pub static mut ctrl_code_ok: c_int = 1;
 
@@ -573,6 +586,77 @@ pub unsafe extern "C" fn vtty_serial_setup(vtty: *mut vtty_t, option: *const vtt
     }
 
     0
+}
+
+/// Create a virtual tty
+#[no_mangle]
+pub unsafe extern "C" fn vtty_create(vm: *mut vm_instance_t, name: *mut c_char, type_: c_int, tcp_port: c_int, option: *const vtty_serial_option_t) -> *mut vtty_t {
+    let vtty: *mut vtty_t = libc::malloc(size_of::<vtty_t>()).cast::<_>();
+    if vtty.is_null() {
+        libc::fprintf(c_stderr(), cstr!("VTTY: unable to create new virtual tty.\n"));
+        return null_mut();
+    }
+    libc::memset(vtty.cast::<_>(), 0, size_of::<vtty_t>());
+    (*vtty).name = name;
+    (*vtty).type_ = type_;
+    (*vtty).vm = vm;
+    (*vtty).fd_count = 0;
+    libc::pthread_mutex_init(addr_of_mut!((*vtty).lock), null_mut());
+    (*vtty).terminal_support = 1;
+    (*vtty).input_state = VTTY_INPUT_TEXT;
+    fd_pool_init(addr_of_mut!((*vtty).fd_pool));
+    for i in 0..VTTY_MAX_FD {
+        (*vtty).fd_array[i] = -1;
+    }
+
+    match (*vtty).type_ {
+        VTTY_TYPE_NONE => {}
+
+        VTTY_TYPE_TERM => {
+            vtty_term_init();
+            (*vtty).fd_array[0] = libc::STDIN_FILENO;
+        }
+
+        VTTY_TYPE_TCP => {
+            (*vtty).tcp_port = tcp_port;
+            (*vtty).fd_count = vtty_tcp_conn_wait(vtty);
+        }
+
+        VTTY_TYPE_SERIAL => {
+            (*vtty).fd_array[0] = libc::open((*option).device, libc::O_RDWR);
+            if (*vtty).fd_array[0] < 0 {
+                libc::fprintf(c_stderr(), cstr!("VTTY: open failed\n"));
+                libc::free(vtty.cast::<_>());
+                return null_mut();
+            }
+            if vtty_serial_setup(vtty, option) != 0 {
+                libc::fprintf(c_stderr(), cstr!("VTTY: setup failed\n"));
+                libc::close((*vtty).fd_array[0]);
+                libc::free(vtty.cast::<_>());
+                return null_mut();
+            }
+            (*vtty).terminal_support = 0;
+        }
+
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("tty_create: bad vtty type %d\n"), (*vtty).type_);
+            libc::free(vtty.cast::<_>());
+            return null_mut();
+        }
+    }
+
+    // Add this new VTTY to the list
+    VTTY_LIST_LOCK();
+    (*vtty).next = vtty_list;
+    (*vtty).pprev = addr_of_mut!(vtty_list);
+
+    if !vtty_list.is_null() {
+        (*vtty_list).pprev = addr_of_mut!((*vtty).next);
+    }
+
+    vtty_list = vtty;
+    VTTY_LIST_UNLOCK();
+    vtty
 }
 
 /// Flush VTTY output

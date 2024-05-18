@@ -26,4 +26,9 @@ fn main() {
     assert!(probe_dep_expr("libc", "{ use libc::size_t; }").status.success());
     emit_dep_expr_cfg("libc", "{ fn f(x: libc::sockaddr_in6) { let _ = x.sin6_len; } }", "has_libc_sockaddr_in6_sin6_len");
     emit_dep_expr_cfg("libc", "{ fn f(x: libc::tm) { let _ = x.tm_gmtoff; } }", "has_libc_tm_tm_gmtoff");
+    emit_dep_expr_cfg("libc", "{ use libc::cfmakeraw; }", "has_libc_cfmakeraw");
+    emit_dep_expr_cfg("libc", "{ use libc::B76800; }", "has_libc_B76800");
+    emit_dep_expr_cfg("libc", "{ use libc::B230400; }", "has_libc_B230400");
+    emit_dep_expr_cfg("libc", "{ use libc::CRTSCTS; }", "has_libc_CRTSCTS");
+    emit_dep_expr_cfg("libc", "{ use libc::CNEW_RTSCTS; }", "has_libc_CNEW_RTSCTS");
 }

@@ -38,6 +38,16 @@ pub const VM_PCI_POOL_SIZE: usize = 32;
 /// Max slots per VM
 pub const VM_MAX_SLOTS: usize = 16;
 
+// VM instance status // TODO enum
+/// VM is halted and no HW resources are used
+pub const VM_STATUS_HALTED: c_int = 0;
+/// Shutdown procedure engaged
+pub const VM_STATUS_SHUTDOWN: c_int = 1;
+/// VM is running
+pub const VM_STATUS_RUNNING: c_int = 2;
+/// VM is suspended
+pub const VM_STATUS_SUSPENDED: c_int = 3;
+
 /// Shutdown function prototype for an object
 pub type vm_shutdown_t = Option<unsafe extern "C" fn(vm: *mut vm_instance_t, data: *mut c_void) -> *mut c_void>;
 
@@ -247,4 +257,36 @@ pub unsafe extern "C" fn vm_close_log(vm: *mut vm_instance_t) -> c_int {
     (*vm).log_file = null_mut();
     (*vm).log_fd = null_mut();
     0
+}
+
+/// Error message
+#[macro_export]
+macro_rules! vm_error {
+    ($vm:expr, $format:expr$(, $arg:expr)*) => {
+        let vm: *mut vm_instance_t = $vm;
+        let format: *mut c_char = $format;
+        let args: &[&dyn sprintf::Printf] = &[$(&CustomPrintf($arg)),*];
+        if let Ok(s) = sprintf::vsprintf(CStr::from_ptr(format).to_str().unwrap(), args) {
+            let mut bytes = s.into_bytes();
+            bytes.push(0);
+            libc::fprintf(c_stderr(), cstr!("%s '%s': %s"), vm_get_log_name(vm), (*vm).name, bytes.as_ptr());
+        }
+    };
+}
+pub use vm_error;
+
+/// Get VM type
+#[no_mangle]
+pub unsafe extern "C" fn vm_get_type(vm: *mut vm_instance_t) -> *mut c_char {
+    (*(*vm).platform).name
+}
+
+/// Get log name
+pub unsafe fn vm_get_log_name(vm: *mut vm_instance_t) -> *mut c_char {
+    if !(*(*vm).platform).log_name.is_null() {
+        return (*(*vm).platform).log_name;
+    }
+
+    // default value
+    cstr!("VM")
 }

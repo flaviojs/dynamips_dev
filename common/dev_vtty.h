@@ -21,20 +21,6 @@ enum {
    VTTY_STATE_TCP_RUNNING,    /* character reading/writing ok */
 };
 
-/* VTTY input states */
-enum {
-   VTTY_INPUT_TEXT,
-   VTTY_INPUT_VT1,
-   VTTY_INPUT_VT2,
-   VTTY_INPUT_REMOTE,
-   VTTY_INPUT_TELNET,
-   VTTY_INPUT_TELNET_IYOU,
-   VTTY_INPUT_TELNET_SB1,
-   VTTY_INPUT_TELNET_SB2,
-   VTTY_INPUT_TELNET_SB_TTYPE,
-   VTTY_INPUT_TELNET_NEXT
-};
-
 #define VTTY_LOCK(tty) pthread_mutex_lock(&(tty)->lock);
 #define VTTY_UNLOCK(tty) pthread_mutex_unlock(&(tty)->lock);
 

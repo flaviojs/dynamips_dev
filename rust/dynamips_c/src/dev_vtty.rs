@@ -39,6 +39,18 @@ pub const VTTY_TYPE_TERM: c_int = 1;
 pub const VTTY_TYPE_TCP: c_int = 2;
 pub const VTTY_TYPE_SERIAL: c_int = 3;
 
+// VTTY input states // TODO enum
+pub const VTTY_INPUT_TEXT: c_int = 0;
+pub const VTTY_INPUT_VT1: c_int = 1;
+pub const VTTY_INPUT_VT2: c_int = 2;
+pub const VTTY_INPUT_REMOTE: c_int = 3;
+pub const VTTY_INPUT_TELNET: c_int = 4;
+pub const VTTY_INPUT_TELNET_IYOU: c_int = 5;
+pub const VTTY_INPUT_TELNET_SB1: c_int = 6;
+pub const VTTY_INPUT_TELNET_SB2: c_int = 7;
+pub const VTTY_INPUT_TELNET_SB_TTYPE: c_int = 8;
+pub const VTTY_INPUT_TELNET_NEXT: c_int = 9;
+
 /// Virtual TTY structure
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -350,6 +362,67 @@ pub unsafe extern "C" fn vtty_tcp_conn_wait(vtty: *mut vtty_t) -> c_int {
     } else {
         vtty_tcp_conn_wait_ipv4(vtty)
     }
+}
+
+/// Accept a TCP connection
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn vtty_tcp_conn_accept(vtty: *mut vtty_t, nsock: c_int) -> c_int {
+    let mut fd_slot: *mut c_int = null_mut();
+    if fd_pool_get_free_slot(addr_of_mut!((*vtty).fd_pool), addr_of_mut!(fd_slot)) < 0 {
+        vm_error!((*vtty).vm, cstr!("unable to create a new VTTY TCP connection\n"));
+        return -1;
+    }
+
+    let fd: c_int = libc::accept((*vtty).fd_array[nsock as usize], null_mut(), null_mut());
+    if fd < 0 {
+        vm_error!((*vtty).vm, cstr!("vtty_tcp_conn_accept: accept on port %d failed %s\n"), (*vtty).tcp_port, libc::strerror(c_errno()));
+        return -1;
+    }
+
+    // Register the new FD
+    *fd_slot = fd;
+
+    vm_log!((*vtty).vm, cstr!("VTTY"), cstr!("%s is now connected (accept_fd=%d,conn_fd=%d)\n"), (*vtty).name, (*vtty).fd_array[nsock as usize], fd);
+
+    // Adapt Telnet settings
+    if (*vtty).terminal_support != 0 {
+        vtty_telnet_do_ttype(fd);
+        vtty_telnet_will_echo(fd);
+        vtty_telnet_will_suppress_go_ahead(fd);
+        vtty_telnet_dont_linemode(fd);
+        (*vtty).input_state = VTTY_INPUT_TEXT;
+    }
+
+    if telnet_message_ok == 1 {
+        fd_printf!(fd, 0, cstr!("Connected to Dynamips VM \"%s\" (ID %u, type %s) - %s\r\nPress ENTER to get the prompt.\r\n"), (*(*vtty).vm).name, (*(*vtty).vm).instance_id, vm_get_type((*vtty).vm), (*vtty).name);
+        // replay old text
+        if (*vtty).replay_full != 0 {
+            let mut i: usize = (*vtty).replay_ptr as usize;
+            while i < VTTY_BUFFER_SIZE {
+                let n: ssize_t = libc::send(fd, addr_of_mut!((*vtty).replay_buffer[i]).cast::<_>(), VTTY_BUFFER_SIZE - i, 0);
+                if n < 0 {
+                    libc::perror(cstr!("vtty_tcp_conn_accept: send"));
+                    break;
+                }
+                i += n as usize;
+            }
+        }
+        let mut i: usize = 0;
+        while i < (*vtty).replay_ptr as usize {
+            let n: ssize_t = libc::send(fd, addr_of_mut!((*vtty).replay_buffer[i]).cast::<_>(), (*vtty).replay_ptr as usize - i, 0);
+            if n < 0 {
+                libc::perror(cstr!("vtty_tcp_conn_accept: send"));
+                break;
+            }
+            i += n as usize;
+        }
+        // warn if not running
+        if (*(*vtty).vm).status != VM_STATUS_RUNNING {
+            fd_printf!(fd, 0, cstr!("\r\n!!! WARNING - VM is not running, will be unresponsive (status=%d) !!!\r\n"), (*(*vtty).vm).status);
+        }
+        vtty_flush(vtty);
+    }
+    0
 }
 
 /// Flush VTTY output

@@ -743,6 +743,15 @@ pub unsafe extern "C" fn vtty_store_data(vtty: *mut vtty_t, data: *mut c_char, l
     bytes
 }
 
+/// Store CTRL+C in buffer
+#[no_mangle]
+pub unsafe extern "C" fn vtty_store_ctrlc(vtty: *mut vtty_t) -> c_int {
+    if !vtty.is_null() {
+        vtty_store(vtty, 0x03);
+    }
+    0
+}
+
 /// Flush VTTY output
 #[no_mangle]
 pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {

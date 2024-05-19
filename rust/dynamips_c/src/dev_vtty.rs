@@ -824,6 +824,38 @@ pub unsafe extern "C" fn vtty_is_char_avail(vtty: *mut vtty_t) -> c_int {
     res
 }
 
+/// Put char to vtty
+#[no_mangle]
+pub unsafe extern "C" fn vtty_put_char(vtty: *mut vtty_t, mut ch: c_char) {
+    match (*vtty).type_ {
+        VTTY_TYPE_NONE => {}
+
+        VTTY_TYPE_TERM | VTTY_TYPE_SERIAL => {
+            if libc::write((*vtty).fd_array[0], addr_of!(ch).cast::<_>(), 1) != 1 {
+                vm_log!((*vtty).vm, cstr!("VTTY"), cstr!("%s: put char 0x%x failed (%s)\n"), (*vtty).name, ch as c_int, libc::strerror(c_errno()));
+            }
+        }
+
+        VTTY_TYPE_TCP => {
+            fd_pool_send(addr_of_mut!((*vtty).fd_pool), addr_of_mut!(ch).cast::<_>(), 1, 0);
+        }
+
+        _ => {
+            vm_error!((*vtty).vm, cstr!("vtty_put_char: bad vtty type %d\n"), (*vtty).type_);
+            libc::exit(1);
+        }
+    }
+
+    // store char for replay
+    (*vtty).replay_buffer[(*vtty).replay_ptr as usize] = ch as u8;
+
+    (*vtty).replay_ptr += 1;
+    if (*vtty).replay_ptr == VTTY_BUFFER_SIZE as c_uint {
+        (*vtty).replay_ptr = 0;
+        (*vtty).replay_full = 1;
+    }
+}
+
 /// Flush VTTY output
 #[no_mangle]
 pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {

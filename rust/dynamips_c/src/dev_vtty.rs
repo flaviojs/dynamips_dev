@@ -856,6 +856,16 @@ pub unsafe extern "C" fn vtty_put_char(vtty: *mut vtty_t, mut ch: c_char) {
     }
 }
 
+/// Put a buffer to vtty
+#[no_mangle]
+pub unsafe extern "C" fn vtty_put_buffer(vtty: *mut vtty_t, buf: *mut c_char, len: size_t) {
+    for i in 0..len {
+        vtty_put_char(vtty, *buf.add(i));
+    }
+
+    vtty_flush(vtty);
+}
+
 /// Flush VTTY output
 #[no_mangle]
 pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {

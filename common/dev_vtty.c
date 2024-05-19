@@ -407,17 +407,6 @@ static void vtty_read_and_store(vtty_t *vtty,int *fd_slot)
    }
 }
 
-/* Put a buffer to vtty */
-void vtty_put_buffer(vtty_t *vtty,char *buf,size_t len)
-{
-   size_t i;
-
-   for(i=0;i<len;i++)
-      vtty_put_char(vtty,buf[i]);
-   
-   vtty_flush(vtty);
-}
-
 /* VTTY TCP input */
 static void vtty_tcp_input(int *fd_slot,void *opt)
 {

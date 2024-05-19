@@ -51,14 +51,6 @@ static pthread_t vtty_thread;
 #define VTTY_LIST_LOCK()   pthread_mutex_lock(&vtty_list_mutex);
 #define VTTY_LIST_UNLOCK() pthread_mutex_unlock(&vtty_list_mutex);
 
-/* Store CTRL+C in buffer */
-int vtty_store_ctrlc(vtty_t *vtty)
-{
-   if (vtty)
-      vtty_store(vtty,0x03);
-   return(0);
-}
-
 /* 
  * Read a character from the terminal.
  */

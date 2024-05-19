@@ -11,6 +11,13 @@ use crate::pci_io::*;
 use crate::rommon_var::*;
 use crate::utils::*;
 
+extern "C" {
+    pub fn vm_ios_save_config(vm: *mut vm_instance_t) -> c_int;
+    pub fn vm_object_dump(vm: *mut vm_instance_t);
+    pub fn vm_resume(vm: *mut vm_instance_t) -> c_int;
+    pub fn vm_suspend(vm: *mut vm_instance_t) -> c_int;
+}
+
 pub type vm_chunk_t = vm_chunk;
 pub type vm_obj_t = vm_obj;
 pub type vm_instance_t = vm_instance;
@@ -289,4 +296,13 @@ pub unsafe fn vm_get_log_name(vm: *mut vm_instance_t) -> *mut c_char {
 
     // default value
     cstr!("VM")
+}
+
+/// Clear an IRQ for a VM
+#[no_mangle]
+#[inline]
+pub unsafe extern "C" fn vm_clear_irq(vm: *mut vm_instance_t, irq: u_int) {
+    if (*vm).clear_irq.is_some() {
+        (*vm).clear_irq.unwrap()(vm, irq);
+    }
 }

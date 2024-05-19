@@ -159,8 +159,16 @@ pub struct cpu_group {
     pub priv_data: *mut c_void,
 }
 
+// Possible CPU types // TODO enum
+pub const CPU_TYPE_MIPS64: u_int = 1;
+pub const CPU_TYPE_PPC32: u_int = 2;
+
 pub unsafe fn CPU_MIPS64(cpu: *mut cpu_gen_t) -> *mut cpu_mips_t {
     addr_of_mut!((*cpu).sp.mips64_cpu)
+}
+
+pub unsafe fn CPU_PPC32(cpu: *mut cpu_gen_t) -> *mut cpu_ppc_t {
+    addr_of_mut!((*cpu).sp.ppc32_cpu)
 }
 
 /// Set the exec loop entry point

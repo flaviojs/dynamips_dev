@@ -8,7 +8,18 @@
 //! Serial console by Peter Ross (suxen_drol@hotmail.com)
 
 use crate::_private::*;
+use crate::cisco_card::*;
+use crate::cpu::*;
 use crate::dynamips::*;
+use crate::dynamips_common::*;
+use crate::memory::*;
+use crate::mips64::*;
+use crate::mips64_exec::*;
+use crate::pci_dev::*;
+use crate::ppc32::*;
+use crate::ppc32_exec::*;
+#[cfg(feature = "USE_UNSTABLE")]
+use crate::tcb::*;
 use crate::utils::*;
 use crate::vm::*;
 
@@ -859,6 +870,16 @@ pub unsafe extern "C" fn vtty_put_char(vtty: *mut vtty_t, mut ch: c_char) {
     }
 }
 
+/// Put a buffer to vtty
+#[no_mangle]
+pub unsafe extern "C" fn vtty_put_buffer(vtty: *mut vtty_t, buf: *mut c_char, len: size_t) {
+    for i in 0..len {
+        vtty_put_char(vtty, *buf.add(i));
+    }
+
+    vtty_flush(vtty);
+}
+
 /// Flush VTTY output
 #[no_mangle]
 pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {
@@ -869,5 +890,217 @@ pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {
             }
         }
         _ => {}
+    }
+}
+
+/// Remote control for MIPS64 processors
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn remote_control_mips64(_vtty: *mut vtty_t, c: c_char, cpu: *mut cpu_mips_t) -> c_int {
+    match c as u8 {
+        // Show information about JIT compiled pages
+        b'b' => {
+            libc::printf(cstr!("\nCPU0: %u JIT compiled pages [Exec Area Pages: %lu/%lu]\n"), (*cpu).compiled_pages, (*cpu).exec_page_alloc as u_long, (*cpu).exec_page_count as u_long);
+        }
+
+        // Non-JIT mode statistics
+        b'j' => {
+            mips64_dump_stats(cpu);
+        }
+
+        _ => {
+            return FALSE;
+        }
+    }
+
+    TRUE
+}
+
+/// Remote control for PPC32 processors
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn remote_control_ppc32(_vtty: *mut vtty_t, c: c_char, cpu: *mut cpu_ppc_t) -> c_int {
+    match c as u8 {
+        // Show information about JIT compiled pages
+        b'b' => {
+            libc::printf(cstr!("\nCPU0: %u JIT compiled pages [Exec Area Pages: %lu/%lu]\n"), (*cpu).compiled_pages, (*cpu).exec_page_alloc as u_long, (*cpu).exec_page_count as u_long);
+        }
+
+        // Non-JIT mode statistics
+        b'j' => {
+            ppc32_dump_stats(cpu);
+        }
+
+        _ => {
+            return FALSE;
+        }
+    }
+
+    TRUE
+}
+
+/// Process remote control char
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn remote_control(vtty: *mut vtty_t, c: u_char) {
+    let vm: *mut vm_instance_t = (*vtty).vm;
+    let cpu0: *mut cpu_gen_t = (*vm).boot_cpu;
+
+    // Specific commands for the different CPU models
+    if !cpu0.is_null() {
+        match (*cpu0).type_ {
+            CPU_TYPE_MIPS64 => {
+                if remote_control_mips64(vtty, c as c_char, CPU_MIPS64(cpu0)) != 0 {
+                    return;
+                }
+            }
+            CPU_TYPE_PPC32 => {
+                if remote_control_ppc32(vtty, c as c_char, CPU_PPC32(cpu0)) != 0 {
+                    return;
+                }
+            }
+            _ => {}
+        }
+    }
+
+    match c {
+        // Show the object list
+        b'o' => {
+            vm_object_dump(vm);
+        }
+
+        // Stop the MIPS VM
+        b'q' => {
+            (*vm).status = VM_STATUS_SHUTDOWN;
+        }
+
+        // Reboot the C7200
+        b'k' => {
+            #[cfg(if_0)]
+            {
+                if (*vm).type_ == VM_TYPE_C7200 {
+                    c7200_boot_ios(VM_C7200(vm));
+                }
+            }
+        }
+
+        // Show the device list
+        b'd' => {
+            dev_show_list(vm);
+            pci_dev_show_list((*vm).pci_bus[0]);
+            pci_dev_show_list((*vm).pci_bus[1]);
+        }
+
+        // Show info about Port Adapters or Network Modules
+        b'p' => {
+            vm_slot_show_all_info(vm);
+        }
+
+        // Dump the MIPS registers
+        b'r' => {
+            if !cpu0.is_null() {
+                (*cpu0).reg_dump.unwrap()(cpu0);
+            }
+        }
+
+        // Dump the latest memory accesses
+        b'm' => {
+            if !cpu0.is_null() {
+                memlog_dump(cpu0);
+            }
+        }
+
+        // Suspend CPU emulation
+        b's' => {
+            vm_suspend(vm);
+        }
+
+        // Resume CPU emulation
+        b'u' => {
+            vm_resume(vm);
+        }
+
+        // Dump the MMU information
+        b't' => {
+            if !cpu0.is_null() {
+                (*cpu0).mmu_dump.unwrap()(cpu0);
+            }
+        }
+
+        // Dump the MMU information (raw mode)
+        b'z' => {
+            if !cpu0.is_null() {
+                (*cpu0).mmu_raw_dump.unwrap()(cpu0);
+            }
+        }
+
+        // Memory translation cache statistics
+        b'l' => {
+            if !cpu0.is_null() {
+                (*cpu0).mts_show_stats.unwrap()(cpu0);
+            }
+        }
+
+        // Extract the configuration from the NVRAM
+        b'c' => {
+            vm_ios_save_config(vm);
+        }
+
+        // Determine an idle pointer counter
+        b'i' => {
+            if !cpu0.is_null() {
+                (*cpu0).get_idling_pc.unwrap()(cpu0);
+            }
+        }
+
+        // Experimentations / Tests
+        b'x' => {
+            #[cfg(if_0)]
+            {
+                if !cpu0.is_null() {
+                    // IRQ triggering
+                    vm_set_irq(vm, 6);
+                    //(*CPU_MIPS64(cpu0)).irq_disable = TRUE;
+                }
+            }
+            #[cfg(feature = "USE_UNSTABLE")]
+            {
+                tsg_show_stats();
+            }
+        }
+
+        b'y' => {
+            if !cpu0.is_null() {
+                // IRQ clearing
+                vm_clear_irq(vm, 6);
+            }
+        }
+
+        // Twice Ctrl + ']' (0x1d, 29), or Alt-Gr + '*' (0xb3, 179)
+        0x1d | 0xb3 => {
+            vtty_store(vtty, c);
+        }
+
+        _ => {
+            libc::printf(cstr!("\n\nInstance %s (ID %d)\n\n"), (*vm).name, (*vm).instance_id);
+
+            libc::printf(cstr!(concat!(
+                "o     - Show the VM object list\n",
+                "d     - Show the device list\n",
+                "r     - Dump CPU registers\n",
+                "t     - Dump MMU information\n",
+                "z     - Dump MMU information (raw mode)\n",
+                "m     - Dump the latest memory accesses\n",
+                "s     - Suspend CPU emulation\n",
+                "u     - Resume CPU emulation\n",
+                "q     - Quit the emulator\n",
+                "k     - Reboot the virtual machine\n",
+                "b     - Show info about JIT compiled pages\n",
+                "l     - MTS cache statistics\n",
+                "c     - Write IOS configuration to disk\n",
+                "j     - Non-JIT mode statistics\n",
+                "i     - Determine an idling pointer counter\n",
+                "x     - Experimentations (can crash the box!)\n",
+                "^]    - Send ^]\n",
+                "Other - This help\n"
+            )));
+        }
     }
 }

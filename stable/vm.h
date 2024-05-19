@@ -59,13 +59,6 @@ static inline void vm_set_irq(vm_instance_t *vm,u_int irq)
       vm->set_irq(vm,irq);
 }
 
-/* Clear an IRQ for a VM */
-static inline void vm_clear_irq(vm_instance_t *vm,u_int irq)
-{
-   if (vm->clear_irq != NULL)
-      vm->clear_irq(vm,irq);
-}
-
 /* Initialize a VM object */
 void vm_object_init(vm_obj_t *obj);
 

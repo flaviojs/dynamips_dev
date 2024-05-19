@@ -51,23 +51,6 @@ static pthread_t vtty_thread;
 #define VTTY_LIST_LOCK()   pthread_mutex_lock(&vtty_list_mutex);
 #define VTTY_LIST_UNLOCK() pthread_mutex_unlock(&vtty_list_mutex);
 
-/* Store arbritary data in the FIFO buffer */
-int vtty_store_data(vtty_t *vtty,char *data, int len)
-{
-   int bytes;
-
-   if (!vtty || !data || len < 0)
-      return(-1); // invalid argument
-
-   for (bytes = 0; bytes < len; bytes++) {
-      if (vtty_store(vtty,data[bytes]) == -1)
-         break;
-   }
-
-   vtty->input_pending = TRUE;
-   return(bytes);
-}
-
 /* Store CTRL+C in buffer */
 int vtty_store_ctrlc(vtty_t *vtty)
 {

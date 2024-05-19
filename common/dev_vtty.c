@@ -52,62 +52,6 @@ static pthread_t vtty_thread;
 #define VTTY_LIST_LOCK()   pthread_mutex_lock(&vtty_list_mutex);
 #define VTTY_LIST_UNLOCK() pthread_mutex_unlock(&vtty_list_mutex);
 
-/* 
- * Read a character from the terminal.
- */
-static int vtty_term_read(vtty_t *vtty)
-{
-   u_char c;
-
-   if (read(vtty->fd_array[0],&c,1) == 1)
-      return(c);
-
-   perror("read from vtty failed");
-   return(-1);
-}
-
-/* 
- * Read a character from the TCP connection.
- */
-static int vtty_tcp_read(vtty_t *vtty,int *fd_slot)
-{
-   int fd = *fd_slot;
-   u_char c;
-   
-   if (read(fd,&c,1) == 1)
-      return(c);
-
-   /* problem with the connection */
-   shutdown(fd,2);
-   close(fd);      
-   *fd_slot = -1;
-
-   /* Shouldn't happen... */
-   return(-1);
-}
-
-/*
- * Read a character from the virtual TTY.
- *
- * If the VTTY is a TCP connection, restart it in case of error.
- */
-static int vtty_read(vtty_t *vtty,int *fd_slot)
-{
-   switch(vtty->type_) {
-      case VTTY_TYPE_TERM:
-      case VTTY_TYPE_SERIAL:
-         return(vtty_term_read(vtty));
-      case VTTY_TYPE_TCP:
-         return(vtty_tcp_read(vtty,fd_slot));
-      default:
-         fprintf(stderr,"vtty_read: bad vtty type %d\n",vtty->type_);
-         return(-1);
-   }
-
-   /* NOTREACHED */
-   return(-1);
-}
-
 /* Remote control for MIPS64 processors */
 static int remote_control_mips64(vtty_t *vtty,char c,cpu_mips_t *cpu)
 {

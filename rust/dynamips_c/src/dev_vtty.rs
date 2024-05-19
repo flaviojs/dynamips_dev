@@ -752,6 +752,51 @@ pub unsafe extern "C" fn vtty_store_ctrlc(vtty: *mut vtty_t) -> c_int {
     0
 }
 
+/// Read a character from the terminal.
+unsafe fn vtty_term_read(vtty: *mut vtty_t) -> c_int {
+    let mut c: c_uchar = 0;
+
+    if libc::read((*vtty).fd_array[0], addr_of_mut!(c).cast::<_>(), 1) == 1 {
+        return c.into();
+    }
+
+    libc::perror(cstr!("read from vtty failed"));
+    -1
+}
+
+/// Read a character from the TCP connection.
+unsafe fn vtty_tcp_read(_vtty: *mut vtty_t, fd_slot: *mut c_int) -> c_int {
+    let fd: c_int = *fd_slot;
+    let mut c: c_uchar = 0;
+
+    if libc::read(fd, addr_of_mut!(c).cast::<_>(), 1) == 1 {
+        return c.into();
+    }
+
+    // problem with the connection
+    libc::shutdown(fd, 2);
+    libc::close(fd);
+    *fd_slot = -1;
+
+    // Shouldn't happen...
+    -1
+}
+
+/// Read a character from the virtual TTY.
+///
+/// If the VTTY is a TCP connection, restart it in case of error.
+#[no_mangle]
+pub unsafe extern "C" fn vtty_read(vtty: *mut vtty_t, fd_slot: *mut c_int) -> c_int {
+    match (*vtty).type_ {
+        VTTY_TYPE_TERM | VTTY_TYPE_SERIAL => vtty_term_read(vtty),
+        VTTY_TYPE_TCP => vtty_tcp_read(vtty, fd_slot),
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("vtty_read: bad vtty type %d\n"), (*vtty).type_);
+            -1
+        }
+    }
+}
+
 /// Flush VTTY output
 #[no_mangle]
 pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {

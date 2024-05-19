@@ -815,6 +815,15 @@ pub unsafe extern "C" fn vtty_get_char(vtty: *mut vtty_t) -> c_int {
     c.into()
 }
 
+/// Returns TRUE if a character is available in buffer
+#[no_mangle]
+pub unsafe extern "C" fn vtty_is_char_avail(vtty: *mut vtty_t) -> c_int {
+    VTTY_LOCK(vtty);
+    let res: c_int = ((*vtty).read_ptr != (*vtty).write_ptr).into();
+    VTTY_UNLOCK(vtty);
+    res
+}
+
 /// Flush VTTY output
 #[no_mangle]
 pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {

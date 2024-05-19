@@ -724,6 +724,25 @@ pub unsafe extern "C" fn vtty_store(vtty: *mut vtty_t, c: c_uchar) -> c_int {
     0
 }
 
+/// Store arbritary data in the FIFO buffer
+#[no_mangle]
+pub unsafe extern "C" fn vtty_store_data(vtty: *mut vtty_t, data: *mut c_char, len: c_int) -> c_int {
+    if vtty.is_null() || data.is_null() || len < 0 {
+        return -1; // invalid argument
+    }
+
+    let mut bytes: c_int = 0;
+    while bytes < len {
+        if vtty_store(vtty, *data.offset(bytes as isize) as c_uchar) == -1 {
+            break;
+        }
+        bytes += 1;
+    }
+
+    (*vtty).input_pending = 1;
+    bytes
+}
+
 /// Flush VTTY output
 #[no_mangle]
 pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {

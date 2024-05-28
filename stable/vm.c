@@ -273,19 +273,6 @@ void vm_log(vm_instance_t *vm,char *module,char *format,...)
    }
 }
 
-/* Close the log file */
-int vm_close_log(vm_instance_t *vm)
-{
-   if (vm->log_fd)
-      fclose(vm->log_fd);
-
-   free(vm->log_file);
-
-   vm->log_file = NULL;
-   vm->log_fd = NULL;
-   return(0);
-}
-
 /* Create the log file */
 int vm_create_log(vm_instance_t *vm)
 {

@@ -52,26 +52,6 @@ enum {
 /* Timer IRQ check interval */
 #define VM_TIMER_IRQ_CHECK_ITV  1000
 
-/* VM Platform definition */
-struct vm_platform {
-   char *name;
-   char *log_name;
-   char *cli_name;
-   int (*create_instance)(vm_instance_t *vm);
-   int (*delete_instance)(vm_instance_t *vm);
-   int (*init_instance)(vm_instance_t *vm);
-   int (*stop_instance)(vm_instance_t *vm);
-   int (*oir_start)(vm_instance_t *vm,u_int slot_id,u_int subslot_id);
-   int (*oir_stop)(vm_instance_t *vm,u_int slot_id,u_int subslot_id);
-   int (*nvram_extract_config)(vm_instance_t *vm,u_char **startup_config,size_t *startup_len,u_char **private_config,size_t *private_len);
-   int (*nvram_push_config)(vm_instance_t *vm,u_char *startup_config,size_t startup_len,u_char *private_config,size_t private_len);
-   u_int (*get_mac_addr_msb)(void);
-   void (*save_config)(vm_instance_t *vm,FILE *fd);
-   int (*cli_parse_options)(vm_instance_t *vm,int option);
-   void (*cli_show_options)(vm_instance_t *vm);
-   void (*show_spec_drivers)(void);
-};
-
 /* VM platform list item */
 struct vm_platform_list {
    struct vm_platform_list *next;

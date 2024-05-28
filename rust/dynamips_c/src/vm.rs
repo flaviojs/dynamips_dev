@@ -192,10 +192,26 @@ pub struct vm_instance {
     pub vm_object_list: *mut vm_obj,
 }
 
-/// cbindgen:no-export
+/// VM Platform definition
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct vm_platform {
-    _todo: u8,
+    pub name: *mut c_char,
+    pub log_name: *mut c_char,
+    pub cli_name: *mut c_char,
+    pub create_instance: Option<unsafe extern "C" fn(vm: *mut vm_instance_t) -> c_int>,
+    pub delete_instance: Option<unsafe extern "C" fn(vm: *mut vm_instance_t) -> c_int>,
+    pub init_instance: Option<unsafe extern "C" fn(vm: *mut vm_instance_t) -> c_int>,
+    pub stop_instance: Option<unsafe extern "C" fn(vm: *mut vm_instance_t) -> c_int>,
+    pub oir_start: Option<unsafe extern "C" fn(vm: *mut vm_instance_t, slot_id: u_int, subslot_id: u_int) -> c_int>,
+    pub oir_stop: Option<unsafe extern "C" fn(vm: *mut vm_instance_t, slot_id: u_int, subslot_id: u_int) -> c_int>,
+    pub nvram_extract_config: Option<unsafe extern "C" fn(vm: *mut vm_instance_t, startup_config: *mut *mut u_char, startup_len: *mut size_t, private_config: *mut *mut u_char, private_len: *mut size_t) -> c_int>,
+    pub nvram_push_config: Option<unsafe extern "C" fn(vm: *mut vm_instance_t, startup_config: *mut u_char, startup_len: size_t, private_config: *mut u_char, private_len: size_t) -> c_int>,
+    pub get_mac_addr_msb: Option<unsafe extern "C" fn() -> u_int>,
+    pub save_config: Option<unsafe extern "C" fn(vm: *mut vm_instance_t, fd: *mut libc::FILE)>,
+    pub cli_parse_options: Option<unsafe extern "C" fn(vm: *mut vm_instance_t, option: c_int) -> c_int>,
+    pub cli_show_options: Option<unsafe extern "C" fn(vm: *mut vm_instance_t)>,
+    pub show_spec_drivers: Option<unsafe extern "C" fn()>,
 }
 
 /// Log a message
@@ -203,4 +219,32 @@ pub unsafe fn vm_flog(vm: *mut vm_instance_t, module: *mut c_char, format: *mut 
     if !(*vm).log_fd.is_null() {
         m_flog((*vm).log_fd, module, format, args);
     }
+}
+
+#[macro_export]
+macro_rules! vm_log {
+    ($vm:expr, $module:expr, $format: expr$(, $arg:expr)*) => {
+        let vm: *mut vm_instance_t = $vm;
+        let module: *mut c_char = $module;
+        let format: *mut c_char = $format;
+        let args: &[&dyn sprintf::Printf] = &[$(&CustomPrintf($arg)),*];
+        if !(*vm).log_fd.is_null() {
+            m_flog((*vm).log_fd, module, format, args);
+        }
+    };
+}
+pub use vm_log;
+
+/// Close the log file
+#[no_mangle]
+pub unsafe extern "C" fn vm_close_log(vm: *mut vm_instance_t) -> c_int {
+    if !(*vm).log_fd.is_null() {
+        libc::fclose((*vm).log_fd);
+    }
+
+    libc::free((*vm).log_file.cast::<_>());
+
+    (*vm).log_file = null_mut();
+    (*vm).log_fd = null_mut();
+    0
 }

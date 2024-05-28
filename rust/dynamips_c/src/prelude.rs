@@ -27,6 +27,7 @@ pub use std::ffi::c_longlong;
 pub use std::ffi::c_short;
 pub use std::ffi::c_uchar;
 pub use std::ffi::c_uint;
+pub use std::ffi::c_ulong;
 pub use std::ffi::c_ulonglong;
 pub use std::ffi::c_ushort;
 pub use std::ffi::c_void;

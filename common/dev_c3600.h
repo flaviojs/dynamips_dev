@@ -19,6 +19,7 @@
 #include "nmc93cX6.h"
 #include "net_io.h"
 #include "vm.h"
+#include "rust_dynamips_c.h"
 
 /* Default C3600 parameters */
 #define C3600_DEFAULT_CHASSIS      "3640"
@@ -67,9 +68,6 @@
 #define C3600_ROM_ADDR        0x1fc00000ULL
 #define C3600_BOOTFLASH_ADDR  0x30000000ULL
 #define C3600_PCI_IO_ADDR     0x100000000ULL
-
-/* Reserved space for ROM in NVRAM */
-#define C3600_NVRAM_ROM_RES_SIZE  2048
 
 /* C3600 ELF Platform ID */
 #define C3620_ELF_MACHINE_ID  0x1e

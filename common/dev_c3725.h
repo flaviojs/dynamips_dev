@@ -19,6 +19,7 @@
 #include "nmc93cX6.h"
 #include "net_io.h"
 #include "vm.h"
+#include "rust_dynamips_c.h"
 
 /* Default C3725 parameters */
 #define C3725_DEFAULT_RAM_SIZE     128
@@ -69,10 +70,6 @@
 
 /* WIC interval in address space */
 #define C3725_WIC_SIZE  0x2000
-
-/* Offset of simulated NVRAM in ROM flash */
-#define C3725_NVRAM_OFFSET    0xE0000
-#define C3725_NVRAM_SIZE      0x1C000 // with backup
 
 /* Reserved space for ROM in NVRAM */
 #define C3725_NVRAM_ROM_RES_SIZE  0

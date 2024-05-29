@@ -20,6 +20,7 @@
 #include "net_io.h"
 #include "dev_mpc860.h"
 #include "vm.h"
+#include "rust_dynamips_c.h"
 
 /* Default C1700 parameters */
 #define C1700_DEFAULT_MAINBOARD    "1720"
@@ -68,9 +69,6 @@
 
 /* WIC interval in address space */
 #define C1700_WIC_SIZE  0x1000
-
-/* Reserved space for ROM in NVRAM */
-#define C1700_NVRAM_ROM_RES_SIZE  2048
 
 /* C1700 ELF Platform ID */
 #define C1700_ELF_MACHINE_ID  0x33

@@ -51,6 +51,7 @@ corrosion_import_crate (
   CRATES
     dynamips_c
     dynamips_c_unstable
+    nvram_export
     udp_recv
     udp_send
 )

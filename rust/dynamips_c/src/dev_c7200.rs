@@ -16,3 +16,18 @@
 //!        %ERR-1-SERR: PCI bus system/parity error
 //!        %ERR-1-FATAL: Fatal error interrupt, No reloading
 //!        err_stat=0x0, err_enable=0x0, mgmt_event=0xFFFFFFFF
+
+use crate::_private::*;
+use crate::dynamips_common::*;
+
+// C7200 common device addresses
+pub const C7200_NVRAM_ADDR: m_uint64_t = 0x1e000000;
+
+/// NPE-G1 specific info
+pub const C7200_G1_NVRAM_ADDR: m_uint64_t = 0x1e400000;
+
+// NPE-G2 specific info
+pub const C7200_G2_NVRAM_ADDR: m_uint64_t = 0xff000000;
+
+/// Reserved space for ROM in NVRAM
+pub const C7200_NVRAM_ROM_RES_SIZE: size_t = 2048;

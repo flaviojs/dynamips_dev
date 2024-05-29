@@ -50,11 +50,7 @@ add_custom_target ( ppc32_microcode_dump_stable
 
 # nvram_export
 if ( BUILD_NVRAM_EXPORT )
-add_executable ( nvram_export
-   "${COMMON}/nvram_export.c"
-   )
-target_link_libraries ( nvram_export ${DYNAMIPS_LIBRARIES} )
-install_executable ( nvram_export )
+install ( IMPORTED_RUNTIME_ARTIFACTS nvram_export ) # TODO IMPORTED_RUNTIME_ARTIFACTS requires cmake 3.21
 endif ( BUILD_NVRAM_EXPORT )
 
 #-----------------------#

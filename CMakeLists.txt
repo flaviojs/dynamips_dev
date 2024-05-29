@@ -75,6 +75,7 @@ corrosion_import_crate(
    CRATES
       dynamips-c # bins: udp_recv
       dynamips-c-unstable
+      nvram_export
       udp_send
    FEATURES ${_features}
 )

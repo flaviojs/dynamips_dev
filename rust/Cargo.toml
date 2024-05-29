@@ -5,6 +5,7 @@ members = [
     "dynamips-c",
     "dynamips-c-stable",
     "dynamips-c-unstable",
+    "nvram_export",
     "udp_send",
 ]
 

@@ -489,35 +489,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* BGEZAL (Branch On Greater or Equal Than Zero And Link) */
-static fastcall int mips64_exec_BGEZAL(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int offset = bits(insn,0,15);
-   m_uint64_t new_pc;
-   int res;
-
-   /* compute the new pc */
-   new_pc = (cpu->pc + 4) + sign_extend(offset << 2,18);
-
-   /* set the return address (instruction after the delay slot) */
-   cpu->gpr[MIPS_GPR_RA] = cpu->pc + 8;
-
-   /* take the branch if gpr[rs] >= 0 */
-   res = ((m_int64_t)cpu->gpr[rs] >= 0);
-
-   /* exec the instruction in the delay slot */
-   mips64_exec_bdslot(cpu);
-
-   /* take the branch if the test result is true */
-   if (res) 
-      cpu->pc = new_pc;
-   else
-      cpu->pc += 8;
-
-   return(1);
-}
-
 /* BGEZALL (Branch On Greater or Equal Than Zero And Link Likely) */
 static fastcall int mips64_exec_BGEZALL(cpu_mips_t *cpu,mips_insn_t insn)
 {

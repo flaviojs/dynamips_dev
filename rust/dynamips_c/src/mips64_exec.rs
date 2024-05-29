@@ -5,6 +5,10 @@ use crate::mips64::*;
 use crate::prelude::*;
 use crate::utils::*;
 
+extern "C" {
+    fn mips64_exec_bdslot(cpu: *mut cpu_mips_t);
+}
+
 /// ADD
 #[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
@@ -83,4 +87,21 @@ pub unsafe extern "C" fn mips64_exec_ANDI(cpu: *mut cpu_mips_t, insn: mips_insn_
 
     (*cpu).gpr[rt as usize] = (*cpu).gpr[rs as usize] & imm as m_uint64_t;
     0
+}
+
+/// B (Branch, virtual instruction)
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_B(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let offset: c_int = bits(insn, 0, 15);
+
+    // compute the new pc
+    let new_pc: m_uint64_t = ((*cpu).pc + 4).wrapping_add_signed(sign_extend((offset << 2) as m_int64_t, 18));
+
+    // exec the instruction in the delay slot
+    mips64_exec_bdslot(cpu);
+
+    // set the new pc in cpu structure
+    (*cpu).pc = new_pc;
+    1
 }

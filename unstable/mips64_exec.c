@@ -506,7 +506,7 @@ void *mips64_exec_run_cpu(cpu_gen_t *gen)
 }
 
 /* Execute the instruction in delay slot */
-static forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
+forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
 {
    mips_insn_t insn;
 
@@ -521,23 +521,6 @@ static forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    
    /* Clear BD slot flag */
    cpu->bd_slot = 0;
-}
-
-/* B (Branch, virtual instruction) */
-static fastcall int mips64_exec_B(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int offset = bits(insn,0,15);
-   m_uint64_t new_pc;
-
-   /* compute the new pc */
-   new_pc = (cpu->pc + 4) + sign_extend(offset << 2,18);
-
-   /* exec the instruction in the delay slot */
-   mips64_exec_bdslot(cpu);
-
-   /* set the new pc in cpu structure */
-   cpu->pc = new_pc;
-   return(1);
 }
 
 /* BAL (Branch And Link, virtual instruction) */

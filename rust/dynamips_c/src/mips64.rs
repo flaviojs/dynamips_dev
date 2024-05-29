@@ -15,6 +15,40 @@ pub type mips_cp0_t = mips_cp0;
 pub type mips_cp1_t = mips_cp1;
 pub type cpu_mips_t = cpu_mips;
 
+// MIPS General Purpose Registers
+pub const MIPS_GPR_ZERO: usize = 0; //  zero
+pub const MIPS_GPR_AT: usize = 1; //  at
+pub const MIPS_GPR_V0: usize = 2; //  v0
+pub const MIPS_GPR_V1: usize = 3; //  v1
+pub const MIPS_GPR_A0: usize = 4; //  a0
+pub const MIPS_GPR_A1: usize = 5; //  a1
+pub const MIPS_GPR_A2: usize = 6; //  a2
+pub const MIPS_GPR_A3: usize = 7; //  a3
+pub const MIPS_GPR_T0: usize = 8; //  t0
+pub const MIPS_GPR_T1: usize = 9; //  t1
+pub const MIPS_GPR_T2: usize = 10; //  t2
+pub const MIPS_GPR_T3: usize = 11; //  t3
+pub const MIPS_GPR_T4: usize = 12; //  t4
+pub const MIPS_GPR_T5: usize = 13; //  t5
+pub const MIPS_GPR_T6: usize = 14; //  t6
+pub const MIPS_GPR_T7: usize = 15; //  t7
+pub const MIPS_GPR_S0: usize = 16; //  s0
+pub const MIPS_GPR_S1: usize = 17; //  s1
+pub const MIPS_GPR_S2: usize = 18; //  s2
+pub const MIPS_GPR_S3: usize = 19; //  s3
+pub const MIPS_GPR_S4: usize = 20; //  s4
+pub const MIPS_GPR_S5: usize = 21; //  s5
+pub const MIPS_GPR_S6: usize = 22; //  s6
+pub const MIPS_GPR_S7: usize = 23; //  s7
+pub const MIPS_GPR_T8: usize = 24; //  t8
+pub const MIPS_GPR_T9: usize = 25; //  t9
+pub const MIPS_GPR_K0: usize = 26; //  k0
+pub const MIPS_GPR_K1: usize = 27; //  k1
+pub const MIPS_GPR_GP: usize = 28; //  gp
+pub const MIPS_GPR_SP: usize = 29; //  sp
+pub const MIPS_GPR_FP: usize = 30; //  fp
+pub const MIPS_GPR_RA: usize = 31; //  ra
+
 /// Number of GPR (general purpose registers)
 pub const MIPS64_GPR_NR: usize = 32;
 

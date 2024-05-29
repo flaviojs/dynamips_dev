@@ -523,26 +523,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* BAL (Branch And Link, virtual instruction) */
-static fastcall int mips64_exec_BAL(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int offset = bits(insn,0,15);
-   m_uint64_t new_pc;
-
-   /* compute the new pc */
-   new_pc = (cpu->pc + 4) + sign_extend(offset << 2,18);
-
-   /* set the return address (instruction after the delay slot) */
-   cpu->gpr[MIPS_GPR_RA] = cpu->pc + 8;
-
-   /* exec the instruction in the delay slot */
-   mips64_exec_bdslot(cpu);
-
-   /* set the new pc in cpu structure */
-   cpu->pc = new_pc;
-   return(1);
-}
-
 /* BEQ (Branch On Equal) */
 static fastcall int mips64_exec_BEQ(cpu_mips_t *cpu,mips_insn_t insn)
 {

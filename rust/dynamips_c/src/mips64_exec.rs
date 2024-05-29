@@ -105,3 +105,23 @@ pub unsafe extern "C" fn mips64_exec_B(cpu: *mut cpu_mips_t, insn: mips_insn_t) 
     (*cpu).pc = new_pc;
     1
 }
+
+/// BAL (Branch And Link, virtual instruction)
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_BAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let offset: c_int = bits(insn, 0, 15);
+
+    // compute the new pc
+    let new_pc: m_uint64_t = ((*cpu).pc + 4).wrapping_add_signed(sign_extend((offset << 2) as m_int64_t, 18));
+
+    // set the return address (instruction after the delay slot)
+    (*cpu).gpr[MIPS_GPR_RA] = (*cpu).pc + 8;
+
+    // exec the instruction in the delay slot
+    mips64_exec_bdslot(cpu);
+
+    // set the new pc in cpu structure
+    (*cpu).pc = new_pc;
+    1
+}

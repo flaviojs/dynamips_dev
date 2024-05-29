@@ -11,42 +11,6 @@
 #include "utils.h" 
 #include "rust_dynamips_c.h"
 
-/* 
- * MIPS General Purpose Registers 
- */
-#define MIPS_GPR_ZERO        0             /*  zero  */
-#define MIPS_GPR_AT          1             /*  at  */
-#define MIPS_GPR_V0          2             /*  v0  */
-#define MIPS_GPR_V1          3             /*  v1  */
-#define MIPS_GPR_A0          4             /*  a0  */
-#define MIPS_GPR_A1          5             /*  a1  */
-#define MIPS_GPR_A2          6             /*  a2  */
-#define MIPS_GPR_A3          7             /*  a3  */
-#define MIPS_GPR_T0          8             /*  t0  */
-#define MIPS_GPR_T1          9             /*  t1  */
-#define MIPS_GPR_T2          10            /*  t2  */
-#define MIPS_GPR_T3          11            /*  t3  */
-#define MIPS_GPR_T4          12            /*  t4  */
-#define MIPS_GPR_T5          13            /*  t5  */
-#define MIPS_GPR_T6          14            /*  t6  */
-#define MIPS_GPR_T7          15            /*  t7  */
-#define MIPS_GPR_S0          16            /*  s0  */
-#define MIPS_GPR_S1          17            /*  s1  */
-#define MIPS_GPR_S2          18            /*  s2  */
-#define MIPS_GPR_S3          19            /*  s3  */
-#define MIPS_GPR_S4          20            /*  s4  */
-#define MIPS_GPR_S5          21            /*  s5  */
-#define MIPS_GPR_S6          22            /*  s6  */
-#define MIPS_GPR_S7          23            /*  s7  */
-#define MIPS_GPR_T8          24            /*  t8  */
-#define MIPS_GPR_T9          25            /*  t9  */
-#define MIPS_GPR_K0          26            /*  k0  */
-#define MIPS_GPR_K1          27            /*  k1  */
-#define MIPS_GPR_GP          28            /*  gp  */
-#define MIPS_GPR_SP          29            /*  sp  */
-#define MIPS_GPR_FP          30            /*  fp  */
-#define MIPS_GPR_RA          31            /*  ra  */
-
 /*
  * Coprocessor 0 (System Coprocessor) Register definitions
  */

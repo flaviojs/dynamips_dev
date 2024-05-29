@@ -489,20 +489,6 @@ static forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* ADDI */
-static fastcall int mips64_exec_ADDI(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-   int imm = bits(insn,0,15);
-   m_uint32_t res,val = sign_extend(imm,16);
-
-   /* TODO: Exception handling */
-   res = (m_uint32_t)cpu->gpr[rs] + val;
-   cpu->gpr[rt] = sign_extend(res,32);
-   return(0);
-}
-
 /* ADDIU */
 static fastcall int mips64_exec_ADDIU(cpu_mips_t *cpu,mips_insn_t insn)
 {

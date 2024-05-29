@@ -3,8 +3,30 @@
 use crate::dynamips_common::*;
 use crate::prelude::*;
 
+pub type insn_exec_page_t = insn_exec_page;
+pub type mts32_entry_t = mts32_entry;
+pub type mts64_entry_t = mts64_entry;
+
 /// MIPS instruction
 pub type mips_insn_t = m_uint32_t;
+
+/// cbindgen:no-export
+#[repr(C)]
+pub struct insn_exec_page {
+    _todo: u8,
+}
+
+/// cbindgen:no-export
+#[repr(C)]
+pub struct mts32_entry {
+    _todo: u8,
+}
+
+/// cbindgen:no-export
+#[repr(C)]
+pub struct mts64_entry {
+    _todo: u8,
+}
 
 /// Dynamic sprintf
 #[macro_export]
@@ -123,4 +145,17 @@ pub unsafe extern "C" fn m_fd_set_non_block(fd: c_int) -> c_int {
     }
 
     libc::fcntl(fd, libc::F_SETFL, flags | libc::O_NONBLOCK)
+}
+
+/// Sign-extension
+#[inline(always)]
+pub unsafe fn sign_extend(x: m_int64_t, mut len: c_int) -> m_int64_t {
+    len = 64 - len;
+    (x << len) >> len
+}
+
+/// Extract bits from a 32-bit values
+#[inline]
+pub unsafe fn bits(val: m_uint32_t, start: c_int, end: c_int) -> c_int {
+    ((val >> start) & ((1 << (end - start + 1)) - 1)) as c_int
 }

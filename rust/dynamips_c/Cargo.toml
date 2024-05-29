@@ -9,6 +9,7 @@ publish = false
 crate-type = ["staticlib","rlib"]
 
 [dependencies]
+fn_abi = "3.0.0"
 function_name = "0.3"
 libc = "0.2"
 libc_alloc = "1.0"
@@ -23,3 +24,4 @@ ENABLE_LINUX_ETH = []
 ENABLE_GEN_ETH = []
 ENABLE_IPV6 = []
 USE_UNSTABLE = []
+fastcall= []

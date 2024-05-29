@@ -9,6 +9,7 @@ after_includes = """
 
 // forward declarations (cbindgen places typedefs after the struct definitions, preventing you from using them in the structs)
 typedef struct cbm_array cbm_array_t;
+typedef struct cpu_mips cpu_mips_t;
 typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;
@@ -17,6 +18,8 @@ typedef struct jit_op jit_op_t;
 typedef struct jit_op_data jit_op_data_t;
 typedef struct memblock memblock_t;
 typedef struct mempool mempool_t;
+typedef struct mips_cp0 mips_cp0_t;
+typedef struct mips_cp1 mips_cp1_t;
 typedef struct parser_context parser_context_t;
 typedef struct parser_token parser_token_t;
 typedef struct ptask ptask_t;
@@ -28,10 +31,17 @@ typedef struct rfc_array rfc_array_t;
 typedef struct rfc_eqclass rfc_eqclass_t;
 typedef struct timer_entry timer_entry_t;
 typedef struct timer_queue timer_queue_t;
+typedef struct tlb_entry tlb_entry_t;
 
 typedef int (*timer_proc)(void *arg1, timer_entry_t *arg2);
 
 // volatile types (cbindgen does not emit the C volatile type qualifier)
 typedef timer_entry_t *volatile Volatile_____timer_entry_t;
 typedef volatile int Volatile_c_int;
+typedef unsigned long long m_uint64_t;
+typedef volatile m_uint64_t Volatile_m_uint64_t;
+typedef volatile u_int Volatile_u_int;
 """
+
+[defines]
+"feature = USE_UNSTABLE" = "USE_UNSTABLE"

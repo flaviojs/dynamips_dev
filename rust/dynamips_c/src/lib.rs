@@ -11,6 +11,7 @@
 pub mod _ext;
 pub mod base64;
 pub mod cisco_eeprom;
+pub mod cpu;
 pub mod crc;
 pub mod dev_c1700;
 pub mod dev_c2600;
@@ -29,6 +30,9 @@ pub mod hash;
 pub mod insn_lookup;
 pub mod jit_op;
 pub mod mempool;
+pub mod mips64;
+pub mod mips64_exec;
+pub mod mips64_jit;
 pub mod net;
 pub mod parser;
 /// cbindgen:ignore
@@ -38,5 +42,7 @@ pub mod rbtree;
 pub mod registry;
 pub mod rommon_var;
 pub mod sbox;
+pub mod tcb;
 pub mod timer;
 pub mod utils;
+pub mod vm;

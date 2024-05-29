@@ -523,32 +523,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* BEQZ (Branch On Equal Zero) - Virtual Instruction */
-static fastcall int mips64_exec_BEQZ(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int offset = bits(insn,0,15);
-   m_uint64_t new_pc;
-   int res;
-
-   /* compute the new pc */
-   new_pc = (cpu->pc + 4) + sign_extend(offset << 2,18);
-
-   /* take the branch if gpr[rs] == 0 */
-   res = (cpu->gpr[rs] == 0);
-
-   /* exec the instruction in the delay slot */
-   mips64_exec_bdslot(cpu);
-
-   /* take the branch if the test result is true */
-   if (res) 
-      cpu->pc = new_pc;
-   else
-      cpu->pc += 8;
-
-   return(1);
-}
-
 /* BNEZ (Branch On Not Equal Zero) - Virtual Instruction */
 static fastcall int mips64_exec_BNEZ(cpu_mips_t *cpu,mips_insn_t insn)
 {

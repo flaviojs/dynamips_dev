@@ -1,0 +1,9 @@
+[package]
+name = "nvram_export"
+version = "0.2.23"
+edition = "2021"
+workspace = ".."
+publish = false
+
+[dependencies]
+dynamips_c = { path = "../dynamips_c" }

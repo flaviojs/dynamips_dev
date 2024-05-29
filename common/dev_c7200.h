@@ -33,6 +33,7 @@
 #include "rust_dynamips_c.h"
 #include "net_io.h"
 #include "vm.h"
+#include "rust_dynamips_c.h"
 
 /* Default C7200 parameters */
 #define C7200_DEFAULT_NPE_TYPE     "npe-400"
@@ -86,7 +87,6 @@
 #define C7200_GT64K_ADDR         0x14000000ULL
 #define C7200_GT64K_SEC_ADDR     0x15000000ULL
 #define C7200_BOOTFLASH_ADDR     0x1a000000ULL
-#define C7200_NVRAM_ADDR         0x1e000000ULL
 #define C7200_MPFPGA_ADDR        0x1e800000ULL
 #define C7200_IOFPGA_ADDR        0x1e840000ULL
 #define C7200_BITBUCKET_ADDR     0x1f000000ULL
@@ -96,9 +96,6 @@
 #define C7200_BSWAP_ADDR         0xc0000000ULL
 #define C7200_PCI_IO_ADDR        0x100000000ULL
 
-/* NPE-G1 specific info */
-#define C7200_G1_NVRAM_ADDR      0x1e400000ULL
-
 /* NPE-G2 specific info */
 #define C7200_G2_BSWAP_ADDR      0xce000000ULL
 #define C7200_G2_BOOTFLASH_ADDR  0xe8000000ULL
@@ -106,14 +103,10 @@
 #define C7200_G2_MV64460_ADDR    0xf1000000ULL
 #define C7200_G2_MPFPGA_ADDR     0xfe000000ULL
 #define C7200_G2_IOFPGA_ADDR     0xfe040000ULL
-#define C7200_G2_NVRAM_ADDR      0xff000000ULL
 #define C7200_G2_ROM_ADDR        0xfff00000ULL
 
 /* NVRAM size for NPE-G2: 2 Mb */
 #define C7200_G2_NVRAM_SIZE      (2 * 1048576)
-
-/* Reserved space for ROM in NVRAM */
-#define C7200_NVRAM_ROM_RES_SIZE  2048
 
 /* C7200 physical address bus mask: keep only the lower 33 bits */
 #define C7200_ADDR_BUS_MASK   0x1ffffffffULL

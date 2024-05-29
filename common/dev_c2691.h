@@ -17,6 +17,7 @@
 #include "nmc93cX6.h"
 #include "net_io.h"
 #include "vm.h"
+#include "rust_dynamips_c.h"
 
 /* Default C2691 parameters */
 #define C2691_DEFAULT_RAM_SIZE     128
@@ -67,10 +68,6 @@
 
 /* WIC interval in address space */
 #define C2691_WIC_SIZE  0x2000
-
-/* Offset of simulated NVRAM in ROM flash */
-#define C2691_NVRAM_OFFSET    0xE0000
-#define C2691_NVRAM_SIZE      0x1C000 // with backup
 
 /* Reserved space for ROM in NVRAM */
 #define C2691_NVRAM_ROM_RES_SIZE  0

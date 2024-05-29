@@ -18,6 +18,7 @@
 #include "net_io.h"
 #include "dev_mpc860.h"
 #include "vm.h"
+#include "rust_dynamips_c.h"
 
 /* Default C2600 parameters */
 #define C2600_DEFAULT_MAINBOARD    "2610"
@@ -67,9 +68,6 @@
 
 /* WIC interval in address space */
 #define C2600_WIC_SIZE  0x400
-
-/* Reserved space for ROM in NVRAM */
-#define C2600_NVRAM_ROM_RES_SIZE  2048
 
 /* C2600 ELF Platform ID */
 #define C2600_ELF_MACHINE_ID  0x2b

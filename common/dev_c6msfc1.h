@@ -18,6 +18,7 @@
 #include "rust_dynamips_c.h"
 #include "net_io.h"
 #include "vm.h"
+#include "rust_dynamips_c.h"
 
 /* Default MSFC1 parameters */
 #define C6MSFC1_DEFAULT_RAM_SIZE     256
@@ -60,7 +61,6 @@
 #define C6MSFC1_GT64K_ADDR         0x14000000ULL
 #define C6MSFC1_GT64K_SEC_ADDR     0x15000000ULL
 #define C6MSFC1_BOOTFLASH_ADDR     0x1a000000ULL
-#define C6MSFC1_NVRAM_ADDR         0x1e000000ULL
 #define C6MSFC1_MPFPGA_ADDR        0x1e800000ULL
 #define C6MSFC1_IOFPGA_ADDR        0x1e840000ULL
 #define C6MSFC1_BITBUCKET_ADDR     0x1f000000ULL
@@ -72,9 +72,6 @@
 
 /* SRAM size */
 #define C6MSFC1_SRAM_SIZE  (4096*1024)
-
-/* Reserved space for ROM in NVRAM */
-#define C6MSFC1_NVRAM_ROM_RES_SIZE  2048
 
 /* MSFC1 physical address bus mask: keep only the lower 33 bits */
 #define C6MSFC1_ADDR_BUS_MASK   0x1ffffffffULL

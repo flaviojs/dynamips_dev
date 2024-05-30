@@ -461,3 +461,32 @@ pub unsafe extern "C" fn mips64_exec_BLTZ(cpu: *mut cpu_mips_t, insn: mips_insn_
 
     1
 }
+
+/// BLTZAL (Branch On Less Than Zero And Link)
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_BLTZAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let offset: c_int = bits(insn, 0, 15);
+
+    // compute the new pc
+    let new_pc: m_uint64_t = ((*cpu).pc + 4).wrapping_add_signed(sign_extend((offset << 2) as m_int64_t, 18));
+
+    // set the return address (instruction after the delay slot)
+    (*cpu).gpr[MIPS_GPR_RA] = (*cpu).pc + 8;
+
+    // take the branch if gpr[rs] < 0
+    let res: bool = ((*cpu).gpr[rs as usize] as m_int64_t) < 0;
+
+    // exec the instruction in the delay slot
+    mips64_exec_bdslot(cpu);
+
+    // take the branch if the test result is true
+    if res {
+        (*cpu).pc = new_pc;
+    } else {
+        (*cpu).pc += 8;
+    }
+
+    1
+}

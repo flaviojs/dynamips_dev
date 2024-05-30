@@ -489,30 +489,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* BGTZL (Branch On Greater Than Zero Likely) */
-static fastcall int mips64_exec_BGTZL(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int offset = bits(insn,0,15);
-   m_uint64_t new_pc;
-   int res;
-
-   /* compute the new pc */
-   new_pc = (cpu->pc + 4) + sign_extend(offset << 2,18);
-
-   /* take the branch if gpr[rs] > 0 */
-   res = ((m_int64_t)cpu->gpr[rs] > 0);
-
-   /* take the branch if the test result is true */
-   if (res) {
-      mips64_exec_bdslot(cpu);
-      cpu->pc = new_pc;
-   } else
-      cpu->pc += 8;
-
-   return(1);
-}
-
 /* BLEZ (Branch On Less or Equal Than Zero) */
 static fastcall int mips64_exec_BLEZ(cpu_mips_t *cpu,mips_insn_t insn)
 {

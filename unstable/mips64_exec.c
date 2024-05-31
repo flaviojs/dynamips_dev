@@ -523,33 +523,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* BNE (Branch On Not Equal) */
-static fastcall int mips64_exec_BNE(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-   int offset = bits(insn,0,15);
-   m_uint64_t new_pc;
-   int res;
-
-   /* compute the new pc */
-   new_pc = (cpu->pc + 4) + sign_extend(offset << 2,18);
-
-   /* take the branch if gpr[rs] != gpr[rt] */
-   res = (cpu->gpr[rs] != cpu->gpr[rt]);
-
-   /* exec the instruction in the delay slot */
-   mips64_exec_bdslot(cpu);
-
-   /* take the branch if the test result is true */
-   if (res) 
-      cpu->pc = new_pc;
-   else
-      cpu->pc += 8;
-
-   return(1);
-}
-
 /* BNEL (Branch On Not Equal Likely) */
 static fastcall int mips64_exec_BNEL(cpu_mips_t *cpu,mips_insn_t insn)
 {

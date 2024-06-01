@@ -476,17 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* DSRL32 */
-static fastcall int mips64_exec_DSRL32(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-   int sa = bits(insn,6,10);
-
-   cpu->gpr[rd] = cpu->gpr[rt] >> (32 + sa);
-   return(0);
-}
-
 /* DSRLV */
 static fastcall int mips64_exec_DSRLV(cpu_mips_t *cpu,mips_insn_t insn)
 {

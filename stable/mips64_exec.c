@@ -476,16 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* CFC0 */
-static fastcall int mips64_exec_CFC0(cpu_mips_t *cpu,mips_insn_t insn)
-{	
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-
-   mips64_cp0_exec_cfc0(cpu,rt,rd);
-   return(0);
-}
-
 /* CTC0 */
 static fastcall int mips64_exec_CTC0(cpu_mips_t *cpu,mips_insn_t insn)
 {	

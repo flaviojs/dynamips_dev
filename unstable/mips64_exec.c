@@ -510,18 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* DADDIU */
-static fastcall int mips64_exec_DADDIU(cpu_mips_t *cpu,mips_insn_t insn)
-{	
-   int rs  = bits(insn,21,25);
-   int rt  = bits(insn,16,20);
-   int imm = bits(insn,0,15);
-   m_uint64_t val = sign_extend(imm,16);
-
-   cpu->gpr[rt] = cpu->gpr[rs] + val;
-   return(0);
-}
-
 /* DADDU: rd = rs + rt */
 static fastcall int mips64_exec_DADDU(cpu_mips_t *cpu,mips_insn_t insn)
 {	

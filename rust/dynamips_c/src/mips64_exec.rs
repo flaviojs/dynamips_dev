@@ -654,3 +654,16 @@ pub unsafe extern "C" fn mips64_exec_CTC0(cpu: *mut cpu_mips_t, insn: mips_insn_
     mips64_cp0_exec_ctc0(cpu, rt as u_int, rd as u_int);
     0
 }
+
+/// DADDIU
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_DADDIU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+    let imm: c_int = bits(insn, 0, 15);
+    let val: m_uint64_t = sign_extend(imm as m_int64_t, 16) as m_uint64_t;
+
+    (*cpu).gpr[rt as usize] = (*cpu).gpr[rs as usize].wrapping_add(val);
+    0
+}

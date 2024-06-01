@@ -300,19 +300,6 @@ _Unused static forced_inline void mips64_exec_memop(cpu_mips_t *cpu,int memop,
    fn(cpu,vaddr,dst_reg);
 }
 
-/* Execute a memory operation (2) */
-static forced_inline void mips64_exec_memop2(cpu_mips_t *cpu,int memop,
-                                             m_uint64_t base,int offset,
-                                             u_int dst_reg,int keep_ll_bit)
-{
-   m_uint64_t vaddr = cpu->gpr[base] + sign_extend(offset,16);
-   fastcall mips_memop_fn fn;
-      
-   if (!keep_ll_bit) cpu->ll_bit = 0;
-   fn = cpu->mem_op_fn[memop];
-   fn(cpu,vaddr,dst_reg);
-}
-
 /* Fetch an instruction */
 static forced_inline int mips64_exec_fetch(cpu_mips_t *cpu,m_uint64_t pc,
                                            mips_insn_t *insn)
@@ -521,17 +508,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    
    /* Clear BD slot flag */
    cpu->bd_slot = 0;
-}
-
-/* CACHE */
-static fastcall int mips64_exec_CACHE(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int base   = bits(insn,21,25);
-   int op     = bits(insn,16,20);
-   int offset = bits(insn,0,15);
-
-   mips64_exec_memop2(cpu,MIPS_MEMOP_CACHE,base,offset,op,FALSE);
-   return(0);
 }
 
 /* CFC0 */

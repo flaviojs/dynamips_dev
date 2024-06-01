@@ -10,6 +10,20 @@ extern "C" {
     fn mips64_exec_break(cpu: *mut cpu_mips_t, code: u_int);
 }
 
+/// Execute a memory operation (2)
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+#[inline(always)]
+pub unsafe extern "C" fn mips64_exec_memop2(cpu: *mut cpu_mips_t, memop: c_int, base: m_uint64_t, offset: c_int, dst_reg: u_int, keep_ll_bit: c_int) {
+    let vaddr: m_uint64_t = (*cpu).gpr[base as usize].wrapping_add_signed(sign_extend(offset as m_int64_t, 16));
+
+    if keep_ll_bit == 0 {
+        (*cpu).ll_bit = 0;
+    }
+    let fn_: mips_memop_fn = (*cpu).mem_op_fn[memop as usize];
+    fn_.unwrap()(cpu, vaddr, dst_reg);
+}
+
 /// ADD
 #[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
@@ -603,4 +617,16 @@ pub unsafe extern "C" fn mips64_exec_BREAK(cpu: *mut cpu_mips_t, insn: mips_insn
 
     mips64_exec_break(cpu, code);
     1
+}
+
+/// CACHE
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_CACHE(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let base: c_int = bits(insn, 21, 25);
+    let op: c_int = bits(insn, 16, 20);
+    let offset: c_int = bits(insn, 0, 15);
+
+    mips64_exec_memop2(cpu, MIPS_MEMOP_CACHE as c_int, base as m_uint64_t, offset, op as u_int, FALSE);
+    0
 }

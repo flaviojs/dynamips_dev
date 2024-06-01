@@ -476,16 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* DMTC1 */
-static fastcall int mips64_exec_DMTC1(cpu_mips_t *cpu,mips_insn_t insn)
-{	
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-
-   mips64_exec_dmtc1(cpu,rt,rd);
-   return(0);
-}
-
 /* DSLL */
 static fastcall int mips64_exec_DSLL(cpu_mips_t *cpu,mips_insn_t insn)
 {

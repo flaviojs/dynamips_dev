@@ -13,6 +13,7 @@ extern "C" {
     fn mips64_exec_bdslot(cpu: *mut cpu_mips_t);
     fn mips64_exec_break(cpu: *mut cpu_mips_t, code: u_int);
     fn mips64_exec_dmfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
+    fn mips64_exec_dmtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
 }
 
 /// Execute a memory operation (2)
@@ -747,5 +748,16 @@ pub unsafe extern "C" fn mips64_exec_DMTC0(cpu: *mut cpu_mips_t, insn: mips_insn
     let rd: c_int = bits(insn, 11, 15);
 
     mips64_cp0_exec_dmtc0(cpu, rt as u_int, rd as u_int);
+    0
+}
+
+/// DMTC1
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_DMTC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rt: c_int = bits(insn, 16, 20);
+    let rd: c_int = bits(insn, 11, 15);
+
+    mips64_exec_dmtc1(cpu, rt as u_int, rd as u_int);
     0
 }

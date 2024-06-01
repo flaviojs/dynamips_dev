@@ -7,6 +7,7 @@ use crate::utils::*;
 
 extern "C" {
     fn mips64_exec_bdslot(cpu: *mut cpu_mips_t);
+    fn mips64_exec_break(cpu: *mut cpu_mips_t, code: u_int);
 }
 
 /// ADD
@@ -591,5 +592,15 @@ pub unsafe extern "C" fn mips64_exec_BNEL(cpu: *mut cpu_mips_t, insn: mips_insn_
         (*cpu).pc += 8;
     }
 
+    1
+}
+
+/// BREAK
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_BREAK(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let code: u_int = bits(insn, 6, 25) as u_int;
+
+    mips64_exec_break(cpu, code);
     1
 }

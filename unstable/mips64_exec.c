@@ -523,15 +523,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* BREAK */
-static fastcall int mips64_exec_BREAK(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   u_int code = bits(insn,6,25);
-
-   mips64_exec_break(cpu,code);
-   return(1);
-}
-
 /* CACHE */
 static fastcall int mips64_exec_CACHE(cpu_mips_t *cpu,mips_insn_t insn)
 {

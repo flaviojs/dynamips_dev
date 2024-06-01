@@ -510,16 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* DMFC1 */
-static fastcall int mips64_exec_DMFC1(cpu_mips_t *cpu,mips_insn_t insn)
-{	
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-
-   mips64_exec_dmfc1(cpu,rt,rd);
-   return(0);
-}
-
 /* DMTC0 */
 static fastcall int mips64_exec_DMTC0(cpu_mips_t *cpu,mips_insn_t insn)
 {	

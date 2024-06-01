@@ -761,3 +761,15 @@ pub unsafe extern "C" fn mips64_exec_DMTC1(cpu: *mut cpu_mips_t, insn: mips_insn
     mips64_exec_dmtc1(cpu, rt as u_int, rd as u_int);
     0
 }
+
+/// DSLL
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_DSLL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rt: c_int = bits(insn, 16, 20);
+    let rd: c_int = bits(insn, 11, 15);
+    let sa: c_int = bits(insn, 6, 10);
+
+    (*cpu).gpr[rd as usize] = (*cpu).gpr[rt as usize] << sa;
+    0
+}

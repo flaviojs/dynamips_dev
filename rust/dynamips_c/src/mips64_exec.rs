@@ -679,3 +679,18 @@ pub unsafe extern "C" fn mips64_exec_DADDU(cpu: *mut cpu_mips_t, insn: mips_insn
     (*cpu).gpr[rd as usize] = (*cpu).gpr[rs as usize].wrapping_add((*cpu).gpr[rt as usize]);
     0
 }
+
+/// DIV
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_DIV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+
+    (*cpu).lo = (((*cpu).gpr[rs as usize] as m_int32_t) / ((*cpu).gpr[rt as usize] as m_int32_t)) as m_uint64_t;
+    (*cpu).hi = (((*cpu).gpr[rs as usize] as m_int32_t) % ((*cpu).gpr[rt as usize] as m_int32_t)) as m_uint64_t;
+
+    (*cpu).lo = sign_extend((*cpu).lo as m_int64_t, 32) as m_uint64_t;
+    (*cpu).hi = sign_extend((*cpu).hi as m_int64_t, 32) as m_uint64_t;
+    0
+}

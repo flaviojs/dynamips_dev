@@ -11,6 +11,7 @@ pub type m_uint8_t = c_uchar;
 
 pub type m_uint16_t = c_ushort;
 
+pub type m_int32_t = c_int;
 pub type m_uint32_t = c_uint;
 
 pub type m_int64_t = c_longlong;

@@ -7,6 +7,7 @@ use crate::utils::*;
 
 extern "C" {
     fn mips64_cp0_exec_cfc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int);
+    fn mips64_cp0_exec_ctc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int);
     fn mips64_exec_bdslot(cpu: *mut cpu_mips_t);
     fn mips64_exec_break(cpu: *mut cpu_mips_t, code: u_int);
 }
@@ -640,5 +641,16 @@ pub unsafe extern "C" fn mips64_exec_CFC0(cpu: *mut cpu_mips_t, insn: mips_insn_
     let rd: c_int = bits(insn, 11, 15);
 
     mips64_cp0_exec_cfc0(cpu, rt as u_int, rd as u_int);
+    0
+}
+
+/// CTC0
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_CTC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rt: c_int = bits(insn, 16, 20);
+    let rd: c_int = bits(insn, 11, 15);
+
+    mips64_cp0_exec_ctc0(cpu, rt as u_int, rd as u_int);
     0
 }

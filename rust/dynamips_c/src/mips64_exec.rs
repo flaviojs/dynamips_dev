@@ -857,3 +857,15 @@ pub unsafe extern "C" fn mips64_exec_DSRL32(cpu: *mut cpu_mips_t, insn: mips_ins
     (*cpu).gpr[rd as usize] = (*cpu).gpr[rt as usize] >> (32 + sa);
     0
 }
+
+/// DSRLV
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_DSRLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+    let rd: c_int = bits(insn, 11, 15);
+
+    (*cpu).gpr[rd as usize] = (*cpu).gpr[rt as usize] >> ((*cpu).gpr[rs as usize] & 0x3f);
+    0
+}

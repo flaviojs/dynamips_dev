@@ -979,3 +979,15 @@ pub unsafe extern "C" fn mips64_exec_LB(cpu: *mut cpu_mips_t, insn: mips_insn_t)
     mips64_exec_memop2(cpu, MIPS_MEMOP_LB as c_int, base as m_uint64_t, offset, rt as u_int, TRUE);
     0
 }
+
+/// LBU (Load Byte Unsigned)
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_LBU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let base: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+    let offset: c_int = bits(insn, 0, 15);
+
+    mips64_exec_memop2(cpu, MIPS_MEMOP_LBU as c_int, base as m_uint64_t, offset, rt as u_int, TRUE);
+    0
+}

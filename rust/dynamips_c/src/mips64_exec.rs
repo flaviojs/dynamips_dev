@@ -950,3 +950,20 @@ pub unsafe extern "C" fn mips64_exec_JALR(cpu: *mut cpu_mips_t, insn: mips_insn_
     (*cpu).pc = new_pc;
     1
 }
+
+/// JR
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_JR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+
+    // get the new pc
+    let new_pc: m_uint64_t = (*cpu).gpr[rs as usize];
+
+    // exec the instruction in the delay slot
+    mips64_exec_bdslot(cpu);
+
+    // set the new pc
+    (*cpu).pc = new_pc;
+    1
+}

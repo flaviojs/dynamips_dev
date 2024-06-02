@@ -476,16 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* MOVE (virtual instruction, real: ADDU) */
-static fastcall int mips64_exec_MOVE(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rd = bits(insn,11,15);
-
-   cpu->gpr[rd] = sign_extend(cpu->gpr[rs],32);
-   return(0);
-}
-
 /* MTC0 */
 static fastcall int mips64_exec_MTC0(cpu_mips_t *cpu,mips_insn_t insn)
 {	

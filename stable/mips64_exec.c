@@ -476,27 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* JALR */
-static fastcall int mips64_exec_JALR(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rd = bits(insn,11,15);
-   m_uint64_t new_pc;
-
-   /* set the return pc (instruction after the delay slot) in GPR[rd] */
-   cpu->gpr[rd] = cpu->pc + 8;
-
-   /* get the new pc */
-   new_pc = cpu->gpr[rs];
-
-   /* exec the instruction in the delay slot */
-   mips64_exec_bdslot(cpu);
-
-   /* set the new pc */
-   cpu->pc = new_pc;
-   return(1);
-}
-
 /* JR */
 static fastcall int mips64_exec_JR(cpu_mips_t *cpu,mips_insn_t insn)
 {

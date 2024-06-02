@@ -929,3 +929,24 @@ pub unsafe extern "C" fn mips64_exec_JAL(cpu: *mut cpu_mips_t, insn: mips_insn_t
     (*cpu).pc = new_pc;
     1
 }
+
+/// JALR
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_JALR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let rd: c_int = bits(insn, 11, 15);
+
+    // set the return pc (instruction after the delay slot) in GPR[rd]
+    (*cpu).gpr[rd as usize] = (*cpu).pc + 8;
+
+    // get the new pc
+    let new_pc: m_uint64_t = (*cpu).gpr[rs as usize];
+
+    // exec the instruction in the delay slot
+    mips64_exec_bdslot(cpu);
+
+    // set the new pc
+    (*cpu).pc = new_pc;
+    1
+}

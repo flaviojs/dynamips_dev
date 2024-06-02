@@ -476,17 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* LB (Load Byte) */
-static fastcall int mips64_exec_LB(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int base   = bits(insn,21,25);
-   int rt     = bits(insn,16,20);
-   int offset = bits(insn,0,15);
-
-   mips64_exec_memop2(cpu,MIPS_MEMOP_LB,base,offset,rt,TRUE);
-   return(0);
-}
-
 /* LBU (Load Byte Unsigned) */
 static fastcall int mips64_exec_LBU(cpu_mips_t *cpu,mips_insn_t insn)
 {

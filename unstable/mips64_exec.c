@@ -510,13 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* ERET */
-static fastcall int mips64_exec_ERET(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   mips64_exec_eret(cpu);
-   return(1);
-}
-
 /* J */
 static fastcall int mips64_exec_J(cpu_mips_t *cpu,mips_insn_t insn)
 {

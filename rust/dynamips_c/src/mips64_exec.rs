@@ -1086,3 +1086,14 @@ pub unsafe extern "C" fn mips64_exec_LL(cpu: *mut cpu_mips_t, insn: mips_insn_t)
     mips64_exec_memop2(cpu, MIPS_MEMOP_LL as c_int, base as m_uint64_t, offset, rt as u_int, TRUE);
     0
 }
+
+/// LUI
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_LUI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rt: c_int = bits(insn, 16, 20);
+    let imm: c_int = bits(insn, 0, 15);
+
+    (*cpu).gpr[rt as usize] = (sign_extend(imm as m_int64_t, 16) << 16) as m_uint64_t;
+    0
+}

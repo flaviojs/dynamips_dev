@@ -476,16 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* LI (virtual) */
-static fastcall int mips64_exec_LI(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rt  = bits(insn,16,20);
-   int imm = bits(insn,0,15);
-
-   cpu->gpr[rt] = sign_extend(imm,16);
-   return(0);
-}
-
 /* LL (Load Linked) */
 static fastcall int mips64_exec_LL(cpu_mips_t *cpu,mips_insn_t insn)
 {

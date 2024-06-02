@@ -476,15 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* MFHI */
-static fastcall int mips64_exec_MFHI(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rd = bits(insn,11,15);
-
-   if (rd) cpu->gpr[rd] = cpu->hi;
-   return(0);
-}
-
 /* MFLO */
 static fastcall int mips64_exec_MFLO(cpu_mips_t *cpu,mips_insn_t insn)
 {

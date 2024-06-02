@@ -1169,3 +1169,15 @@ pub unsafe extern "C" fn mips64_exec_MFC1(cpu: *mut cpu_mips_t, insn: mips_insn_
     mips64_exec_mfc1(cpu, rt as u_int, rd as u_int);
     0
 }
+
+/// MFHI
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_MFHI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rd: c_int = bits(insn, 11, 15);
+
+    if rd != 0 {
+        (*cpu).gpr[rd as usize] = (*cpu).hi;
+    }
+    0
+}

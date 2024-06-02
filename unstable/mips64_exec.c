@@ -510,15 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* MFLO */
-static fastcall int mips64_exec_MFLO(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rd = bits(insn,11,15);
-
-   if (rd) cpu->gpr[rd] = cpu->lo;
-   return(0);
-}
-
 /* MOVE (virtual instruction, real: ADDU) */
 static fastcall int mips64_exec_MOVE(cpu_mips_t *cpu,mips_insn_t insn)
 {

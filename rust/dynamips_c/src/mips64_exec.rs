@@ -1181,3 +1181,15 @@ pub unsafe extern "C" fn mips64_exec_MFHI(cpu: *mut cpu_mips_t, insn: mips_insn_
     }
     0
 }
+
+/// MFLO
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_MFLO(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rd: c_int = bits(insn, 11, 15);
+
+    if rd != 0 {
+        (*cpu).gpr[rd as usize] = (*cpu).lo;
+    }
+    0
+}

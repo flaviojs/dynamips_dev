@@ -510,19 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* MOVZ */
-static fastcall int mips64_exec_MOVZ(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-   
-   if (!cpu->gpr[rt])
-      cpu->gpr[rd] = cpu->gpr[rs];
-
-   return(0);
-}
-
 /* MTC0 */
 static fastcall int mips64_exec_MTC0(cpu_mips_t *cpu,mips_insn_t insn)
 {	

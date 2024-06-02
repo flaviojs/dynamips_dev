@@ -510,17 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* LDC1 (Load Double-Word to Coprocessor 1) */
-static fastcall int mips64_exec_LDC1(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int base   = bits(insn,21,25);
-   int ft     = bits(insn,16,20);
-   int offset = bits(insn,0,15);
-
-   mips64_exec_memop2(cpu,MIPS_MEMOP_LDC1,base,offset,ft,TRUE);
-   return(0);
-}
-
 /* LDL (Load Double-Word Left) */
 static fastcall int mips64_exec_LDL(cpu_mips_t *cpu,mips_insn_t insn)
 {

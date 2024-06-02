@@ -1003,3 +1003,15 @@ pub unsafe extern "C" fn mips64_exec_LD(cpu: *mut cpu_mips_t, insn: mips_insn_t)
     mips64_exec_memop2(cpu, MIPS_MEMOP_LD as c_int, base as m_uint64_t, offset, rt as u_int, TRUE);
     0
 }
+
+/// LDC1 (Load Double-Word to Coprocessor 1)
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_LDC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let base: c_int = bits(insn, 21, 25);
+    let ft: c_int = bits(insn, 16, 20);
+    let offset: c_int = bits(insn, 0, 15);
+
+    mips64_exec_memop2(cpu, MIPS_MEMOP_LDC1 as c_int, base as m_uint64_t, offset, ft as u_int, TRUE);
+    0
+}

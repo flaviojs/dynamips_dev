@@ -476,17 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* SWR (Store Word Right) */
-static fastcall int mips64_exec_SWR(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int base   = bits(insn,21,25);
-   int rt     = bits(insn,16,20);
-   int offset = bits(insn,0,15);
-
-   mips64_exec_memop2(cpu,MIPS_MEMOP_SWR,base,offset,rt,FALSE);
-   return(0);
-}
-
 /* SYNC */
 static fastcall int mips64_exec_SYNC(cpu_mips_t *cpu,mips_insn_t insn)
 {

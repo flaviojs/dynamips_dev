@@ -10,6 +10,10 @@ use crate::tcb::*;
 use crate::utils::*;
 use crate::vm::*;
 
+extern "C" {
+    pub fn mips64_dump_regs(cpu: *mut cpu_gen_t);
+}
+
 pub type tlb_entry_t = tlb_entry;
 pub type mips_cp0_t = mips_cp0;
 pub type mips_cp1_t = mips_cp1;

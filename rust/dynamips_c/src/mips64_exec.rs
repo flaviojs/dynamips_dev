@@ -1767,3 +1767,12 @@ pub unsafe extern "C" fn mips64_exec_XORI(cpu: *mut cpu_mips_t, insn: mips_insn_
     (*cpu).gpr[rt as usize] = (*cpu).gpr[rs as usize] ^ imm as m_uint64_t;
     0
 }
+
+/// Unknown opcode
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_unknown(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    libc::printf(cstr!("MIPS64: unknown opcode 0x%8.8x at pc = 0x%llx\n"), insn, (*cpu).pc);
+    mips64_dump_regs((*cpu).gen);
+    0
+}

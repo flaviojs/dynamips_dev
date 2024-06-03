@@ -319,14 +319,6 @@ static forced_inline int mips64_exec_fetch(cpu_mips_t *cpu,m_uint64_t pc,
    return(0);
 }
 
-/* Unknown opcode */
-static fastcall int mips64_exec_unknown(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   printf("MIPS64: unknown opcode 0x%8.8x at pc = 0x%llx\n",insn,cpu->pc);
-   mips64_dump_regs(cpu->gen);
-   return(0);
-}
-
 /* Execute a single instruction */
 static forced_inline int 
 mips64_exec_single_instruction(cpu_mips_t *cpu,mips_insn_t instruction)

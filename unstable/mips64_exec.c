@@ -510,20 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* TEQ (Trap if Equal) */
-static fastcall int mips64_exec_TEQ(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-
-   if (unlikely(cpu->gpr[rs] == cpu->gpr[rt])) {
-      mips64_trigger_trap_exception(cpu);
-      return(1);
-   }
-
-   return(0);
-}
-
 /* TEQI (Trap if Equal Immediate) */
 static fastcall int mips64_exec_TEQI(cpu_mips_t *cpu,mips_insn_t insn)
 {

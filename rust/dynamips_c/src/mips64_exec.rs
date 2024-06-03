@@ -20,6 +20,7 @@ extern "C" {
     fn mips64_exec_mfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_mtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_syscall(cpu: *mut cpu_mips_t);
+    fn mips64_trigger_trap_exception(cpu: *mut cpu_mips_t);
 }
 
 /// Execute a memory operation (2)
@@ -1674,4 +1675,19 @@ pub unsafe extern "C" fn mips64_exec_SYNC(_cpu: *mut cpu_mips_t, _insn: mips_ins
 pub unsafe extern "C" fn mips64_exec_SYSCALL(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     mips64_exec_syscall(cpu);
     1
+}
+
+/// TEQ (Trap if Equal)
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_TEQ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+
+    if unlikely((*cpu).gpr[rs as usize] == (*cpu).gpr[rt as usize]) {
+        mips64_trigger_trap_exception(cpu);
+        return 1;
+    }
+
+    0
 }

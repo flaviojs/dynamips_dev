@@ -16,6 +16,7 @@ pub use function_name::named;
 pub use libc;
 pub use libc::size_t;
 pub use libc::ssize_t;
+pub use likely_stable::unlikely;
 pub use std::ffi::c_char;
 pub use std::ffi::c_int;
 pub use std::ffi::c_long;

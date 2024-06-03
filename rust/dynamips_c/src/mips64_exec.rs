@@ -1278,3 +1278,18 @@ pub unsafe extern "C" fn mips64_exec_MUL(cpu: *mut cpu_mips_t, insn: mips_insn_t
     (*cpu).gpr[rd as usize] = sign_extend(val as m_int64_t, 32) as m_uint64_t;
     0
 }
+
+/// MULT
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_MULT(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+
+    let mut val: m_int64_t = (*cpu).gpr[rs as usize] as m_int32_t as m_int64_t;
+    val *= (*cpu).gpr[rt as usize] as m_int32_t as m_int64_t;
+
+    (*cpu).lo = sign_extend(val, 32) as m_uint64_t;
+    (*cpu).hi = sign_extend(val >> 32, 32) as m_uint64_t;
+    0
+}

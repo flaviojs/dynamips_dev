@@ -476,20 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* MULTU */
-static fastcall int mips64_exec_MULTU(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-   m_uint64_t val;
-
-   val = (m_uint64_t)(m_uint32_t)cpu->gpr[rs];
-   val *= (m_uint64_t)(m_uint32_t)cpu->gpr[rt];
-   cpu->lo = sign_extend(val,32);
-   cpu->hi = sign_extend(val >> 32,32);
-   return(0);
-}
-
 /* NOP */
 static fastcall int mips64_exec_NOP(cpu_mips_t *cpu,mips_insn_t insn)
 {

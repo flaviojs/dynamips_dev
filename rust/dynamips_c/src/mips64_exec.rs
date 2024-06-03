@@ -1659,3 +1659,10 @@ pub unsafe extern "C" fn mips64_exec_SWR(cpu: *mut cpu_mips_t, insn: mips_insn_t
     mips64_exec_memop2(cpu, MIPS_MEMOP_SWR as c_int, base as m_uint64_t, offset, rt as u_int, FALSE);
     0
 }
+
+/// SYNC
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_SYNC(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+    0
+}

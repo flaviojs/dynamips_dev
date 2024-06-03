@@ -510,12 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* SYNC */
-static fastcall int mips64_exec_SYNC(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   return(0);
-}
-
 /* SYSCALL */
 static fastcall int mips64_exec_SYSCALL(cpu_mips_t *cpu,mips_insn_t insn)
 {

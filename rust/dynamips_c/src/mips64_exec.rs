@@ -27,6 +27,30 @@ extern "C" {
     fn mips64_trigger_trap_exception(cpu: *mut cpu_mips_t);
 }
 
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub type mips64_insn_exec_tag_exec = Option<unsafe extern "C" fn(_: *mut cpu_mips_t, _: mips_insn_t) -> c_int>;
+
+/// MIPS instruction recognition
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mips64_insn_exec_tag {
+    pub name: *mut c_char,
+    pub exec: mips64_insn_exec_tag_exec,
+    pub mask: m_uint32_t,
+    pub value: m_uint32_t,
+    pub delay_slot: c_int,
+    pub instr_type: c_int,
+    pub count: m_uint64_t,
+}
+impl mips64_insn_exec_tag {
+    pub const fn new(name: *mut c_char, exec: mips64_insn_exec_tag_exec, mask: m_uint32_t, value: m_uint32_t, delay_slot: c_int, instr_type: c_int) -> Self {
+        Self { name, exec, mask, value, delay_slot, instr_type, count: 0 }
+    }
+    pub const fn null() -> Self {
+        Self { name: null_mut(), exec: None, mask: 0x00000000, value: 0x00000000, delay_slot: 1, instr_type: 0, count: 0 }
+    }
+}
+
 /// Execute a memory operation (2)
 #[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
@@ -1776,3 +1800,133 @@ pub unsafe extern "C" fn mips64_exec_unknown(cpu: *mut cpu_mips_t, insn: mips_in
     mips64_dump_regs((*cpu).gen);
     0
 }
+
+/// MIPS instruction array
+#[no_mangle] // TODO private
+pub static mut mips64_exec_tags: [mips64_insn_exec_tag; 122] = [
+    mips64_insn_exec_tag::new(cstr!("li"), Some(mips64_exec_LI), 0xffe00000, 0x24000000, 1, 16),
+    mips64_insn_exec_tag::new(cstr!("move"), Some(mips64_exec_MOVE), 0xfc1f07ff, 0x00000021, 1, 15),
+    mips64_insn_exec_tag::new(cstr!("b"), Some(mips64_exec_B), 0xffff0000, 0x10000000, 0, 10),
+    mips64_insn_exec_tag::new(cstr!("bal"), Some(mips64_exec_BAL), 0xffff0000, 0x04110000, 0, 10),
+    mips64_insn_exec_tag::new(cstr!("beqz"), Some(mips64_exec_BEQZ), 0xfc1f0000, 0x10000000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bnez"), Some(mips64_exec_BNEZ), 0xfc1f0000, 0x14000000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("add"), Some(mips64_exec_ADD), 0xfc0007ff, 0x00000020, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("addi"), Some(mips64_exec_ADDI), 0xfc000000, 0x20000000, 1, 6),
+    mips64_insn_exec_tag::new(cstr!("addiu"), Some(mips64_exec_ADDIU), 0xfc000000, 0x24000000, 1, 6),
+    mips64_insn_exec_tag::new(cstr!("addu"), Some(mips64_exec_ADDU), 0xfc0007ff, 0x00000021, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("and"), Some(mips64_exec_AND), 0xfc0007ff, 0x00000024, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("andi"), Some(mips64_exec_ANDI), 0xfc000000, 0x30000000, 1, 5),
+    mips64_insn_exec_tag::new(cstr!("beq"), Some(mips64_exec_BEQ), 0xfc000000, 0x10000000, 0, 8),
+    mips64_insn_exec_tag::new(cstr!("beql"), Some(mips64_exec_BEQL), 0xfc000000, 0x50000000, 0, 8),
+    mips64_insn_exec_tag::new(cstr!("bgez"), Some(mips64_exec_BGEZ), 0xfc1f0000, 0x04010000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bgezal"), Some(mips64_exec_BGEZAL), 0xfc1f0000, 0x04110000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bgezall"), Some(mips64_exec_BGEZALL), 0xfc1f0000, 0x04130000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bgezl"), Some(mips64_exec_BGEZL), 0xfc1f0000, 0x04030000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bgtz"), Some(mips64_exec_BGTZ), 0xfc1f0000, 0x1c000000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bgtzl"), Some(mips64_exec_BGTZL), 0xfc1f0000, 0x5c000000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("blez"), Some(mips64_exec_BLEZ), 0xfc1f0000, 0x18000000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("blezl"), Some(mips64_exec_BLEZL), 0xfc1f0000, 0x58000000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bltz"), Some(mips64_exec_BLTZ), 0xfc1f0000, 0x04000000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bltzal"), Some(mips64_exec_BLTZAL), 0xfc1f0000, 0x04100000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bltzall"), Some(mips64_exec_BLTZALL), 0xfc1f0000, 0x04120000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bltzl"), Some(mips64_exec_BLTZL), 0xfc1f0000, 0x04020000, 0, 9),
+    mips64_insn_exec_tag::new(cstr!("bne"), Some(mips64_exec_BNE), 0xfc000000, 0x14000000, 0, 8),
+    mips64_insn_exec_tag::new(cstr!("bnel"), Some(mips64_exec_BNEL), 0xfc000000, 0x54000000, 0, 8),
+    mips64_insn_exec_tag::new(cstr!("break"), Some(mips64_exec_BREAK), 0xfc00003f, 0x0000000d, 1, 0),
+    mips64_insn_exec_tag::new(cstr!("cache"), Some(mips64_exec_CACHE), 0xfc000000, 0xbc000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("cfc0"), Some(mips64_exec_CFC0), 0xffe007ff, 0x40400000, 1, 18),
+    mips64_insn_exec_tag::new(cstr!("ctc0"), Some(mips64_exec_CTC0), 0xffe007ff, 0x40600000, 1, 18),
+    mips64_insn_exec_tag::new(cstr!("daddiu"), Some(mips64_exec_DADDIU), 0xfc000000, 0x64000000, 1, 5),
+    mips64_insn_exec_tag::new(cstr!("daddu"), Some(mips64_exec_DADDU), 0xfc0007ff, 0x0000002d, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("div"), Some(mips64_exec_DIV), 0xfc00ffff, 0x0000001a, 1, 17),
+    mips64_insn_exec_tag::new(cstr!("divu"), Some(mips64_exec_DIVU), 0xfc00ffff, 0x0000001b, 1, 17),
+    mips64_insn_exec_tag::new(cstr!("dmfc0"), Some(mips64_exec_DMFC0), 0xffe007f8, 0x40200000, 1, 18),
+    mips64_insn_exec_tag::new(cstr!("dmfc1"), Some(mips64_exec_DMFC1), 0xffe007ff, 0x44200000, 1, 19),
+    mips64_insn_exec_tag::new(cstr!("dmtc0"), Some(mips64_exec_DMTC0), 0xffe007f8, 0x40a00000, 1, 18),
+    mips64_insn_exec_tag::new(cstr!("dmtc1"), Some(mips64_exec_DMTC1), 0xffe007ff, 0x44a00000, 1, 19),
+    mips64_insn_exec_tag::new(cstr!("dsll"), Some(mips64_exec_DSLL), 0xffe0003f, 0x00000038, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("dsll32"), Some(mips64_exec_DSLL32), 0xffe0003f, 0x0000003c, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("dsllv"), Some(mips64_exec_DSLLV), 0xfc0007ff, 0x00000014, 1, 4),
+    mips64_insn_exec_tag::new(cstr!("dsra"), Some(mips64_exec_DSRA), 0xffe0003f, 0x0000003b, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("dsra32"), Some(mips64_exec_DSRA32), 0xffe0003f, 0x0000003f, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("dsrav"), Some(mips64_exec_DSRAV), 0xfc0007ff, 0x00000017, 1, 4),
+    mips64_insn_exec_tag::new(cstr!("dsrl"), Some(mips64_exec_DSRL), 0xffe0003f, 0x0000003a, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("dsrl32"), Some(mips64_exec_DSRL32), 0xffe0003f, 0x0000003e, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("dsrlv"), Some(mips64_exec_DSRLV), 0xfc0007ff, 0x00000016, 1, 4),
+    mips64_insn_exec_tag::new(cstr!("dsubu"), Some(mips64_exec_DSUBU), 0xfc0007ff, 0x0000002f, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("eret"), Some(mips64_exec_ERET), 0xffffffff, 0x42000018, 0, 1),
+    mips64_insn_exec_tag::new(cstr!("j"), Some(mips64_exec_J), 0xfc000000, 0x08000000, 0, 11),
+    mips64_insn_exec_tag::new(cstr!("jal"), Some(mips64_exec_JAL), 0xfc000000, 0x0c000000, 0, 11),
+    mips64_insn_exec_tag::new(cstr!("jalr"), Some(mips64_exec_JALR), 0xfc1f003f, 0x00000009, 0, 15),
+    mips64_insn_exec_tag::new(cstr!("jr"), Some(mips64_exec_JR), 0xfc1ff83f, 0x00000008, 0, 13),
+    mips64_insn_exec_tag::new(cstr!("lb"), Some(mips64_exec_LB), 0xfc000000, 0x80000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("lbu"), Some(mips64_exec_LBU), 0xfc000000, 0x90000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("ld"), Some(mips64_exec_LD), 0xfc000000, 0xdc000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("ldc1"), Some(mips64_exec_LDC1), 0xfc000000, 0xd4000000, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("ldl"), Some(mips64_exec_LDL), 0xfc000000, 0x68000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("ldr"), Some(mips64_exec_LDR), 0xfc000000, 0x6c000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("lh"), Some(mips64_exec_LH), 0xfc000000, 0x84000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("lhu"), Some(mips64_exec_LHU), 0xfc000000, 0x94000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("ll"), Some(mips64_exec_LL), 0xfc000000, 0xc0000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("lui"), Some(mips64_exec_LUI), 0xffe00000, 0x3c000000, 1, 16),
+    mips64_insn_exec_tag::new(cstr!("lw"), Some(mips64_exec_LW), 0xfc000000, 0x8c000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("lwl"), Some(mips64_exec_LWL), 0xfc000000, 0x88000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("lwr"), Some(mips64_exec_LWR), 0xfc000000, 0x98000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("lwu"), Some(mips64_exec_LWU), 0xfc000000, 0x9c000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("mfc0"), Some(mips64_exec_MFC0), 0xffe007ff, 0x40000000, 1, 18),
+    mips64_insn_exec_tag::new(cstr!("mfc0_1"), Some(mips64_exec_CFC0), 0xffe007ff, 0x40000001, 1, 19),
+    mips64_insn_exec_tag::new(cstr!("mfc1"), Some(mips64_exec_MFC1), 0xffe007ff, 0x44000000, 1, 19),
+    mips64_insn_exec_tag::new(cstr!("mfhi"), Some(mips64_exec_MFHI), 0xffff07ff, 0x00000010, 1, 14),
+    mips64_insn_exec_tag::new(cstr!("mflo"), Some(mips64_exec_MFLO), 0xffff07ff, 0x00000012, 1, 14),
+    #[cfg(feature = "USE_UNSTABLE")]
+    mips64_insn_exec_tag::new(cstr!("movz"), Some(mips64_exec_MOVZ), 0xfc0007ff, 0x0000000a, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("mtc0"), Some(mips64_exec_MTC0), 0xffe007ff, 0x40800000, 1, 18),
+    mips64_insn_exec_tag::new(cstr!("mtc1"), Some(mips64_exec_MTC1), 0xffe007ff, 0x44800000, 1, 19),
+    mips64_insn_exec_tag::new(cstr!("mthi"), Some(mips64_exec_MTHI), 0xfc1fffff, 0x00000011, 1, 13),
+    mips64_insn_exec_tag::new(cstr!("mtlo"), Some(mips64_exec_MTLO), 0xfc1fffff, 0x00000013, 1, 13),
+    mips64_insn_exec_tag::new(cstr!("mul"), Some(mips64_exec_MUL), 0xfc0007ff, 0x70000002, 1, 4),
+    mips64_insn_exec_tag::new(cstr!("mult"), Some(mips64_exec_MULT), 0xfc00ffff, 0x00000018, 1, 17),
+    mips64_insn_exec_tag::new(cstr!("multu"), Some(mips64_exec_MULTU), 0xfc00ffff, 0x00000019, 1, 17),
+    mips64_insn_exec_tag::new(cstr!("nop"), Some(mips64_exec_NOP), 0xffffffff, 0x00000000, 1, 1),
+    mips64_insn_exec_tag::new(cstr!("nor"), Some(mips64_exec_NOR), 0xfc0007ff, 0x00000027, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("or"), Some(mips64_exec_OR), 0xfc0007ff, 0x00000025, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("ori"), Some(mips64_exec_ORI), 0xfc000000, 0x34000000, 1, 5),
+    mips64_insn_exec_tag::new(cstr!("pref"), Some(mips64_exec_PREF), 0xfc000000, 0xcc000000, 1, 0),
+    mips64_insn_exec_tag::new(cstr!("prefi"), Some(mips64_exec_PREFI), 0xfc0007ff, 0x4c00000f, 1, 0),
+    mips64_insn_exec_tag::new(cstr!("sb"), Some(mips64_exec_SB), 0xfc000000, 0xa0000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("sc"), Some(mips64_exec_SC), 0xfc000000, 0xe0000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("sd"), Some(mips64_exec_SD), 0xfc000000, 0xfc000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("sdc1"), Some(mips64_exec_SDC1), 0xfc000000, 0xf4000000, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("sdl"), Some(mips64_exec_SDL), 0xfc000000, 0xb0000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("sdr"), Some(mips64_exec_SDR), 0xfc000000, 0xb4000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("sh"), Some(mips64_exec_SH), 0xfc000000, 0xa4000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("sll"), Some(mips64_exec_SLL), 0xffe0003f, 0x00000000, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("sllv"), Some(mips64_exec_SLLV), 0xfc0007ff, 0x00000004, 1, 4),
+    mips64_insn_exec_tag::new(cstr!("slt"), Some(mips64_exec_SLT), 0xfc0007ff, 0x0000002a, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("slti"), Some(mips64_exec_SLTI), 0xfc000000, 0x28000000, 1, 5),
+    mips64_insn_exec_tag::new(cstr!("sltiu"), Some(mips64_exec_SLTIU), 0xfc000000, 0x2c000000, 1, 5),
+    mips64_insn_exec_tag::new(cstr!("sltu"), Some(mips64_exec_SLTU), 0xfc0007ff, 0x0000002b, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("sra"), Some(mips64_exec_SRA), 0xffe0003f, 0x00000003, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("srav"), Some(mips64_exec_SRAV), 0xfc0007ff, 0x00000007, 1, 4),
+    mips64_insn_exec_tag::new(cstr!("srl"), Some(mips64_exec_SRL), 0xffe0003f, 0x00000002, 1, 7),
+    mips64_insn_exec_tag::new(cstr!("srlv"), Some(mips64_exec_SRLV), 0xfc0007ff, 0x00000006, 1, 4),
+    mips64_insn_exec_tag::new(cstr!("sub"), Some(mips64_exec_SUB), 0xfc0007ff, 0x00000022, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("subu"), Some(mips64_exec_SUBU), 0xfc0007ff, 0x00000023, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("sw"), Some(mips64_exec_SW), 0xfc000000, 0xac000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("swl"), Some(mips64_exec_SWL), 0xfc000000, 0xa8000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("swr"), Some(mips64_exec_SWR), 0xfc000000, 0xb8000000, 1, 2),
+    mips64_insn_exec_tag::new(cstr!("sync"), Some(mips64_exec_SYNC), 0xfffff83f, 0x0000000f, 1, 1),
+    mips64_insn_exec_tag::new(cstr!("syscall"), Some(mips64_exec_SYSCALL), 0xfc00003f, 0x0000000c, 1, 1),
+    mips64_insn_exec_tag::new(cstr!("teq"), Some(mips64_exec_TEQ), 0xfc00003f, 0x00000034, 1, 17),
+    mips64_insn_exec_tag::new(cstr!("teqi"), Some(mips64_exec_TEQI), 0xfc1f0000, 0x040c0000, 1, 20),
+    mips64_insn_exec_tag::new(cstr!("tlbp"), Some(mips64_exec_TLBP), 0xffffffff, 0x42000008, 1, 1),
+    mips64_insn_exec_tag::new(cstr!("tlbr"), Some(mips64_exec_TLBR), 0xffffffff, 0x42000001, 1, 1),
+    mips64_insn_exec_tag::new(cstr!("tlbwi"), Some(mips64_exec_TLBWI), 0xffffffff, 0x42000002, 1, 1),
+    mips64_insn_exec_tag::new(cstr!("tlbwr"), Some(mips64_exec_TLBWR), 0xffffffff, 0x42000006, 1, 1),
+    mips64_insn_exec_tag::new(cstr!("xor"), Some(mips64_exec_XOR), 0xfc0007ff, 0x00000026, 1, 3),
+    mips64_insn_exec_tag::new(cstr!("xori"), Some(mips64_exec_XORI), 0xfc000000, 0x38000000, 1, 5),
+    mips64_insn_exec_tag::new(cstr!("unknown"), Some(mips64_exec_unknown), 0x00000000, 0x00000000, 1, 0),
+    mips64_insn_exec_tag::null(),
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    mips64_insn_exec_tag::null(), // TODO extra value to sync array size; currently cbindgen does not support different sizes
+];

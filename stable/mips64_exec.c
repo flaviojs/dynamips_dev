@@ -476,12 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* PREFI */
-static fastcall int mips64_exec_PREFI(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   return(0);
-}
-
 /* SB (Store Byte) */
 static fastcall int mips64_exec_SB(cpu_mips_t *cpu,mips_insn_t insn)
 {

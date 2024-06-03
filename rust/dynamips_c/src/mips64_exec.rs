@@ -1357,3 +1357,10 @@ pub unsafe extern "C" fn mips64_exec_ORI(cpu: *mut cpu_mips_t, insn: mips_insn_t
 pub unsafe extern "C" fn mips64_exec_PREF(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     0
 }
+
+/// PREFI
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_PREFI(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+    0
+}

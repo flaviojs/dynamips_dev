@@ -510,13 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* TLBP */
-static fastcall int mips64_exec_TLBP(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   mips64_cp0_exec_tlbp(cpu);
-   return(0);
-}
-
 /* TLBR */
 static fastcall int mips64_exec_TLBR(cpu_mips_t *cpu,mips_insn_t insn)
 {

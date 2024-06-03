@@ -1743,3 +1743,15 @@ pub unsafe extern "C" fn mips64_exec_TLBWR(cpu: *mut cpu_mips_t, _insn: mips_ins
     mips64_cp0_exec_tlbwr(cpu);
     0
 }
+
+/// XOR
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_XOR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+    let rd: c_int = bits(insn, 11, 15);
+
+    (*cpu).gpr[rd as usize] = (*cpu).gpr[rs as usize] ^ (*cpu).gpr[rt as usize];
+    0
+}

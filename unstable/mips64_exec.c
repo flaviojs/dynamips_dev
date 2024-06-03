@@ -510,17 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* XOR */
-static fastcall int mips64_exec_XOR(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-
-   cpu->gpr[rd] = cpu->gpr[rs] ^ cpu->gpr[rt];
-   return(0);
-}
-
 /* XORI */
 static fastcall int mips64_exec_XORI(cpu_mips_t *cpu,mips_insn_t insn)
 {

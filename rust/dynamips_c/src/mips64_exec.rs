@@ -1254,3 +1254,13 @@ pub unsafe extern "C" fn mips64_exec_MTHI(cpu: *mut cpu_mips_t, insn: mips_insn_
     (*cpu).hi = (*cpu).gpr[rs as usize];
     0
 }
+
+/// MTLO
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_MTLO(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+
+    (*cpu).lo = (*cpu).gpr[rs as usize];
+    0
+}

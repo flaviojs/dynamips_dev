@@ -510,17 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* SDC1 (Store Double-Word from Coprocessor 1) */
-static fastcall int mips64_exec_SDC1(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int base   = bits(insn,21,25);
-   int ft     = bits(insn,16,20);
-   int offset = bits(insn,0,15);
-
-   mips64_exec_memop2(cpu,MIPS_MEMOP_SDC1,base,offset,ft,FALSE);
-   return(0);
-}
-
 /* SH (Store Half-Word) */
 static fastcall int mips64_exec_SH(cpu_mips_t *cpu,mips_insn_t insn)
 {

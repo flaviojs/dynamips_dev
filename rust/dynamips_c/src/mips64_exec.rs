@@ -19,6 +19,7 @@ extern "C" {
     fn mips64_exec_eret(cpu: *mut cpu_mips_t);
     fn mips64_exec_mfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_mtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
+    fn mips64_exec_syscall(cpu: *mut cpu_mips_t);
 }
 
 /// Execute a memory operation (2)
@@ -1665,4 +1666,12 @@ pub unsafe extern "C" fn mips64_exec_SWR(cpu: *mut cpu_mips_t, insn: mips_insn_t
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
 pub unsafe extern "C" fn mips64_exec_SYNC(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     0
+}
+
+/// SYSCALL
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_SYSCALL(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+    mips64_exec_syscall(cpu);
+    1
 }

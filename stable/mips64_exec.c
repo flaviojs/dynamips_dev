@@ -476,13 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* SYSCALL */
-static fastcall int mips64_exec_SYSCALL(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   mips64_exec_syscall(cpu);
-   return(1);
-}
-
 /* TEQ (Trap if Equal) */
 static fastcall int mips64_exec_TEQ(cpu_mips_t *cpu,mips_insn_t insn)
 {

@@ -510,19 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* SLLV */
-static fastcall int mips64_exec_SLLV(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-   m_uint32_t res;
-   
-   res = (m_uint32_t)cpu->gpr[rt] << (cpu->gpr[rs] & 0x1f);
-   cpu->gpr[rd] = sign_extend(res,32);
-   return(0);
-}
-
 /* SLT */
 static fastcall int mips64_exec_SLT(cpu_mips_t *cpu,mips_insn_t insn)
 {

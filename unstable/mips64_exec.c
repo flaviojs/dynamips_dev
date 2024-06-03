@@ -510,17 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* XORI */
-static fastcall int mips64_exec_XORI(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs  = bits(insn,21,25);
-   int rt  = bits(insn,16,20);
-   int imm = bits(insn,0,15);
-
-   cpu->gpr[rt] = cpu->gpr[rs] ^ imm;
-   return(0);
-}
-
 /* MIPS instruction array */
 static struct mips64_insn_exec_tag mips64_exec_tags[] = {
    { "li"     , mips64_exec_LI      , 0xffe00000 , 0x24000000, 1, 16 },

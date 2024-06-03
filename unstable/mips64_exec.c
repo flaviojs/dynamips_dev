@@ -510,19 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* SRA */
-static fastcall int mips64_exec_SRA(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-   int sa = bits(insn,6,10);
-   m_int32_t res;
-   
-   res = (m_int32_t)cpu->gpr[rt] >> sa;
-   cpu->gpr[rd] = sign_extend(res,32);
-   return(0);
-}
-
 /* SRAV */
 static fastcall int mips64_exec_SRAV(cpu_mips_t *cpu,mips_insn_t insn)
 {

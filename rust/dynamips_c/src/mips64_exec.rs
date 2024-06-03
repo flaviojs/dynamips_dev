@@ -1307,3 +1307,10 @@ pub unsafe extern "C" fn mips64_exec_MULTU(cpu: *mut cpu_mips_t, insn: mips_insn
     (*cpu).hi = sign_extend((val >> 32) as m_int64_t, 32) as m_uint64_t;
     0
 }
+
+/// NOP
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_NOP(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+    0
+}

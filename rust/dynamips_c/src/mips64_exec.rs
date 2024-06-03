@@ -1436,3 +1436,15 @@ pub unsafe extern "C" fn mips64_exec_SDC1(cpu: *mut cpu_mips_t, insn: mips_insn_
     mips64_exec_memop2(cpu, MIPS_MEMOP_SDC1 as c_int, base as m_uint64_t, offset, ft as u_int, FALSE);
     0
 }
+
+/// SH (Store Half-Word)
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_SH(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let base: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+    let offset: c_int = bits(insn, 0, 15);
+
+    mips64_exec_memop2(cpu, MIPS_MEMOP_SH as c_int, base as m_uint64_t, offset, rt as u_int, FALSE);
+    0
+}

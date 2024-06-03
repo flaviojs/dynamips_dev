@@ -476,22 +476,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    mips64_exec_single_instruction(cpu,insn);
 }
 
-/* SLTIU */
-static fastcall int mips64_exec_SLTIU(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-   int imm = bits(insn,0,15);
-   m_uint64_t val = sign_extend(imm,16);
-
-   if (cpu->gpr[rs] < val)
-      cpu->gpr[rt] = 1;
-   else
-      cpu->gpr[rt] = 0;
-
-   return(0);
-}
-
 /* SLTU */
 static fastcall int mips64_exec_SLTU(cpu_mips_t *cpu,mips_insn_t insn)
 {

@@ -510,17 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* OR */
-static fastcall int mips64_exec_OR(cpu_mips_t *cpu,mips_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-
-   cpu->gpr[rd] = cpu->gpr[rs] | cpu->gpr[rt];
-   return(0);
-}
-
 /* ORI */
 static fastcall int mips64_exec_ORI(cpu_mips_t *cpu,mips_insn_t insn)
 {

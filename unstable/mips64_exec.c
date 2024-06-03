@@ -510,16 +510,6 @@ forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
    cpu->bd_slot = 0;
 }
 
-/* MTC1 */
-static fastcall int mips64_exec_MTC1(cpu_mips_t *cpu,mips_insn_t insn)
-{	
-   int rt = bits(insn,16,20);
-   int rd = bits(insn,11,15);
-
-   mips64_exec_mtc1(cpu,rt,rd);
-   return(0);
-}
-
 /* MTHI */
 static fastcall int mips64_exec_MTHI(cpu_mips_t *cpu,mips_insn_t insn)
 {

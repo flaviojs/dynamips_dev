@@ -1244,3 +1244,13 @@ pub unsafe extern "C" fn mips64_exec_MTC1(cpu: *mut cpu_mips_t, insn: mips_insn_
     mips64_exec_mtc1(cpu, rt as u_int, rd as u_int);
     0
 }
+
+/// MTHI
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_MTHI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+
+    (*cpu).hi = (*cpu).gpr[rs as usize];
+    0
+}

@@ -1264,3 +1264,17 @@ pub unsafe extern "C" fn mips64_exec_MTLO(cpu: *mut cpu_mips_t, insn: mips_insn_
     (*cpu).lo = (*cpu).gpr[rs as usize];
     0
 }
+
+/// MUL
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_MUL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+    let rt: c_int = bits(insn, 16, 20);
+    let rd: c_int = bits(insn, 11, 15);
+
+    // note: after this instruction, HI/LO regs are undefined
+    let val: m_int32_t = (*cpu).gpr[rs as usize] as m_int32_t * (*cpu).gpr[rt as usize] as m_int32_t;
+    (*cpu).gpr[rd as usize] = sign_extend(val as m_int64_t, 32) as m_uint64_t;
+    0
+}

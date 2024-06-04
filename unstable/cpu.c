@@ -30,21 +30,6 @@
 #include "ppc32_jit.h"
 #include "dynamips.h"
 
-/* Find a CPU in a group given its ID */
-cpu_gen_t *cpu_group_find_id(cpu_group_t *group,u_int id)
-{
-   cpu_gen_t *cpu;
-
-   if (!group)
-      return NULL;
-
-   for(cpu=group->cpu_list;cpu;cpu=cpu->next)
-      if (cpu->id == id)
-         return cpu;
-
-   return NULL;
-}
-
 /* Find the highest CPU ID in a CPU group */
 int cpu_group_find_highest_id(cpu_group_t *group,u_int *highest_id)
 {
@@ -143,11 +128,11 @@ cpu_gen_t *cpu_create(vm_instance_t *vm,u_int type,u_int id)
    memset(cpu,0,sizeof(*cpu));
    cpu->vm    = vm;
    cpu->id    = id;
-   cpu->type  = type;
+   cpu->type_ = type;
    cpu->state = CPU_STATE_SUSPENDED;
    cpu->tsg   = vm->tsg;
 
-   switch(cpu->type) {
+   switch(cpu->type_) {
       case CPU_TYPE_MIPS64:
          cpu->jit_op_data.array_size = MIPS_INSN_PER_PAGE;
          CPU_MIPS64(cpu)->vm = vm;
@@ -177,7 +162,7 @@ cpu_gen_t *cpu_create(vm_instance_t *vm,u_int type,u_int id)
          break;
 
       default:
-         fprintf(stderr,"CPU type %u is not supported yet\n",cpu->type);
+         fprintf(stderr,"CPU type %u is not supported yet\n",cpu->type_);
          abort();
          break;
    }
@@ -201,7 +186,7 @@ void cpu_delete(cpu_gen_t *cpu)
       pthread_join(cpu->cpu_thread,NULL);
 
       /* Free resources */
-      switch(cpu->type) {
+      switch(cpu->type_) {
          case CPU_TYPE_MIPS64:
             mips64_delete(CPU_MIPS64(cpu));
             break;

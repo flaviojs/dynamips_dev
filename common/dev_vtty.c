@@ -769,7 +769,7 @@ static void remote_control(vtty_t *vtty,u_char c)
 
    /* Specific commands for the different CPU models */
    if (cpu0) {
-      switch(cpu0->type) {
+      switch(cpu0->type_) {
          case CPU_TYPE_MIPS64:
             if (remote_control_mips64(vtty,c,CPU_MIPS64(cpu0)))
                return;

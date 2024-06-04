@@ -35,6 +35,8 @@ after_includes = """
 // cbindgen 0.26.0 puts the typedef of a struct after the struct declaration,
 // so structs that use that typedef internally need a forward declaration of the typedef
 typedef struct cbm_array cbm_array_t;
+typedef struct cpu_gen cpu_gen_t;
+typedef struct cpu_group cpu_group_t;
 typedef struct cpu_mips cpu_mips_t;
 typedef struct cpu_ppc cpu_ppc_t;
 typedef struct fs_nvram fs_nvram_t;

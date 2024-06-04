@@ -626,19 +626,6 @@ fastcall void mips64_exec_mtc1(cpu_mips_t *cpu,u_int gp_reg,u_int cp1_reg)
    cpu->fpu.reg[cp1_reg] = cpu->gpr[gp_reg] & 0xffffffff;
 }
 
-/* Virtual breakpoint */
-fastcall void mips64_run_breakpoint(cpu_mips_t *cpu)
-{
-   cpu_log(cpu->gen,"BREAKPOINT",
-           "Virtual breakpoint reached at PC=0x%llx\n",cpu->pc);
-
-   printf("[[[ Virtual Breakpoint reached at PC=0x%llx RA=0x%llx]]]\n",
-          cpu->pc,cpu->gpr[MIPS_GPR_RA]);
-
-   mips64_dump_regs(cpu->gen);
-   memlog_dump(cpu->gen);
-}
-
 /* Add a virtual breakpoint */
 int mips64_add_breakpoint(cpu_gen_t *cpu,m_uint64_t pc)
 {

@@ -153,6 +153,25 @@ pub unsafe extern "C" fn m_strtok(mut str_: *mut c_char, delim: c_char, array: *
     pos
 }
 
+/// Logging function
+pub unsafe fn m_flog(fd: *mut libc::FILE, module: *mut c_char, fmt: *mut c_char, args: &[&dyn sprintf::Printf]) {
+    let mut spec: libc::timespec = zeroed::<_>();
+    let mut tmn: libc::tm = zeroed::<_>();
+
+    if !fd.is_null() {
+        libc::clock_gettime(libc::CLOCK_REALTIME, addr_of_mut!(spec));
+        libc::gmtime_r(addr_of!(spec.tv_sec), addr_of_mut!(tmn));
+
+        // NOTE never use strftime for timestamps, it is crashy
+        libc::fprintf(fd, cstr!("%d-%02d-%02dT%02d:%02d:%02d.%03dZ %s: "), tmn.tm_year + 1900, tmn.tm_mon + 1, tmn.tm_mday, tmn.tm_hour, tmn.tm_min, tmn.tm_sec, (spec.tv_nsec / 1000000) as c_int, module);
+        if let Ok(s) = sprintf::vsprintf(CStr::from_ptr(fmt).to_str().unwrap(), args) {
+            let s = CString::new(s).unwrap();
+            libc::fputs(s.as_c(), fd);
+        }
+        libc::fflush(fd);
+    }
+}
+
 /// Normalize a size
 #[no_mangle]
 pub unsafe extern "C" fn normalize_size(val: u_int, nb: u_int, shift: c_int) -> u_int {

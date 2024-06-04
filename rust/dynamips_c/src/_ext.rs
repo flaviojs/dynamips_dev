@@ -165,6 +165,19 @@ impl sprintf::Printf for Printf<*mut c_char> {
         None
     }
 }
+macro_rules! impl_printf {
+    ($t:tt) => {
+        impl sprintf::Printf for Printf<$t> {
+            fn format(&self, x: &sprintf::ConversionSpecifier) -> Result<String, sprintf::PrintfError> {
+                self.0.format(x)
+            }
+            fn as_int(&self) -> Option<i32> {
+                self.0.as_int()
+            }
+        }
+    };
+}
+impl_printf!(u64);
 
 /// Wrapper around a volatile type.
 /// cbindgen:no-export

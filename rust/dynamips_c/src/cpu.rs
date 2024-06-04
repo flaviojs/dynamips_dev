@@ -163,3 +163,57 @@ pub unsafe extern "C" fn cpu_group_find_id(group: *mut cpu_group_t, id: u_int) -
 
     null_mut()
 }
+
+/// Log a message for a CPU
+#[macro_export]
+macro_rules! cpu_log {
+    ($cpu:expr, $module:expr, $format:expr$(, $arg:expr)*) => {
+        let cpu: *mut cpu_gen_t = $cpu;
+        let module: *mut c_char = $module;
+        let format: *mut c_char = $format;
+        let args: &[&dyn sprintf::Printf] = &[$(&Printf($arg)),*];
+
+        let mut buffer: [c_char; 256] = [0; 256];
+        #[cfg(not(feature = "USE_UNSTABLE"))]
+        {
+            buffer[0] = b'C' as c_char;
+            buffer[1] = b'P' as c_char;
+            buffer[2] = b'U' as c_char;
+
+            match  (*cpu).id{
+                0 => buffer[3] = b'0' as c_char,
+                1 => buffer[3] = b'1' as c_char,
+                2 => buffer[3] = b'2' as c_char,
+                3 => buffer[3] = b'3' as c_char,
+                4 => buffer[3] = b'4' as c_char,
+                5 => buffer[3] = b'5' as c_char,
+                6 => buffer[3] = b'6' as c_char,
+                7 => buffer[3] = b'7' as c_char,
+                8 => buffer[3] = b'8' as c_char,
+                9 => buffer[3] = b'9' as c_char,
+                _ => buffer[3] = b'-' as c_char,
+            }
+
+            buffer[4] = b':' as c_char;
+            buffer[5] = b' ' as c_char;
+
+            let mut buf: *mut c_char = buffer.as_c_mut();
+            buf = buf.add(6);
+            let mut i: *mut c_char = module;
+            while *i != 0 {
+                *buf = *i;
+                buf = buf.add(1);
+                i = i.add(1);
+            }
+
+            *buf = 0;
+        }
+        #[cfg(feature = "USE_UNSTABLE")]
+        {
+            libc::snprintf(buffer.as_c_mut(), buffer.len(), cstr!("CPU%u: %s"), (*cpu).id, module);
+        }
+
+        $crate::vm::vm_flog((*cpu).vm, buffer.as_c_mut(), format, args)
+    };
+}
+pub use cpu_log;

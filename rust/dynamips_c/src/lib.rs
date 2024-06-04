@@ -32,6 +32,7 @@ pub mod fs_nvram;
 pub mod hash;
 pub mod insn_lookup;
 pub mod jit_op;
+pub mod memory;
 pub mod mempool;
 pub mod mips64;
 pub mod mips64_exec;

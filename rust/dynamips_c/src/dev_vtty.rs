@@ -11,6 +11,7 @@ use crate::_private::*;
 use crate::utils::*;
 
 pub type vtty_serial_option_t = vtty_serial_option;
+pub type vtty_t = virtual_tty;
 
 /// Commmand line support utility
 #[repr(C)]
@@ -22,6 +23,12 @@ pub struct vtty_serial_option {
     pub parity: c_int,
     pub stopbits: c_int,
     pub hwflow: c_int,
+}
+
+/// cbindgen:no-export
+#[repr(C)]
+pub struct virtual_tty {
+    _todo: u8,
 }
 
 /// Parse serial interface descriptor string, return 0 if success

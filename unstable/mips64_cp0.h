@@ -9,6 +9,7 @@
 #include "rust_dynamips_c.h"
 
 #include "utils.h" 
+#include "rust_dynamips_c.h"
 
 #define TLB_ZONE_ADD 0
 #define TLB_ZONE_DELETE 1
@@ -59,9 +60,6 @@ static forced_inline m_uint64_t mips64_cp0_get_vpn2_mask(cpu_mips_t *cpu)
    else
       return(MIPS_TLB_VPN2_MASK_32);
 }
-
-/* CP0 register names */
-extern char *mips64_cp0_reg_names[];
 
 /* Get cp0 register index given its name */
 int mips64_cp0_get_reg_index(char *name);

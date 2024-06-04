@@ -9,6 +9,7 @@ use crate::dynamips_common::*;
 use crate::pci_dev::*;
 use crate::pci_io::*;
 use crate::rommon_var::*;
+use crate::utils::*;
 
 pub type vm_chunk_t = vm_chunk;
 pub type vm_obj_t = vm_obj;
@@ -195,4 +196,11 @@ pub struct vm_instance {
 #[repr(C)]
 pub struct vm_platform {
     _todo: u8,
+}
+
+/// Log a message
+pub unsafe fn vm_flog(vm: *mut vm_instance_t, module: *mut c_char, format: *mut c_char, args: &[&dyn sprintf::Printf]) {
+    if !(*vm).log_fd.is_null() {
+        m_flog((*vm).log_fd, module, format, args);
+    }
 }

@@ -4,8 +4,12 @@
 //! MIPS64 Step-by-step execution.
 
 use crate::_private::*;
+use crate::cpu::*;
+use crate::dynamips::*;
 use crate::dynamips_common::*;
+use crate::insn_lookup::*;
 use crate::mips64::*;
+use crate::mips64_cp0::*;
 use crate::utils::*;
 
 extern "C" {
@@ -24,6 +28,7 @@ extern "C" {
     fn mips64_exec_dmfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_dmtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_eret(cpu: *mut cpu_mips_t);
+    fn mips64_exec_inc_cp0_cnt(cpu: *mut cpu_mips_t);
     fn mips64_exec_mfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_mtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_syscall(cpu: *mut cpu_mips_t);
@@ -52,6 +57,259 @@ impl mips64_insn_exec_tag {
     pub const fn null() -> Self {
         Self { name: null_mut(), exec: None, mask: 0x00000000, value: 0x00000000, delay_slot: 1, instr_type: 0, count: 0 }
     }
+}
+
+/// ILT
+static mut ilt: *mut insn_lookup_t = null_mut();
+
+#[inline(always)]
+unsafe extern "C" fn mips64_exec_get_insn(index: c_int) -> *mut c_void {
+    addr_of_mut!(mips64_exec_tags[index as usize]).cast::<_>()
+}
+
+unsafe extern "C" fn mips64_exec_chk_lo(tag: *mut c_void, value: c_int) -> c_int {
+    let tag: *mut mips64_insn_exec_tag = tag.cast::<_>();
+    ((value as m_uint32_t & (*tag).mask) == ((*tag).value & 0xFFFF)).into()
+}
+
+unsafe extern "C" fn mips64_exec_chk_hi(tag: *mut c_void, value: c_int) -> c_int {
+    let tag: *mut mips64_insn_exec_tag = tag.cast::<_>();
+    ((value as m_uint32_t & ((*tag).mask >> 16)) == ((*tag).value >> 16)).into()
+}
+
+/// Destroy instruction lookup table
+extern "C" fn destroy_ilt() {
+    unsafe {
+        assert!(!ilt.is_null());
+        ilt_destroy(ilt);
+        ilt = null_mut();
+    }
+}
+
+/// Initialize instruction lookup table
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_create_ilt() {
+    let mut count: c_int = 0;
+    while mips64_exec_tags[count as usize].exec.is_some() {
+        count += 1;
+    }
+
+    ilt = ilt_create(cstr!("mips64e"), count, Some(mips64_exec_get_insn), Some(mips64_exec_chk_lo), Some(mips64_exec_chk_hi));
+
+    libc::atexit(destroy_ilt);
+}
+
+/// Dump an instruction
+#[no_mangle]
+pub unsafe extern "C" fn mips64_dump_insn(buffer: *mut c_char, buf_size: size_t, mut insn_name_size: size_t, pc: m_uint64_t, instruction: mips_insn_t) -> c_int {
+    let mut insn_name: [c_char; 64] = [0; 64];
+    let mut insn_format: [c_char; 32] = [0; 32];
+    let base: c_int;
+    let rs: c_int;
+    let rd: c_int;
+    let rt: c_int;
+    let sa: c_int;
+    let offset: c_int;
+    let imm: c_int;
+    let new_pc: m_uint64_t;
+
+    // Lookup for instruction
+    let index: c_int = ilt_lookup(ilt, instruction);
+    let tag: *mut mips64_insn_exec_tag = mips64_exec_get_insn(index).cast::<_>();
+
+    if tag.is_null() {
+        libc::snprintf(buffer, buf_size, cstr!("%8.8x  (unknown)"), instruction);
+        return -1;
+    }
+
+    let mut name: *mut c_char = (*tag).name;
+    if name.is_null() {
+        name = cstr!("[unknown]");
+    }
+
+    if insn_name_size == 0 {
+        insn_name_size = 10;
+    }
+
+    libc::snprintf(insn_format.as_c_mut(), insn_format.len(), cstr!("%%-%lus"), insn_name_size as u_long);
+    libc::snprintf(insn_name.as_c_mut(), insn_name.len(), insn_format.as_c(), name);
+
+    match (*tag).instr_type {
+        // instructions without operands
+        1 => {
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s"), instruction, insn_name);
+        }
+
+        // load/store instructions
+        2 => {
+            base = bits(instruction, 21, 25);
+            rt = bits(instruction, 16, 20);
+            offset = bits(instruction, 0, 15) as m_int16_t as c_int;
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%d(%s)"), instruction, insn_name, mips64_gpr_reg_names[rt as usize], offset, mips64_gpr_reg_names[base as usize]);
+        }
+
+        // GPR[rd] = GPR[rs] op GPR[rt]
+        3 => {
+            rs = bits(instruction, 21, 25);
+            rt = bits(instruction, 16, 20);
+            rd = bits(instruction, 11, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s,%s"), instruction, insn_name, mips64_gpr_reg_names[rd as usize], mips64_gpr_reg_names[rs as usize], mips64_gpr_reg_names[rt as usize]);
+        }
+
+        // GPR[rd] = GPR[rt] op GPR[rs]
+        4 => {
+            rs = bits(instruction, 21, 25);
+            rt = bits(instruction, 16, 20);
+            rd = bits(instruction, 11, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s,%s"), instruction, insn_name, mips64_gpr_reg_names[rd as usize], mips64_gpr_reg_names[rt as usize], mips64_gpr_reg_names[rs as usize]);
+        }
+
+        // GPR[rt] = GPR[rs] op immediate (hex)
+        5 => {
+            rs = bits(instruction, 21, 25);
+            rt = bits(instruction, 16, 20);
+            imm = bits(instruction, 0, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s,0x%x"), instruction, insn_name, mips64_gpr_reg_names[rt as usize], mips64_gpr_reg_names[rs as usize], imm);
+        }
+
+        // GPR[rt] = GPR[rs] op immediate (dec)
+        6 => {
+            rs = bits(instruction, 21, 25);
+            rt = bits(instruction, 16, 20);
+            imm = bits(instruction, 0, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s,%d"), instruction, insn_name, mips64_gpr_reg_names[rt as usize], mips64_gpr_reg_names[rs as usize], imm as m_int16_t as c_int);
+        }
+
+        // GPR[rd] = GPR[rt] op sa
+        7 => {
+            rt = bits(instruction, 16, 20);
+            rd = bits(instruction, 11, 15);
+            sa = bits(instruction, 6, 10);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s,%d"), instruction, insn_name, mips64_gpr_reg_names[rd as usize], mips64_gpr_reg_names[rt as usize], sa);
+        }
+
+        // Branch with: GPR[rs] / GPR[rt] / offset
+        8 => {
+            rs = bits(instruction, 21, 25);
+            rt = bits(instruction, 16, 20);
+            offset = bits(instruction, 0, 15);
+            new_pc = (pc + 4).wrapping_add_signed(sign_extend((offset << 2) as m_int64_t, 18));
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s,0x%llx"), instruction, insn_name, mips64_gpr_reg_names[rs as usize], mips64_gpr_reg_names[rt as usize], new_pc);
+        }
+
+        // Branch with: GPR[rs] / offset
+        9 => {
+            rs = bits(instruction, 21, 25);
+            offset = bits(instruction, 0, 15);
+            new_pc = (pc + 4).wrapping_add_signed(sign_extend((offset << 2) as m_int64_t, 18));
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,0x%llx"), instruction, insn_name, mips64_gpr_reg_names[rs as usize], new_pc);
+        }
+
+        // Branch with: offset
+        10 => {
+            offset = bits(instruction, 0, 15);
+            new_pc = (pc + 4).wrapping_add_signed(sign_extend((offset << 2) as m_int64_t, 18));
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s 0x%llx"), instruction, insn_name, new_pc);
+        }
+
+        // Jump
+        11 => {
+            offset = bits(instruction, 0, 25);
+            new_pc = (pc & !((1 << 28) - 1)) | (offset << 2) as m_uint64_t;
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s 0x%llx"), instruction, insn_name, new_pc);
+        }
+
+        // op GPR[rs]
+        13 => {
+            rs = bits(instruction, 21, 25);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s"), instruction, insn_name, mips64_gpr_reg_names[rs as usize]);
+        }
+
+        // op GPR[rd]
+        14 => {
+            rd = bits(instruction, 11, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s"), instruction, insn_name, mips64_gpr_reg_names[rd as usize]);
+        }
+
+        // op GPR[rd], GPR[rs]
+        15 => {
+            rs = bits(instruction, 21, 25);
+            rd = bits(instruction, 11, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s"), instruction, insn_name, mips64_gpr_reg_names[rd as usize], mips64_gpr_reg_names[rs as usize]);
+        }
+
+        // op GPR[rt], imm
+        16 => {
+            rt = bits(instruction, 16, 20);
+            imm = bits(instruction, 0, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,0x%x"), instruction, insn_name, mips64_gpr_reg_names[rt as usize], imm);
+        }
+
+        // op GPR[rs], GPR[rt]
+        17 => {
+            rs = bits(instruction, 21, 25);
+            rt = bits(instruction, 16, 20);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s"), instruction, insn_name, mips64_gpr_reg_names[rs as usize], mips64_gpr_reg_names[rt as usize]);
+        }
+
+        // op GPR[rt], CP0[rd]
+        18 => {
+            rt = bits(instruction, 16, 20);
+            rd = bits(instruction, 11, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,%s"), instruction, insn_name, mips64_gpr_reg_names[rt as usize], mips64_cp0_reg_names[rd as usize]);
+        }
+
+        // op GPR[rt], $rd
+        19 => {
+            rt = bits(instruction, 16, 20);
+            rd = bits(instruction, 11, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,$%d"), instruction, insn_name, mips64_gpr_reg_names[rt as usize], rd);
+        }
+
+        // op GPR[rs], imm
+        20 => {
+            rs = bits(instruction, 21, 25);
+            imm = bits(instruction, 0, 15);
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s %s,0x%x"), instruction, insn_name, mips64_gpr_reg_names[rs as usize], imm);
+        }
+
+        _ => {
+            libc::snprintf(buffer, buf_size, cstr!("%8.8x  %s (TO DEFINE - %d)"), instruction, insn_name, (*tag).instr_type);
+            return -1;
+        }
+    }
+
+    0
+}
+
+/// Execute a single instruction
+#[no_mangle] // private
+#[inline]
+pub unsafe extern "C" fn mips64_exec_single_instruction(cpu: *mut cpu_mips_t, instruction: mips_insn_t) -> c_int {
+    if DEBUG_INSN_PERF_CNT != 0 {
+        (*cpu).perf_counter += 1;
+    }
+
+    // Increment CP0 count register
+    mips64_exec_inc_cp0_cnt(cpu);
+
+    // Lookup for instruction
+    let index: c_int = ilt_lookup(ilt, instruction);
+    let tag: *mut mips64_insn_exec_tag = mips64_exec_get_insn(index).cast::<_>();
+    let exec = (*tag).exec;
+
+    if NJM_STATS_ENABLE != 0 {
+        (*cpu).insn_exec_count += 1;
+        mips64_exec_tags[index as usize].count += 1;
+    }
+    if false {
+        let mut buffer: [c_char; 80] = [0; 80];
+
+        if mips64_dump_insn(buffer.as_c_mut(), buffer.len(), 0, (*cpu).pc, instruction) != -1 {
+            cpu_log!((*cpu).gen, cstr!("EXEC"), cstr!("0x%llx: %s\n"), (*cpu).pc, buffer.as_ref());
+        }
+    }
+    exec.unwrap()(cpu, instruction)
 }
 
 /// Execute a memory operation (2)

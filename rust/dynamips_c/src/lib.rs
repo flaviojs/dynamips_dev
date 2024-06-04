@@ -10,6 +10,7 @@
 
 pub mod _ext;
 pub mod base64;
+pub mod cisco_card;
 pub mod cisco_eeprom;
 pub mod cpu;
 pub mod crc;
@@ -23,6 +24,7 @@ pub mod dev_c6msfc1;
 pub mod dev_c7200;
 pub mod dev_ds1620;
 pub mod dev_vtty;
+pub mod device;
 pub mod dynamips;
 pub mod dynamips_common;
 pub mod fs_fat;
@@ -36,6 +38,8 @@ pub mod mips64_exec;
 pub mod mips64_jit;
 pub mod net;
 pub mod parser;
+pub mod pci_dev;
+pub mod pci_io;
 pub mod ppc32;
 pub mod ppc32_jit;
 pub mod ppc32_mem;

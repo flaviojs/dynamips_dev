@@ -35,6 +35,10 @@ typedef struct rfc_eqclass rfc_eqclass_t;
 typedef struct timer_entry timer_entry_t;
 typedef struct timer_queue timer_queue_t;
 typedef struct tlb_entry tlb_entry_t;
+typedef struct vm_chunk vm_chunk_t;
+typedef struct vm_instance vm_instance_t;
+typedef struct vm_obj vm_obj_t;
+typedef struct vm_platform vm_platform_t;
 
 typedef int (*timer_proc)(void *arg1, timer_entry_t *arg2);
 

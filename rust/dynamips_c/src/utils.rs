@@ -7,6 +7,39 @@ pub type insn_exec_page_t = insn_exec_page;
 pub type mts32_entry_t = mts32_entry;
 pub type mts64_entry_t = mts64_entry;
 
+/// Host CPU Types
+pub const CPU_x86: c_int = 0;
+pub const CPU_amd64: c_int = 1;
+pub const CPU_nojit: c_int = 2;
+
+/// cbindgen:no-export
+pub const JIT_CPU: c_int = {
+    #[cfg(target_arch = "x86")]
+    {
+        CPU_x86
+    }
+    #[cfg(target_arch = "x86_64")]
+    {
+        CPU_amd64
+    }
+    #[cfg(not(any(target_arch = "x86", target_arch = "x86_64")))]
+    {
+        CPU_nojit
+    }
+};
+
+/// Number of host registers available for JIT
+/// cbindgen:no-export
+pub const JIT_HOST_NREG: usize = {
+    if JIT_CPU == CPU_x86 {
+        8
+    } else if JIT_CPU == CPU_amd64 {
+        16
+    } else {
+        0
+    }
+};
+
 /// MIPS instruction
 pub type mips_insn_t = m_uint32_t;
 
@@ -26,6 +59,20 @@ pub struct mts32_entry {
 #[repr(C)]
 pub struct mts64_entry {
     _todo: u8,
+}
+
+/// Host register allocation
+pub const HREG_FLAG_ALLOC_LOCKED: c_int = 1;
+pub const HREG_FLAG_ALLOC_FORCED: c_int = 2;
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct hreg_map {
+    pub hreg: c_int,
+    pub vreg: c_int,
+    pub flags: c_int,
+    pub prev: *mut hreg_map,
+    pub next: *mut hreg_map,
 }
 
 /// Dynamic sprintf

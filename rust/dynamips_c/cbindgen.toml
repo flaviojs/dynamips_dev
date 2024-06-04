@@ -10,6 +10,7 @@ after_includes = """
 // forward declarations (cbindgen places typedefs after the struct definitions, preventing you from using them in the structs)
 typedef struct cbm_array cbm_array_t;
 typedef struct cpu_mips cpu_mips_t;
+typedef struct cpu_ppc cpu_ppc_t;
 typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;
@@ -38,9 +39,25 @@ typedef int (*timer_proc)(void *arg1, timer_entry_t *arg2);
 // volatile types (cbindgen does not emit the C volatile type qualifier)
 typedef timer_entry_t *volatile Volatile_____timer_entry_t;
 typedef volatile int Volatile_c_int;
+typedef unsigned int m_uint32_t;
 typedef unsigned long long m_uint64_t;
+typedef volatile m_uint32_t Volatile_m_uint32_t;
 typedef volatile m_uint64_t Volatile_m_uint64_t;
 typedef volatile u_int Volatile_u_int;
+
+// Host CPU Types
+#define CPU_x86    0
+#define CPU_amd64  1
+#define CPU_nojit  2
+
+// Number of host registers available for JIT
+#if JIT_CPU == CPU_x86
+#define JIT_HOST_NREG  8
+#elif JIT_CPU == CPU_amd64
+#define JIT_HOST_NREG  16
+#else
+#define JIT_HOST_NREG  0
+#endif
 """
 
 [defines]

@@ -14,20 +14,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Host CPU Types */
-#define CPU_x86    0
-#define CPU_amd64  1
-#define CPU_nojit  2
-
-/* Number of host registers available for JIT */
-#if JIT_CPU == CPU_x86
-#define JIT_HOST_NREG  8
-#elif JIT_CPU == CPU_amd64
-#define JIT_HOST_NREG  16
-#else
-#define JIT_HOST_NREG  0
-#endif
-
 /* Host to VM (big-endian) conversion functions */
 #if ARCH_BYTE_ORDER == ARCH_BIG_ENDIAN
 #define htovm16(x) (x)
@@ -126,16 +112,6 @@ struct mts64_entry {
    m_iptr_t   hpa;    /* Host Page Address */
    m_uint32_t flags;  /* Flags */
 }__attribute__ ((aligned(16)));
-
-/* Host register allocation */
-#define HREG_FLAG_ALLOC_LOCKED  1
-#define HREG_FLAG_ALLOC_FORCED  2
-
-struct hreg_map {
-   int hreg,vreg;
-   int flags;
-   struct hreg_map *prev,*next;
-};
 
 /* Global logfile */
 extern FILE *log_file;

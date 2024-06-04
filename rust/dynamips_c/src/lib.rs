@@ -35,6 +35,9 @@ pub mod mips64_exec;
 pub mod mips64_jit;
 pub mod net;
 pub mod parser;
+pub mod ppc32;
+pub mod ppc32_jit;
+pub mod ppc32_mem;
 /// cbindgen:ignore
 pub mod prelude;
 pub mod ptask;

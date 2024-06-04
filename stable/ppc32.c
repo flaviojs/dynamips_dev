@@ -23,21 +23,6 @@
 #include "ppc32_exec.h"
 #include "ppc32_jit.h"
 
-/* Reset a PowerPC CPU */
-int ppc32_reset(cpu_ppc_t *cpu)
-{
-   cpu->ia = PPC32_ROM_START;
-   cpu->gpr[1] = PPC32_ROM_SP;
-   cpu->msr = PPC32_MSR_IP;
-
-   /* Restart the MTS subsystem */
-   ppc32_mem_restart(cpu);
-
-   /* Flush JIT structures */
-   ppc32_jit_flush(cpu,0);
-   return(0);
-}
-
 /* Initialize a PowerPC processor */
 int ppc32_init(cpu_ppc_t *cpu)
 {

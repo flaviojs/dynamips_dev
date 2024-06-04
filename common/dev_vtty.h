@@ -49,16 +49,6 @@ enum {
    VTTY_INPUT_TELNET_NEXT
 };
 
-
-/* Commmand line support utility */
-typedef struct vtty_serial_option vtty_serial_option_t;
-struct vtty_serial_option {
-   char *device;
-   int baudrate, databits, parity, stopbits, hwflow;
-};
-
-int vtty_parse_serial_option(vtty_serial_option_t *params, char *optarg);
-
 /* Virtual TTY structure */
 typedef struct virtual_tty vtty_t;
 struct virtual_tty {

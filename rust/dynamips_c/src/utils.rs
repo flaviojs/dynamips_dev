@@ -105,6 +105,54 @@ macro_rules! dyn_sprintf {
 }
 pub use dyn_sprintf;
 
+/// Tokenize a string
+#[no_mangle]
+pub unsafe extern "C" fn m_strtok(mut str_: *mut c_char, delim: c_char, array: *mut *mut c_char, max_count: c_int) -> c_int {
+    for i in 0..max_count {
+        *array.offset(i as isize) = null_mut();
+    }
+
+    let mut pos: c_int = 0;
+    loop {
+        if pos == max_count {
+            for i in 0..max_count {
+                libc::free(*array.offset(i as isize).cast::<_>());
+            }
+            return -1;
+        }
+
+        let mut ptr: *mut c_char = libc::strchr(str_, delim as c_int);
+        if ptr.is_null() {
+            ptr = str_.add(libc::strlen(str_));
+        }
+
+        let len: size_t = ptr.offset_from(str_) as size_t;
+
+        *array.offset(pos as isize) = libc::malloc(len + 1).cast::<_>();
+        if (*array.offset(pos as isize)).is_null() {
+            for i in 0..max_count {
+                libc::free(*array.offset(i as isize).cast::<_>());
+            }
+            return -1;
+        }
+
+        libc::memcpy(*array.offset(pos as isize).cast::<_>(), str_.cast::<_>(), len);
+        *((*array.offset(pos as isize)).add(len)) = 0;
+
+        while *ptr == delim {
+            ptr = ptr.add(1);
+        }
+
+        str_ = ptr;
+        pos += 1;
+        if *ptr == 0 {
+            break;
+        }
+    }
+
+    pos
+}
+
 /// Normalize a size
 #[no_mangle]
 pub unsafe extern "C" fn normalize_size(val: u_int, nb: u_int, shift: c_int) -> u_int {

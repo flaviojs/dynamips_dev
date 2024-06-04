@@ -22,6 +22,7 @@ pub mod dev_c3745;
 pub mod dev_c6msfc1;
 pub mod dev_c7200;
 pub mod dev_ds1620;
+pub mod dev_vtty;
 pub mod dynamips;
 pub mod dynamips_common;
 pub mod fs_fat;

@@ -14,6 +14,7 @@ function_name = "0.3"
 libc = "0.2"
 libc_alloc = "1.0"
 likely_stable = "0.1"
+setjmp = "0.1"
 sprintf = "0.3"
 
 [build-dependencies]

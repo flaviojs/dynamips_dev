@@ -544,7 +544,7 @@ static int cmd_show_timer_drift(hypervisor_conn_t *conn,
    if (!(cpu = find_cpu(conn,vm,atoi(argv[1]))))
       return(-1);
 
-   switch(cpu->type) {
+   switch(cpu->type_) {
       case CPU_TYPE_MIPS64:
          hypervisor_send_reply(conn,HSC_INFO_MSG,0,"Timer Drift: %u",
                                CPU_MIPS64(cpu)->timer_drift);

@@ -203,7 +203,7 @@ void *dev_remote_control_access(cpu_gen_t *cpu,struct vdevice *dev,
             if ((storage_dev = dev_get_by_name(vm,"ssa")))
                *data = storage_dev->phys_addr;
 
-            if (cpu->type == CPU_TYPE_MIPS64)
+            if (cpu->type_ == CPU_TYPE_MIPS64)
                *data += MIPS_KSEG1_BASE;
          }
          break;

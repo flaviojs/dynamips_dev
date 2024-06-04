@@ -15,12 +15,6 @@
 /* CPU identifiers */
 #define PPC32_PVR_405     0x40110000
 
-/* Number of GPR (general purpose registers) */
-#define PPC32_GPR_NR      32
-
-/* Number of registers in FPU */
-#define PPC32_FPU_REG_NR  32
-
 /* Minimum page size: 4 Kb */
 #define PPC32_MIN_PAGE_SHIFT   12
 #define PPC32_MIN_PAGE_SIZE    (1 << PPC32_MIN_PAGE_SHIFT)
@@ -29,10 +23,6 @@
 
 /* Number of instructions per page */
 #define PPC32_INSN_PER_PAGE    (PPC32_MIN_PAGE_SIZE/sizeof(ppc_insn_t))
-
-/* Starting point for ROM */
-#define PPC32_ROM_START  0xfff00100
-#define PPC32_ROM_SP     0x00006000
 
 /* Special Purpose Registers (SPR) */
 #define PPC32_SPR_XER        1
@@ -100,33 +90,9 @@
 #define PPC32_XER_CA        (1 << PPC32_XER_CA_BIT) /* Carry */
 #define PPC32_XER_BC_MASK   0x0000007F              /* Byte cnt (lswx/stswx) */
 
-/* MSR (Machine State Register) */
-#define PPC32_MSR_POW_MASK  0x00060000   /* Power Management */
-#define PPC32_MSR_ILE       0x00010000   /* Exception Little-Endian Mode */
-#define PPC32_MSR_EE        0x00008000   /* External Interrupt Enable */
-#define PPC32_MSR_PR        0x00004000   /* Privilege Level (0=supervisor) */
-#define PPC32_MSR_PR_SHIFT  14
-#define PPC32_MSR_FP        0x00002000   /* Floating-Point Available */
-#define PPC32_MSR_ME        0x00001000   /* Machine Check Enable */
-#define PPC32_MSR_FE0       0x00000800   /* Floating-Point Exception Mode 0 */
-#define PPC32_MSR_SE        0x00000400   /* Single-step trace enable */
-#define PPC32_MSR_BE        0x00000200   /* Branch Trace Enable */
-#define PPC32_MSR_FE1       0x00000100   /* Floating-Point Exception Mode 1 */
-#define PPC32_MSR_IP        0x00000040   /* Exception Prefix */
-#define PPC32_MSR_IR        0x00000020   /* Instruction address translation */
-#define PPC32_MSR_DR        0x00000010   /* Data address translation */
-#define PPC32_MSR_RI        0x00000002   /* Recoverable Exception */
-#define PPC32_MSR_LE        0x00000001   /* Little-Endian mode enable */
-
 #define PPC32_RFI_MSR_MASK  0x87c0ff73
 #define PPC32_EXC_SRR1_MASK 0x0000ff73
 #define PPC32_EXC_MSR_MASK  0x0006ef32
-
-/* Number of BAT registers (8 for PowerPC 7448) */
-#define PPC32_BAT_NR  8
-
-/* Number of segment registers */
-#define PPC32_SR_NR   16
 
 /* Upper BAT register */
 #define PPC32_UBAT_BEPI_MASK   0xFFFE0000  /* Block Effective Page Index */
@@ -202,67 +168,10 @@
 #define PPC405_TLBLO_M           0x00000002    /* Memory Coherent */
 #define PPC405_TLBLO_G           0x00000001    /* Guarded */
 
-/* Number of TLB entries for PPC405 */
-#define PPC405_TLB_ENTRIES   64
-
-struct ppc405_tlb_entry {
-   m_uint32_t tlb_hi,tlb_lo,tid;
-};
-
-/* Memory operations */
-enum {
-   PPC_MEMOP_LOOKUP = 0,
-
-   /* Instruction fetch operation */
-   PPC_MEMOP_IFETCH,
-
-   /* Load operations */
-   PPC_MEMOP_LBZ,
-   PPC_MEMOP_LHZ,
-   PPC_MEMOP_LWZ,
-
-   /* Load operation with sign-extend */
-   PPC_MEMOP_LHA,
-
-   /* Store operations */
-   PPC_MEMOP_STB,
-   PPC_MEMOP_STH,
-   PPC_MEMOP_STW,
-
-   /* Byte-Reversed operations */
-   PPC_MEMOP_LWBR,
-   PPC_MEMOP_STWBR,
-
-   /* String operations */
-   PPC_MEMOP_LSW,
-   PPC_MEMOP_STSW,
-
-   /* FPU operations */
-   PPC_MEMOP_LFD,
-   PPC_MEMOP_STFD,
-
-   /* ICBI - Instruction Cache Block Invalidate */
-   PPC_MEMOP_ICBI,
-
-   PPC_MEMOP_MAX,
-};
-
-/* PowerPC CPU type */
-typedef struct cpu_ppc cpu_ppc_t;
-
-/* Memory operation function prototype */
-typedef fastcall void (*ppc_memop_fn)(cpu_ppc_t *cpu,m_uint32_t vaddr,
-                                      u_int reg);
-
 /* BAT type indexes */
 enum {
    PPC32_IBAT_IDX = 0,
    PPC32_DBAT_IDX,
-};
-
-/* BAT register */
-struct ppc32_bat_reg {
-   m_uint32_t reg[2];
 };
 
 /* BAT register programming */
@@ -274,174 +183,6 @@ struct ppc32_bat_prog {
 /* MTS Instruction Cache and Data Cache */
 #define PPC32_MTS_ICACHE  PPC32_IBAT_IDX
 #define PPC32_MTS_DCACHE  PPC32_DBAT_IDX
-
-/* FPU Coprocessor definition */
-typedef struct {
-   m_uint64_t reg[PPC32_FPU_REG_NR];
-}ppc_fpu_t;
-
-/* Maximum number of breakpoints */
-#define PPC32_MAX_BREAKPOINTS  8
-
-/* zzz */
-struct ppc32_vtlb_entry {
-   m_uint32_t vaddr;
-   m_uint32_t haddr;
-};
-
-/* PowerPC CPU definition */
-struct cpu_ppc {
-   /* Instruction address */
-   m_uint32_t ia;
-
-   /* General Purpose registers */
-   m_uint32_t gpr[PPC32_GPR_NR];
-
-   struct ppc32_vtlb_entry vtlb[PPC32_GPR_NR];
-
-   /* Pending IRQ */
-   volatile m_uint32_t irq_pending,irq_check;
-
-   /* XER, Condition Register, Link Register, Count Register */
-   m_uint32_t xer,lr,ctr,reserve;
-   m_uint32_t xer_ca;
-
-   /* Condition Register (CR) fields */
-   u_int cr_fields[8];
-
-   /* MTS caches (Instruction+Data) */
-   mts32_entry_t *mts_cache[2];
-
-   /* Code page translation cache and physical page mapping */
-   ppc32_jit_tcb_t **exec_blk_map,**exec_phys_map;
-
-   /* Virtual address to physical page translation */
-   fastcall int (*translate)(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int cid,
-                             m_uint32_t *phys_page);
-
-   /* Memory access functions */
-   ppc_memop_fn mem_op_fn[PPC_MEMOP_MAX];
-
-   /* Memory lookup function (to load ELF image,...) */
-   void *(*mem_op_lookup)(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int cid);
-
-   /* MTS slow lookup function */
-   mts32_entry_t *(*mts_slow_lookup)(cpu_ppc_t *cpu,m_uint32_t vaddr,
-                                     u_int cid,u_int op_code,u_int op_size,
-                                     u_int op_type,m_uint64_t *data,
-                                     mts32_entry_t *alt_entry);
-
-   /* IRQ counters */
-   m_uint64_t irq_count,timer_irq_count,irq_fp_count;
-   pthread_mutex_t irq_lock;
-
-   /* Current and free lists of translated code blocks */
-   ppc32_jit_tcb_t *tcb_list,*tcb_last,*tcb_free_list;
-
-   /* Executable page area */
-   void *exec_page_area;
-   size_t exec_page_area_size;
-   size_t exec_page_count,exec_page_alloc;
-   insn_exec_page_t *exec_page_free_list;
-   insn_exec_page_t *exec_page_array;
-
-   /* Idle PC value */
-   volatile m_uint32_t idle_pc;
-
-   /* Timer IRQs */
-   volatile u_int timer_irq_pending,timer_irq_armed;
-   u_int timer_irq_freq;
-   u_int timer_irq_check_itv;
-   u_int timer_drift;
-
-   /* IRQ disable flag */
-   volatile u_int irq_disable;
-
-   /* IBAT (Instruction) and DBAT (Data) registers */
-   struct ppc32_bat_reg bat[2][PPC32_BAT_NR];
-   
-   /* Segment registers */
-   m_uint32_t sr[PPC32_SR_NR];
-
-   /* Page Table Address */
-   m_uint32_t sdr1;
-   void *sdr1_hptr;
-
-   /* MSR (Machine state register) */
-   m_uint32_t msr;
-
-   /* Interrupt Registers (SRR0/SRR1) */
-   m_uint32_t srr0,srr1,dsisr,dar;
-
-   /* SPRG registers */
-   m_uint32_t sprg[4];
-
-   /* PVR (Processor Version Register) */
-   m_uint32_t pvr;
-
-   /* Time-Base register */
-   m_uint64_t tb;
-
-   /* Decrementer */
-   m_uint32_t dec;
-
-   /* Hardware Implementation Dependent Registers */
-   m_uint32_t hid0,hid1;
-
-   /* String instruction position (lswi/stswi) */
-   u_int sw_pos;
-
-   /* PowerPC 405 TLB */
-   struct ppc405_tlb_entry ppc405_tlb[PPC405_TLB_ENTRIES];
-   m_uint32_t ppc405_pid;
-
-   /* MPC860 IMMR register */
-   m_uint32_t mpc860_immr;
-
-   /* FPU */
-   ppc_fpu_t fpu;
-
-   /* Generic CPU instance pointer */
-   cpu_gen_t *gen;
-
-   /* VM instance */
-   vm_instance_t *vm;
-   
-   /* MTS cache statistics */
-   m_uint64_t mts_misses,mts_lookups;
-
-   /* JIT flush method */
-   u_int jit_flush_method;
-
-   /* Number of compiled pages */
-   u_int compiled_pages;
-
-   /* Fast memory operations use */
-   u_int fast_memop;
-
-   /* Direct block jump */
-   u_int exec_blk_direct_jump;
-
-   /* Current exec page (non-JIT) info */
-   m_uint64_t njm_exec_page;
-   mips_insn_t *njm_exec_ptr;
-
-   /* Performance counter (non-JIT) */
-   m_uint32_t perf_counter;
-
-   /* non-JIT mode instruction counter */
-   m_uint64_t insn_exec_count;
-
-   /* Breakpoints */
-   m_uint32_t breakpoints[PPC32_MAX_BREAKPOINTS];
-   u_int breakpoints_enabled;
-
-   /* JIT host register allocation */
-   char *jit_hreg_seq_name;
-   int ppc_reg_map[PPC32_GPR_NR];
-   struct hreg_map *hreg_map_list,*hreg_lru;
-   struct hreg_map hreg_map[JIT_HOST_NREG];
-};
 
 #define PPC32_CR_FIELD_OFFSET(f) \
    (OFFSET(cpu_ppc_t,cr_fields)+((f) * sizeof(u_int)))

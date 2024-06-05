@@ -99,6 +99,24 @@ pub unsafe extern "C" fn mips64_exec_create_ilt() {
     libc::atexit(destroy_ilt);
 }
 
+/// Dump statistics
+#[no_mangle]
+pub unsafe extern "C" fn mips64_dump_stats(cpu: *mut cpu_mips_t) {
+    if NJM_STATS_ENABLE != 0 {
+        libc::printf(cstr!("\n"));
+
+        let mut i = 0;
+        while mips64_exec_tags[i].exec.is_some() {
+            libc::printf(cstr!("  * %-10s : %10llu\n"), mips64_exec_tags[i].name, mips64_exec_tags[i].count);
+            i += 1;
+        }
+
+        libc::printf(cstr!("%llu instructions executed since startup.\n"), (*cpu).insn_exec_count);
+    } else {
+        libc::printf(cstr!("Statistics support is not compiled in.\n"));
+    }
+}
+
 /// Dump an instruction
 #[no_mangle]
 pub unsafe extern "C" fn mips64_dump_insn(buffer: *mut c_char, buf_size: size_t, mut insn_name_size: size_t, pc: m_uint64_t, instruction: mips_insn_t) -> c_int {

@@ -23,24 +23,6 @@
 #include "rust_dynamips_c.h"
 #include "dynamips.h"
 
-/* Dump statistics */
-void mips64_dump_stats(cpu_mips_t *cpu)
-{
-   int i;
-
-#if NJM_STATS_ENABLE
-   printf("\n");
-
-   for(i=0;mips64_exec_tags[i].exec;i++)
-      printf("  * %-10s : %10llu\n",
-             mips64_exec_tags[i].name,mips64_exec_tags[i].count);
-
-   printf("%llu instructions executed since startup.\n",cpu->insn_exec_count);
-#else
-   printf("Statistics support is not compiled in.\n");
-#endif
-}
-
 /* Dump an instruction block */
 void mips64_dump_insn_block(cpu_mips_t *cpu,m_uint64_t pc,u_int count,
                             size_t insn_name_size)

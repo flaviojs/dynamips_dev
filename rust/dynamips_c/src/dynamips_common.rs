@@ -9,6 +9,7 @@ pub const TRUE: c_int = 1;
 // Common types
 pub type m_uint8_t = c_uchar;
 
+pub type m_int16_t = c_short;
 pub type m_uint16_t = c_ushort;
 
 pub type m_int32_t = c_int;

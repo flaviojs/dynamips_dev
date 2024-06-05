@@ -20,42 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* MIPS cp0 registers names */
-char *mips64_cp0_reg_names[MIPS64_CP0_REG_NR] = {
-   "index" , 
-   "random", 
-   "entry_lo0", 
-   "entry_lo1", 
-   "context", 
-   "pagemask",
-   "wired", 
-   "info",
-   "badvaddr", 
-   "count", 
-   "entry_hi", 
-   "compare", 
-   "status", 
-   "cause",
-   "epc", 
-   "prid", 
-   "config", 
-   "ll_addr", 
-   "watch_lo", 
-   "watch_hi", 
-   "xcontext",
-   "cp0_r21",
-   "cp0_r22",
-   "cp0_r23",
-   "cp0_r24",
-   "cp0_r25",
-   "ecc", 
-   "cache_err", 
-   "tag_lo", 
-   "tag_hi", 
-   "err_epc",
-   "cp0_r31",
-};
-
 /* Get cp0 register index given its name */
 int mips64_cp0_get_reg_index(char *name)
 {

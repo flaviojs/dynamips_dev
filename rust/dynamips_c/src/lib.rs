@@ -35,6 +35,7 @@ pub mod jit_op;
 pub mod memory;
 pub mod mempool;
 pub mod mips64;
+pub mod mips64_cp0;
 pub mod mips64_exec;
 pub mod mips64_jit;
 pub mod net;

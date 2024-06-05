@@ -7,9 +7,7 @@
 #define __CP0_H__
 
 #include "utils.h" 
-
-/* CP0 register names */
-extern char *mips64_cp0_reg_names[];
+#include "rust_dynamips_c.h"
 
 /* Get cp0 register index given its name */
 int mips64_cp0_get_reg_index(char *name);

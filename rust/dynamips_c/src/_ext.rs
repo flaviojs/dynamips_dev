@@ -48,6 +48,9 @@ pub type u_char = std::ffi::c_uchar;
 /// Non-standard unsigned int
 pub type u_int = std::ffi::c_uint;
 
+/// Non-standard unsigned long
+pub type u_long = std::ffi::c_ulong;
+
 /// Trait that converts a rust type to a C representation.
 pub trait AsC<T, V> {
     fn as_c(&self) -> T;
@@ -165,19 +168,15 @@ impl sprintf::Printf for Printf<*mut c_char> {
         None
     }
 }
-macro_rules! impl_printf {
-    ($t:tt) => {
-        impl sprintf::Printf for Printf<$t> {
-            fn format(&self, x: &sprintf::ConversionSpecifier) -> Result<String, sprintf::PrintfError> {
-                self.0.format(x)
-            }
-            fn as_int(&self) -> Option<i32> {
-                self.0.as_int()
-            }
-        }
-    };
+impl sprintf::Printf for Printf<&[c_char]> {
+    fn format(&self, spec: &sprintf::ConversionSpecifier) -> Result<String, sprintf::PrintfError> {
+        let p: *const c_char = self.0.as_c();
+        Printf(p).format(spec)
+    }
+    fn as_int(&self) -> Option<i32> {
+        None
+    }
 }
-impl_printf!(u64);
 
 /// Wrapper around a volatile type.
 /// cbindgen:no-export

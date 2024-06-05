@@ -299,6 +299,16 @@ pub struct cpu_mips {
     pub current_tb: *mut cpu_tb_t,
 }
 
+/// MIPS general purpose registers names
+#[rustfmt::skip]
+#[no_mangle]
+pub static mut mips64_gpr_reg_names: [*mut c_char; MIPS64_GPR_NR] = [
+    cstr!("zr"), cstr!("at"), cstr!("v0"), cstr!("v1"), cstr!("a0"), cstr!("a1"), cstr!("a2"), cstr!("a3"),
+    cstr!("t0"), cstr!("t1"), cstr!("t2"), cstr!("t3"), cstr!("t4"), cstr!("t5"), cstr!("t6"), cstr!("t7"),
+    cstr!("s0"), cstr!("s1"), cstr!("s2"), cstr!("s3"), cstr!("s4"), cstr!("s5"), cstr!("s6"), cstr!("s7"),
+    cstr!("t8"), cstr!("t9"), cstr!("k0"), cstr!("k1"), cstr!("gp"), cstr!("sp"), cstr!("fp"), cstr!("ra"),
+];
+
 /// Virtual breakpoint
 #[no_mangle]
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]

@@ -14,25 +14,6 @@
 
 #include "rust_dynamips_c.h"
 
-/* Host to VM (big-endian) conversion functions */
-#if ARCH_BYTE_ORDER == ARCH_BIG_ENDIAN
-#define htovm16(x) (x)
-#define htovm32(x) (x)
-#define htovm64(x) (x)
-
-#define vmtoh16(x) (x)
-#define vmtoh32(x) (x)
-#define vmtoh64(x) (x)
-#else
-#define htovm16(x) (htons(x))
-#define htovm32(x) (htonl(x))
-#define htovm64(x) (swap64(x))
-
-#define vmtoh16(x) (ntohs(x))
-#define vmtoh32(x) (ntohl(x))
-#define vmtoh64(x) (swap64(x))
-#endif
-
 /* FD pool */
 #define FD_POOL_MAX  16
 

@@ -297,6 +297,21 @@ pub unsafe extern "C" fn mips64_dump_insn(buffer: *mut c_char, buf_size: size_t,
     0
 }
 
+/// Dump an instruction block
+#[no_mangle]
+pub unsafe extern "C" fn mips64_dump_insn_block(cpu: *mut cpu_mips_t, mut pc: m_uint64_t, count: u_int, insn_name_size: size_t) {
+    let mut buffer: [c_char; 80] = [0; 80];
+
+    for _ in 0..count {
+        let ptr: *mut mips_insn_t = (*cpu).mem_op_lookup.unwrap()(cpu, pc).cast::<_>();
+        let insn: mips_insn_t = vmtoh32(*ptr);
+
+        mips64_dump_insn(buffer.as_c_mut(), buffer.len(), insn_name_size, pc, insn);
+        libc::printf(cstr!("0x%llx: %s\n"), pc, buffer);
+        pc += size_of::<mips_insn_t>() as m_uint64_t;
+    }
+}
+
 /// Execute a single instruction
 #[no_mangle] // private
 #[inline]

@@ -23,24 +23,6 @@
 #include "rust_dynamips_c.h"
 #include "dynamips.h"
 
-/* Dump an instruction block */
-void mips64_dump_insn_block(cpu_mips_t *cpu,m_uint64_t pc,u_int count,
-                            size_t insn_name_size)
-{
-   mips_insn_t *ptr,insn;
-   char buffer[80];
-   int i;
-
-   for(i=0;i<count;i++) {
-      ptr = cpu->mem_op_lookup(cpu,pc);
-      insn = vmtoh32(*ptr);
-
-      mips64_dump_insn(buffer,sizeof(buffer),insn_name_size,pc,insn);
-      printf("0x%llx: %s\n",pc,buffer);
-      pc += sizeof(mips_insn_t);
-   }
-}
-
 /* Execute a memory operation */
 _Unused static forced_inline void mips64_exec_memop(cpu_mips_t *cpu,int memop,
                                             m_uint64_t vaddr,u_int dst_reg,

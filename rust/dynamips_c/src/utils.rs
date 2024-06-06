@@ -40,6 +40,33 @@ pub const JIT_HOST_NREG: usize = {
     }
 };
 
+// Host to VM (big-endian) conversion functions
+#[no_mangle]
+pub extern "C" fn htovm16(x: u16) -> u16 {
+    x.to_be()
+}
+#[no_mangle]
+pub extern "C" fn htovm32(x: u32) -> u32 {
+    x.to_be()
+}
+#[no_mangle]
+pub extern "C" fn htovm64(x: u64) -> u64 {
+    x.to_be()
+}
+
+#[no_mangle]
+pub extern "C" fn vmtoh16(x: u16) -> u16 {
+    u16::from_be(x)
+}
+#[no_mangle]
+pub extern "C" fn vmtoh32(x: u32) -> u32 {
+    u32::from_be(x)
+}
+#[no_mangle]
+pub extern "C" fn vmtoh64(x: u64) -> u64 {
+    u64::from_be(x)
+}
+
 /// MIPS instruction
 pub type mips_insn_t = m_uint32_t;
 

@@ -54,6 +54,12 @@ pub const MIPS_GPR_SP: usize = 29; //  sp
 pub const MIPS_GPR_FP: usize = 30; //  fp
 pub const MIPS_GPR_RA: usize = 31; //  ra
 
+/// Minimum page size: 4 Kb
+pub const MIPS_MIN_PAGE_SHIFT: c_int = 12;
+pub const MIPS_MIN_PAGE_SIZE: size_t = 1 << MIPS_MIN_PAGE_SHIFT;
+pub const MIPS_MIN_PAGE_IMASK: m_uint64_t = MIPS_MIN_PAGE_SIZE as m_uint64_t - 1;
+pub const MIPS_MIN_PAGE_MASK: m_uint64_t = 0xfffffffffffff000;
+
 /// Number of GPR (general purpose registers)
 pub const MIPS64_GPR_NR: usize = 32;
 

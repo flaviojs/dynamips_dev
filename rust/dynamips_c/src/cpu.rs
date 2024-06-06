@@ -13,6 +13,11 @@ pub type memlog_access_t = memlog_access;
 pub type cpu_gen_t = cpu_gen;
 pub type cpu_group_t = cpu_group;
 
+/// Virtual CPU states // TODO enum
+pub const CPU_STATE_RUNNING: u_int = 0;
+pub const CPU_STATE_HALTED: u_int = 1;
+pub const CPU_STATE_SUSPENDED: u_int = 2;
+
 /// Maximum results for idle pc
 pub const CPU_IDLE_PC_MAX_RES: usize = 10;
 

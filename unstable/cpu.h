@@ -21,13 +21,6 @@ enum {
    CPU_TYPE_PPC32,
 };
 
-/* Virtual CPU states */
-enum {
-   CPU_STATE_RUNNING = 0,
-   CPU_STATE_HALTED,
-   CPU_STATE_SUSPENDED,
-};
-
 #define CPU_MIPS64(cpu) (&(cpu)->sp.mips64_cpu)
 #define CPU_PPC32(cpu)  (&(cpu)->sp.ppc32_cpu)
 

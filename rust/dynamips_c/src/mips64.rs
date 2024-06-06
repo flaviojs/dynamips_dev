@@ -316,6 +316,46 @@ pub static mut mips64_gpr_reg_names: [*mut c_char; MIPS64_GPR_NR] = [
     cstr!("t8"), cstr!("t9"), cstr!("k0"), cstr!("k1"), cstr!("gp"), cstr!("sp"), cstr!("fp"), cstr!("ra"),
 ];
 
+/// Timer IRQ
+#[no_mangle]
+pub extern "C" fn mips64_timer_irq_run(cpu: *mut c_void) -> *mut c_void {
+    unsafe {
+        let cpu: *mut cpu_mips_t = cpu.cast::<_>();
+        let mut umutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
+        let mut ucond: libc::pthread_cond_t = libc::PTHREAD_COND_INITIALIZER;
+        let mut t_spc: libc::timespec = zeroed::<_>();
+        let mut expire: m_tmcnt_t;
+
+        let interval: u_int = 1000000 / (*cpu).timer_irq_freq;
+        let threshold: u_int = (*cpu).timer_irq_freq * 10;
+        expire = m_gettime_usec() + interval as m_tmcnt_t;
+
+        while (*(*cpu).gen).state.get() != CPU_STATE_HALTED {
+            libc::pthread_mutex_lock(addr_of_mut!(umutex));
+            t_spc.tv_sec = (expire / 1000000) as libc::time_t;
+            t_spc.tv_nsec = ((expire % 1000000) * 1000) as _;
+            libc::pthread_cond_timedwait(addr_of_mut!(ucond), addr_of_mut!(umutex), addr_of!(t_spc));
+            libc::pthread_mutex_unlock(addr_of_mut!(umutex));
+
+            if likely((*cpu).irq_disable.get() == 0) && likely((*(*cpu).gen).state.get() == CPU_STATE_RUNNING) {
+                (*cpu).timer_irq_pending.set((*cpu).timer_irq_pending.get() + 1);
+
+                if unlikely((*cpu).timer_irq_pending.get() > threshold) {
+                    (*cpu).timer_irq_pending.set(0);
+                    (*cpu).timer_drift += 1;
+                    if false {
+                        libc::printf(cstr!("Timer IRQ not accurate (%u pending IRQ): reduce the \"--timer-irq-check-itv\" parameter (current value: %u)\n"), (*cpu).timer_irq_pending, (*cpu).timer_irq_check_itv);
+                    }
+                }
+            }
+
+            expire += interval as m_tmcnt_t;
+        }
+
+        null_mut()
+    }
+}
+
 /// Virtual breakpoint
 #[no_mangle]
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]

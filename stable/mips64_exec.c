@@ -23,25 +23,6 @@
 #include "rust_dynamips_c.h"
 #include "dynamips.h"
 
-/* Fetch an instruction */
-static forced_inline int mips64_exec_fetch(cpu_mips_t *cpu,m_uint64_t pc,
-                                           mips_insn_t *insn)
-{   
-   m_uint64_t exec_page;
-   m_uint32_t offset;
-
-   exec_page = pc & ~(m_uint64_t)MIPS_MIN_PAGE_IMASK;
-
-   if (unlikely(exec_page != cpu->njm_exec_page)) {
-      cpu->njm_exec_page = exec_page;
-      cpu->njm_exec_ptr  = cpu->mem_op_lookup(cpu,exec_page);
-   }
-
-   offset = (pc & MIPS_MIN_PAGE_IMASK) >> 2;
-   *insn = vmtoh32(cpu->njm_exec_ptr[offset]);
-   return(0);
-}
-
 /* Single-step execution */
 fastcall void mips64_exec_single_step(cpu_mips_t *cpu,mips_insn_t instruction)
 {

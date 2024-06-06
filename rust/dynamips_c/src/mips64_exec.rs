@@ -369,6 +369,34 @@ pub unsafe extern "C" fn mips64_exec_memop2(cpu: *mut cpu_mips_t, memop: c_int, 
     fn_.unwrap()(cpu, vaddr, dst_reg);
 }
 
+/// Fetch an instruction
+#[no_mangle] // TODO private
+#[inline(always)]
+pub unsafe extern "C" fn mips64_exec_fetch(cpu: *mut cpu_mips_t, pc: m_uint64_t, insn: *mut mips_insn_t) -> c_int {
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    {
+        let exec_page: m_uint64_t = pc & !(MIPS_MIN_PAGE_IMASK as m_uint64_t);
+
+        if unlikely(exec_page != (*cpu).njm_exec_page) {
+            (*cpu).njm_exec_page = exec_page;
+            (*cpu).njm_exec_ptr = (*cpu).mem_op_lookup.unwrap()(cpu, exec_page).cast::<_>();
+        }
+    }
+    #[cfg(feature = "USE_UNSTABLE")]
+    {
+        let exec_page: m_uint64_t = pc & MIPS_MIN_PAGE_MASK;
+
+        if unlikely(exec_page != (*cpu).njm_exec_page) {
+            (*cpu).njm_exec_ptr = (*cpu).mem_op_ifetch.unwrap()(cpu, exec_page).cast::<_>();
+            (*cpu).njm_exec_page = exec_page;
+        }
+    }
+
+    let offset: m_uint32_t = ((pc & MIPS_MIN_PAGE_IMASK) >> 2) as m_uint32_t;
+    *insn = vmtoh32(*(*cpu).njm_exec_ptr.wrapping_add(offset as usize));
+    0
+}
+
 /// ADD
 #[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]

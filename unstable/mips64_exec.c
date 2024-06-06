@@ -23,34 +23,6 @@
 #include "rust_dynamips_c.h"
 #include "dynamips.h"
 
-/* Execute a page */
-fastcall int mips64_exec_page(cpu_mips_t *cpu)
-{
-   m_uint32_t offset;
-   mips_insn_t insn;
-   int res;
-
-   /* Check IRQ */
-   if (unlikely(cpu->irq_pending))
-      mips64_trigger_irq(cpu);
-
-   cpu->njm_exec_page = cpu->pc & MIPS_MIN_PAGE_MASK;
-   cpu->njm_exec_ptr  = cpu->mem_op_ifetch(cpu,cpu->njm_exec_page);
-
-   do {
-      /* Reset "zero register" (for safety) */
-      cpu->gpr[0] = 0;
-
-      offset = (cpu->pc & MIPS_MIN_PAGE_IMASK) >> 2;
-      insn = vmtoh32(cpu->njm_exec_ptr[offset]);
-
-      res = mips64_exec_single_instruction(cpu,insn);
-      if (likely(!res)) cpu->pc += sizeof(mips_insn_t);
-   }while((cpu->pc & MIPS_MIN_PAGE_MASK) == cpu->njm_exec_page);
-
-   return(0);
-}
-
 /* Run MIPS code in step-by-step mode */
 void *mips64_exec_run_cpu(cpu_gen_t *gen)
 {   

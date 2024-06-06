@@ -406,6 +406,38 @@ pub unsafe extern "C" fn mips64_exec_single_step(cpu: *mut cpu_mips_t, instructi
     }
 }
 
+/* Execute a page */
+#[cfg(feature = "USE_UNSTABLE")]
+#[no_mangle]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_page(cpu: *mut cpu_mips_t) -> c_int {
+    // Check IRQ
+    if unlikely((*cpu).irq_pending != 0) {
+        mips64_trigger_irq(cpu);
+    }
+
+    (*cpu).njm_exec_page = (*cpu).pc & MIPS_MIN_PAGE_MASK;
+    (*cpu).njm_exec_ptr = (*cpu).mem_op_ifetch.unwrap()(cpu, (*cpu).njm_exec_page).cast::<_>();
+
+    loop {
+        // Reset "zero register" (for safety)
+        (*cpu).gpr[0] = 0;
+
+        let offset: m_uint32_t = (((*cpu).pc & MIPS_MIN_PAGE_IMASK) >> 2) as m_uint32_t;
+        let insn: mips_insn_t = vmtoh32(*(*cpu).njm_exec_ptr.add(offset as usize));
+
+        let res: c_int = mips64_exec_single_instruction(cpu, insn);
+        if likely(res == 0) {
+            (*cpu).pc += size_of::<mips_insn_t>() as m_uint64_t;
+        }
+        if ((*cpu).pc & MIPS_MIN_PAGE_MASK) != (*cpu).njm_exec_page {
+            break;
+        }
+    }
+
+    0
+}
+
 /// ADD
 #[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]

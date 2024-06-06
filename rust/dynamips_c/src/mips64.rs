@@ -16,6 +16,7 @@ use crate::vm::*;
 
 extern "C" {
     pub fn mips64_dump_regs(cpu: *mut cpu_gen_t);
+    pub fn mips64_trigger_irq(cpu: *mut cpu_mips_t);
 }
 
 pub type tlb_entry_t = tlb_entry;

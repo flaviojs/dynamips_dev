@@ -20,7 +20,6 @@ extern "C" {
     fn mips64_cp0_exec_tlbr(cpu: *mut cpu_mips_t);
     fn mips64_cp0_exec_tlbwi(cpu: *mut cpu_mips_t);
     fn mips64_cp0_exec_tlbwr(cpu: *mut cpu_mips_t);
-    fn mips64_exec_bdslot(cpu: *mut cpu_mips_t);
     fn mips64_exec_break(cpu: *mut cpu_mips_t, code: u_int);
     fn mips64_exec_dmfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_dmtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
@@ -436,6 +435,31 @@ pub unsafe extern "C" fn mips64_exec_page(cpu: *mut cpu_mips_t) -> c_int {
     }
 
     0
+}
+
+/// Execute the instruction in delay slot
+#[inline(always)]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+unsafe fn mips64_exec_bdslot(cpu: *mut cpu_mips_t) {
+    let mut insn: mips_insn_t = 0;
+
+    #[cfg(feature = "USE_UNSTABLE")]
+    {
+        // Set BD slot flag
+        (*cpu).bd_slot = 1;
+    }
+
+    // Fetch the instruction in delay slot
+    mips64_exec_fetch(cpu, (*cpu).pc + 4, addr_of_mut!(insn));
+
+    // Execute the instruction
+    mips64_exec_single_instruction(cpu, insn);
+
+    #[cfg(feature = "USE_UNSTABLE")]
+    {
+        // Clear BD slot flag
+        (*cpu).bd_slot = 0;
+    }
 }
 
 /// ADD

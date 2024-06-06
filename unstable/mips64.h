@@ -277,9 +277,6 @@ void mips64_set_prid(cpu_mips_t *cpu,m_uint32_t prid);
 /* Set idle PC value */
 void mips64_set_idle_pc(cpu_gen_t *cpu,m_uint64_t addr);
 
-/* Timer IRQ */
-void *mips64_timer_irq_run(cpu_mips_t *cpu);
-
 /* Determine an "idling" PC */
 int mips64_get_idling_pc(cpu_gen_t *cpu);
 

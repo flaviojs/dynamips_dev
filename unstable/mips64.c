@@ -147,50 +147,6 @@ void mips64_set_idle_pc(cpu_gen_t *cpu,m_uint64_t addr)
    CPU_MIPS64(cpu)->idle_pc = addr;
 }
 
-/* Timer IRQ */
-void *mips64_timer_irq_run(cpu_mips_t *cpu)
-{
-   pthread_mutex_t umutex = PTHREAD_MUTEX_INITIALIZER;
-   pthread_cond_t ucond = PTHREAD_COND_INITIALIZER;
-   struct timespec t_spc;
-   m_tmcnt_t expire;
-   u_int interval;
-   u_int threshold;
-
-   interval = 1000000 / cpu->timer_irq_freq;
-   threshold = cpu->timer_irq_freq * 10;
-   expire = m_gettime_usec() + interval;
-
-   while(cpu->gen->state != CPU_STATE_HALTED) {
-      pthread_mutex_lock(&umutex);
-      t_spc.tv_sec = expire / 1000000;
-      t_spc.tv_nsec = (expire % 1000000) * 1000;
-      pthread_cond_timedwait(&ucond,&umutex,&t_spc);
-      pthread_mutex_unlock(&umutex);
-
-      if (likely(!cpu->irq_disable) && 
-          likely(cpu->gen->state == CPU_STATE_RUNNING)) 
-      {
-         cpu->timer_irq_pending++;
-
-         if (unlikely(cpu->timer_irq_pending > threshold)) {
-            cpu->timer_irq_pending = 0;
-            cpu->timer_drift++;
-#if 0
-            printf("Timer IRQ not accurate (%u pending IRQ): "
-                   "reduce the \"--timer-irq-check-itv\" parameter "
-                   "(current value: %u)\n",
-                   cpu->timer_irq_pending,cpu->timer_irq_check_itv);
-#endif
-         }
-      }
-
-      expire += interval;
-   }
-
-   return NULL;
-}
-
 #define IDLE_HASH_SIZE  8192
 
 /* Idle PC hash item */

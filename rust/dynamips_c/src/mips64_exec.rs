@@ -345,6 +345,16 @@ pub unsafe extern "C" fn mips64_exec_single_instruction(cpu: *mut cpu_mips_t, in
     exec.unwrap()(cpu, instruction)
 }
 
+/// Execute a memory operation
+#[inline(always)]
+unsafe fn mips64_exec_memop(cpu: *mut cpu_mips_t, memop: c_int, vaddr: m_uint64_t, dst_reg: u_int, keep_ll_bit: c_int) {
+    if keep_ll_bit == 0 {
+        (*cpu).ll_bit = 0;
+    }
+    let fn_ = (*cpu).mem_op_fn[memop as usize];
+    fn_.unwrap()(cpu, vaddr, dst_reg);
+}
+
 /// Execute a memory operation (2)
 #[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]

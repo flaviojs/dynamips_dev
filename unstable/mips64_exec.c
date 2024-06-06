@@ -23,17 +23,6 @@
 #include "rust_dynamips_c.h"
 #include "dynamips.h"
 
-/* Single-step execution */
-fastcall void mips64_exec_single_step(cpu_mips_t *cpu,mips_insn_t instruction)
-{
-   int res;
-
-   res = mips64_exec_single_instruction(cpu,instruction);
-
-   /* Normal flow ? */
-   if (likely(!res)) cpu->pc += 4;
-}
-
 /* Execute a page */
 fastcall int mips64_exec_page(cpu_mips_t *cpu)
 {

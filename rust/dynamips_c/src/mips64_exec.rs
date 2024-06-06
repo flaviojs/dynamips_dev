@@ -397,6 +397,18 @@ pub unsafe extern "C" fn mips64_exec_fetch(cpu: *mut cpu_mips_t, pc: m_uint64_t,
     0
 }
 
+/// Single-step execution
+#[no_mangle]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_exec_single_step(cpu: *mut cpu_mips_t, instruction: mips_insn_t) {
+    let res: c_int = mips64_exec_single_instruction(cpu, instruction);
+
+    // Normal flow ?
+    if likely(res == 0) {
+        (*cpu).pc += 4;
+    }
+}
+
 /// ADD
 #[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]

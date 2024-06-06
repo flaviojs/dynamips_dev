@@ -114,22 +114,4 @@ void *mips64_exec_run_cpu(cpu_gen_t *gen)
    return NULL;
 }
 
-/* Execute the instruction in delay slot */
-forced_inline void mips64_exec_bdslot(cpu_mips_t *cpu)
-{
-   mips_insn_t insn;
-
-   /* Set BD slot flag */
-   cpu->bd_slot = 1;
-
-   /* Fetch the instruction in delay slot */
-   mips64_exec_fetch(cpu,cpu->pc+4,&insn);
-
-   /* Execute the instruction */
-   mips64_exec_single_instruction(cpu,insn);
-   
-   /* Clear BD slot flag */
-   cpu->bd_slot = 0;
-}
-
 #endif

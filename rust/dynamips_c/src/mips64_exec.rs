@@ -312,9 +312,8 @@ pub unsafe extern "C" fn mips64_dump_insn_block(cpu: *mut cpu_mips_t, mut pc: m_
 }
 
 /// Execute a single instruction
-#[no_mangle] // private
 #[inline]
-pub unsafe extern "C" fn mips64_exec_single_instruction(cpu: *mut cpu_mips_t, instruction: mips_insn_t) -> c_int {
+unsafe fn mips64_exec_single_instruction(cpu: *mut cpu_mips_t, instruction: mips_insn_t) -> c_int {
     if DEBUG_INSN_PERF_CNT != 0 {
         (*cpu).perf_counter += 1;
     }
@@ -352,10 +351,9 @@ unsafe fn mips64_exec_memop(cpu: *mut cpu_mips_t, memop: c_int, vaddr: m_uint64_
 }
 
 /// Execute a memory operation (2)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
 #[inline(always)]
-pub unsafe extern "C" fn mips64_exec_memop2(cpu: *mut cpu_mips_t, memop: c_int, base: m_uint64_t, offset: c_int, dst_reg: u_int, keep_ll_bit: c_int) {
+unsafe fn mips64_exec_memop2(cpu: *mut cpu_mips_t, memop: c_int, base: m_uint64_t, offset: c_int, dst_reg: u_int, keep_ll_bit: c_int) {
     let vaddr: m_uint64_t = (*cpu).gpr[base as usize].wrapping_add_signed(sign_extend(offset as m_int64_t, 16));
 
     if keep_ll_bit == 0 {
@@ -366,9 +364,8 @@ pub unsafe extern "C" fn mips64_exec_memop2(cpu: *mut cpu_mips_t, memop: c_int, 
 }
 
 /// Fetch an instruction
-#[no_mangle] // TODO private
 #[inline(always)]
-pub unsafe extern "C" fn mips64_exec_fetch(cpu: *mut cpu_mips_t, pc: m_uint64_t, insn: *mut mips_insn_t) -> c_int {
+unsafe fn mips64_exec_fetch(cpu: *mut cpu_mips_t, pc: m_uint64_t, insn: *mut mips_insn_t) -> c_int {
     #[cfg(not(feature = "USE_UNSTABLE"))]
     {
         let exec_page: m_uint64_t = pc & !(MIPS_MIN_PAGE_IMASK as m_uint64_t);
@@ -562,9 +559,8 @@ unsafe fn mips64_exec_bdslot(cpu: *mut cpu_mips_t) {
 }
 
 /// ADD
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_ADD(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_ADD(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -576,9 +572,8 @@ pub unsafe extern "C" fn mips64_exec_ADD(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// ADDI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_ADDI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_ADDI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
@@ -591,9 +586,8 @@ pub unsafe extern "C" fn mips64_exec_ADDI(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// ADDIU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_ADDIU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_ADDIU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
@@ -605,9 +599,8 @@ pub unsafe extern "C" fn mips64_exec_ADDIU(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// ADDU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_ADDU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_ADDU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -618,9 +611,8 @@ pub unsafe extern "C" fn mips64_exec_ADDU(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// AND
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_AND(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_AND(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -630,9 +622,8 @@ pub unsafe extern "C" fn mips64_exec_AND(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// ANDI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_ANDI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_ANDI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
@@ -642,9 +633,8 @@ pub unsafe extern "C" fn mips64_exec_ANDI(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// B (Branch, virtual instruction)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_B(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_B(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let offset: c_int = bits(insn, 0, 15);
 
     // compute the new pc
@@ -659,9 +649,8 @@ pub unsafe extern "C" fn mips64_exec_B(cpu: *mut cpu_mips_t, insn: mips_insn_t) 
 }
 
 /// BAL (Branch And Link, virtual instruction)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let offset: c_int = bits(insn, 0, 15);
 
     // compute the new pc
@@ -679,9 +668,8 @@ pub unsafe extern "C" fn mips64_exec_BAL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// BEQ (Branch On Equal)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BEQ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BEQ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -706,9 +694,8 @@ pub unsafe extern "C" fn mips64_exec_BEQ(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// BEQL (Branch On Equal Likely)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BEQL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BEQL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -731,9 +718,8 @@ pub unsafe extern "C" fn mips64_exec_BEQL(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// BEQZ (Branch On Equal Zero) - Virtual Instruction
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BEQZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BEQZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -757,9 +743,8 @@ pub unsafe extern "C" fn mips64_exec_BEQZ(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// BNEZ (Branch On Not Equal Zero) - Virtual Instruction
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BNEZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BNEZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -783,9 +768,8 @@ pub unsafe extern "C" fn mips64_exec_BNEZ(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// BGEZ (Branch On Greater or Equal Than Zero)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BGEZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BGEZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -809,9 +793,8 @@ pub unsafe extern "C" fn mips64_exec_BGEZ(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// BGEZAL (Branch On Greater or Equal Than Zero And Link)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BGEZAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BGEZAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -838,9 +821,8 @@ pub unsafe extern "C" fn mips64_exec_BGEZAL(cpu: *mut cpu_mips_t, insn: mips_ins
 }
 
 /// BGEZALL (Branch On Greater or Equal Than Zero And Link Likely)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BGEZALL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BGEZALL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -865,9 +847,8 @@ pub unsafe extern "C" fn mips64_exec_BGEZALL(cpu: *mut cpu_mips_t, insn: mips_in
 }
 
 /// BGEZL (Branch On Greater or Equal Than Zero Likely)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BGEZL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BGEZL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -889,9 +870,8 @@ pub unsafe extern "C" fn mips64_exec_BGEZL(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// BGTZ (Branch On Greater Than Zero)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BGTZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BGTZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -915,9 +895,8 @@ pub unsafe extern "C" fn mips64_exec_BGTZ(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// BGTZL (Branch On Greater Than Zero Likely)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BGTZL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BGTZL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -939,9 +918,8 @@ pub unsafe extern "C" fn mips64_exec_BGTZL(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// BLEZ (Branch On Less or Equal Than Zero)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BLEZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BLEZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -965,9 +943,8 @@ pub unsafe extern "C" fn mips64_exec_BLEZ(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 // BLEZL (Branch On Less or Equal Than Zero Likely)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BLEZL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BLEZL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -989,9 +966,8 @@ pub unsafe extern "C" fn mips64_exec_BLEZL(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// BLTZ (Branch On Less Than Zero)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BLTZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BLTZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -1015,9 +991,8 @@ pub unsafe extern "C" fn mips64_exec_BLTZ(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// BLTZAL (Branch On Less Than Zero And Link)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BLTZAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BLTZAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -1044,9 +1019,8 @@ pub unsafe extern "C" fn mips64_exec_BLTZAL(cpu: *mut cpu_mips_t, insn: mips_ins
 }
 
 /// BLTZALL (Branch On Less Than Zero And Link Likely)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BLTZALL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BLTZALL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -1071,9 +1045,8 @@ pub unsafe extern "C" fn mips64_exec_BLTZALL(cpu: *mut cpu_mips_t, insn: mips_in
 }
 
 /// BLTZL (Branch On Less Than Zero Likely)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BLTZL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BLTZL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let offset: c_int = bits(insn, 0, 15);
 
@@ -1095,9 +1068,8 @@ pub unsafe extern "C" fn mips64_exec_BLTZL(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// BNE (Branch On Not Equal)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BNE(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BNE(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1122,9 +1094,8 @@ pub unsafe extern "C" fn mips64_exec_BNE(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// BNEL (Branch On Not Equal Likely)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BNEL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BNEL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1147,9 +1118,8 @@ pub unsafe extern "C" fn mips64_exec_BNEL(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// BREAK
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_BREAK(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_BREAK(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let code: u_int = bits(insn, 6, 25) as u_int;
 
     mips64_exec_break(cpu, code);
@@ -1157,9 +1127,8 @@ pub unsafe extern "C" fn mips64_exec_BREAK(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// CACHE
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_CACHE(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_CACHE(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let op: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1169,9 +1138,8 @@ pub unsafe extern "C" fn mips64_exec_CACHE(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// CFC0
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_CFC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_CFC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1180,9 +1148,8 @@ pub unsafe extern "C" fn mips64_exec_CFC0(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// CTC0
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_CTC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_CTC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1191,9 +1158,8 @@ pub unsafe extern "C" fn mips64_exec_CTC0(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// DADDIU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DADDIU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DADDIU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
@@ -1204,9 +1170,8 @@ pub unsafe extern "C" fn mips64_exec_DADDIU(cpu: *mut cpu_mips_t, insn: mips_ins
 }
 
 /// DADDU: rd = rs + rt
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DADDU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DADDU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1216,9 +1181,8 @@ pub unsafe extern "C" fn mips64_exec_DADDU(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// DIV
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DIV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DIV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
 
@@ -1231,9 +1195,8 @@ pub unsafe extern "C" fn mips64_exec_DIV(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// DIVU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DIVU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DIVU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
 
@@ -1250,9 +1213,8 @@ pub unsafe extern "C" fn mips64_exec_DIVU(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// DMFC0
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DMFC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DMFC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1261,9 +1223,8 @@ pub unsafe extern "C" fn mips64_exec_DMFC0(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// DMFC1
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DMFC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DMFC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1272,9 +1233,8 @@ pub unsafe extern "C" fn mips64_exec_DMFC1(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// DMTC0
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DMTC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DMTC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1283,9 +1243,8 @@ pub unsafe extern "C" fn mips64_exec_DMTC0(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// DMTC1
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DMTC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DMTC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1294,9 +1253,8 @@ pub unsafe extern "C" fn mips64_exec_DMTC1(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// DSLL
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSLL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSLL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -1306,9 +1264,8 @@ pub unsafe extern "C" fn mips64_exec_DSLL(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// DSLL32
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSLL32(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSLL32(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -1318,9 +1275,8 @@ pub unsafe extern "C" fn mips64_exec_DSLL32(cpu: *mut cpu_mips_t, insn: mips_ins
 }
 
 /// DSLLV
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSLLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSLLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1330,9 +1286,8 @@ pub unsafe extern "C" fn mips64_exec_DSLLV(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// DSRA
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSRA(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSRA(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -1342,9 +1297,8 @@ pub unsafe extern "C" fn mips64_exec_DSRA(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// DSRA32
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSRA32(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSRA32(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -1354,9 +1308,8 @@ pub unsafe extern "C" fn mips64_exec_DSRA32(cpu: *mut cpu_mips_t, insn: mips_ins
 }
 
 /// DSRAV
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSRAV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSRAV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1366,9 +1319,8 @@ pub unsafe extern "C" fn mips64_exec_DSRAV(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// DSRL
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSRL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSRL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -1378,9 +1330,8 @@ pub unsafe extern "C" fn mips64_exec_DSRL(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// DSRL32
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSRL32(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSRL32(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -1390,9 +1341,8 @@ pub unsafe extern "C" fn mips64_exec_DSRL32(cpu: *mut cpu_mips_t, insn: mips_ins
 }
 
 /// DSRLV
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSRLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSRLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1402,9 +1352,8 @@ pub unsafe extern "C" fn mips64_exec_DSRLV(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// DSUBU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_DSUBU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_DSUBU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1414,17 +1363,15 @@ pub unsafe extern "C" fn mips64_exec_DSUBU(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// ERET
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_ERET(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_ERET(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     mips64_exec_eret(cpu);
     1
 }
 
 /// J
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_J(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_J(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let instr_index: u_int = bits(insn, 0, 25) as u_int;
 
     /* compute the new pc */
@@ -1440,9 +1387,8 @@ pub unsafe extern "C" fn mips64_exec_J(cpu: *mut cpu_mips_t, insn: mips_insn_t) 
 }
 
 /// JAL
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_JAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_JAL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let instr_index: u_int = bits(insn, 0, 25) as u_int;
 
     // compute the new pc
@@ -1461,9 +1407,8 @@ pub unsafe extern "C" fn mips64_exec_JAL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// JALR
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_JALR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_JALR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1482,9 +1427,8 @@ pub unsafe extern "C" fn mips64_exec_JALR(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// JR
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_JR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_JR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
 
     // get the new pc
@@ -1499,9 +1443,8 @@ pub unsafe extern "C" fn mips64_exec_JR(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// LB (Load Byte)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LB(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LB(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1511,9 +1454,8 @@ pub unsafe extern "C" fn mips64_exec_LB(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// LBU (Load Byte Unsigned)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LBU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LBU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1523,9 +1465,8 @@ pub unsafe extern "C" fn mips64_exec_LBU(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// LD (Load Double-Word)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LD(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LD(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1535,9 +1476,8 @@ pub unsafe extern "C" fn mips64_exec_LD(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// LDC1 (Load Double-Word to Coprocessor 1)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LDC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LDC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let ft: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1547,9 +1487,8 @@ pub unsafe extern "C" fn mips64_exec_LDC1(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// LDL (Load Double-Word Left)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LDL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LDL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1559,9 +1498,8 @@ pub unsafe extern "C" fn mips64_exec_LDL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// LDR (Load Double-Word Right)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LDR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LDR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1571,9 +1509,8 @@ pub unsafe extern "C" fn mips64_exec_LDR(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// LH (Load Half-Word)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LH(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LH(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1583,9 +1520,8 @@ pub unsafe extern "C" fn mips64_exec_LH(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// LHU (Load Half-Word Unsigned)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LHU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LHU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1595,9 +1531,8 @@ pub unsafe extern "C" fn mips64_exec_LHU(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// LI (virtual)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
 
@@ -1606,9 +1541,8 @@ pub unsafe extern "C" fn mips64_exec_LI(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// LL (Load Linked)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1618,9 +1552,8 @@ pub unsafe extern "C" fn mips64_exec_LL(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// LUI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LUI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LUI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
 
@@ -1629,9 +1562,8 @@ pub unsafe extern "C" fn mips64_exec_LUI(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// LW (Load Word)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LW(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LW(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1641,9 +1573,8 @@ pub unsafe extern "C" fn mips64_exec_LW(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// LWL (Load Word Left)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LWL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LWL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1653,9 +1584,8 @@ pub unsafe extern "C" fn mips64_exec_LWL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// LWR (Load Word Right)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LWR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LWR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1665,9 +1595,8 @@ pub unsafe extern "C" fn mips64_exec_LWR(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// LWU (Load Word Unsigned)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_LWU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_LWU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1677,9 +1606,8 @@ pub unsafe extern "C" fn mips64_exec_LWU(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// MFC0
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MFC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MFC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1688,9 +1616,8 @@ pub unsafe extern "C" fn mips64_exec_MFC0(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MFC1
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MFC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MFC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1699,9 +1626,8 @@ pub unsafe extern "C" fn mips64_exec_MFC1(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MFHI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MFHI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MFHI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rd: c_int = bits(insn, 11, 15);
 
     if rd != 0 {
@@ -1711,9 +1637,8 @@ pub unsafe extern "C" fn mips64_exec_MFHI(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MFLO
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MFLO(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MFLO(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rd: c_int = bits(insn, 11, 15);
 
     if rd != 0 {
@@ -1723,9 +1648,8 @@ pub unsafe extern "C" fn mips64_exec_MFLO(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MOVE (virtual instruction, real: ADDU)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MOVE(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MOVE(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1735,9 +1659,8 @@ pub unsafe extern "C" fn mips64_exec_MOVE(cpu: *mut cpu_mips_t, insn: mips_insn_
 
 /// MOVZ
 #[cfg(feature = "USE_UNSTABLE")]
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MOVZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MOVZ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1750,9 +1673,8 @@ pub unsafe extern "C" fn mips64_exec_MOVZ(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MTC0
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MTC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MTC0(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1761,9 +1683,8 @@ pub unsafe extern "C" fn mips64_exec_MTC0(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MTC1
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MTC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MTC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
 
@@ -1772,9 +1693,8 @@ pub unsafe extern "C" fn mips64_exec_MTC1(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MTHI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MTHI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MTHI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
 
     (*cpu).hi = (*cpu).gpr[rs as usize];
@@ -1782,9 +1702,8 @@ pub unsafe extern "C" fn mips64_exec_MTHI(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MTLO
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MTLO(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MTLO(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
 
     (*cpu).lo = (*cpu).gpr[rs as usize];
@@ -1792,9 +1711,8 @@ pub unsafe extern "C" fn mips64_exec_MTLO(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MUL
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MUL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MUL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1806,9 +1724,8 @@ pub unsafe extern "C" fn mips64_exec_MUL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// MULT
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MULT(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MULT(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
 
@@ -1821,9 +1738,8 @@ pub unsafe extern "C" fn mips64_exec_MULT(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// MULTU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_MULTU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_MULTU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
 
@@ -1835,16 +1751,14 @@ pub unsafe extern "C" fn mips64_exec_MULTU(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// NOP
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_NOP(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_NOP(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     0
 }
 
 /// NOR
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_NOR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_NOR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1854,9 +1768,8 @@ pub unsafe extern "C" fn mips64_exec_NOR(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// OR
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_OR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_OR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -1866,9 +1779,8 @@ pub unsafe extern "C" fn mips64_exec_OR(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// ORI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_ORI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_ORI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
@@ -1878,23 +1790,20 @@ pub unsafe extern "C" fn mips64_exec_ORI(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// PREF
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_PREF(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_PREF(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     0
 }
 
 /// PREFI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_PREFI(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_PREFI(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     0
 }
 
 /// SB (Store Byte)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SB(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SB(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1904,9 +1813,8 @@ pub unsafe extern "C" fn mips64_exec_SB(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// SC (Store Conditional)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SC(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SC(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1916,9 +1824,8 @@ pub unsafe extern "C" fn mips64_exec_SC(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// SD (Store Double-Word)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SD(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SD(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1928,9 +1835,8 @@ pub unsafe extern "C" fn mips64_exec_SD(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// SDL (Store Double-Word Left)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SDL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SDL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1940,9 +1846,8 @@ pub unsafe extern "C" fn mips64_exec_SDL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SDR (Store Double-Word Right)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SDR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SDR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1952,9 +1857,8 @@ pub unsafe extern "C" fn mips64_exec_SDR(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SDC1 (Store Double-Word from Coprocessor 1)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SDC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SDC1(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let ft: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1964,9 +1868,8 @@ pub unsafe extern "C" fn mips64_exec_SDC1(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// SH (Store Half-Word)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SH(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SH(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -1976,9 +1879,8 @@ pub unsafe extern "C" fn mips64_exec_SH(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// SLL
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SLL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SLL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -1989,9 +1891,8 @@ pub unsafe extern "C" fn mips64_exec_SLL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SLLV
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SLLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SLLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -2002,9 +1903,8 @@ pub unsafe extern "C" fn mips64_exec_SLLV(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// SLT
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SLT(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SLT(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -2019,9 +1919,8 @@ pub unsafe extern "C" fn mips64_exec_SLT(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SLTI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SLTI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SLTI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
@@ -2037,9 +1936,8 @@ pub unsafe extern "C" fn mips64_exec_SLTI(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// SLTIU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SLTIU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SLTIU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
@@ -2055,9 +1953,8 @@ pub unsafe extern "C" fn mips64_exec_SLTIU(cpu: *mut cpu_mips_t, insn: mips_insn
 }
 
 /// SLTU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SLTU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SLTU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -2072,9 +1969,8 @@ pub unsafe extern "C" fn mips64_exec_SLTU(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// SRA
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SRA(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SRA(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -2085,9 +1981,8 @@ pub unsafe extern "C" fn mips64_exec_SRA(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SRAV
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SRAV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SRAV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -2098,9 +1993,8 @@ pub unsafe extern "C" fn mips64_exec_SRAV(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// SRL
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SRL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SRL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
     let sa: c_int = bits(insn, 6, 10);
@@ -2111,9 +2005,8 @@ pub unsafe extern "C" fn mips64_exec_SRL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SRLV
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SRLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SRLV(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -2124,9 +2017,8 @@ pub unsafe extern "C" fn mips64_exec_SRLV(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// SUB
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SUB(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SUB(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -2138,9 +2030,8 @@ pub unsafe extern "C" fn mips64_exec_SUB(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SUBU
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SUBU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SUBU(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -2151,9 +2042,8 @@ pub unsafe extern "C" fn mips64_exec_SUBU(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// SW (Store Word)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SW(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SW(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -2163,9 +2053,8 @@ pub unsafe extern "C" fn mips64_exec_SW(cpu: *mut cpu_mips_t, insn: mips_insn_t)
 }
 
 /// SWL (Store Word Left)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SWL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SWL(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -2175,9 +2064,8 @@ pub unsafe extern "C" fn mips64_exec_SWL(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SWR (Store Word Right)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SWR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SWR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let base: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let offset: c_int = bits(insn, 0, 15);
@@ -2187,24 +2075,21 @@ pub unsafe extern "C" fn mips64_exec_SWR(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// SYNC
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SYNC(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SYNC(_cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     0
 }
 
 /// SYSCALL
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_SYSCALL(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_SYSCALL(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     mips64_exec_syscall(cpu);
     1
 }
 
 /// TEQ (Trap if Equal)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_TEQ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_TEQ(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
 
@@ -2217,9 +2102,8 @@ pub unsafe extern "C" fn mips64_exec_TEQ(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// TEQI (Trap if Equal Immediate)
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_TEQI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_TEQI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let imm: c_int = bits(insn, 0, 15);
     let val: m_uint64_t = sign_extend(imm as m_int64_t, 16) as m_uint64_t;
@@ -2233,41 +2117,36 @@ pub unsafe extern "C" fn mips64_exec_TEQI(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// TLBP
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_TLBP(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_TLBP(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     mips64_cp0_exec_tlbp(cpu);
     0
 }
 
 /// TLBR
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_TLBR(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_TLBR(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     mips64_cp0_exec_tlbr(cpu);
     0
 }
 
 /// TLBWI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_TLBWI(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_TLBWI(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     mips64_cp0_exec_tlbwi(cpu);
     0
 }
 
 /// TLBWR
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_TLBWR(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_TLBWR(cpu: *mut cpu_mips_t, _insn: mips_insn_t) -> c_int {
     mips64_cp0_exec_tlbwr(cpu);
     0
 }
 
 /// XOR
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_XOR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_XOR(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let rd: c_int = bits(insn, 11, 15);
@@ -2277,9 +2156,8 @@ pub unsafe extern "C" fn mips64_exec_XOR(cpu: *mut cpu_mips_t, insn: mips_insn_t
 }
 
 /// XORI
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_XORI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_XORI(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     let rs: c_int = bits(insn, 21, 25);
     let rt: c_int = bits(insn, 16, 20);
     let imm: c_int = bits(insn, 0, 15);
@@ -2289,17 +2167,15 @@ pub unsafe extern "C" fn mips64_exec_XORI(cpu: *mut cpu_mips_t, insn: mips_insn_
 }
 
 /// Unknown opcode
-#[no_mangle] // TODO private
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
-pub unsafe extern "C" fn mips64_exec_unknown(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
+unsafe extern "C" fn mips64_exec_unknown(cpu: *mut cpu_mips_t, insn: mips_insn_t) -> c_int {
     libc::printf(cstr!("MIPS64: unknown opcode 0x%8.8x at pc = 0x%llx\n"), insn, (*cpu).pc);
     mips64_dump_regs((*cpu).gen);
     0
 }
 
 /// MIPS instruction array
-#[no_mangle] // TODO private
-pub static mut mips64_exec_tags: [mips64_insn_exec_tag; 122] = [
+static mut mips64_exec_tags: [mips64_insn_exec_tag; 122] = [
     mips64_insn_exec_tag::new(cstr!("li"), Some(mips64_exec_LI), 0xffe00000, 0x24000000, 1, 16),
     mips64_insn_exec_tag::new(cstr!("move"), Some(mips64_exec_MOVE), 0xfc1f07ff, 0x00000021, 1, 15),
     mips64_insn_exec_tag::new(cstr!("b"), Some(mips64_exec_B), 0xffff0000, 0x10000000, 0, 10),

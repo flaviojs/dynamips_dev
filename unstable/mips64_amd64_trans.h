@@ -10,7 +10,7 @@
 #include "amd64-codegen.h"
 #include "cpu.h"
 #include "dynamips.h"
-#include "mips64_exec.h"
+#include "rust_dynamips_c.h"
 
 #define JIT_SUPPORT 1
 

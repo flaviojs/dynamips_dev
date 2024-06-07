@@ -17,7 +17,6 @@
 #include "rust_dynamips_c.h"
 #include "cpu.h"
 #include "mips64_mem.h"
-#include "mips64_exec.h"
 #include "mips64_jit.h"
 #include "dynamips.h"
 #include "memory.h"

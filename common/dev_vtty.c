@@ -31,7 +31,7 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "mips64_exec.h"
+#include "rust_dynamips_c.h"
 #include "ppc32_exec.h"
 #include "device.h"
 #include "memory.h"

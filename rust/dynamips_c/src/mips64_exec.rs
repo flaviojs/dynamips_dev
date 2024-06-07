@@ -440,6 +440,105 @@ pub unsafe extern "C" fn mips64_exec_page(cpu: *mut cpu_mips_t) -> c_int {
     0
 }
 
+/* Run MIPS code in step-by-step mode */
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_run_cpu(gen: *mut cpu_gen_t) -> *mut c_void {
+    let cpu: *mut cpu_mips_t = CPU_MIPS64(gen);
+    let mut timer_irq_thread: libc::pthread_t = 0;
+    let mut timer_irq_check: u_int = 0;
+    let mut insn: mips_insn_t = 0;
+    let mut res: c_int;
+
+    if libc::pthread_create(addr_of_mut!(timer_irq_thread), null_mut(), mips64_timer_irq_run, cpu.cast::<_>()) != 0 {
+        libc::fprintf(c_stderr(), cstr!("VM '%s': unable to create Timer IRQ thread for CPU%u.\n"), (*(*cpu).vm).name, (*gen).id);
+        cpu_stop(gen);
+        return null_mut();
+    }
+
+    (*gen).cpu_thread_running.set(TRUE);
+    cpu_exec_loop_set!(gen);
+
+    'start_cpu: loop {
+        (*gen).idle_count = 0;
+
+        loop {
+            if unlikely((*gen).state.get() != CPU_STATE_RUNNING) {
+                break;
+            }
+
+            // Handle virtual idle loop
+            if unlikely((*cpu).pc == (*cpu).idle_pc.get()) {
+                (*gen).idle_count += 1;
+                if (*gen).idle_count == (*gen).idle_max {
+                    cpu_idle_loop(gen);
+                    (*gen).idle_count = 0;
+                }
+            }
+
+            // Handle the virtual CPU clock
+            timer_irq_check += 1;
+            if timer_irq_check == (*cpu).timer_irq_check_itv {
+                timer_irq_check = 0;
+
+                if (*cpu).timer_irq_pending.get() != 0 && (*cpu).irq_disable.get() == 0 {
+                    mips64_trigger_timer_irq(cpu);
+                    mips64_trigger_irq(cpu);
+                    (*cpu).timer_irq_pending.set((*cpu).timer_irq_pending.get() - 1);
+                }
+            }
+
+            // Reset "zero register" (for safety)
+            (*cpu).gpr[0] = 0;
+
+            // Check IRQ
+            if unlikely((*cpu).irq_pending != 0) {
+                mips64_trigger_irq(cpu);
+                continue;
+            }
+
+            // Fetch and execute the instruction
+            mips64_exec_fetch(cpu, (*cpu).pc, addr_of_mut!(insn));
+            res = mips64_exec_single_instruction(cpu, insn);
+
+            // Normal flow ?
+            if likely(res == 0) {
+                (*cpu).pc += size_of::<mips_insn_t>() as m_uint64_t;
+            }
+        }
+
+        if (*cpu).pc == 0 {
+            cpu_stop(gen);
+            cpu_log!(gen, cstr!("SLOW_EXEC"), cstr!("PC=0, halting CPU.\n"));
+        }
+
+        // Check regularly if the CPU has been restarted
+        while (*gen).cpu_thread_running.get() != 0 {
+            (*gen).seq_state.set((*gen).seq_state.get() + 1);
+
+            match (*gen).state.get() {
+                CPU_STATE_RUNNING => {
+                    (*gen).state.set(CPU_STATE_RUNNING);
+                    continue 'start_cpu;
+                }
+
+                CPU_STATE_HALTED => {
+                    (*gen).cpu_thread_running.set(FALSE);
+                    libc::pthread_join(timer_irq_thread, null_mut());
+                }
+
+                _ => {}
+            }
+
+            // CPU is paused
+            libc::usleep(200000);
+        }
+
+        break;
+    }
+
+    null_mut()
+}
+
 /// Execute the instruction in delay slot
 #[inline(always)]
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]

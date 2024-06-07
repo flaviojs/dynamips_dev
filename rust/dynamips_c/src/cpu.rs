@@ -12,6 +12,11 @@ use crate::ppc32::*;
 use crate::tcb::*;
 use crate::vm::*;
 
+extern "C" {
+    pub fn cpu_idle_loop(cpu: *mut cpu_gen_t);
+    pub fn cpu_stop(cpu: *mut cpu_gen_t);
+}
+
 pub type memlog_access_t = memlog_access;
 pub type cpu_gen_t = cpu_gen;
 pub type cpu_group_t = cpu_group;
@@ -153,6 +158,20 @@ pub struct cpu_group {
     pub cpu_list: *mut cpu_gen_t,
     pub priv_data: *mut c_void,
 }
+
+pub unsafe fn CPU_MIPS64(cpu: *mut cpu_gen_t) -> *mut cpu_mips_t {
+    addr_of_mut!((*cpu).sp.mips64_cpu)
+}
+
+/// Set the exec loop entry point
+#[macro_export]
+macro_rules! cpu_exec_loop_set {
+    ($cpu:expr) => {
+        let cpu: *mut cpu_gen_t = $cpu;
+        setjmp::setjmp(addr_of_mut!((*cpu).exec_loop_env));
+    };
+}
+pub use cpu_exec_loop_set;
 
 /// Find a CPU in a group given its ID
 #[no_mangle]

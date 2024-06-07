@@ -30,7 +30,6 @@
 #include "tcb.h"
 #endif
 
-#include "mips64_exec.h"
 #include "mips64_jit.h"
 #include "ppc32_exec.h"
 #include "ppc32_jit.h"

@@ -90,7 +90,6 @@ set ( _files
    "${LOCAL}/mips64_mem.c"
    "${LOCAL}/mips64_cp0.c"
    "${LOCAL}/mips64_jit.c"
-   "${LOCAL}/mips64_exec.c"
    "${LOCAL}/ppc32.c"
    "${LOCAL}/ppc32_mem.c"
    "${LOCAL}/ppc32_jit.c"

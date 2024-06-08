@@ -249,3 +249,25 @@ macro_rules! cpu_log {
     };
 }
 pub use cpu_log;
+
+/// Find the highest CPU ID in a CPU group
+#[no_mangle]
+pub unsafe extern "C" fn cpu_group_find_highest_id(group: *mut cpu_group_t, highest_id: *mut u_int) -> c_int {
+    let mut cpu: *mut cpu_gen_t;
+    let mut max_id: u_int = 0;
+
+    if group.is_null() || !(*group).cpu_list.is_null() {
+        return -1;
+    }
+
+    cpu = (*group).cpu_list;
+    while !cpu.is_null() {
+        if (*cpu).id >= max_id {
+            max_id = (*cpu).id;
+        }
+        cpu = (*cpu).next;
+    }
+
+    *highest_id = max_id;
+    0
+}

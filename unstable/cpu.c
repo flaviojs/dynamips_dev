@@ -30,19 +30,6 @@
 #include "ppc32_jit.h"
 #include "dynamips.h"
 
-/* Create a new CPU group */
-cpu_group_t *cpu_group_create(char *name)
-{
-   cpu_group_t *group;
-
-   if (!(group = malloc(sizeof(*group))))
-      return NULL;
-
-   group->name = name;
-   group->cpu_list = NULL;
-   return group;
-}
-
 /* Delete a CPU group */
 void cpu_group_delete(cpu_group_t *group)
 {  

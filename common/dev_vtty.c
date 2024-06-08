@@ -51,30 +51,6 @@ static pthread_t vtty_thread;
 #define VTTY_LIST_LOCK()   pthread_mutex_lock(&vtty_list_mutex);
 #define VTTY_LIST_UNLOCK() pthread_mutex_unlock(&vtty_list_mutex);
 
-/* Remote control for MIPS64 processors */
-static int remote_control_mips64(vtty_t *vtty,char c,cpu_mips_t *cpu)
-{
-   switch(c) {    
-      /* Show information about JIT compiled pages */
-      case 'b':
-         printf("\nCPU0: %u JIT compiled pages [Exec Area Pages: %lu/%lu]\n",
-                cpu->compiled_pages,
-                (u_long)cpu->exec_page_alloc,
-                (u_long)cpu->exec_page_count);
-         break;
-
-      /* Non-JIT mode statistics */
-      case 'j':
-         mips64_dump_stats(cpu);
-         break;
-
-      default:
-         return(FALSE);
-   }
-
-   return(TRUE);
-}
-
 /* Remote control for PPC32 processors */
 static int remote_control_ppc32(vtty_t *vtty,char c,cpu_ppc_t *cpu)
 {

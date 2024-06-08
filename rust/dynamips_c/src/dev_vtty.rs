@@ -5,6 +5,9 @@
 //! Serial console by Peter Ross (suxen_drol@hotmail.com)
 
 use crate::dynamips::*;
+use crate::dynamips_common::*;
+use crate::mips64::*;
+use crate::mips64_exec::*;
 use crate::prelude::*;
 use crate::utils::*;
 use crate::vm::*;
@@ -877,4 +880,26 @@ pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {
         }
         _ => {}
     }
+}
+
+/// Remote control for MIPS64 processors
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn remote_control_mips64(_vtty: *mut vtty_t, c: c_char, cpu: *mut cpu_mips_t) -> c_int {
+    match c as u8 {
+        // Show information about JIT compiled pages
+        b'b' => {
+            libc::printf(cstr!("\nCPU0: %u JIT compiled pages [Exec Area Pages: %lu/%lu]\n"), (*cpu).compiled_pages, (*cpu).exec_page_alloc as u_long, (*cpu).exec_page_count as u_long);
+        }
+
+        // Non-JIT mode statistics
+        b'j' => {
+            mips64_dump_stats(cpu);
+        }
+
+        _ => {
+            return FALSE;
+        }
+    }
+
+    TRUE
 }

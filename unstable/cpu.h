@@ -15,12 +15,6 @@
 #include "mips64_cp0.h"
 #include "ppc32.h"
 
-/* Possible CPU types */
-enum {
-   CPU_TYPE_MIPS64 = 1,
-   CPU_TYPE_PPC32,
-};
-
 #define CPU_MIPS64(cpu) (&(cpu)->sp.mips64_cpu)
 #define CPU_PPC32(cpu)  (&(cpu)->sp.ppc32_cpu)
 

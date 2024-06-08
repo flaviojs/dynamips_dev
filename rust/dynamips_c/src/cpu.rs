@@ -324,3 +324,17 @@ pub unsafe extern "C" fn cpu_group_delete(group: *mut cpu_group_t) {
         libc::free(group.cast::<_>());
     }
 }
+
+/// Rebuild the MTS subsystem for a CPU group
+#[no_mangle]
+pub unsafe extern "C" fn cpu_group_rebuild_mts(group: *mut cpu_group_t) -> c_int {
+    let mut cpu: *mut cpu_gen_t;
+
+    cpu = (*group).cpu_list;
+    while !cpu.is_null() {
+        (*cpu).mts_rebuild.unwrap()(cpu);
+        cpu = (*cpu).next;
+    }
+
+    0
+}

@@ -29,17 +29,6 @@
 #include "dynamips.h"
 #include "vm.h"
 
-/* Rebuild the MTS subsystem for a CPU group */
-int cpu_group_rebuild_mts(cpu_group_t *group)
-{
-   cpu_gen_t *cpu;
-
-   for(cpu=group->cpu_list;cpu;cpu=cpu->next)
-      cpu->mts_rebuild(cpu);
-
-   return(0);
-}
-
 /* Log a message for a CPU */
 void cpu_log(cpu_gen_t *cpu,char *module,char *format,...)
 {

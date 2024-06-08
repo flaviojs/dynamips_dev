@@ -20,7 +20,6 @@
 #include "device.h"
 #include "net_io.h"
 #include "rust_dynamips_c.h"
-#include "dev_vtty.h"
 #include "dev_mv64460.h"
 
 /* Debugging flags */

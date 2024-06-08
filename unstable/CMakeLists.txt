@@ -74,7 +74,6 @@ set ( _files
    "${COMMON}/pci_io.c"
    "${COMMON}/dev_zero.c"
    "${COMMON}/dev_bswap.c"
-   "${COMMON}/dev_vtty.c"
    "${COMMON}/dev_ram.c"
    "${COMMON}/dev_rom.c"
    "${COMMON}/dev_nvram.c"

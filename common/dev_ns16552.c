@@ -22,7 +22,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "dev_vtty.h"
 
 /* Debugging flags */
 #define DEBUG_UNKNOWN  1

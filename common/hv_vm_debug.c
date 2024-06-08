@@ -27,7 +27,6 @@
 #include "dynamips.h"
 #include "device.h"
 #include "dev_c7200.h"
-#include "dev_vtty.h"
 #include "utils.h"
 #include "rust_dynamips_c.h"
 #include "hypervisor.h"

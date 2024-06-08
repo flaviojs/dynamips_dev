@@ -41,7 +41,6 @@
 #include "dev_c6msfc1.h"
 #include "dev_c6sup1.h"
 #include "ppc32_vmtest.h"
-#include "dev_vtty.h"
 #include "plugin.h"
 #include "rust_dynamips_c.h"
 #include "hypervisor.h"

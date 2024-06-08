@@ -30,21 +30,6 @@
 #include "ppc32_jit.h"
 #include "dynamips.h"
 
-/* Delete a CPU group */
-void cpu_group_delete(cpu_group_t *group)
-{  
-   cpu_gen_t *cpu,*next;
-
-   if (group != NULL) {
-      for(cpu=group->cpu_list;cpu;cpu=next) {
-         next = cpu->next;
-         cpu_delete(cpu);
-      }
-
-      free(group);
-   }
-}
-
 /* Rebuild the MTS subsystem for a CPU group */
 int cpu_group_rebuild_mts(cpu_group_t *group)
 {

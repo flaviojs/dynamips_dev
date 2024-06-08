@@ -292,3 +292,16 @@ pub unsafe extern "C" fn cpu_group_add(group: *mut cpu_group_t, cpu: *mut cpu_ge
     (*group).cpu_list = cpu;
     0
 }
+
+/// Create a new CPU group
+#[no_mangle]
+pub unsafe extern "C" fn cpu_group_create(name: *mut c_char) -> *mut cpu_group_t {
+    let group: *mut cpu_group_t = libc::malloc(size_of::<cpu_group_t>()).cast::<_>();
+    if group.is_null() {
+        return null_mut();
+    }
+
+    (*group).name = name;
+    (*group).cpu_list = null_mut();
+    group
+}

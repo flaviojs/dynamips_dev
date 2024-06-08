@@ -28,7 +28,6 @@
 #include "vm.h"
 #include "device.h"
 #include "dev_c3745.h"
-#include "dev_vtty.h"
 #include "utils.h"
 #include "net.h"
 #include "atm.h"

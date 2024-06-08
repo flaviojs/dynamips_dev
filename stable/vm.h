@@ -15,7 +15,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "cpu.h"
-#include "dev_vtty.h"
 #include "cisco_card.h"
 
 #define VM_PAGE_SHIFT  12

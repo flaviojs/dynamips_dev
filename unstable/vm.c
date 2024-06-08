@@ -24,7 +24,6 @@
 #include "vm.h"
 #include "tcb.h"
 #include "mips64_jit.h"
-#include "dev_vtty.h"
 
 #include MIPS64_ARCH_INC_FILE
 

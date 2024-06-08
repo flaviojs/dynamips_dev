@@ -21,7 +21,6 @@
 #include "device.h"
 #include "dev_rom.h"
 #include "pci_io.h"
-#include "dev_vtty.h"
 #include "net.h"
 #include "ppc32_mem.h"
 #include "ppc32_vmtest.h"

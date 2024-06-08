@@ -25,7 +25,6 @@
 #include "dev_rom.h"
 #include "dev_c2691.h"
 #include "dev_c2691_iofpga.h"
-#include "dev_vtty.h"
 
 /* ======================================================================== */
 /* EEPROM definitions                                                       */

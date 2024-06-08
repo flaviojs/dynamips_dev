@@ -132,10 +132,8 @@ const TELQUAL_SEND: u8 = 1;
 
 static mut vtty_thread: libc::pthread_t = 0;
 // VTTY list
-#[no_mangle] // TODO private
-pub static mut vtty_list_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
-#[no_mangle] // TODO private
-pub static mut vtty_list: *mut vtty_t = null_mut();
+static mut vtty_list_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
+static mut vtty_list: *mut vtty_t = null_mut();
 
 unsafe fn VTTY_LIST_LOCK() {
     libc::pthread_mutex_lock(addr_of_mut!(vtty_list_mutex));
@@ -144,11 +142,9 @@ unsafe fn VTTY_LIST_UNLOCK() {
     libc::pthread_mutex_unlock(addr_of_mut!(vtty_list_mutex));
 }
 
-#[no_mangle] // TODO private
-pub static mut ctrl_code_ok: c_int = 1;
+static mut ctrl_code_ok: c_int = 1;
 
-#[no_mangle] // TODO private
-pub static mut telnet_message_ok: c_int = 1;
+static mut telnet_message_ok: c_int = 1;
 
 pub static mut tios: libc::termios = unsafe { zeroed::<_>() };
 pub static mut tios_orig: libc::termios = unsafe { zeroed::<_>() };
@@ -166,29 +162,25 @@ pub unsafe extern "C" fn vtty_set_telnetmsg(n: c_int) {
 }
 
 /// Send Telnet command: WILL TELOPT_ECHO
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vtty_telnet_will_echo(fd: c_int) {
+unsafe fn vtty_telnet_will_echo(fd: c_int) {
     let cmd: [u8; 3] = [IAC, WILL, TELOPT_ECHO];
     libc::write(fd, cmd.as_ptr().cast::<_>(), cmd.len());
 }
 
 /* Send Telnet command: Suppress Go-Ahead */
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vtty_telnet_will_suppress_go_ahead(fd: c_int) {
+unsafe fn vtty_telnet_will_suppress_go_ahead(fd: c_int) {
     let cmd: [u8; 3] = [IAC, WILL, TELOPT_SGA];
     libc::write(fd, cmd.as_ptr().cast::<_>(), cmd.len());
 }
 
 /// Send Telnet command: Don't use linemode
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vtty_telnet_dont_linemode(fd: c_int) {
+unsafe fn vtty_telnet_dont_linemode(fd: c_int) {
     let cmd: [u8; 3] = [IAC, DONT, TELOPT_LINEMODE];
     libc::write(fd, cmd.as_ptr().cast::<_>(), cmd.len());
 }
 
 /// Send Telnet command: does the client support terminal type message?
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vtty_telnet_do_ttype(fd: c_int) {
+unsafe fn vtty_telnet_do_ttype(fd: c_int) {
     let cmd: [u8; 3] = [IAC, DO, TELOPT_TTYPE];
     libc::write(fd, cmd.as_ptr().cast::<_>(), cmd.len());
 }
@@ -201,8 +193,7 @@ extern "C" fn vtty_term_reset() {
 }
 
 /// Initialize real TTY
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vtty_term_init() {
+unsafe fn vtty_term_init() {
     libc::tcgetattr(libc::STDIN_FILENO, addr_of_mut!(tios));
 
     libc::memcpy(addr_of_mut!(tios_orig).cast::<_>(), addr_of!(tios).cast::<_>(), size_of::<libc::termios>());
@@ -398,8 +389,7 @@ unsafe fn vtty_tcp_conn_wait_ipv4(vtty: *mut vtty_t) -> c_int {
 }
 
 /// Wait for a TCP connection
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vtty_tcp_conn_wait(vtty: *mut vtty_t) -> c_int {
+unsafe fn vtty_tcp_conn_wait(vtty: *mut vtty_t) -> c_int {
     if cfg!(feature = "ENABLE_IPV6") {
         vtty_tcp_conn_wait_ipv4_ipv6(vtty)
     } else {
@@ -408,8 +398,7 @@ pub unsafe extern "C" fn vtty_tcp_conn_wait(vtty: *mut vtty_t) -> c_int {
 }
 
 /// Accept a TCP connection
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vtty_tcp_conn_accept(vtty: *mut vtty_t, nsock: c_int) -> c_int {
+unsafe fn vtty_tcp_conn_accept(vtty: *mut vtty_t, nsock: c_int) -> c_int {
     let mut fd_slot: *mut c_int = null_mut();
     if fd_pool_get_free_slot(addr_of_mut!((*vtty).fd_pool), addr_of_mut!(fd_slot)) < 0 {
         vm_error!((*vtty).vm, cstr!("unable to create a new VTTY TCP connection\n"));
@@ -469,8 +458,7 @@ pub unsafe extern "C" fn vtty_tcp_conn_accept(vtty: *mut vtty_t, nsock: c_int) -
 }
 
 /// Setup serial port, return 0 if success.
-#[no_mangle]
-pub unsafe extern "C" fn vtty_serial_setup(vtty: *mut vtty_t, option: *const vtty_serial_option_t) -> c_int {
+unsafe fn vtty_serial_setup(vtty: *mut vtty_t, option: *const vtty_serial_option_t) -> c_int {
     let mut tio: libc::termios = zeroed::<_>();
 
     if libc::tcgetattr((*vtty).fd_array[0], addr_of_mut!(tio)) != 0 {
@@ -808,8 +796,7 @@ unsafe fn vtty_tcp_read(_vtty: *mut vtty_t, fd_slot: *mut c_int) -> c_int {
 /// Read a character from the virtual TTY.
 ///
 /// If the VTTY is a TCP connection, restart it in case of error.
-#[no_mangle]
-pub unsafe extern "C" fn vtty_read(vtty: *mut vtty_t, fd_slot: *mut c_int) -> c_int {
+unsafe fn vtty_read(vtty: *mut vtty_t, fd_slot: *mut c_int) -> c_int {
     match (*vtty).type_ {
         VTTY_TYPE_TERM | VTTY_TYPE_SERIAL => vtty_term_read(vtty),
         VTTY_TYPE_TCP => vtty_tcp_read(vtty, fd_slot),
@@ -906,8 +893,7 @@ pub unsafe extern "C" fn vtty_flush(vtty: *mut vtty_t) {
 }
 
 /// Remote control for MIPS64 processors
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn remote_control_mips64(_vtty: *mut vtty_t, c: c_char, cpu: *mut cpu_mips_t) -> c_int {
+unsafe fn remote_control_mips64(_vtty: *mut vtty_t, c: c_char, cpu: *mut cpu_mips_t) -> c_int {
     match c as u8 {
         // Show information about JIT compiled pages
         b'b' => {
@@ -928,8 +914,7 @@ pub unsafe extern "C" fn remote_control_mips64(_vtty: *mut vtty_t, c: c_char, cp
 }
 
 /// Remote control for PPC32 processors
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn remote_control_ppc32(_vtty: *mut vtty_t, c: c_char, cpu: *mut cpu_ppc_t) -> c_int {
+unsafe fn remote_control_ppc32(_vtty: *mut vtty_t, c: c_char, cpu: *mut cpu_ppc_t) -> c_int {
     match c as u8 {
         // Show information about JIT compiled pages
         b'b' => {
@@ -950,8 +935,7 @@ pub unsafe extern "C" fn remote_control_ppc32(_vtty: *mut vtty_t, c: c_char, cpu
 }
 
 /// Process remote control char
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn remote_control(vtty: *mut vtty_t, c: u_char) {
+unsafe fn remote_control(vtty: *mut vtty_t, c: u_char) {
     let vm: *mut vm_instance_t = (*vtty).vm;
     let cpu0: *mut cpu_gen_t = (*vm).boot_cpu;
 
@@ -1118,9 +1102,8 @@ pub unsafe extern "C" fn remote_control(vtty: *mut vtty_t, c: u_char) {
 }
 
 /// Read a character (until one is available) and store it in buffer
-#[no_mangle] // TODO private
 #[allow(clippy::needless_return)]
-pub unsafe extern "C" fn vtty_read_and_store(vtty: *mut vtty_t, fd_slot: *mut c_int) {
+unsafe fn vtty_read_and_store(vtty: *mut vtty_t, fd_slot: *mut c_int) {
     // wait until we get a character input
     let c: c_int = vtty_read(vtty, fd_slot);
 

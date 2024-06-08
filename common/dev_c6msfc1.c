@@ -29,7 +29,6 @@
 #include "dev_i8254x.h"
 #include "dev_c6msfc1.h"
 #include "dev_c6msfc1_mpfpga.h"
-#include "dev_vtty.h"
 #include "net.h"
 
 /* MSFC1 EEPROM */

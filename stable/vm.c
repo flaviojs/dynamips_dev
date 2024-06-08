@@ -23,7 +23,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "mips64_jit.h"
-#include "dev_vtty.h"
 
 #include MIPS64_ARCH_INC_FILE
 

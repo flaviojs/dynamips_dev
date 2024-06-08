@@ -10,6 +10,7 @@ use crate::tcb::*;
 use crate::vm::*;
 
 extern "C" {
+    pub fn cpu_delete(cpu: *mut cpu_gen_t);
     pub fn cpu_idle_loop(cpu: *mut cpu_gen_t);
     pub fn cpu_stop(cpu: *mut cpu_gen_t);
 }
@@ -301,4 +302,22 @@ pub unsafe extern "C" fn cpu_group_create(name: *mut c_char) -> *mut cpu_group_t
     (*group).name = name;
     (*group).cpu_list = null_mut();
     group
+}
+
+/// Delete a CPU group
+#[no_mangle]
+pub unsafe extern "C" fn cpu_group_delete(group: *mut cpu_group_t) {
+    let mut cpu: *mut cpu_gen_t;
+    let mut next: *mut cpu_gen_t;
+
+    if !group.is_null() {
+        cpu = (*group).cpu_list;
+        while !cpu.is_null() {
+            next = (*cpu).next;
+            cpu_delete(cpu);
+            cpu = next;
+        }
+
+        libc::free(group.cast::<_>());
+    }
 }

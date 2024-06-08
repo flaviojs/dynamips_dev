@@ -19,6 +19,7 @@ use crate::prelude::*;
 use crate::tcb::*;
 use crate::utils::*;
 use crate::vm::*;
+use std::cmp::max;
 
 pub type vtty_serial_option_t = vtty_serial_option;
 pub type vtty_t = virtual_tty;
@@ -126,6 +127,7 @@ const TELQUAL_IS: u8 = 0;
 /// send option
 const TELQUAL_SEND: u8 = 1;
 
+static mut vtty_thread: libc::pthread_t = 0;
 // VTTY list
 #[no_mangle] // TODO private
 pub static mut vtty_list_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
@@ -1290,4 +1292,129 @@ pub unsafe extern "C" fn vtty_read_and_store(vtty: *mut vtty_t, fd_slot: *mut c_
 
         _ => {}
     }
+}
+
+/// VTTY TCP input
+unsafe extern "C" fn vtty_tcp_input(fd_slot: *mut c_int, opt: *mut c_void) {
+    vtty_read_and_store(opt.cast::<_>(), fd_slot);
+}
+
+/// VTTY thread
+extern "C" fn vtty_thread_main(_arg: *mut c_void) -> *mut c_void {
+    unsafe {
+        let mut vtty: *mut vtty_t;
+        let mut tv: libc::timeval = zeroed::<_>();
+        let mut fd_max: c_int;
+        let mut fd_tcp: c_int;
+        let mut res: c_int;
+        let mut rfds: libc::fd_set = zeroed::<_>();
+
+        loop {
+            VTTY_LIST_LOCK();
+
+            // Build the FD set
+            libc::FD_ZERO(addr_of_mut!(rfds));
+            fd_max = -1;
+            vtty = vtty_list;
+            while !vtty.is_null() {
+                match (*vtty).type_ {
+                    VTTY_TYPE_TCP => {
+                        for i in 0..(*vtty).fd_count {
+                            if (*vtty).fd_array[i as usize] != -1 {
+                                libc::FD_SET((*vtty).fd_array[i as usize], addr_of_mut!(rfds));
+                                if (*vtty).fd_array[i as usize] > fd_max {
+                                    fd_max = (*vtty).fd_array[i as usize];
+                                }
+                            }
+                        }
+
+                        fd_tcp = fd_pool_set_fds(addr_of_mut!((*vtty).fd_pool), addr_of_mut!(rfds));
+                        fd_max = max(fd_tcp, fd_max);
+                    }
+
+                    _ => {
+                        if (*vtty).fd_array[0] != -1 {
+                            libc::FD_SET((*vtty).fd_array[0], addr_of_mut!(rfds));
+                            fd_max = max((*vtty).fd_array[0], fd_max);
+                        }
+                    }
+                }
+
+                vtty = (*vtty).next;
+            }
+            VTTY_LIST_UNLOCK();
+
+            // Wait for incoming data
+            tv.tv_sec = 0;
+            tv.tv_usec = 50 * 1000; // 50 ms
+            res = libc::select(fd_max + 1, addr_of_mut!(rfds), null_mut(), null_mut(), addr_of_mut!(tv));
+
+            if res == -1 {
+                if c_errno() != libc::EINTR {
+                    libc::perror(cstr!("vtty_thread: select"));
+                }
+                continue;
+            }
+
+            // Examine active FDs and call user handlers
+            VTTY_LIST_LOCK();
+            vtty = vtty_list;
+            while !vtty.is_null() {
+                match (*vtty).type_ {
+                    VTTY_TYPE_TCP => {
+                        // check incoming connection
+                        for i in 0..(*vtty).fd_count {
+                            if (*vtty).fd_array[i as usize] == -1 {
+                                continue;
+                            }
+
+                            if !libc::FD_ISSET((*vtty).fd_array[i as usize], addr_of!(rfds)) {
+                                continue;
+                            }
+
+                            vtty_tcp_conn_accept(vtty, i);
+                        }
+
+                        // check established connection
+                        fd_pool_check_input(addr_of_mut!((*vtty).fd_pool), addr_of_mut!(rfds), Some(vtty_tcp_input), vtty.cast::<_>());
+                    }
+
+                    // Term, Serial
+                    _ => {
+                        if (*vtty).fd_array[0] != -1 && libc::FD_ISSET((*vtty).fd_array[0], addr_of!(rfds)) {
+                            vtty_read_and_store(vtty, addr_of_mut!((*vtty).fd_array[0]));
+                            (*vtty).input_pending = TRUE;
+                        }
+                    }
+                }
+
+                if (*vtty).input_pending != 0 {
+                    if (*vtty).read_notifier.is_some() {
+                        (*vtty).read_notifier.unwrap()(vtty);
+                    }
+
+                    (*vtty).input_pending = FALSE;
+                }
+
+                // Flush any pending output
+                if (*vtty).managed_flush == 0 {
+                    vtty_flush(vtty);
+                }
+
+                vtty = (*vtty).next;
+            }
+            VTTY_LIST_UNLOCK();
+        }
+    }
+}
+
+/// Initialize the VTTY thread
+#[no_mangle]
+pub unsafe extern "C" fn vtty_init() -> c_int {
+    if libc::pthread_create(addr_of_mut!(vtty_thread), null_mut(), vtty_thread_main, null_mut()) != 0 {
+        libc::perror(cstr!("vtty: pthread_create"));
+        return -1;
+    }
+
+    0
 }

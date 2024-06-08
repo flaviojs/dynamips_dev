@@ -271,3 +271,21 @@ pub unsafe extern "C" fn cpu_group_find_highest_id(group: *mut cpu_group_t, high
     *highest_id = max_id;
     0
 }
+
+/// Add a CPU in a CPU group
+#[no_mangle]
+pub unsafe extern "C" fn cpu_group_add(group: *mut cpu_group_t, cpu: *mut cpu_gen_t) -> c_int {
+    if group.is_null() {
+        return -1;
+    }
+
+    // check that we don't already have a CPU with this id
+    if !cpu_group_find_id(group, (*cpu).id).is_null() {
+        libc::fprintf(c_stderr(), cstr!("cpu_group_add: CPU%u already present in group.\n"), (*cpu).id);
+        return -1;
+    }
+
+    (*cpu).next = (*group).cpu_list;
+    (*group).cpu_list = cpu;
+    0
+}

@@ -30,24 +30,6 @@
 #include "ppc32_jit.h"
 #include "dynamips.h"
 
-/* Add a CPU in a CPU group */
-int cpu_group_add(cpu_group_t *group,cpu_gen_t *cpu)
-{
-   if (!group)
-      return(-1);
-
-   /* check that we don't already have a CPU with this id */
-   if (cpu_group_find_id(group,cpu->id) != NULL) {
-      fprintf(stderr,"cpu_group_add: CPU%u already present in group.\n",
-              cpu->id);
-      return(-1);
-   }
-   
-   cpu->next = group->cpu_list;
-   group->cpu_list = cpu;
-   return(0);
-}
-
 /* Create a new CPU group */
 cpu_group_t *cpu_group_create(char *name)
 {

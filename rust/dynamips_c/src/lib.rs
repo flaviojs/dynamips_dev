@@ -43,6 +43,7 @@ pub mod parser;
 pub mod pci_dev;
 pub mod pci_io;
 pub mod ppc32;
+pub mod ppc32_exec;
 pub mod ppc32_jit;
 pub mod ppc32_mem;
 /// cbindgen:ignore

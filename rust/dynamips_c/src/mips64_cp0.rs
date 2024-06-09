@@ -162,3 +162,10 @@ pub unsafe extern "C" fn mips64_cp0_get_reg_fast(cpu: *mut cpu_mips_t, cp0_reg: 
 pub unsafe extern "C" fn mips64_cp0_get_reg(cpu: *mut cpu_mips_t, cp0_reg: u_int) -> m_uint64_t {
     mips64_cp0_get_reg_fast(cpu, cp0_reg)
 }
+
+/// DMFC0
+#[no_mangle]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_cp0_exec_dmfc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int) {
+    (*cpu).gpr[gp_reg as usize] = mips64_cp0_get_reg_fast(cpu, cp0_reg);
+}

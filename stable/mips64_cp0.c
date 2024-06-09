@@ -20,18 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* Get cp0 register index given its name */
-int mips64_cp0_get_reg_index(char *name)
-{
-   int i;
-
-   for(i=0;i<MIPS64_CP0_REG_NR;i++)
-      if (!strcmp(mips64_cp0_reg_names[i],name))
-         return(i);
-
-   return(-1);
-}
-
 /* Get the CPU operating mode (User,Supervisor or Kernel) - inline version */
 static forced_inline u_int mips64_cp0_get_mode_inline(cpu_mips_t *cpu)
 {  

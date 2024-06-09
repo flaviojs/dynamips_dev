@@ -12,6 +12,7 @@ use crate::utils::*;
 use crate::vm::*;
 
 extern "C" {
+    pub fn mips64_clear_irq(cpu: *mut cpu_mips_t, irq: m_uint8_t);
     pub fn mips64_dump_regs(cpu: *mut cpu_gen_t);
     #[cfg(feature = "USE_UNSTABLE")]
     pub fn mips64_general_exception(cpu: *mut cpu_mips_t, exc_code: u_int);
@@ -19,6 +20,7 @@ extern "C" {
     pub fn mips64_trigger_exception(cpu: *mut cpu_mips_t, exc_code: u_int, bd_slot: c_int);
     pub fn mips64_trigger_irq(cpu: *mut cpu_mips_t);
     pub fn mips64_trigger_timer_irq(cpu: *mut cpu_mips_t);
+    pub fn mips64_update_irq_flag(cpu: *mut cpu_mips_t);
 }
 
 pub type tlb_entry_t = tlb_entry;
@@ -175,6 +177,23 @@ pub const MIPS_CP0_CAUSE_IBIT2: m_uint32_t = 0x00000400;
 pub const MIPS_CP0_CAUSE_IBIT1: m_uint32_t = 0x00000200;
 pub const MIPS_CP0_CAUSE_IBIT0: m_uint32_t = 0x00000100;
 
+/// TLB masks and shifts
+pub const MIPS_TLB_PAGE_MASK: m_uint64_t = 0x01ffe000;
+pub const MIPS_TLB_PAGE_SHIFT: c_int = 13;
+pub const MIPS_TLB_VPN2_MASK_32: m_uint64_t = 0xffffe000;
+pub const MIPS_TLB_VPN2_MASK_64: m_uint64_t = 0xc00000ffffffe000;
+pub const MIPS_TLB_PFN_MASK: m_uint32_t = 0x3fffffc0;
+pub const MIPS_TLB_ASID_MASK: m_uint32_t = 0x000000ff; // "asid" in EntryHi
+pub const MIPS_TLB_G_MASK: m_uint32_t = 0x00001000; // "Global" in EntryHi
+pub const MIPS_TLB_V_MASK: m_uint32_t = 0x2; // "Valid" in EntryLo
+pub const MIPS_TLB_D_MASK: m_uint32_t = 0x4; // "Dirty" in EntryLo
+pub const MIPS_TLB_C_MASK: m_uint32_t = 0x38; // Page Coherency Attribute
+pub const MIPS_TLB_C_SHIFT: c_int = 3;
+
+pub const MIPS_CP0_LO_G_MASK: m_uint64_t = 0x00000001; // "Global" in Lo0/1 reg
+pub const MIPS_CP0_HI_SAFE_MASK: m_uint64_t = 0xffffe0ff; // Safety mask for Hi reg
+pub const MIPS_CP0_LO_SAFE_MASK: m_uint64_t = 0x7fffffff; // Safety mask for Lo reg
+
 /// Minimum page size: 4 Kb
 pub const MIPS_MIN_PAGE_SHIFT: c_int = 12;
 pub const MIPS_MIN_PAGE_SIZE: size_t = 1 << MIPS_MIN_PAGE_SHIFT;
@@ -190,7 +209,10 @@ pub const MIPS64_CP0_REG_NR: usize = 32;
 /// Number of registers in CP1
 pub const MIPS64_CP1_REG_NR: usize = 32;
 
+/// Number of TLB entries
+pub const MIPS64_TLB_STD_ENTRIES: usize = 48;
 pub const MIPS64_TLB_MAX_ENTRIES: usize = 64;
+pub const MIPS64_TLB_IDX_MASK: m_uint64_t = 0x3f; // 6 bits
 
 /// Enable the 64 TLB entries for R7000 CPU
 pub const MIPS64_R7000_TLB64_ENABLE: m_uint32_t = 0x20000000;

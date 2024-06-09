@@ -20,66 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* Set a cp0 register */
-static inline void mips64_cp0_set_reg(cpu_mips_t *cpu,u_int cp0_reg,
-                                      m_uint64_t val)
-{
-   mips_cp0_t *cp0 = &cpu->cp0;
-   m_uint32_t delta;
-
-   switch(cp0_reg) {
-      case MIPS_CP0_STATUS:
-      case MIPS_CP0_CAUSE:
-         cp0->reg[cp0_reg] = val;
-         mips64_update_irq_flag(cpu);
-         break;
-         
-      case MIPS_CP0_PAGEMASK:
-         cp0->reg[cp0_reg] = val & MIPS_TLB_PAGE_MASK;
-         break;
-         
-      case MIPS_CP0_COMPARE:
-         mips64_clear_irq(cpu,7);
-         mips64_update_irq_flag(cpu);
-         cp0->reg[cp0_reg] = val;
-
-         delta = val - cp0->reg[MIPS_CP0_COUNT];
-         cpu->cp0_virt_cnt_reg = 0;
-         cpu->cp0_virt_cmp_reg = delta / cpu->vm->clock_divisor;
-         break;
-
-      case MIPS_CP0_COUNT:
-         cp0->reg[cp0_reg] = val;
-
-         delta = cp0->reg[MIPS_CP0_COMPARE] - val;
-         cpu->cp0_virt_cnt_reg = 0;
-         cpu->cp0_virt_cmp_reg = delta / cpu->vm->clock_divisor;
-         break;
-
-     case MIPS_CP0_TLB_HI:
-         cp0->reg[cp0_reg] = val & MIPS_CP0_HI_SAFE_MASK;
-         break;
-
-      case MIPS_CP0_TLB_LO_0:
-      case MIPS_CP0_TLB_LO_1:
-         cp0->reg[cp0_reg] = val & MIPS_CP0_LO_SAFE_MASK;
-         break;
-
-      case MIPS_CP0_RANDOM:
-      case MIPS_CP0_PRID:
-      case MIPS_CP0_CONFIG:
-         /* read only registers */
-         break;
-
-      case MIPS_CP0_WIRED:
-         cp0->reg[cp0_reg] = val & MIPS64_TLB_IDX_MASK;
-         break;
-
-      default:
-         cp0->reg[cp0_reg] = val;
-   }
-}
-
 /* Get a cp0 "set 1" register (R7000) */
 m_uint64_t mips64_cp0_s1_get_reg(cpu_mips_t *cpu,u_int cp0_s1_reg)
 {
@@ -142,12 +82,6 @@ static inline void mips64_cp0_s1_set_reg(cpu_mips_t *cpu,u_int cp0_s1_reg,
                  "CP0_S1","trying to set unknown register %u (val=0x%llx)\n",
                  cp0_s1_reg,val);
    }
-}
-
-/* DMTC0 */
-fastcall void mips64_cp0_exec_dmtc0(cpu_mips_t *cpu,u_int gp_reg,u_int cp0_reg)
-{
-   mips64_cp0_set_reg(cpu,cp0_reg,cpu->gpr[gp_reg]);
 }
 
 /* MFC0 */

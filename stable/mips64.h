@@ -11,23 +11,6 @@
 #include "utils.h" 
 #include "rust_dynamips_c.h"
 
-/* TLB masks and shifts */
-#define MIPS_TLB_PAGE_MASK     0x01ffe000
-#define MIPS_TLB_PAGE_SHIFT    13
-#define MIPS_TLB_VPN2_MASK_32  0xffffe000ULL
-#define MIPS_TLB_VPN2_MASK_64  0xc00000ffffffe000ULL
-#define MIPS_TLB_PFN_MASK      0x3fffffc0
-#define MIPS_TLB_ASID_MASK     0x000000ff     /* "asid" in EntryHi */
-#define MIPS_TLB_G_MASK        0x00001000     /* "Global" in EntryHi */
-#define MIPS_TLB_V_MASK        0x2            /* "Valid" in EntryLo */
-#define MIPS_TLB_D_MASK        0x4            /* "Dirty" in EntryLo */
-#define MIPS_TLB_C_MASK        0x38           /* Page Coherency Attribute */
-#define MIPS_TLB_C_SHIFT       3
-
-#define MIPS_CP0_LO_G_MASK     0x00000001     /* "Global" in Lo0/1 reg */
-#define MIPS_CP0_HI_SAFE_MASK  0xffffe0ff     /* Safety mask for Hi reg */
-#define MIPS_CP0_LO_SAFE_MASK  0x7fffffff     /* Safety mask for Lo reg */
-
 /* MIPS "jr ra" instruction */
 #define MIPS_INSN_JR_RA        0x03e00008
 
@@ -78,11 +61,6 @@
 
 /* Number of registers in CP1 */
 #define MIPS64_CP1_REG_NR   32
-
-/* Number of TLB entries */
-#define MIPS64_TLB_STD_ENTRIES  48
-#define MIPS64_TLB_MAX_ENTRIES  64
-#define MIPS64_TLB_IDX_MASK     0x3f   /* 6 bits */
 
 /* Number of instructions per page */
 #define MIPS_INSN_PER_PAGE (MIPS_MIN_PAGE_SIZE/sizeof(mips_insn_t))

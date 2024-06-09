@@ -84,12 +84,6 @@ static inline void mips64_cp0_s1_set_reg(cpu_mips_t *cpu,u_int cp0_s1_reg,
    }
 }
 
-/* MTC0 */
-fastcall void mips64_cp0_exec_mtc0(cpu_mips_t *cpu,u_int gp_reg,u_int cp0_reg)
-{
-   mips64_cp0_set_reg(cpu,cp0_reg,cpu->gpr[gp_reg] & 0xffffffff);
-}
-
 /* CFC0 */
 fastcall void mips64_cp0_exec_cfc0(cpu_mips_t *cpu,u_int gp_reg,u_int cp0_reg)
 {

@@ -84,12 +84,6 @@ static inline void mips64_cp0_s1_set_reg(cpu_mips_t *cpu,u_int cp0_s1_reg,
    }
 }
 
-/* MFC0 */
-fastcall void mips64_cp0_exec_mfc0(cpu_mips_t *cpu,u_int gp_reg,u_int cp0_reg)
-{
-   cpu->gpr[gp_reg] = sign_extend(mips64_cp0_get_reg_fast(cpu,cp0_reg),32);
-}
-
 /* MTC0 */
 fastcall void mips64_cp0_exec_mtc0(cpu_mips_t *cpu,u_int gp_reg,u_int cp0_reg)
 {

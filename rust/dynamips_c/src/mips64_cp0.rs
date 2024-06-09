@@ -1,8 +1,10 @@
 //! MIPS Coprocessor 0 (System Coprocessor) implementation.
 //! We don't use the JIT here, since there is no high performance needed.
 
+use crate::dynamips_common::*;
 use crate::mips64::*;
 use crate::prelude::*;
+use crate::utils::*;
 
 /// MIPS cp0 registers names
 #[no_mangle]
@@ -108,4 +110,55 @@ pub unsafe fn mips64_cp0_check_kernel_mode(cpu: *mut cpu_mips_t) -> c_int {
     }
 
     0
+}
+
+/// Get value of random register
+#[no_mangle] // TODO private
+#[inline]
+pub unsafe extern "C" fn mips64_cp0_get_random_reg(cpu: *mut cpu_mips_t) -> u_int {
+    // We use the virtual count register as a basic "random" value
+    let wired: u_int = (*cpu).cp0.reg[MIPS_CP0_WIRED] as u_int;
+    wired + ((*cpu).cp0_virt_cnt_reg % ((*cpu).cp0.tlb_entries - wired))
+}
+
+/// Get a cp0 register (fast version)
+#[no_mangle] // TODO private
+#[inline]
+pub unsafe extern "C" fn mips64_cp0_get_reg_fast(cpu: *mut cpu_mips_t, cp0_reg: u_int) -> m_uint64_t {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+    let delta: m_uint32_t;
+    let mut res: m_uint32_t;
+
+    match cp0_reg as usize {
+        MIPS_CP0_COUNT => {
+            delta = (*cpu).cp0_virt_cmp_reg - (*cpu).cp0_virt_cnt_reg;
+            res = (*cp0).reg[MIPS_CP0_COMPARE] as m_uint32_t;
+            res -= (*(*cpu).vm).clock_divisor * delta;
+            sign_extend(res as m_int64_t, 32) as m_uint64_t
+        }
+
+        MIPS_CP0_COMPARE => {
+            if true {
+                sign_extend((*cp0).reg[MIPS_CP0_COMPARE] as m_int64_t, 32) as m_uint64_t
+            } else {
+                // really useful and logical ?
+                delta = (*cpu).cp0_virt_cmp_reg - (*cpu).cp0_virt_cnt_reg;
+                res = (*cp0).reg[MIPS_CP0_COUNT] as m_uint32_t;
+                res += (*(*cpu).vm).clock_divisor * delta;
+                res as m_uint64_t
+            }
+        }
+
+        MIPS_CP0_INFO => MIPS64_R7000_TLB64_ENABLE as m_uint64_t,
+
+        MIPS_CP0_RANDOM => mips64_cp0_get_random_reg(cpu) as m_uint64_t,
+
+        _ => (*cp0).reg[cp0_reg as usize],
+    }
+}
+
+/// Get a cp0 register
+#[no_mangle]
+pub unsafe extern "C" fn mips64_cp0_get_reg(cpu: *mut cpu_mips_t, cp0_reg: u_int) -> m_uint64_t {
+    mips64_cp0_get_reg_fast(cpu, cp0_reg)
 }

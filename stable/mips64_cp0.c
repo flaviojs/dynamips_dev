@@ -20,57 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* Get value of random register */
-static inline u_int mips64_cp0_get_random_reg(cpu_mips_t *cpu)
-{
-   u_int wired;
-
-   /* We use the virtual count register as a basic "random" value */
-   wired = cpu->cp0.reg[MIPS_CP0_WIRED];
-   return(wired + (cpu->cp0_virt_cnt_reg % (cpu->cp0.tlb_entries - wired)));
-}
-
-/* Get a cp0 register (fast version) */
-static inline m_uint64_t mips64_cp0_get_reg_fast(cpu_mips_t *cpu,u_int cp0_reg)
-{
-   mips_cp0_t *cp0 = &cpu->cp0;
-   m_uint32_t delta,res;
-
-   switch(cp0_reg) {
-      case MIPS_CP0_COUNT:
-         delta = cpu->cp0_virt_cmp_reg - cpu->cp0_virt_cnt_reg;
-         res = (m_uint32_t)cp0->reg[MIPS_CP0_COMPARE];
-         res -= cpu->vm->clock_divisor * delta;
-         return(sign_extend(res,32));
-
-#if 1
-      case MIPS_CP0_COMPARE:
-         return(sign_extend(cp0->reg[MIPS_CP0_COMPARE],32));
-#else
-      /* really useful and logical ? */
-      case MIPS_CP0_COMPARE:
-         delta = cpu->cp0_virt_cmp_reg - cpu->cp0_virt_cnt_reg;
-         res = (m_uint32_t)cp0->reg[MIPS_CP0_COUNT];
-         res += (cpu->vm->clock_divisor * delta);
-         return(res);
-#endif
-      case MIPS_CP0_INFO:
-         return(MIPS64_R7000_TLB64_ENABLE);
-
-      case MIPS_CP0_RANDOM:        
-         return(mips64_cp0_get_random_reg(cpu));
-
-      default:
-         return(cp0->reg[cp0_reg]);
-   }
-}
-
-/* Get a cp0 register */
-m_uint64_t mips64_cp0_get_reg(cpu_mips_t *cpu,u_int cp0_reg)
-{
-   return(mips64_cp0_get_reg_fast(cpu,cp0_reg));
-}
-
 /* Set a cp0 register */
 static inline void mips64_cp0_set_reg(cpu_mips_t *cpu,u_int cp0_reg,
                                       m_uint64_t val)

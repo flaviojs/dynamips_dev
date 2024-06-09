@@ -84,9 +84,6 @@
 #define MIPS64_TLB_MAX_ENTRIES  64
 #define MIPS64_TLB_IDX_MASK     0x3f   /* 6 bits */
 
-/* Enable the 64 TLB entries for R7000 CPU */
-#define MIPS64_R7000_TLB64_ENABLE   0x20000000
-
 /* Number of instructions per page */
 #define MIPS_INSN_PER_PAGE (MIPS_MIN_PAGE_SIZE/sizeof(mips_insn_t))
 

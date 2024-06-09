@@ -192,6 +192,9 @@ pub const MIPS64_CP1_REG_NR: usize = 32;
 
 pub const MIPS64_TLB_MAX_ENTRIES: usize = 64;
 
+/// Enable the 64 TLB entries for R7000 CPU
+pub const MIPS64_R7000_TLB64_ENABLE: m_uint32_t = 0x20000000;
+
 // Memory operations // TODO enum
 pub const MIPS_MEMOP_LOOKUP: c_uint = 0;
 #[cfg(feature = "USE_UNSTABLE")]

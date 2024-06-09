@@ -311,3 +311,10 @@ pub unsafe extern "C" fn mips64_cp0_s1_set_reg(cpu: *mut cpu_mips_t, cp0_s1_reg:
 pub unsafe extern "C" fn mips64_cp0_exec_cfc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int) {
     (*cpu).gpr[gp_reg as usize] = sign_extend(mips64_cp0_s1_get_reg(cpu, cp0_reg) as m_int64_t, 32) as m_uint64_t;
 }
+
+/// CTC0
+#[no_mangle]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_cp0_exec_ctc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int) {
+    mips64_cp0_s1_set_reg(cpu, cp0_reg, (*cpu).gpr[gp_reg as usize] & 0xffffffff);
+}

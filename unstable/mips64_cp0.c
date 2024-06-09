@@ -20,12 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* CTC0 */
-fastcall void mips64_cp0_exec_ctc0(cpu_mips_t *cpu,u_int gp_reg,u_int cp0_reg)
-{
-   mips64_cp0_s1_set_reg(cpu,cp0_reg,cpu->gpr[gp_reg] & 0xffffffff);
-}
-
 /* Get the page size corresponding to a page mask */
 static inline m_uint32_t get_page_size(m_uint32_t page_mask)
 {

@@ -44,3 +44,16 @@ pub static mut mips64_cp0_reg_names: [*mut c_char; MIPS64_CP0_REG_NR] = [
     cstr!("err_epc"),
     cstr!("cp0_r31"),
 ];
+
+/// Get cp0 register index given its name
+#[allow(clippy::needless_range_loop)]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_cp0_get_reg_index(name: *mut c_char) -> c_int {
+    for i in 0..MIPS64_CP0_REG_NR {
+        if libc::strcmp(mips64_cp0_reg_names[i], name) == 0 {
+            return i as c_int;
+        }
+    }
+
+    -1
+}

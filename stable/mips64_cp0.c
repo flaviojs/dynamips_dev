@@ -20,39 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* Get the CPU operating mode (User,Supervisor or Kernel) - inline version */
-static forced_inline u_int mips64_cp0_get_mode_inline(cpu_mips_t *cpu)
-{  
-   mips_cp0_t *cp0 = &cpu->cp0;
-   u_int cpu_mode;
-
-   cpu_mode = cp0->reg[MIPS_CP0_STATUS] >> MIPS_CP0_STATUS_KSU_SHIFT;
-   cpu_mode &= MIPS_CP0_STATUS_KSU_MASK;
-   return(cpu_mode);
-}
-
-/* Get the CPU operating mode (User,Supervisor or Kernel) */
-u_int mips64_cp0_get_mode(cpu_mips_t *cpu)
-{  
-   return(mips64_cp0_get_mode_inline(cpu));
-}
-
-/* Check that we are running in kernel mode */
-int mips64_cp0_check_kernel_mode(cpu_mips_t *cpu)
-{
-   u_int cpu_mode;
-
-   cpu_mode = mips64_cp0_get_mode(cpu);
-
-   if (cpu_mode != MIPS_CP0_STATUS_KM) {
-      /* XXX Branch delay slot */
-      mips64_trigger_exception(cpu,MIPS_CP0_CAUSE_ILLOP,0);
-      return(1);
-   }
-
-   return(0);
-}
-
 /* Get value of random register */
 static inline u_int mips64_cp0_get_random_reg(cpu_mips_t *cpu)
 {

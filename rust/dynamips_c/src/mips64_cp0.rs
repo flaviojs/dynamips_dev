@@ -54,3 +54,58 @@ pub unsafe extern "C" fn mips64_cp0_get_reg_index(name: *mut c_char) -> c_int {
 
     -1
 }
+
+/// Get the CPU operating mode (User,Supervisor or Kernel) - inline version
+#[cfg(not(feature = "USE_UNSTABLE"))]
+#[inline(always)]
+unsafe fn mips64_cp0_get_mode_inline(cpu: *mut cpu_mips_t) -> u_int {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+    let mut cpu_mode: u_int = ((*cp0).reg[MIPS_CP0_STATUS] >> MIPS_CP0_STATUS_KSU_SHIFT) as u_int;
+    cpu_mode &= MIPS_CP0_STATUS_KSU_MASK;
+    cpu_mode
+}
+
+/// Get the CPU operating mode (User,Supervisor or Kernel)
+#[cfg(not(feature = "USE_UNSTABLE"))]
+unsafe fn mips64_cp0_get_mode(cpu: *mut cpu_mips_t) -> u_int {
+    mips64_cp0_get_mode_inline(cpu)
+}
+
+/// Check that we are running in kernel mode
+#[cfg(not(feature = "USE_UNSTABLE"))]
+pub unsafe fn mips64_cp0_check_kernel_mode(cpu: *mut cpu_mips_t) -> c_int {
+    let cpu_mode: u_int = mips64_cp0_get_mode(cpu);
+
+    if cpu_mode != MIPS_CP0_STATUS_KM {
+        // XXX Branch delay slot
+        mips64_trigger_exception(cpu, MIPS_CP0_CAUSE_ILLOP, 0);
+        return 1;
+    }
+
+    0
+}
+
+/// Get the CPU operating mode (User,Supervisor or Kernel)
+#[cfg(feature = "USE_UNSTABLE")]
+#[inline(always)]
+unsafe fn mips64_cp0_get_mode(cpu: *mut cpu_mips_t) -> u_int {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+    let mut cpu_mode: u_int = ((*cp0).reg[MIPS_CP0_STATUS] >> MIPS_CP0_STATUS_KSU_SHIFT) as u_int;
+    cpu_mode &= MIPS_CP0_STATUS_KSU_MASK;
+    cpu_mode
+}
+
+/// Check that we are running in kernel mode
+#[cfg(feature = "USE_UNSTABLE")]
+pub unsafe fn mips64_cp0_check_kernel_mode(cpu: *mut cpu_mips_t) -> c_int {
+    let cpu_mode: u_int = mips64_cp0_get_mode(cpu);
+
+    if cpu_mode != MIPS_CP0_STATUS_KM {
+        mips64_general_exception(cpu, MIPS_CP0_CAUSE_ILLOP);
+        return 1;
+    }
+
+    0
+}

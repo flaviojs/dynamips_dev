@@ -20,21 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* Check that we are running in kernel mode */
-int mips64_cp0_check_kernel_mode(cpu_mips_t *cpu)
-{
-   u_int cpu_mode;
-
-   cpu_mode = mips64_cp0_get_mode(cpu);
-
-   if (cpu_mode != MIPS_CP0_STATUS_KM) {
-      mips64_general_exception(cpu,MIPS_CP0_CAUSE_ILLOP);
-      return(1);
-   }
-
-   return(0);
-}
-
 /* Get value of random register */
 static inline u_int mips64_cp0_get_random_reg(cpu_mips_t *cpu)
 {

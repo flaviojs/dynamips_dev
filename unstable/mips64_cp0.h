@@ -39,17 +39,6 @@ void mips64_cp0_update_xcontext_reg(cpu_mips_t *cpu,m_uint64_t addr)
    cpu->cp0.reg[MIPS_CP0_XCONTEXT] |= rbadvpn2;
 }
 
-/* Get the CPU operating mode (User,Supervisor or Kernel) */
-static forced_inline u_int mips64_cp0_get_mode(cpu_mips_t *cpu)
-{  
-   mips_cp0_t *cp0 = &cpu->cp0;
-   u_int cpu_mode;
-
-   cpu_mode = cp0->reg[MIPS_CP0_STATUS] >> MIPS_CP0_STATUS_KSU_SHIFT;
-   cpu_mode &= MIPS_CP0_STATUS_KSU_MASK;
-   return(cpu_mode);
-}
-
 /* Get the VPN2 mask */
 static forced_inline m_uint64_t mips64_cp0_get_vpn2_mask(cpu_mips_t *cpu)
 {

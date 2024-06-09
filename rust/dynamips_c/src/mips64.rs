@@ -13,6 +13,10 @@ use crate::vm::*;
 
 extern "C" {
     pub fn mips64_dump_regs(cpu: *mut cpu_gen_t);
+    #[cfg(feature = "USE_UNSTABLE")]
+    pub fn mips64_general_exception(cpu: *mut cpu_mips_t, exc_code: u_int);
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    pub fn mips64_trigger_exception(cpu: *mut cpu_mips_t, exc_code: u_int, bd_slot: c_int);
     pub fn mips64_trigger_irq(cpu: *mut cpu_mips_t);
     pub fn mips64_trigger_timer_irq(cpu: *mut cpu_mips_t);
 }
@@ -55,6 +59,121 @@ pub const MIPS_GPR_GP: usize = 28; //  gp
 pub const MIPS_GPR_SP: usize = 29; //  sp
 pub const MIPS_GPR_FP: usize = 30; //  fp
 pub const MIPS_GPR_RA: usize = 31; //  ra
+
+/// Coprocessor 0 (System Coprocessor) Register definitions
+pub const MIPS_CP0_INDEX: usize = 0; // TLB Index
+pub const MIPS_CP0_RANDOM: usize = 1; // TLB Random
+pub const MIPS_CP0_TLB_LO_0: usize = 2; // TLB Entry Lo0
+pub const MIPS_CP0_TLB_LO_1: usize = 3; // TLB Entry Lo1
+pub const MIPS_CP0_CONTEXT: usize = 4; // Kernel PTE pointer
+pub const MIPS_CP0_PAGEMASK: usize = 5; // TLB Page Mask
+pub const MIPS_CP0_WIRED: usize = 6; // TLB Wired
+pub const MIPS_CP0_INFO: usize = 7; // Info (RM7000)
+pub const MIPS_CP0_BADVADDR: usize = 8; // Bad Virtual Address
+pub const MIPS_CP0_COUNT: usize = 9; // Count
+pub const MIPS_CP0_TLB_HI: usize = 10; // TLB Entry Hi
+pub const MIPS_CP0_COMPARE: usize = 11; // Timer Compare
+pub const MIPS_CP0_STATUS: usize = 12; // Status
+pub const MIPS_CP0_CAUSE: usize = 13; // Cause
+pub const MIPS_CP0_EPC: usize = 14; // Exception PC
+pub const MIPS_CP0_PRID: usize = 15; // Proc Rev ID
+pub const MIPS_CP0_CONFIG: usize = 16; // Configuration
+pub const MIPS_CP0_LLADDR: usize = 17; // Load/Link address
+pub const MIPS_CP0_WATCHLO: usize = 18; // Low Watch address
+pub const MIPS_CP0_WATCHHI: usize = 19; // High Watch address
+pub const MIPS_CP0_XCONTEXT: usize = 20; // Extended context
+pub const MIPS_CP0_ECC: usize = 26; // ECC and parity
+pub const MIPS_CP0_CACHERR: usize = 27; // Cache Err/Status
+pub const MIPS_CP0_TAGLO: usize = 28; // Cache Tag Lo
+pub const MIPS_CP0_TAGHI: usize = 29; // Cache Tag Hi
+pub const MIPS_CP0_ERR_EPC: usize = 30; // Error exception PC
+
+/// CP0 Set 1 Registers (R7000)
+pub const MIPS_CP0_S1_CONFIG: usize = 16; // Configuration Register
+pub const MIPS_CP0_S1_IPLLO: usize = 18; // Priority level for IRQ [7:0]
+pub const MIPS_CP0_S1_IPLHI: usize = 19; // Priority level for IRQ [15:8]
+pub const MIPS_CP0_S1_INTCTL: usize = 20; // Interrupt Control
+pub const MIPS_CP0_S1_DERRADDR0: usize = 26; // Imprecise Error Address
+pub const MIPS_CP0_S1_DERRADDR1: usize = 27; // Imprecise Error Address
+
+/// CP0 Status Register
+pub const MIPS_CP0_STATUS_CU0: m_uint32_t = 0x10000000;
+pub const MIPS_CP0_STATUS_CU1: m_uint32_t = 0x20000000;
+pub const MIPS_CP0_STATUS_BEV: m_uint32_t = 0x00400000;
+pub const MIPS_CP0_STATUS_TS: m_uint32_t = 0x00200000;
+pub const MIPS_CP0_STATUS_SR: m_uint32_t = 0x00100000;
+pub const MIPS_CP0_STATUS_CH: m_uint32_t = 0x00040000;
+pub const MIPS_CP0_STATUS_CE: m_uint32_t = 0x00020000;
+pub const MIPS_CP0_STATUS_DE: m_uint32_t = 0x00010000;
+pub const MIPS_CP0_STATUS_RP: m_uint32_t = 0x08000000;
+pub const MIPS_CP0_STATUS_FR: m_uint32_t = 0x04000000;
+pub const MIPS_CP0_STATUS_RE: m_uint32_t = 0x02000000;
+pub const MIPS_CP0_STATUS_KX: m_uint32_t = 0x00000080;
+pub const MIPS_CP0_STATUS_SX: m_uint32_t = 0x00000040;
+pub const MIPS_CP0_STATUS_UX: m_uint32_t = 0x00000020;
+pub const MIPS_CP0_STATUS_KSU: m_uint32_t = 0x00000018;
+pub const MIPS_CP0_STATUS_ERL: m_uint32_t = 0x00000004;
+pub const MIPS_CP0_STATUS_EXL: m_uint32_t = 0x00000002;
+pub const MIPS_CP0_STATUS_IE: m_uint32_t = 0x00000001;
+pub const MIPS_CP0_STATUS_IMASK7: m_uint32_t = 0x00008000;
+pub const MIPS_CP0_STATUS_IMASK6: m_uint32_t = 0x00004000;
+pub const MIPS_CP0_STATUS_IMASK5: m_uint32_t = 0x00002000;
+pub const MIPS_CP0_STATUS_IMASK4: m_uint32_t = 0x00001000;
+pub const MIPS_CP0_STATUS_IMASK3: m_uint32_t = 0x00000800;
+pub const MIPS_CP0_STATUS_IMASK2: m_uint32_t = 0x00000400;
+pub const MIPS_CP0_STATUS_IMASK1: m_uint32_t = 0x00000200;
+pub const MIPS_CP0_STATUS_IMASK0: m_uint32_t = 0x00000100;
+
+pub const MIPS_CP0_STATUS_DS_MASK: m_uint32_t = 0x00770000;
+pub const MIPS_CP0_STATUS_CU_MASK: m_uint32_t = 0xF0000000;
+pub const MIPS_CP0_STATUS_IMASK: m_uint32_t = 0x0000FF00;
+
+/// Addressing mode: Kernel, Supervisor and User
+pub const MIPS_CP0_STATUS_KSU_SHIFT: u_int = 0x03;
+pub const MIPS_CP0_STATUS_KSU_MASK: u_int = 0x03;
+
+pub const MIPS_CP0_STATUS_KM: u_int = 0x00;
+pub const MIPS_CP0_STATUS_SM: u_int = 0x01;
+pub const MIPS_CP0_STATUS_UM: u_int = 0x10;
+
+/// CP0 Cause register
+pub const MIPS_CP0_CAUSE_BD_SLOT: m_uint32_t = 0x80000000;
+
+pub const MIPS_CP0_CAUSE_MASK: m_uint32_t = 0x0000007C;
+pub const MIPS_CP0_CAUSE_CEMASK: m_uint32_t = 0x30000000;
+pub const MIPS_CP0_CAUSE_IMASK: m_uint32_t = 0x0000FF00;
+
+pub const MIPS_CP0_CAUSE_SHIFT: c_int = 2;
+pub const MIPS_CP0_CAUSE_CESHIFT: c_int = 28;
+pub const MIPS_CP0_CAUSE_ISHIFT: c_int = 8;
+
+pub const MIPS_CP0_CAUSE_INTERRUPT: u_int = 0;
+pub const MIPS_CP0_CAUSE_TLB_MOD: u_int = 1;
+pub const MIPS_CP0_CAUSE_TLB_LOAD: u_int = 2;
+pub const MIPS_CP0_CAUSE_TLB_SAVE: u_int = 3;
+pub const MIPS_CP0_CAUSE_ADDR_LOAD: u_int = 4; // ADEL
+pub const MIPS_CP0_CAUSE_ADDR_SAVE: u_int = 5; // ADES
+pub const MIPS_CP0_CAUSE_BUS_INSTR: u_int = 6;
+pub const MIPS_CP0_CAUSE_BUS_DATA: u_int = 7;
+pub const MIPS_CP0_CAUSE_SYSCALL: u_int = 8;
+pub const MIPS_CP0_CAUSE_BP: u_int = 9;
+pub const MIPS_CP0_CAUSE_ILLOP: u_int = 10;
+pub const MIPS_CP0_CAUSE_CP_UNUSABLE: u_int = 11;
+pub const MIPS_CP0_CAUSE_OVFLW: u_int = 12;
+pub const MIPS_CP0_CAUSE_TRAP: u_int = 13;
+pub const MIPS_CP0_CAUSE_VC_INSTR: u_int = 14; // Virtual Coherency
+pub const MIPS_CP0_CAUSE_FPE: u_int = 15;
+pub const MIPS_CP0_CAUSE_WATCH: u_int = 23;
+pub const MIPS_CP0_CAUSE_VC_DATA: u_int = 31; // Virtual Coherency
+
+pub const MIPS_CP0_CAUSE_IBIT7: m_uint32_t = 0x00008000;
+pub const MIPS_CP0_CAUSE_IBIT6: m_uint32_t = 0x00004000;
+pub const MIPS_CP0_CAUSE_IBIT5: m_uint32_t = 0x00002000;
+pub const MIPS_CP0_CAUSE_IBIT4: m_uint32_t = 0x00001000;
+pub const MIPS_CP0_CAUSE_IBIT3: m_uint32_t = 0x00000800;
+pub const MIPS_CP0_CAUSE_IBIT2: m_uint32_t = 0x00000400;
+pub const MIPS_CP0_CAUSE_IBIT1: m_uint32_t = 0x00000200;
+pub const MIPS_CP0_CAUSE_IBIT0: m_uint32_t = 0x00000100;
 
 /// Minimum page size: 4 Kb
 pub const MIPS_MIN_PAGE_SHIFT: c_int = 12;

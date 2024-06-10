@@ -2,6 +2,7 @@
 //! We don't use the JIT here, since there is no high performance needed.
 
 use crate::cpu::*;
+use crate::dynamips::*;
 use crate::dynamips_common::*;
 #[cfg(feature = "USE_UNSTABLE")]
 use crate::memory::*;
@@ -549,5 +550,112 @@ pub unsafe extern "C" fn mips64_cp0_map_tlb_to_mts(cpu: *mut cpu_mips_t, index: 
 pub unsafe extern "C" fn mips64_cp0_map_all_tlb_to_mts(cpu: *mut cpu_mips_t) {
     for i in 0..(*cpu).cp0.tlb_entries {
         mips64_cp0_map_tlb_to_mts(cpu, i as c_int);
+    }
+}
+
+/// Write page size in buffer
+unsafe fn get_page_size_str(buffer: *mut c_char, len: size_t, page_mask: m_uint32_t) -> *mut c_char {
+    let page_size: m_uint32_t = get_page_size(page_mask);
+
+    // Mb ?
+    if page_size >= (1024 * 1024) {
+        libc::snprintf(buffer, len, cstr!("%uMB"), page_size >> 20);
+    } else {
+        libc::snprintf(buffer, len, cstr!("%uKB"), page_size >> 10);
+    }
+
+    buffer
+}
+
+/// Dump the specified TLB entry
+unsafe fn mips64_tlb_dump_entry(cpu: *mut cpu_mips_t, index: u_int) {
+    let mut buffer: [c_char; 256] = [0; 256];
+
+    let entry: *mut tlb_entry_t = addr_of_mut!((*cpu).cp0.tlb[index as usize]);
+
+    // virtual Address
+    libc::printf(cstr!(" %2d: vaddr=0x%8.8llx "), index, (*entry).hi & mips64_cp0_get_vpn2_mask(cpu));
+
+    // global or ASID
+    if ((*entry).hi & MIPS_TLB_G_MASK as m_uint64_t) != 0 {
+        libc::printf(cstr!("(global)    "));
+    } else {
+        libc::printf(cstr!("(asid 0x%2.2llx) "), (*entry).hi & MIPS_TLB_ASID_MASK as m_uint64_t);
+    }
+
+    // 1st page: Lo0
+    libc::printf(cstr!("p0="));
+
+    if ((*entry).lo0 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+        libc::printf(cstr!("0x%9.9llx"), ((*entry).lo0 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6);
+    } else {
+        libc::printf(cstr!("(invalid)  "));
+    }
+
+    libc::printf(cstr!(" %c "), if ((*entry).lo0 & MIPS_TLB_D_MASK as m_uint64_t) != 0 { 'D' } else { ' ' });
+
+    // 2nd page: Lo1
+    libc::printf(cstr!("p1="));
+
+    if ((*entry).lo1 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+        libc::printf(cstr!("0x%9.9llx"), ((*entry).lo1 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6);
+    } else {
+        libc::printf(cstr!("(invalid)  "));
+    }
+
+    libc::printf(cstr!(" %c "), if ((*entry).lo1 & MIPS_TLB_D_MASK as m_uint64_t) != 0 { 'D' } else { ' ' });
+
+    // page size
+    libc::printf(cstr!(" (%s)\n"), get_page_size_str(buffer.as_c_mut(), buffer.len(), (*entry).mask as m_uint32_t));
+}
+
+/// Human-Readable dump of the TLB
+#[no_mangle]
+pub unsafe extern "C" fn mips64_tlb_dump(cpu: *mut cpu_gen_t) {
+    let mcpu: *mut cpu_mips_t = CPU_MIPS64(cpu);
+
+    libc::printf(cstr!("TLB dump:\n"));
+
+    for i in 0..(*mcpu).cp0.tlb_entries {
+        mips64_tlb_dump_entry(mcpu, i);
+    }
+
+    libc::printf(cstr!("\n"));
+}
+
+/// TLBP: Probe a TLB entry
+#[no_mangle]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_cp0_exec_tlbp(cpu: *mut cpu_mips_t) {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+    let vpn2_mask: m_uint64_t = mips64_cp0_get_vpn2_mask(cpu);
+    let hi_reg: m_uint64_t = (*cp0).reg[MIPS_CP0_TLB_HI];
+    let asid: m_uint64_t = hi_reg & MIPS_TLB_ASID_MASK as m_uint64_t;
+    let vpn2: m_uint64_t = hi_reg & vpn2_mask;
+
+    (*cp0).reg[MIPS_CP0_INDEX] = 0xffffffff80000000;
+
+    for i in 0..(*cp0).tlb_entries {
+        let entry: *mut tlb_entry_t = addr_of_mut!((*cp0).tlb[i as usize]);
+        if cfg!(not(feature = "USE_UNSTABLE")) {
+            if (((*entry).hi & vpn2_mask) == vpn2) && (((*entry).hi & MIPS_TLB_G_MASK as m_uint64_t) != 0 || (((*entry).hi & MIPS_TLB_ASID_MASK as m_uint64_t) == asid)) {
+                (*cp0).reg[MIPS_CP0_INDEX] = i as m_uint64_t;
+                if DEBUG_TLB_ACTIVITY != 0 {
+                    libc::printf(cstr!("CPU: CP0_TLBP returned %u\n"), i);
+                    mips64_tlb_dump((*cpu).gen);
+                }
+            }
+        } else {
+            let page_mask: m_uint64_t = !(*entry).mask;
+
+            if (((*entry).hi & vpn2_mask & page_mask) == (vpn2 & page_mask)) && (((*entry).hi & MIPS_TLB_G_MASK as m_uint64_t) != 0 || (((*entry).hi & MIPS_TLB_ASID_MASK as m_uint64_t) == asid)) {
+                (*cp0).reg[MIPS_CP0_INDEX] = i as m_uint64_t;
+                if DEBUG_TLB_ACTIVITY != 0 {
+                    libc::printf(cstr!("CPU: CP0_TLBP returned %u\n"), i);
+                    mips64_tlb_dump((*cpu).gen);
+                }
+            }
+        }
     }
 }

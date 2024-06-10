@@ -20,22 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* Write page size in buffer */
-static char *get_page_size_str(char *buffer,size_t len,m_uint32_t page_mask)
-{
-   m_uint32_t page_size;
-
-   page_size = get_page_size(page_mask);
-   
-   /* Mb ? */
-   if (page_size >= (1024*1024))
-      snprintf(buffer,len,"%uMB",page_size >> 20);
-   else
-      snprintf(buffer,len,"%uKB",page_size >> 10);
-
-   return buffer;
-}
-
 /* Execute a callback for the specified entry */
 static inline void mips64_cp0_tlb_callback(cpu_mips_t *cpu,tlb_entry_t *entry,
                                            int action)
@@ -62,40 +46,6 @@ static inline void mips64_cp0_tlb_callback(cpu_mips_t *cpu,tlb_entry_t *entry,
              "action=%s\n",
              vaddr,paddr1,psize,
              (action == 0) ? "ADD" : "DELETE");*/
-   }
-}
-
-/* TLBP: Probe a TLB entry */
-fastcall void mips64_cp0_exec_tlbp(cpu_mips_t *cpu)
-{
-   mips_cp0_t *cp0 = &cpu->cp0;
-   m_uint64_t hi_reg,asid;
-   m_uint64_t vpn2,vpn2_mask;
-   m_uint64_t page_mask;
-   tlb_entry_t *entry;
-   int i;
-  
-   vpn2_mask = mips64_cp0_get_vpn2_mask(cpu);
-   hi_reg = cp0->reg[MIPS_CP0_TLB_HI];
-   asid = hi_reg & MIPS_TLB_ASID_MASK;
-   vpn2 = hi_reg & vpn2_mask;
-
-   cp0->reg[MIPS_CP0_INDEX] = 0xffffffff80000000ULL;
-   
-   for(i=0;i<cp0->tlb_entries;i++) {
-      entry = &cp0->tlb[i];
-      page_mask = ~entry->mask;
-
-      if (((entry->hi & vpn2_mask & page_mask) == (vpn2 & page_mask)) &&
-          ((entry->hi & MIPS_TLB_G_MASK) || 
-           ((entry->hi & MIPS_TLB_ASID_MASK) == asid)))
-      {
-         cp0->reg[MIPS_CP0_INDEX] = i;
-#if DEBUG_TLB_ACTIVITY
-         printf("CPU: CP0_TLBP returned %u\n",i);
-         tlb_dump(cpu);
-#endif
-      }
    }
 }
 
@@ -206,61 +156,5 @@ void mips64_tlb_raw_dump(cpu_gen_t *cpu)
              i, entry->mask, entry->hi, entry->lo0, entry->lo1);
    }
 
-   printf("\n");
-}
-
-/* Dump the specified TLB entry */
-void mips64_tlb_dump_entry(cpu_mips_t *cpu,u_int index)
-{
-   tlb_entry_t *entry;
-   char buffer[256];
-
-   entry = &cpu->cp0.tlb[index];
-
-   /* virtual Address */
-   printf(" %2d: vaddr=0x%8.8llx ", 
-          index, entry->hi & mips64_cp0_get_vpn2_mask(cpu));
-
-   /* global or ASID */
-   if (entry->hi & MIPS_TLB_G_MASK)
-      printf("(global)    ");
-   else
-      printf("(asid 0x%2.2llx) ",entry->hi & MIPS_TLB_ASID_MASK);
-
-   /* 1st page: Lo0 */
-   printf("p0=");
-
-   if (entry->lo0 & MIPS_TLB_V_MASK)
-      printf("0x%9.9llx",(entry->lo0 & MIPS_TLB_PFN_MASK) << 6);
-   else
-      printf("(invalid)  ");            
-   
-   printf(" %c ",(entry->lo0 & MIPS_TLB_D_MASK) ? 'D' : ' ');
-   
-   /* 2nd page: Lo1 */
-   printf("p1=");
-
-   if (entry->lo1 & MIPS_TLB_V_MASK)
-      printf("0x%9.9llx",(entry->lo1 & MIPS_TLB_PFN_MASK) << 6);
-   else
-      printf("(invalid)  ");            
-
-   printf(" %c ",(entry->lo1 & MIPS_TLB_D_MASK) ? 'D' : ' ');
-
-   /* page size */
-   printf(" (%s)\n",get_page_size_str(buffer,sizeof(buffer),entry->mask));
-}
-
-/* Human-Readable dump of the TLB */
-void mips64_tlb_dump(cpu_gen_t *cpu)
-{
-   cpu_mips_t *mcpu = CPU_MIPS64(cpu);
-   u_int i;
-
-   printf("TLB dump:\n");
-
-   for(i=0;i<mcpu->cp0.tlb_entries;i++) 
-      mips64_tlb_dump_entry(mcpu,i);
-   
    printf("\n");
 }

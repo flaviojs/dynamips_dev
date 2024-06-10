@@ -20,12 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* Get the page size corresponding to a page mask */
-static inline m_uint32_t get_page_size(m_uint32_t page_mask)
-{
-   return((page_mask + 0x2000) >> 1);
-}
-
 /* Write page size in buffer */
 static char *get_page_size_str(char *buffer,size_t len,m_uint32_t page_mask)
 {
@@ -69,96 +63,6 @@ static inline void mips64_cp0_tlb_callback(cpu_mips_t *cpu,tlb_entry_t *entry,
              vaddr,paddr1,psize,
              (action == 0) ? "ADD" : "DELETE");*/
    }
-}
-
-/* TLB lookup */
-int mips64_cp0_tlb_lookup(cpu_mips_t *cpu,m_uint64_t vaddr,
-                          u_int op_type,mts_map_t *res)
-{
-   mips_cp0_t *cp0 = &cpu->cp0;
-   m_uint64_t vpn_addr,vpn2_mask;
-   m_uint64_t page_mask,hi_addr;
-   m_uint32_t page_size,pca;
-   tlb_entry_t *entry;
-   u_int asid;
-   int i;
-
-   vpn2_mask = mips64_cp0_get_vpn2_mask(cpu);
-   vpn_addr = vaddr & vpn2_mask;
-
-   asid = cp0->reg[MIPS_CP0_TLB_HI] & MIPS_TLB_ASID_MASK;
-
-   for(i=0;i<cp0->tlb_entries;i++) {
-      entry = &cp0->tlb[i];
-
-      page_mask = ~entry->mask;
-      hi_addr = entry->hi & vpn2_mask & page_mask;
-
-      if (((vpn_addr & page_mask) == hi_addr) &&
-          ((entry->hi & MIPS_TLB_G_MASK) ||
-           ((entry->hi & MIPS_TLB_ASID_MASK) == asid)))
-      {
-         page_size = get_page_size(entry->mask);
-
-         if ((vaddr & page_size) == 0) {
-            /* Even Page */
-            if (entry->lo0 & MIPS_TLB_V_MASK) 
-            {
-               /* Check write protection */
-               if ((op_type == MTS_WRITE) && !(entry->lo0 & MIPS_TLB_D_MASK))
-                  return MIPS_TLB_LOOKUP_MOD;
-               
-               res->flags = 0;
-               res->vaddr = vaddr & MIPS_MIN_PAGE_MASK;
-               res->paddr = (entry->lo0 & MIPS_TLB_PFN_MASK) << 6;
-               res->paddr += (res->vaddr & (page_size-1));
-               res->paddr &= cpu->addr_bus_mask;
-
-               res->offset = vaddr & MIPS_MIN_PAGE_IMASK;
-
-               pca = (entry->lo0 & MIPS_TLB_C_MASK);
-               pca >>= MIPS_TLB_C_SHIFT;
-               res->cached = mips64_cca_cached(pca);
-               
-               if (!(entry->lo0 & MIPS_TLB_D_MASK))
-                  res->flags |= MTS_FLAG_RO;
-               
-               return(MIPS_TLB_LOOKUP_OK);
-            }
-         } else {
-            /* Odd Page */
-            if (entry->lo1 & MIPS_TLB_V_MASK) 
-            {
-               /* Check write protection */
-               if ((op_type == MTS_WRITE) && !(entry->lo1 & MIPS_TLB_D_MASK))
-                  return MIPS_TLB_LOOKUP_MOD;
-
-               res->flags = 0;
-               res->vaddr = vaddr & MIPS_MIN_PAGE_MASK;
-               res->paddr = (entry->lo1 & MIPS_TLB_PFN_MASK) << 6;
-               res->paddr += (res->vaddr & (page_size-1));
-               res->paddr &= cpu->addr_bus_mask;
-
-               res->offset = vaddr & MIPS_MIN_PAGE_IMASK;
-
-               pca = (entry->lo1 & MIPS_TLB_C_MASK);
-               pca >>= MIPS_TLB_C_SHIFT;
-               res->cached = mips64_cca_cached(pca);     
-                                             
-               if (!(entry->lo1 & MIPS_TLB_D_MASK))
-                  res->flags |= MTS_FLAG_RO;
-                         
-               return(MIPS_TLB_LOOKUP_OK);
-            }
-         }
-
-         /* Invalid entry */
-         return(MIPS_TLB_LOOKUP_INVALID);
-      }
-   }
-
-   /* No matching entry */
-   return(MIPS_TLB_LOOKUP_MISS);
 }
 
 /* TLBP: Probe a TLB entry */

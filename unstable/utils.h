@@ -75,27 +75,6 @@ struct m_list {
    m_list_t *next;
 };
 
-/* MTS mapping info */
-typedef struct {
-   m_uint64_t vaddr;
-   m_uint64_t paddr;
-   m_uint64_t len;
-   m_uint32_t cached;
-   m_uint32_t offset;
-   m_uint32_t flags;
-}mts_map_t;
-
-/* Invalid VTLB entry */
-#define MTS_INV_ENTRY_MASK  0x00000001
-
-/* MTS entry flags */
-#define MTS_FLAG_DEV   0x000000001   /* Virtual device used */
-#define MTS_FLAG_COW   0x000000002   /* Copy-On-Write */
-#define MTS_FLAG_EXEC  0x000000004   /* Exec page */
-#define MTS_FLAG_RO    0x000000008   /* Read-only page */
-
-#define MTS_FLAG_WRCATCH (MTS_FLAG_RO|MTS_FLAG_COW)  /* Catch writes */
-
 /* Virtual TLB entry (32-bit MMU) */
 typedef struct mts32_entry mts32_entry_t;
 struct mts32_entry {

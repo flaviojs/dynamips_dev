@@ -3,6 +3,8 @@
 
 use crate::cpu::*;
 use crate::dynamips_common::*;
+#[cfg(feature = "USE_UNSTABLE")]
+use crate::memory::*;
 use crate::mips64::*;
 use crate::prelude::*;
 use crate::utils::*;
@@ -317,4 +319,183 @@ pub unsafe extern "C" fn mips64_cp0_exec_cfc0(cpu: *mut cpu_mips_t, gp_reg: u_in
 #[cfg_attr(feature = "fastcall", abi("fastcall"))]
 pub unsafe extern "C" fn mips64_cp0_exec_ctc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int) {
     mips64_cp0_s1_set_reg(cpu, cp0_reg, (*cpu).gpr[gp_reg as usize] & 0xffffffff);
+}
+
+/// Get the page size corresponding to a page mask
+#[inline]
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn get_page_size(page_mask: m_uint32_t) -> m_uint32_t {
+    (page_mask + 0x2000) >> 1
+}
+
+/// Get the VPN2 mask
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "USE_UNSTABLE", inline(always))]
+pub unsafe extern "C" fn mips64_cp0_get_vpn2_mask(cpu: *mut cpu_mips_t) -> m_uint64_t {
+    if (*cpu).addr_mode == 64 {
+        MIPS_TLB_VPN2_MASK_64
+    } else {
+        MIPS_TLB_VPN2_MASK_32
+    }
+}
+
+/// TLB lookup
+#[cfg(not(feature = "USE_UNSTABLE"))]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_cp0_tlb_lookup(cpu: *mut cpu_mips_t, vaddr: m_uint64_t, res: *mut mts_map_t) -> c_int {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+    let vpn_addr: m_uint64_t;
+    let vpn2_mask: m_uint64_t;
+    let mut page_mask: m_uint64_t;
+    let mut hi_addr: m_uint64_t;
+    let page_size: m_uint32_t;
+    let mut pca: m_uint32_t;
+    let mut entry: *mut tlb_entry_t;
+    let asid: u_int;
+
+    vpn2_mask = mips64_cp0_get_vpn2_mask(cpu);
+    vpn_addr = vaddr & vpn2_mask;
+
+    asid = ((*cp0).reg[MIPS_CP0_TLB_HI] & MIPS_TLB_ASID_MASK as m_uint64_t) as m_uint32_t;
+
+    for i in 0..(*cp0).tlb_entries {
+        entry = addr_of_mut!((*cp0).tlb[i as usize]);
+
+        page_mask = !((*entry).mask + 0x1FFF);
+        hi_addr = (*entry).hi & vpn2_mask;
+
+        if ((vpn_addr & page_mask) == hi_addr) && (((*entry).hi & MIPS_TLB_G_MASK as m_uint64_t) != 0 || (((*entry).hi & MIPS_TLB_ASID_MASK as m_uint64_t) == asid as m_uint64_t)) {
+            page_size = get_page_size((*entry).mask as m_uint32_t);
+
+            if (vaddr & page_size as m_uint64_t) == 0 {
+                // Even Page
+                if ((*entry).lo0 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+                    (*res).vaddr = vaddr & MIPS_MIN_PAGE_MASK;
+                    (*res).paddr = ((*entry).lo0 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6;
+                    (*res).paddr += (*res).vaddr & (page_size - 1) as m_uint64_t;
+                    (*res).paddr &= (*cpu).addr_bus_mask;
+
+                    (*res).offset = (vaddr & MIPS_MIN_PAGE_IMASK) as m_uint32_t;
+
+                    pca = (*entry).lo0 as m_uint32_t & MIPS_TLB_C_MASK;
+                    pca >>= MIPS_TLB_C_SHIFT;
+                    (*res).cached = mips64_cca_cached(pca as m_uint8_t) as m_uint32_t;
+
+                    (*res).tlb_index = i;
+                    return TRUE;
+                }
+            } else {
+                // Odd Page
+                if ((*entry).lo1 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+                    (*res).vaddr = vaddr & MIPS_MIN_PAGE_MASK;
+                    (*res).paddr = ((*entry).lo1 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6;
+                    (*res).paddr += (*res).vaddr & (page_size - 1) as m_uint64_t;
+                    (*res).paddr &= (*cpu).addr_bus_mask;
+
+                    (*res).offset = (vaddr & MIPS_MIN_PAGE_IMASK) as m_uint32_t;
+
+                    pca = ((*entry).lo1 & MIPS_TLB_C_MASK as m_uint64_t) as m_uint32_t;
+                    pca >>= MIPS_TLB_C_SHIFT;
+                    (*res).cached = mips64_cca_cached(pca as m_uint8_t) as m_uint32_t;
+
+                    (*res).tlb_index = i;
+                    return TRUE;
+                }
+            }
+
+            // Invalid entry
+            return FALSE;
+        }
+    }
+
+    // No matching entry
+    FALSE
+}
+
+/// TLB lookup
+#[cfg(feature = "USE_UNSTABLE")]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_cp0_tlb_lookup(cpu: *mut cpu_mips_t, vaddr: m_uint64_t, op_type: u_int, res: *mut mts_map_t) -> c_int {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+    let mut page_mask: m_uint64_t;
+    let mut hi_addr: m_uint64_t;
+    let page_size: m_uint32_t;
+    let mut pca: m_uint32_t;
+    let mut entry: *mut tlb_entry_t;
+
+    let vpn2_mask: m_uint64_t = mips64_cp0_get_vpn2_mask(cpu);
+    let vpn_addr: m_uint64_t = vaddr & vpn2_mask;
+
+    let asid: u_int = ((*cp0).reg[MIPS_CP0_TLB_HI] & MIPS_TLB_ASID_MASK as m_uint64_t) as m_uint32_t;
+
+    for i in 0..(*cp0).tlb_entries {
+        entry = addr_of_mut!((*cp0).tlb[i as usize]);
+
+        page_mask = !(*entry).mask;
+        hi_addr = (*entry).hi & vpn2_mask & page_mask;
+
+        if ((vpn_addr & page_mask) == hi_addr) && (((*entry).hi & MIPS_TLB_G_MASK as m_uint64_t) != 0 || (((*entry).hi & MIPS_TLB_ASID_MASK as m_uint64_t) == asid as m_uint64_t)) {
+            page_size = get_page_size((*entry).mask as m_uint32_t);
+
+            if (vaddr & page_size as m_uint64_t) == 0 {
+                // Even Page
+                if ((*entry).lo0 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+                    // Check write protection
+                    if (op_type == MTS_WRITE) && ((*entry).lo0 & MIPS_TLB_D_MASK as m_uint64_t) == 0 {
+                        return MIPS_TLB_LOOKUP_MOD;
+                    }
+
+                    (*res).flags = 0;
+                    (*res).vaddr = vaddr & MIPS_MIN_PAGE_MASK;
+                    (*res).paddr = ((*entry).lo0 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6;
+                    (*res).paddr += (*res).vaddr & (page_size - 1) as m_uint64_t;
+                    (*res).paddr &= (*cpu).addr_bus_mask;
+
+                    (*res).offset = (vaddr & MIPS_MIN_PAGE_IMASK) as m_uint32_t;
+
+                    pca = ((*entry).lo0 & MIPS_TLB_C_MASK as m_uint64_t) as m_uint32_t;
+                    pca >>= MIPS_TLB_C_SHIFT;
+                    (*res).cached = mips64_cca_cached(pca as m_uint8_t) as m_uint32_t;
+
+                    if ((*entry).lo0 & MIPS_TLB_D_MASK as m_uint64_t) == 0 {
+                        (*res).flags |= MTS_FLAG_RO;
+                    }
+
+                    return MIPS_TLB_LOOKUP_OK;
+                }
+            } else {
+                // Odd Page
+                if ((*entry).lo1 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+                    // Check write protection
+                    if (op_type == MTS_WRITE) && ((*entry).lo1 & MIPS_TLB_D_MASK as m_uint64_t) == 0 {
+                        return MIPS_TLB_LOOKUP_MOD;
+                    }
+
+                    (*res).flags = 0;
+                    (*res).vaddr = vaddr & MIPS_MIN_PAGE_MASK;
+                    (*res).paddr = ((*entry).lo1 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6;
+                    (*res).paddr += (*res).vaddr & (page_size - 1) as m_uint64_t;
+                    (*res).paddr &= (*cpu).addr_bus_mask;
+
+                    (*res).offset = (vaddr & MIPS_MIN_PAGE_IMASK) as m_uint32_t;
+
+                    pca = ((*entry).lo1 & MIPS_TLB_C_MASK as m_uint64_t) as m_uint32_t;
+                    pca >>= MIPS_TLB_C_SHIFT;
+                    (*res).cached = mips64_cca_cached(pca as m_uint8_t) as m_uint32_t;
+
+                    if ((*entry).lo1 & MIPS_TLB_D_MASK as m_uint64_t) == 0 {
+                        (*res).flags |= MTS_FLAG_RO;
+                    }
+
+                    return MIPS_TLB_LOOKUP_OK;
+                }
+            }
+
+            // Invalid entry
+            return MIPS_TLB_LOOKUP_INVALID;
+        }
+    }
+
+    // No matching entry
+    MIPS_TLB_LOOKUP_MISS
 }

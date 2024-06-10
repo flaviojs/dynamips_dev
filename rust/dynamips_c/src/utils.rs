@@ -5,6 +5,7 @@ use crate::prelude::*;
 
 pub type fd_pool_t = fd_pool;
 pub type insn_exec_page_t = insn_exec_page;
+pub type mts_map_t = mts_map;
 pub type mts32_entry_t = mts32_entry;
 pub type mts64_entry_t = mts64_entry;
 
@@ -86,6 +87,32 @@ pub type mips_insn_t = m_uint32_t;
 pub struct insn_exec_page {
     _todo: u8,
 }
+
+/// MTS mapping info
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mts_map {
+    pub vaddr: m_uint64_t,
+    pub paddr: m_uint64_t,
+    pub len: m_uint64_t,
+    pub cached: m_uint32_t,
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    pub tlb_index: m_uint32_t,
+    pub offset: m_uint32_t,
+    #[cfg(feature = "USE_UNSTABLE")]
+    pub flags: m_uint32_t,
+}
+
+/// Invalid VTLB entry
+pub const MTS_INV_ENTRY_MASK: m_uint32_t = 0x00000001;
+
+/// MTS entry flags
+pub const MTS_FLAG_DEV: m_uint32_t = 0x000000001; // Virtual device used
+pub const MTS_FLAG_COW: m_uint32_t = 0x000000002; // Copy-On-Write
+pub const MTS_FLAG_EXEC: m_uint32_t = 0x000000004; // Exec page
+pub const MTS_FLAG_RO: m_uint32_t = 0x000000008; // Read-only page
+
+pub const MTS_FLAG_WRCATCH: m_uint32_t = MTS_FLAG_RO | MTS_FLAG_COW; // Catch writes
 
 /// cbindgen:no-export
 #[repr(C)]

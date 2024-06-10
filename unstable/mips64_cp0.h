@@ -41,15 +41,6 @@ void mips64_cp0_update_xcontext_reg(cpu_mips_t *cpu,m_uint64_t addr)
    cpu->cp0.reg[MIPS_CP0_XCONTEXT] |= rbadvpn2;
 }
 
-/* Get the VPN2 mask */
-static forced_inline m_uint64_t mips64_cp0_get_vpn2_mask(cpu_mips_t *cpu)
-{
-   if (cpu->addr_mode == 64)
-      return(MIPS_TLB_VPN2_MASK_64);
-   else
-      return(MIPS_TLB_VPN2_MASK_32);
-}
-
 /* Get cp0 register index given its name */
 int mips64_cp0_get_reg_index(char *name);
 

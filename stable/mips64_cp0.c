@@ -42,40 +42,6 @@ void mips64_cp0_unmap_tlb_to_mts(cpu_mips_t *cpu,int index)
       cpu->mts_unmap(cpu,v1_addr,page_size,MTS_ACC_T,index);
 }
 
-/* TLBR: Read Indexed TLB entry */
-fastcall void mips64_cp0_exec_tlbr(cpu_mips_t *cpu)
-{
-   mips_cp0_t *cp0 = &cpu->cp0;
-   tlb_entry_t *entry;
-   u_int index;
-
-   index = cp0->reg[MIPS_CP0_INDEX];
-
-#if DEBUG_TLB_ACTIVITY
-   cpu_log(cpu,"TLB","CP0_TLBR: reading entry %u.\n",index);
-#endif
-
-   if (index < cp0->tlb_entries)
-   {
-      entry = &cp0->tlb[index];
-
-      cp0->reg[MIPS_CP0_PAGEMASK] = entry->mask;
-      cp0->reg[MIPS_CP0_TLB_HI]   = entry->hi;
-      cp0->reg[MIPS_CP0_TLB_LO_0] = entry->lo0;
-      cp0->reg[MIPS_CP0_TLB_LO_1] = entry->lo1;
-
-      /* 
-       * The G bit must be reported in both Lo0 and Lo1 registers,
-       * and cleared in Hi register.
-       */
-      if (entry->hi & MIPS_TLB_G_MASK) {
-         cp0->reg[MIPS_CP0_TLB_LO_0] |= MIPS_CP0_LO_G_MASK;
-         cp0->reg[MIPS_CP0_TLB_LO_1] |= MIPS_CP0_LO_G_MASK;
-         cp0->reg[MIPS_CP0_TLB_HI] &= ~MIPS_TLB_G_MASK;
-      }
-   }
-}
-
 /* TLBW: Write a TLB entry */
 static inline void mips64_cp0_exec_tlbw(cpu_mips_t *cpu,u_int index)
 {

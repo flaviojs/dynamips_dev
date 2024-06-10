@@ -659,3 +659,33 @@ pub unsafe extern "C" fn mips64_cp0_exec_tlbp(cpu: *mut cpu_mips_t) {
         }
     }
 }
+
+/// TLBR: Read Indexed TLB entry
+#[no_mangle]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_cp0_exec_tlbr(cpu: *mut cpu_mips_t) {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+    let index: u_int = (*cp0).reg[MIPS_CP0_INDEX] as u_int;
+
+    if DEBUG_TLB_ACTIVITY != 0 {
+        cpu_log!((*cpu).gen, cstr!("TLB"), cstr!("CP0_TLBR: reading entry %u.\n"), index);
+    }
+
+    if index < (*cp0).tlb_entries {
+        let entry: *mut tlb_entry_t = addr_of_mut!((*cp0).tlb[index as usize]);
+
+        (*cp0).reg[MIPS_CP0_PAGEMASK] = (*entry).mask;
+        (*cp0).reg[MIPS_CP0_TLB_HI] = (*entry).hi;
+        (*cp0).reg[MIPS_CP0_TLB_LO_0] = (*entry).lo0;
+        (*cp0).reg[MIPS_CP0_TLB_LO_1] = (*entry).lo1;
+
+        // The G bit must be reported in both Lo0 and Lo1 registers,
+        // and cleared in Hi register.
+        if ((*entry).hi & MIPS_TLB_G_MASK as m_uint64_t) != 0 {
+            (*cp0).reg[MIPS_CP0_TLB_LO_0] |= MIPS_CP0_LO_G_MASK;
+            (*cp0).reg[MIPS_CP0_TLB_LO_1] |= MIPS_CP0_LO_G_MASK;
+            (*cp0).reg[MIPS_CP0_TLB_HI] &= !(MIPS_TLB_G_MASK as m_uint64_t);
+        }
+    }
+}

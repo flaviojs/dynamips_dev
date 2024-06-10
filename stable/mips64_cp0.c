@@ -36,48 +36,6 @@ static char *get_page_size_str(char *buffer,size_t len,m_uint32_t page_mask)
    return buffer;
 }
 
-/* 
- * Map a TLB entry into the MTS.
- *
- * We apply the physical address bus masking here.
- *
- * TODO: - Manage ASID
- *       - Manage CPU Mode (user,supervisor or kernel)
- */
-void mips64_cp0_map_tlb_to_mts(cpu_mips_t *cpu,int index)
-{
-   m_uint64_t v0_addr,v1_addr,p0_addr,p1_addr;
-   m_uint32_t page_size,pca;
-   tlb_entry_t *entry;
-   int cacheable;
-
-   entry = &cpu->cp0.tlb[index];
-
-   page_size = get_page_size(entry->mask);
-   v0_addr = entry->hi & mips64_cp0_get_vpn2_mask(cpu);
-   v1_addr = v0_addr + page_size;
-
-   if (entry->lo0 & MIPS_TLB_V_MASK) {
-      pca = (entry->lo0 & MIPS_TLB_C_MASK);
-      pca >>= MIPS_TLB_C_SHIFT;
-      cacheable = mips64_cca_cached(pca);
-       
-      p0_addr = (entry->lo0 & MIPS_TLB_PFN_MASK) << 6;
-      cpu->mts_map(cpu,v0_addr,p0_addr & cpu->addr_bus_mask,page_size,
-                   cacheable,index);
-   }
-
-   if (entry->lo1 & MIPS_TLB_V_MASK) {
-      pca = (entry->lo1 & MIPS_TLB_C_MASK);
-      pca >>= MIPS_TLB_C_SHIFT;
-      cacheable = mips64_cca_cached(pca);
-
-      p1_addr = (entry->lo1 & MIPS_TLB_PFN_MASK) << 6;
-      cpu->mts_map(cpu,v1_addr,p1_addr & cpu->addr_bus_mask,page_size,
-                   cacheable,index);
-   }
-}
-
 /*
  * Unmap a TLB entry in the MTS.
  */
@@ -98,15 +56,6 @@ void mips64_cp0_unmap_tlb_to_mts(cpu_mips_t *cpu,int index)
 
    if (entry->lo1 & MIPS_TLB_V_MASK)
       cpu->mts_unmap(cpu,v1_addr,page_size,MTS_ACC_T,index);
-}
-
-/* Map all TLB entries into the MTS */
-void mips64_cp0_map_all_tlb_to_mts(cpu_mips_t *cpu)
-{   
-   int i;
-
-   for(i=0;i<cpu->cp0.tlb_entries;i++)
-      mips64_cp0_map_tlb_to_mts(cpu,i);
 }
 
 /* TLBP: Probe a TLB entry */

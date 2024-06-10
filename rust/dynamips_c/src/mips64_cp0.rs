@@ -499,3 +499,55 @@ pub unsafe extern "C" fn mips64_cp0_tlb_lookup(cpu: *mut cpu_mips_t, vaddr: m_ui
     // No matching entry
     MIPS_TLB_LOOKUP_MISS
 }
+
+/// Map a TLB entry into the MTS.
+///
+/// We apply the physical address bus masking here.
+///
+/// TODO: - Manage ASID
+///       - Manage CPU Mode (user,supervisor or kernel)
+#[cfg(not(feature = "USE_UNSTABLE"))]
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn mips64_cp0_map_tlb_to_mts(cpu: *mut cpu_mips_t, index: c_int) {
+    let v0_addr: m_uint64_t;
+    let v1_addr: m_uint64_t;
+    let p0_addr: m_uint64_t;
+    let p1_addr: m_uint64_t;
+    let page_size: m_uint32_t;
+    let mut pca: m_uint32_t;
+    let entry: *mut tlb_entry_t;
+    let mut cacheable: c_int;
+
+    entry = addr_of_mut!((*cpu).cp0.tlb[index as usize]);
+
+    page_size = get_page_size((*entry).mask as m_uint32_t);
+    v0_addr = (*entry).hi & mips64_cp0_get_vpn2_mask(cpu);
+    v1_addr = v0_addr + page_size as m_uint64_t;
+
+    if ((*entry).lo0 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+        pca = ((*entry).lo0 & MIPS_TLB_C_MASK as m_uint64_t) as m_uint32_t;
+        pca >>= MIPS_TLB_C_SHIFT;
+        cacheable = mips64_cca_cached(pca as m_uint8_t);
+
+        p0_addr = ((*entry).lo0 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6;
+        (*cpu).mts_map.unwrap()(cpu, v0_addr, p0_addr & (*cpu).addr_bus_mask, page_size, cacheable, index);
+    }
+
+    if ((*entry).lo1 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+        pca = ((*entry).lo1 & MIPS_TLB_C_MASK as m_uint64_t) as m_uint32_t;
+        pca >>= MIPS_TLB_C_SHIFT;
+        cacheable = mips64_cca_cached(pca as m_uint8_t);
+
+        p1_addr = ((*entry).lo1 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6;
+        (*cpu).mts_map.unwrap()(cpu, v1_addr, p1_addr & (*cpu).addr_bus_mask, page_size, cacheable, index);
+    }
+}
+
+/// Map all TLB entries into the MTS
+#[cfg(not(feature = "USE_UNSTABLE"))]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_cp0_map_all_tlb_to_mts(cpu: *mut cpu_mips_t) {
+    for i in 0..(*cpu).cp0.tlb_entries {
+        mips64_cp0_map_tlb_to_mts(cpu, i as c_int);
+    }
+}

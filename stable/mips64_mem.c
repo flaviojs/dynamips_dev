@@ -473,13 +473,6 @@ static fastcall int mips64_mts32_translate(cpu_mips_t *cpu,m_uint64_t vaddr,
 
 /* ======================================================================== */
 
-/* Shutdown MTS subsystem */
-void mips64_mem_shutdown(cpu_mips_t *cpu)
-{
-   if (cpu->mts_shutdown != NULL)
-      cpu->mts_shutdown(cpu);
-}
-
 /* Set the address mode */
 int mips64_set_addr_mode(cpu_mips_t *cpu,u_int addr_mode)
 {

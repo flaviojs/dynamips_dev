@@ -28,11 +28,6 @@
 #define MTS_DEVID_SHIFT   26
 #define MTS_DEVOFF_MASK   0x03ffffff
 
-/* Memory access flags */
-#define MTS_ACC_AE  0x00000002   /* Address Error */
-#define MTS_ACC_T   0x00000004   /* TLB Exception */
-#define MTS_ACC_U   0x00000006   /* Unexistent */
-
 /* Macro for easy hash computing */
 #define MTS_SHR(v,sr) ((v) >> (sr))
 

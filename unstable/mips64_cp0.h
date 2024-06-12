@@ -9,9 +9,6 @@
 #include "utils.h" 
 #include "rust_dynamips_c.h"
 
-#define TLB_ZONE_ADD 0
-#define TLB_ZONE_DELETE 1
-
 /* Update the Context register with a faulty address */
 static inline 
 void mips64_cp0_update_context_reg(cpu_mips_t *cpu,m_uint64_t addr)

@@ -4,11 +4,15 @@
 use crate::cpu::*;
 use crate::dynamips::*;
 use crate::dynamips_common::*;
-#[cfg(feature = "USE_UNSTABLE")]
 use crate::memory::*;
 use crate::mips64::*;
 use crate::prelude::*;
 use crate::utils::*;
+
+#[cfg(feature = "USE_UNSTABLE")]
+pub const TLB_ZONE_ADD: c_int = 0;
+#[cfg(feature = "USE_UNSTABLE")]
+pub const TLB_ZONE_DELETE: c_int = 1;
 
 /// MIPS cp0 registers names
 #[no_mangle]
@@ -688,4 +692,135 @@ pub unsafe extern "C" fn mips64_cp0_exec_tlbr(cpu: *mut cpu_mips_t) {
             (*cp0).reg[MIPS_CP0_TLB_HI] &= !(MIPS_TLB_G_MASK as m_uint64_t);
         }
     }
+}
+
+/// Unmap a TLB entry in the MTS.
+#[cfg(not(feature = "USE_UNSTABLE"))]
+unsafe fn mips64_cp0_unmap_tlb_to_mts(cpu: *mut cpu_mips_t, index: c_int) {
+    let entry: *mut tlb_entry_t = addr_of_mut!((*cpu).cp0.tlb[index as usize]);
+
+    let page_size: m_uint32_t = get_page_size((*entry).mask as m_uint32_t);
+    let v0_addr: m_uint64_t = (*entry).hi & mips64_cp0_get_vpn2_mask(cpu);
+    let v1_addr: m_uint64_t = v0_addr + page_size as m_uint64_t;
+
+    if ((*entry).lo0 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+        (*cpu).mts_unmap.unwrap()(cpu, v0_addr, page_size, MTS_ACC_T, index);
+    }
+
+    if ((*entry).lo1 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+        (*cpu).mts_unmap.unwrap()(cpu, v1_addr, page_size, MTS_ACC_T, index);
+    }
+}
+
+/// Execute a callback for the specified entry
+#[cfg(feature = "USE_UNSTABLE")]
+#[inline]
+unsafe fn mips64_cp0_tlb_callback(cpu: *mut cpu_mips_t, entry: *mut tlb_entry_t, action: c_int) {
+    let vaddr: m_uint64_t = (*entry).hi & mips64_cp0_get_vpn2_mask(cpu);
+    let psize: m_uint32_t = get_page_size((*entry).mask as m_uint32_t);
+
+    if ((*entry).lo0 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+        let paddr0: m_uint64_t = ((*entry).lo0 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6;
+
+        if false {
+            libc::printf(cstr!("TLB: vaddr=0x%8.8llx -> paddr0=0x%10.10llx (size=0x%8.8x), action=%s\n"), vaddr, paddr0, psize, if action == 0 { cstr!("ADD") } else { cstr!("DELETE") });
+        }
+    }
+
+    if ((*entry).lo1 & MIPS_TLB_V_MASK as m_uint64_t) != 0 {
+        let paddr1: m_uint64_t = ((*entry).lo1 & MIPS_TLB_PFN_MASK as m_uint64_t) << 6;
+
+        if false {
+            libc::printf(cstr!("TLB: vaddr=0x%8.8llx -> paddr1=0x%10.10llx (size=0x%8.8x), action=%s\n"), vaddr, paddr1, psize, if action == 0 { cstr!("ADD") } else { cstr!("DELETE") });
+        }
+    }
+}
+
+/// TLBW: Write a TLB entry
+#[inline]
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn mips64_cp0_exec_tlbw(cpu: *mut cpu_mips_t, index: u_int) {
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    {
+        let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+        if DEBUG_TLB_ACTIVITY != 0 {
+            cpu_log!((*cpu).gen, cstr!("TLB"), cstr!("CP0_TLBWI: writing entry %u [mask=0x%8.8llx,hi=0x%8.8llx,lo0=0x%8.8llx,lo1=0x%8.8llx]\n"), index, (*cp0).reg[MIPS_CP0_PAGEMASK], (*cp0).reg[MIPS_CP0_TLB_HI], (*cp0).reg[MIPS_CP0_TLB_LO_0], (*cp0).reg[MIPS_CP0_TLB_LO_1]);
+        }
+
+        if index < (*cp0).tlb_entries {
+            let entry: *mut tlb_entry_t = addr_of_mut!((*cp0).tlb[index as usize]);
+
+            // Unmap the old entry if it was valid
+            mips64_cp0_unmap_tlb_to_mts(cpu, index as c_int);
+
+            (*entry).mask = (*cp0).reg[MIPS_CP0_PAGEMASK] & MIPS_TLB_PAGE_MASK;
+            (*entry).hi = (*cp0).reg[MIPS_CP0_TLB_HI] & !(*entry).mask;
+            (*entry).hi &= MIPS_CP0_HI_SAFE_MASK; // clear G bit
+            (*entry).lo0 = (*cp0).reg[MIPS_CP0_TLB_LO_0];
+            (*entry).lo1 = (*cp0).reg[MIPS_CP0_TLB_LO_1];
+
+            // if G bit is set in lo0 and lo1, set it in hi
+            if (((*entry).lo0 & (*entry).lo1) & MIPS_CP0_LO_G_MASK) != 0 {
+                (*entry).hi |= MIPS_TLB_G_MASK as m_uint64_t;
+            }
+
+            // Clear G bit in TLB lo0 and lo1
+            (*entry).lo0 &= !MIPS_CP0_LO_G_MASK;
+            (*entry).lo1 &= !MIPS_CP0_LO_G_MASK;
+
+            // Inform the MTS subsystem
+            mips64_cp0_map_tlb_to_mts(cpu, index as c_int);
+
+            if DEBUG_TLB_ACTIVITY != 0 {
+                mips64_tlb_dump_entry(cpu, index);
+            }
+        }
+    }
+    #[cfg(feature = "USE_UNSTABLE")]
+    {
+        let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+        if DEBUG_TLB_ACTIVITY != 0 {
+            cpu_log!((*cpu).gen, cstr!("TLB"), cstr!("CP0_TLBWI: writing entry %u [mask=0x%8.8llx,hi=0x%8.8llx,lo0=0x%8.8llx,lo1=0x%8.8llx]\n"), index, (*cp0).reg[MIPS_CP0_PAGEMASK], (*cp0).reg[MIPS_CP0_TLB_HI], (*cp0).reg[MIPS_CP0_TLB_LO_0], (*cp0).reg[MIPS_CP0_TLB_LO_1]);
+        }
+
+        if index < (*cp0).tlb_entries {
+            let entry: *mut tlb_entry_t = addr_of_mut!((*cp0).tlb[index as usize]);
+
+            mips64_cp0_tlb_callback(cpu, entry, TLB_ZONE_ADD);
+
+            (*entry).mask = (*cp0).reg[MIPS_CP0_PAGEMASK] & MIPS_TLB_PAGE_MASK;
+            (*entry).hi = (*cp0).reg[MIPS_CP0_TLB_HI];
+            (*entry).lo0 = (*cp0).reg[MIPS_CP0_TLB_LO_0];
+            (*entry).lo1 = (*cp0).reg[MIPS_CP0_TLB_LO_1];
+
+            // if G bit is set in lo0 and lo1, set it in hi
+            if (((*entry).lo0 & (*entry).lo1) & MIPS_CP0_LO_G_MASK as m_uint64_t) != 0 {
+                (*entry).hi |= MIPS_TLB_G_MASK as m_uint64_t;
+            } else {
+                (*entry).hi &= !(MIPS_TLB_G_MASK as m_uint64_t);
+            }
+
+            // Clear G bit in TLB lo0 and lo1
+            (*entry).lo0 &= !MIPS_CP0_LO_G_MASK;
+            (*entry).lo1 &= !MIPS_CP0_LO_G_MASK;
+
+            // Inform the MTS subsystem
+            (*cpu).mts_invalidate.unwrap()(cpu);
+
+            mips64_cp0_tlb_callback(cpu, entry, TLB_ZONE_DELETE);
+
+            if DEBUG_TLB_ACTIVITY != 0 {
+                mips64_tlb_dump_entry(cpu, index);
+            }
+        }
+    }
+}
+
+/// TLBWI: Write Indexed TLB entry
+#[no_mangle]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_cp0_exec_tlbwi(cpu: *mut cpu_mips_t) {
+    mips64_cp0_exec_tlbw(cpu, (*cpu).cp0.reg[MIPS_CP0_INDEX] as u_int);
 }

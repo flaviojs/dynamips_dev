@@ -31,11 +31,6 @@
 #define MTS_DEVID_SHIFT   26
 #define MTS_DEVOFF_MASK   0x03ffffff
 
-/* Memory access flags */
-#define MTS_ACC_AE  0x00000002   /* Address Error */
-#define MTS_ACC_T   0x00000004   /* TLB Exception */
-#define MTS_ACC_U   0x00000006   /* Unexistent */
-
 /* Hash table size for MTS64 (default: [shift:16,bits:12]) */
 #define MTS64_HASH_SHIFT   12
 #define MTS64_HASH_BITS    14

@@ -9,19 +9,6 @@
 #include "utils.h" 
 #include "rust_dynamips_c.h"
 
-/* Update the Context register with a faulty address */
-static inline 
-void mips64_cp0_update_context_reg(cpu_mips_t *cpu,m_uint64_t addr)
-{
-   m_uint64_t badvpn2;
-   
-   badvpn2 = addr & MIPS_CP0_CONTEXT_VPN2_MASK;
-   badvpn2 <<= MIPS_CP0_CONTEXT_BADVPN2_SHIFT;
-   
-   cpu->cp0.reg[MIPS_CP0_CONTEXT] &= ~MIPS_CP0_CONTEXT_BADVPN2_MASK;
-   cpu->cp0.reg[MIPS_CP0_CONTEXT] |= badvpn2;
-}
-
 /* Update the XContext register with a faulty address */
 static inline 
 void mips64_cp0_update_xcontext_reg(cpu_mips_t *cpu,m_uint64_t addr)

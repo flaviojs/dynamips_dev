@@ -178,6 +178,14 @@ pub const MIPS_CP0_CAUSE_IBIT2: m_uint32_t = 0x00000400;
 pub const MIPS_CP0_CAUSE_IBIT1: m_uint32_t = 0x00000200;
 pub const MIPS_CP0_CAUSE_IBIT0: m_uint32_t = 0x00000100;
 
+/// CP0 Context register
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_CP0_CONTEXT_VPN2_MASK: m_uint64_t = 0xffffe000; // applied to addr
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_CP0_CONTEXT_BADVPN2_MASK: m_uint64_t = 0x7fffff;
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_CP0_CONTEXT_BADVPN2_SHIFT: c_int = 4;
+
 /// TLB masks and shifts
 pub const MIPS_TLB_PAGE_MASK: m_uint64_t = 0x01ffe000;
 pub const MIPS_TLB_PAGE_SHIFT: c_int = 13;

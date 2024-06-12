@@ -13,16 +13,6 @@ use crate::mips64_cp0::*;
 use crate::utils::*;
 
 extern "C" {
-    fn mips64_cp0_exec_cfc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int);
-    fn mips64_cp0_exec_ctc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int);
-    fn mips64_cp0_exec_dmfc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int);
-    fn mips64_cp0_exec_dmtc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int);
-    fn mips64_cp0_exec_mfc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int);
-    fn mips64_cp0_exec_mtc0(cpu: *mut cpu_mips_t, gp_reg: u_int, cp0_reg: u_int);
-    fn mips64_cp0_exec_tlbp(cpu: *mut cpu_mips_t);
-    fn mips64_cp0_exec_tlbr(cpu: *mut cpu_mips_t);
-    fn mips64_cp0_exec_tlbwi(cpu: *mut cpu_mips_t);
-    fn mips64_cp0_exec_tlbwr(cpu: *mut cpu_mips_t);
     fn mips64_exec_break(cpu: *mut cpu_mips_t, code: u_int);
     fn mips64_exec_dmfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);
     fn mips64_exec_dmtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int);

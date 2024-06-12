@@ -17,7 +17,7 @@
 #include "cpu.h"
 #include "mips64_jit.h"
 #include "mips64_ppc32_trans.h"
-#include "mips64_cp0.h"
+#include "rust_dynamips_c.h"
 #include "memory.h"
 
 /* Macros for CPU structure access */

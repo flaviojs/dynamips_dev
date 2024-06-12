@@ -20,7 +20,6 @@
 #include "memory.h"
 #include "device.h"
 #include "mips64.h"
-#include "mips64_cp0.h"
 #include "rust_dynamips_c.h"
 #include "mips64_jit.h"
 #include "ppc32.h"

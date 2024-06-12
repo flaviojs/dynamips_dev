@@ -824,3 +824,10 @@ pub unsafe extern "C" fn mips64_cp0_exec_tlbw(cpu: *mut cpu_mips_t, index: u_int
 pub unsafe extern "C" fn mips64_cp0_exec_tlbwi(cpu: *mut cpu_mips_t) {
     mips64_cp0_exec_tlbw(cpu, (*cpu).cp0.reg[MIPS_CP0_INDEX] as u_int);
 }
+
+/// TLBWR: Write Random TLB entry
+#[no_mangle]
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn mips64_cp0_exec_tlbwr(cpu: *mut cpu_mips_t) {
+    mips64_cp0_exec_tlbw(cpu, mips64_cp0_get_random_reg(cpu));
+}

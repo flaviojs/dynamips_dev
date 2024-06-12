@@ -20,12 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 
-/* TLBWR: Write Random TLB entry */
-fastcall void mips64_cp0_exec_tlbwr(cpu_mips_t *cpu)
-{
-   mips64_cp0_exec_tlbw(cpu,mips64_cp0_get_random_reg(cpu));
-}
-
 /* Raw dump of the TLB */
 void mips64_tlb_raw_dump(cpu_gen_t *cpu)
 {

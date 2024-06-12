@@ -472,29 +472,3 @@ static fastcall int mips64_mts32_translate(cpu_mips_t *cpu,m_uint64_t vaddr,
 }
 
 /* ======================================================================== */
-
-/* Set the address mode */
-int mips64_set_addr_mode(cpu_mips_t *cpu,u_int addr_mode)
-{
-   if (cpu->addr_mode != addr_mode) {
-      mips64_mem_shutdown(cpu);
-      
-      switch(addr_mode) {
-         case 32:
-            mips64_mts32_init(cpu);
-            mips64_mts32_init_memop_vectors(cpu);
-            break;
-         case 64:
-            mips64_mts64_init(cpu);
-            mips64_mts64_init_memop_vectors(cpu);
-            break;
-         default:
-            fprintf(stderr,
-                    "mts_set_addr_mode: internal error (addr_mode=%u)\n",
-                    addr_mode);
-            exit(EXIT_FAILURE);
-      }
-   }
-
-   return(0);
-}

@@ -16,7 +16,6 @@
 #include "tcb.h"
 #include "mips64_jit.h"
 #include "mips64_amd64_trans.h"
-#include "mips64_cp0.h"
 #include "memory.h"
 
 /* Macros for CPU structure access */

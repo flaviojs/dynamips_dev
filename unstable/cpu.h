@@ -12,7 +12,6 @@
 #include "rust_dynamips_c.h"
 
 #include "mips64.h"
-#include "mips64_cp0.h"
 #include "ppc32.h"
 
 #define CPU_MIPS64(cpu) (&(cpu)->sp.mips64_cpu)

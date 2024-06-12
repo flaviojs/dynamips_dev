@@ -121,18 +121,16 @@ pub unsafe fn mips64_cp0_check_kernel_mode(cpu: *mut cpu_mips_t) -> c_int {
 }
 
 /// Get value of random register
-#[no_mangle] // TODO private
 #[inline]
-pub unsafe extern "C" fn mips64_cp0_get_random_reg(cpu: *mut cpu_mips_t) -> u_int {
+unsafe fn mips64_cp0_get_random_reg(cpu: *mut cpu_mips_t) -> u_int {
     // We use the virtual count register as a basic "random" value
     let wired: u_int = (*cpu).cp0.reg[MIPS_CP0_WIRED] as u_int;
     wired + ((*cpu).cp0_virt_cnt_reg % ((*cpu).cp0.tlb_entries - wired))
 }
 
 /// Get a cp0 register (fast version)
-#[no_mangle] // TODO private
 #[inline]
-pub unsafe extern "C" fn mips64_cp0_get_reg_fast(cpu: *mut cpu_mips_t, cp0_reg: u_int) -> m_uint64_t {
+unsafe fn mips64_cp0_get_reg_fast(cpu: *mut cpu_mips_t, cp0_reg: u_int) -> m_uint64_t {
     let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
     let delta: m_uint32_t;
     let mut res: m_uint32_t;
@@ -179,9 +177,8 @@ pub unsafe extern "C" fn mips64_cp0_exec_dmfc0(cpu: *mut cpu_mips_t, gp_reg: u_i
 }
 
 /// Set a cp0 register
-#[no_mangle] // TODO private
 #[inline]
-pub unsafe extern "C" fn mips64_cp0_set_reg(cpu: *mut cpu_mips_t, cp0_reg: u_int, val: m_uint64_t) {
+unsafe fn mips64_cp0_set_reg(cpu: *mut cpu_mips_t, cp0_reg: u_int, val: m_uint64_t) {
     let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
     let delta: m_uint32_t;
 
@@ -280,9 +277,8 @@ unsafe fn mips64_cp0_s1_get_reg(cpu: *mut cpu_mips_t, cp0_s1_reg: u_int) -> m_ui
 }
 
 /// Set a cp0 "set 1" register (R7000)
-#[no_mangle] // TODO private
 #[inline]
-pub unsafe extern "C" fn mips64_cp0_s1_set_reg(cpu: *mut cpu_mips_t, cp0_s1_reg: u_int, val: m_uint64_t) {
+unsafe fn mips64_cp0_s1_set_reg(cpu: *mut cpu_mips_t, cp0_s1_reg: u_int, val: m_uint64_t) {
     let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
 
     match cp0_s1_reg as usize {
@@ -328,13 +324,12 @@ pub unsafe extern "C" fn mips64_cp0_exec_ctc0(cpu: *mut cpu_mips_t, gp_reg: u_in
 
 /// Get the page size corresponding to a page mask
 #[inline]
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn get_page_size(page_mask: m_uint32_t) -> m_uint32_t {
+unsafe fn get_page_size(page_mask: m_uint32_t) -> m_uint32_t {
     (page_mask + 0x2000) >> 1
 }
 
 /// Get the VPN2 mask
-#[no_mangle] // TODO private
+#[no_mangle]
 #[cfg_attr(feature = "USE_UNSTABLE", inline(always))]
 pub unsafe extern "C" fn mips64_cp0_get_vpn2_mask(cpu: *mut cpu_mips_t) -> m_uint64_t {
     if (*cpu).addr_mode == 64 {
@@ -512,8 +507,7 @@ pub unsafe extern "C" fn mips64_cp0_tlb_lookup(cpu: *mut cpu_mips_t, vaddr: m_ui
 /// TODO: - Manage ASID
 ///       - Manage CPU Mode (user,supervisor or kernel)
 #[cfg(not(feature = "USE_UNSTABLE"))]
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn mips64_cp0_map_tlb_to_mts(cpu: *mut cpu_mips_t, index: c_int) {
+unsafe fn mips64_cp0_map_tlb_to_mts(cpu: *mut cpu_mips_t, index: c_int) {
     let v0_addr: m_uint64_t;
     let v1_addr: m_uint64_t;
     let p0_addr: m_uint64_t;
@@ -738,7 +732,7 @@ unsafe fn mips64_cp0_tlb_callback(cpu: *mut cpu_mips_t, entry: *mut tlb_entry_t,
 
 /// TLBW: Write a TLB entry
 #[inline]
-#[no_mangle] // TODO private
+#[no_mangle]
 pub unsafe extern "C" fn mips64_cp0_exec_tlbw(cpu: *mut cpu_mips_t, index: u_int) {
     #[cfg(not(feature = "USE_UNSTABLE"))]
     {

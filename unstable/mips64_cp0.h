@@ -9,20 +9,6 @@
 #include "utils.h" 
 #include "rust_dynamips_c.h"
 
-/* Update the XContext register with a faulty address */
-static inline 
-void mips64_cp0_update_xcontext_reg(cpu_mips_t *cpu,m_uint64_t addr)
-{
-   m_uint64_t rbadvpn2;
-   
-   rbadvpn2 = addr & MIPS_CP0_XCONTEXT_VPN2_MASK;
-   rbadvpn2 <<= MIPS_CP0_XCONTEXT_BADVPN2_SHIFT;
-   rbadvpn2 |= ((addr >> 62) & 0x03) << MIPS_CP0_XCONTEXT_R_SHIFT;
-   
-   cpu->cp0.reg[MIPS_CP0_XCONTEXT] &= ~MIPS_CP0_XCONTEXT_RBADVPN2_MASK;
-   cpu->cp0.reg[MIPS_CP0_XCONTEXT] |= rbadvpn2;
-}
-
 /* Get cp0 register index given its name */
 int mips64_cp0_get_reg_index(char *name);
 

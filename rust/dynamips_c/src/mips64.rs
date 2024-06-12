@@ -186,6 +186,16 @@ pub const MIPS_CP0_CONTEXT_BADVPN2_MASK: m_uint64_t = 0x7fffff;
 #[cfg(feature = "USE_UNSTABLE")]
 pub const MIPS_CP0_CONTEXT_BADVPN2_SHIFT: c_int = 4;
 
+/// CP0 XContext register
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_CP0_XCONTEXT_VPN2_MASK: m_uint64_t = 0xffffffe000;
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_CP0_XCONTEXT_RBADVPN2_MASK: m_uint64_t = 0x1ffffffff;
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_CP0_XCONTEXT_BADVPN2_SHIFT: c_int = 4;
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_CP0_XCONTEXT_R_SHIFT: c_int = 31;
+
 /// TLB masks and shifts
 pub const MIPS_TLB_PAGE_MASK: m_uint64_t = 0x01ffe000;
 pub const MIPS_TLB_PAGE_SHIFT: c_int = 13;

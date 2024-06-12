@@ -858,3 +858,16 @@ pub unsafe extern "C" fn mips64_cp0_update_context_reg(cpu: *mut cpu_mips_t, add
     (*cpu).cp0.reg[MIPS_CP0_CONTEXT] &= !MIPS_CP0_CONTEXT_BADVPN2_MASK;
     (*cpu).cp0.reg[MIPS_CP0_CONTEXT] |= badvpn2;
 }
+
+/// Update the XContext register with a faulty address
+#[cfg(feature = "USE_UNSTABLE")]
+#[inline]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_cp0_update_xcontext_reg(cpu: *mut cpu_mips_t, addr: m_uint64_t) {
+    let mut rbadvpn2: m_uint64_t = addr & MIPS_CP0_XCONTEXT_VPN2_MASK;
+    rbadvpn2 <<= MIPS_CP0_XCONTEXT_BADVPN2_SHIFT;
+    rbadvpn2 |= ((addr >> 62) & 0x03) << MIPS_CP0_XCONTEXT_R_SHIFT;
+
+    (*cpu).cp0.reg[MIPS_CP0_XCONTEXT] &= !MIPS_CP0_XCONTEXT_RBADVPN2_MASK;
+    (*cpu).cp0.reg[MIPS_CP0_XCONTEXT] |= rbadvpn2;
+}

@@ -831,3 +831,18 @@ pub unsafe extern "C" fn mips64_cp0_exec_tlbwi(cpu: *mut cpu_mips_t) {
 pub unsafe extern "C" fn mips64_cp0_exec_tlbwr(cpu: *mut cpu_mips_t) {
     mips64_cp0_exec_tlbw(cpu, mips64_cp0_get_random_reg(cpu));
 }
+
+/// Raw dump of the TLB
+#[no_mangle]
+pub unsafe extern "C" fn mips64_tlb_raw_dump(cpu: *mut cpu_gen_t) {
+    let mcpu: *mut cpu_mips_t = CPU_MIPS64(cpu);
+
+    libc::printf(cstr!("TLB dump:\n"));
+
+    for i in 0..(*mcpu).cp0.tlb_entries {
+        let entry: *mut tlb_entry_t = addr_of_mut!((*mcpu).cp0.tlb[i as usize]);
+        libc::printf(cstr!(" %2d: mask=0x%16.16llx hi=0x%16.16llx lo0=0x%16.16llx lo1=0x%16.16llx\n"), i, (*entry).mask, (*entry).hi, (*entry).lo0, (*entry).lo1);
+    }
+
+    libc::printf(cstr!("\n"));
+}

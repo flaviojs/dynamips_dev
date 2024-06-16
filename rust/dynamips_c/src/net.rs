@@ -4,6 +4,8 @@ use crate::dynamips_common::*;
 use crate::prelude::*;
 use crate::utils::*;
 
+pub type n_eth_addr_t = n_eth_addr;
+
 pub const N_IP_ADDR_LEN: usize = 4;
 pub const N_IP_ADDR_BITS: usize = 32;
 
@@ -28,6 +30,16 @@ pub union n_ipv6_addr_ip6 {
     pub u6_addr32: [m_uint32_t; 4],
     pub u6_addr16: [m_uint16_t; 8],
     pub u6_addr8: [m_uint8_t; 16],
+}
+
+/// Ethernet Constants
+pub const N_ETH_ALEN: usize = 6;
+
+/// Ethernet Address
+#[repr(C, packed)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_eth_addr {
+    pub eth_addr_byte: [m_uint8_t; N_ETH_ALEN],
 }
 
 /// IP mask table, which allows to find quickly a network mask 
@@ -441,4 +453,11 @@ pub unsafe extern "C" fn ipv6_parse_cidr(token: *mut c_char, net_addr: *mut n_ip
 
     libc::free(tmp.cast::<_>());
     0
+}
+
+/// Check for a broadcast ethernet address
+#[no_mangle]
+pub unsafe extern "C" fn eth_addr_is_bcast(addr: *mut n_eth_addr_t) -> c_int {
+    let bcast_addr: [u8; 6] = *b"\xff\xff\xff\xff\xff\xff";
+    (libc::memcmp(addr.cast::<_>(), bcast_addr.as_c_void(), 6) != 0).into()
 }

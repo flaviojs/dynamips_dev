@@ -70,3 +70,6 @@ typedef volatile u_int Volatile_u_int;
 
 [defines]
 "feature = USE_UNSTABLE" = "USE_UNSTABLE"
+
+[layout]
+packed = "__attribute__ ((__packed__))"

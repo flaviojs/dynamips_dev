@@ -80,7 +80,6 @@ typedef struct {
 #define N_ETH_MTU   1500
 
 /* Ethernet Constants */
-#define N_ETH_ALEN  6
 #define N_ETH_HLEN  sizeof(n_eth_hdr_t)
 
 /* CRC Length */
@@ -107,11 +106,6 @@ typedef struct {
 /* ARP opcodes */
 #define N_ARP_REQUEST  0x1
 #define N_ARP_REPLY    0x2
-
-/* Ethernet Address */
-typedef struct {
-   m_uint8_t eth_addr_byte[N_ETH_ALEN];
-} __attribute__ ((__packed__)) n_eth_addr_t;
 
 /* Ethernet Header */
 typedef struct {
@@ -257,13 +251,6 @@ typedef struct {
 }n_pkt_ctx_t;
 
 /* ----------------------------------------------------------------------- */
-
-/* Check for a broadcast ethernet address */
-static inline int eth_addr_is_bcast(n_eth_addr_t *addr)
-{
-   static const char *bcast_addr = "\xff\xff\xff\xff\xff\xff";
-   return(!memcmp(addr,bcast_addr,6));
-}
 
 /* Check for a broadcast/multicast ethernet address */
 static inline int eth_addr_is_mcast(n_eth_addr_t *addr)

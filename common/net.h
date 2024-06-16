@@ -15,15 +15,10 @@
 /* TODO missing in MinGW */
 #include <sys/socket.h>
 #include <netinet/in.h>
-
-#define N_IP_ADDR_LEN   4
-#define N_IP_ADDR_BITS  32
+#include "rust_dynamips_c.h"
 
 #define N_IPV6_ADDR_LEN   16
 #define N_IPV6_ADDR_BITS  128
-
-/* IPv4 Address definition */
-typedef m_uint32_t n_ip_addr_t;
 
 /* IP Network definition */
 typedef struct {

@@ -1,7 +1,29 @@
 //! Network Utility functions.
 
+use crate::dynamips_common::*;
 use crate::prelude::*;
 use crate::utils::*;
+
+pub const N_IP_ADDR_LEN: usize = 4;
+pub const N_IP_ADDR_BITS: usize = 32;
+
+/// IPv4 Address definition
+pub type n_ip_addr_t = m_uint32_t;
+
+/// IP mask table, which allows to find quickly a network mask 
+/// with a prefix length.
+#[rustfmt::skip]
+static mut ip_masks: [n_ip_addr_t; N_IP_ADDR_BITS+1] = [
+    0x0,
+    0x80000000, 0xC0000000, 0xE0000000, 0xF0000000,
+    0xF8000000, 0xFC000000, 0xFE000000, 0xFF000000,
+    0xFF800000, 0xFFC00000, 0xFFE00000, 0xFFF00000,
+    0xFFF80000, 0xFFFC0000, 0xFFFE0000, 0xFFFF0000,
+    0xFFFF8000, 0xFFFFC000, 0xFFFFE000, 0xFFFFF000,
+    0xFFFFF800, 0xFFFFFC00, 0xFFFFFE00, 0xFFFFFF00,
+    0xFFFFFF80, 0xFFFFFFC0, 0xFFFFFFE0, 0xFFFFFFF0,
+    0xFFFFFFF8, 0xFFFFFFFC, 0xFFFFFFFE, 0xFFFFFFFF
+];
 
 /// Create a new socket to connect to specified host
 unsafe fn udp_connect_ipv4_ipv6(local_port: c_int, remote_host: *mut c_char, remote_port: c_int) -> c_int {
@@ -271,4 +293,58 @@ pub unsafe extern "C" fn ip_listen(ip_addr: *mut c_char, port: c_int, sock_type:
     } else {
         ip_listen_ipv4(ip_addr, port, sock_type, max_fd, fd_array.into())
     }
+}
+
+/// Convert a string containing an IP address in binary
+#[no_mangle]
+pub unsafe extern "C" fn n_ip_aton(ip_addr: *mut n_ip_addr_t, ip_str: *mut c_char) -> c_int {
+    let mut addr: libc::in_addr = zeroed::<_>();
+
+    if inet_aton(ip_str, addr_of_mut!(addr)) == 0 {
+        return -1;
+    }
+
+    *ip_addr = ntohl(addr.s_addr);
+    0
+}
+
+/* Parse an IPv4 CIDR prefix */
+#[no_mangle]
+pub unsafe extern "C" fn ip_parse_cidr(token: *mut c_char, net_addr: *mut n_ip_addr_t, net_mask: *mut n_ip_addr_t) -> c_int {
+    // Find separator
+    let sl: *mut c_char = libc::strchr(token, b'/' as c_int);
+    if sl.is_null() {
+        return -1;
+    }
+
+    // Get mask
+    let mut err: *mut c_char = null_mut();
+    let mask: u_long = libc::strtoul(sl.add(1), addr_of_mut!(err), 0);
+    if *err != 0 {
+        return -1;
+    }
+
+    // Ensure that mask has a correct value
+    if mask as usize > N_IP_ADDR_BITS {
+        return -1;
+    }
+
+    let tmp: *mut c_char = libc::strdup(token);
+    if tmp.is_null() {
+        return -1;
+    }
+
+    *tmp.offset(sl.offset_from(token)) = 0;
+
+    // Parse IP Address
+    if n_ip_aton(net_addr, tmp) == -1 {
+        libc::free(tmp.cast::<_>());
+        return -1;
+    }
+
+    // Set netmask
+    *net_mask = ip_masks[mask as usize];
+
+    libc::free(tmp.cast::<_>());
+    0
 }

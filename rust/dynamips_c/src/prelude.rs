@@ -51,4 +51,6 @@ extern "C" {
     pub fn gethostbyname(name: *const c_char) -> *mut libc::hostent;
     pub fn htons(x: u16) -> u16;
     pub fn inet_addr(cp: *const libc::c_char) -> libc::in_addr_t;
+    pub fn inet_aton(cp: *const c_char, inp: *mut libc::in_addr) -> c_int;
+    pub fn ntohl(x: u32) -> u32;
 }

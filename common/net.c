@@ -10,22 +10,6 @@
 #include "rust_dynamips_c.h"
 
 /* 
- * IP mask table, which allows to find quickly a network mask 
- * with a prefix length.
- */
-n_ip_addr_t ip_masks[N_IP_ADDR_BITS+1] = {
-   0x0, 
-   0x80000000, 0xC0000000, 0xE0000000, 0xF0000000,
-   0xF8000000, 0xFC000000, 0xFE000000, 0xFF000000,
-   0xFF800000, 0xFFC00000, 0xFFE00000, 0xFFF00000,
-   0xFFF80000, 0xFFFC0000, 0xFFFE0000, 0xFFFF0000,
-   0xFFFF8000, 0xFFFFC000, 0xFFFFE000, 0xFFFFF000,
-   0xFFFFF800, 0xFFFFFC00, 0xFFFFFE00, 0xFFFFFF00,
-   0xFFFFFF80, 0xFFFFFFC0, 0xFFFFFFE0, 0xFFFFFFF0,
-   0xFFFFFFF8, 0xFFFFFFFC, 0xFFFFFFFE, 0xFFFFFFFF
-};
-
-/* 
  * IPv6 mask table, which allows to find quickly a network mask 
  * with a prefix length. Note this is a particularly ugly way
  * to do this, since we use statically 2 Kb.
@@ -69,18 +53,6 @@ char *n_ipv6_ntoa(char *buffer,n_ipv6_addr_t *ipv6_addr)
 }
 #endif
 
-/* Convert a string containing an IP address in binary */
-int n_ip_aton(n_ip_addr_t *ip_addr,char *ip_str)
-{
-   struct in_addr addr;
-
-   if (inet_aton(ip_str,&addr) == 0)
-      return(-1);
-
-   *ip_addr = ntohl(addr.s_addr);
-   return(0);
-}
-
 #if HAS_RFC2553
 /* Convert an IPv6 address from string into binary */
 int n_ipv6_aton(n_ipv6_addr_t *ipv6_addr,char *ip_str)
@@ -88,43 +60,6 @@ int n_ipv6_aton(n_ipv6_addr_t *ipv6_addr,char *ip_str)
    return(inet_pton(AF_INET6,ip_str,ipv6_addr));
 }
 #endif
-
-/* Parse an IPv4 CIDR prefix */
-int ip_parse_cidr(char *token,n_ip_addr_t *net_addr,n_ip_addr_t *net_mask)
-{
-   char *sl,*tmp,*err;
-   u_long mask;
-
-   /* Find separator */
-   if ((sl = strchr(token,'/')) == NULL)
-      return(-1);
-
-   /* Get mask */
-   mask = strtoul(sl+1,&err,0);
-   if (*err != 0)
-      return(-1);
-
-   /* Ensure that mask has a correct value */
-   if (mask > N_IP_ADDR_BITS)
-      return(-1);
-
-   if ((tmp = strdup(token)) == NULL)
-      return(-1);
-
-   tmp[sl - token] = '\0';
-
-   /* Parse IP Address */
-   if (n_ip_aton(net_addr,tmp) == -1) {
-      free(tmp);
-      return(-1);
-   }
-
-   /* Set netmask */
-   *net_mask = ip_masks[mask];
-
-   free(tmp);
-   return(0);
-}
 
 #if HAS_RFC2553
 /* Parse an IPv6 CIDR prefix */

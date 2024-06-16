@@ -52,5 +52,6 @@ extern "C" {
     pub fn htons(x: u16) -> u16;
     pub fn inet_addr(cp: *const libc::c_char) -> libc::in_addr_t;
     pub fn inet_aton(cp: *const c_char, inp: *mut libc::in_addr) -> c_int;
+    pub fn inet_pton(af: c_int, src: *const c_char, dst: *mut c_void) -> c_int;
     pub fn ntohl(x: u32) -> u32;
 }

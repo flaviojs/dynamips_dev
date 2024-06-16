@@ -17,23 +17,11 @@
 #include <netinet/in.h>
 #include "rust_dynamips_c.h"
 
-#define N_IPV6_ADDR_LEN   16
-#define N_IPV6_ADDR_BITS  128
-
 /* IP Network definition */
 typedef struct {
    n_ip_addr_t net_addr;
    n_ip_addr_t net_mask;
 }n_ip_network_t;
-
-/* IPv6 Address definition */
-typedef struct {
-   union {
-      m_uint32_t u6_addr32[4];
-      m_uint16_t u6_addr16[8];
-      m_uint8_t  u6_addr8[16];
-   }ip6;
-}n_ipv6_addr_t;
 
 /* IPv6 Network definition */
 typedef struct {

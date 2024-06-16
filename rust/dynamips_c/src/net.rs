@@ -7,8 +7,28 @@ use crate::utils::*;
 pub const N_IP_ADDR_LEN: usize = 4;
 pub const N_IP_ADDR_BITS: usize = 32;
 
+pub const N_IPV6_ADDR_LEN: usize = 16;
+pub const N_IPV6_ADDR_BITS: usize = 128;
+
 /// IPv4 Address definition
 pub type n_ip_addr_t = m_uint32_t;
+
+/// IPv6 Address definition
+pub type n_ipv6_addr_t = n_ipv6_addr;
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct n_ipv6_addr {
+    pub ip6: n_ipv6_addr_ip6,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union n_ipv6_addr_ip6 {
+    pub u6_addr32: [m_uint32_t; 4],
+    pub u6_addr16: [m_uint16_t; 8],
+    pub u6_addr8: [m_uint8_t; 16],
+}
 
 /// IP mask table, which allows to find quickly a network mask 
 /// with a prefix length.
@@ -24,6 +44,33 @@ static mut ip_masks: [n_ip_addr_t; N_IP_ADDR_BITS+1] = [
     0xFFFFFF80, 0xFFFFFFC0, 0xFFFFFFE0, 0xFFFFFFF0,
     0xFFFFFFF8, 0xFFFFFFFC, 0xFFFFFFFE, 0xFFFFFFFF
 ];
+
+/// IPv6 mask table, which allows to find quickly a network mask
+/// with a prefix length. Note this is a particularly ugly way
+/// to do this, since we use statically 2 Kb.
+static mut ipv6_masks: [n_ipv6_addr_t; N_IPV6_ADDR_BITS + 1] = unsafe { zeroed::<_>() };
+
+/// Initialize IPv6 masks
+#[no_mangle]
+pub unsafe extern "C" fn ipv6_init_masks() {
+    // Set all bits to 1
+    libc::memset(ipv6_masks.as_c_void_mut(), 0xff, size_of::<[n_ipv6_addr_t; N_IPV6_ADDR_BITS + 1]>());
+
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..N_IPV6_ADDR_BITS {
+        let mut index = i >> 3; /* Compute byte index (divide by 8) */
+
+        // rotate byte
+        ipv6_masks[i].ip6.u6_addr8[index] <<= 8 - (i & 7);
+        index += 1;
+
+        // clear following bytes
+        while index < N_IPV6_ADDR_LEN {
+            ipv6_masks[i].ip6.u6_addr8[index] = 0;
+            index += 1;
+        }
+    }
+}
 
 /// Create a new socket to connect to specified host
 unsafe fn udp_connect_ipv4_ipv6(local_port: c_int, remote_host: *mut c_char, remote_port: c_int) -> c_int {
@@ -344,6 +391,53 @@ pub unsafe extern "C" fn ip_parse_cidr(token: *mut c_char, net_addr: *mut n_ip_a
 
     // Set netmask
     *net_mask = ip_masks[mask as usize];
+
+    libc::free(tmp.cast::<_>());
+    0
+}
+
+/// Convert an IPv6 address from string into binary
+#[no_mangle]
+pub unsafe extern "C" fn n_ipv6_aton(ipv6_addr: *mut n_ipv6_addr_t, ip_str: *mut c_char) -> c_int {
+    inet_pton(libc::AF_INET6, ip_str, ipv6_addr.cast::<_>())
+}
+
+/// Parse an IPv6 CIDR prefix
+#[no_mangle]
+pub unsafe extern "C" fn ipv6_parse_cidr(token: *mut c_char, net_addr: *mut n_ipv6_addr_t, net_mask: *mut u_int) -> c_int {
+    // Find separator
+    let sl: *mut c_char = libc::strchr(token, b'/' as c_int);
+    if sl.is_null() {
+        return -1;
+    }
+
+    // Get mask
+    let mut err: *mut c_char = null_mut();
+    let mask: u_long = libc::strtoul(sl.add(1), addr_of_mut!(err), 0);
+    if *err != 0 {
+        return -1;
+    }
+
+    // Ensure that mask has a correct value
+    if mask as usize > N_IPV6_ADDR_BITS {
+        return -1;
+    }
+
+    let tmp: *mut c_char = libc::strdup(token);
+    if tmp.is_null() {
+        return -1;
+    }
+
+    *tmp.offset(sl.offset_from(token)) = 0;
+
+    // Parse IP Address
+    if n_ipv6_aton(net_addr, tmp) <= 0 {
+        libc::free(tmp.cast::<_>());
+        return -1;
+    }
+
+    // Set netmask
+    *net_mask = mask as u_int;
 
     libc::free(tmp.cast::<_>());
     0

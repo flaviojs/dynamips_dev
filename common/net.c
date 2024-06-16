@@ -9,34 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-/* 
- * IPv6 mask table, which allows to find quickly a network mask 
- * with a prefix length. Note this is a particularly ugly way
- * to do this, since we use statically 2 Kb.
- */
-n_ipv6_addr_t ipv6_masks[N_IPV6_ADDR_BITS+1];
-
-/* Initialize IPv6 masks */
-void ipv6_init_masks(void)
-{
-   int i,index;
-
-   /* Set all bits to 1 */
-   memset(ipv6_masks,0xff,sizeof(ipv6_masks));
-
-   for(i=0;i<N_IPV6_ADDR_BITS;i++) 
-   {
-      index = i >> 3;  /* Compute byte index (divide by 8) */
-
-      /* rotate byte */
-      ipv6_masks[i].ip6.u6_addr8[index++] <<= (8 - (i & 7));
-
-      /* clear following bytes */
-      while(index<N_IPV6_ADDR_LEN)
-         ipv6_masks[i].ip6.u6_addr8[index++] = 0;
-   }
-}
-
 /* Convert an IPv4 address into a string */
 char *n_ip_ntoa(char *buffer,n_ip_addr_t ip_addr)
 {
@@ -50,53 +22,6 @@ char *n_ip_ntoa(char *buffer,n_ip_addr_t ip_addr)
 char *n_ipv6_ntoa(char *buffer,n_ipv6_addr_t *ipv6_addr)
 {
    return((char *)inet_ntop(AF_INET6,ipv6_addr,buffer,INET6_ADDRSTRLEN));
-}
-#endif
-
-#if HAS_RFC2553
-/* Convert an IPv6 address from string into binary */
-int n_ipv6_aton(n_ipv6_addr_t *ipv6_addr,char *ip_str)
-{
-   return(inet_pton(AF_INET6,ip_str,ipv6_addr));
-}
-#endif
-
-#if HAS_RFC2553
-/* Parse an IPv6 CIDR prefix */
-int ipv6_parse_cidr(char *token,n_ipv6_addr_t *net_addr,u_int *net_mask)
-{
-   char *sl,*tmp,*err;
-   u_long mask;
-
-   /* Find separator */
-   if ((sl = strchr(token,'/')) == NULL)
-      return(-1);
-
-   /* Get mask */
-   mask = strtoul(sl+1,&err,0);
-   if (*err != 0)
-      return(-1);
-
-   /* Ensure that mask has a correct value */
-   if (mask > N_IPV6_ADDR_BITS)
-      return(-1);
-
-   if ((tmp = strdup(token)) == NULL)
-      return(-1);
-
-   tmp[sl - token] = '\0';
-
-   /* Parse IP Address */
-   if (n_ipv6_aton(net_addr,tmp) <= 0) {
-      free(tmp);
-      return(-1);
-   }
-
-   /* Set netmask */
-   *net_mask = (u_int)mask;
-
-   free(tmp);
-   return(0);
 }
 #endif
 

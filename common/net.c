@@ -9,14 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-/* Convert an IPv4 address into a string */
-char *n_ip_ntoa(char *buffer,n_ip_addr_t ip_addr)
-{
-   u_char *p = (u_char *)&ip_addr;
-   sprintf(buffer,"%u.%u.%u.%u",p[0],p[1],p[2],p[3]);
-   return(buffer);
-}
-
 #if HAS_RFC2553
 /* Convert in IPv6 address into a string */
 char *n_ipv6_ntoa(char *buffer,n_ipv6_addr_t *ipv6_addr)

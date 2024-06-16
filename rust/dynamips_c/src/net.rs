@@ -461,3 +461,11 @@ pub unsafe extern "C" fn eth_addr_is_bcast(addr: *mut n_eth_addr_t) -> c_int {
     let bcast_addr: [u8; 6] = *b"\xff\xff\xff\xff\xff\xff";
     (libc::memcmp(addr.cast::<_>(), bcast_addr.as_c_void(), 6) != 0).into()
 }
+
+/// Convert an IPv4 address into a string
+#[no_mangle]
+pub unsafe extern "C" fn n_ip_ntoa(buffer: *mut c_char, mut ip_addr: n_ip_addr_t) -> *mut c_char {
+    let p: *mut u_char = addr_of_mut!(ip_addr).cast::<_>();
+    libc::sprintf(buffer, cstr!("%u.%u.%u.%u"), *p.add(0) as c_uint, *p.add(1) as c_uint, *p.add(2) as c_uint, *p.add(3) as c_uint);
+    buffer
+}

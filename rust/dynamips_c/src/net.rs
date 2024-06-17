@@ -538,3 +538,36 @@ pub unsafe extern "C" fn parse_board_id(buf: *mut m_uint8_t, id: *const c_char, 
     }
     -1
 }
+
+/// Parse a MAC address
+#[no_mangle]
+pub unsafe extern "C" fn parse_mac_addr(addr: *mut n_eth_addr_t, str_: *mut c_char) -> c_int {
+    let mut v: [u_int; N_ETH_ALEN] = [0; N_ETH_ALEN];
+    let mut res: c_int;
+
+    // First try, standard format (00:01:02:03:04:05)
+    res = libc::sscanf(str_, cstr!("%x:%x:%x:%x:%x:%x"), addr_of_mut!(v[0]), addr_of_mut!(v[1]), addr_of_mut!(v[2]), addr_of_mut!(v[3]), addr_of_mut!(v[4]), addr_of_mut!(v[5]));
+
+    if res == 6 {
+        #[allow(clippy::needless_range_loop)]
+        for i in 0..N_ETH_ALEN {
+            (*addr).eth_addr_byte[i] = v[i] as m_uint8_t;
+        }
+        return 0;
+    }
+
+    // Second try, Cisco format (0001.0002.0003)
+    res = libc::sscanf(str_, cstr!("%x.%x.%x"), addr_of_mut!(v[0]), addr_of_mut!(v[1]), addr_of_mut!(v[2]));
+
+    if res == 3 {
+        (*addr).eth_addr_byte[0] = ((v[0] >> 8) & 0xFF) as m_uint8_t;
+        (*addr).eth_addr_byte[1] = (v[0] & 0xFF) as m_uint8_t;
+        (*addr).eth_addr_byte[2] = ((v[1] >> 8) & 0xFF) as m_uint8_t;
+        (*addr).eth_addr_byte[3] = (v[1] & 0xFF) as m_uint8_t;
+        (*addr).eth_addr_byte[4] = ((v[2] >> 8) & 0xFF) as m_uint8_t;
+        (*addr).eth_addr_byte[5] = (v[2] & 0xFF) as m_uint8_t;
+        return 0;
+    }
+
+    -1
+}

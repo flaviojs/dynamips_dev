@@ -9,37 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-/* Parse a MAC address */
-int parse_mac_addr(n_eth_addr_t *addr,char *str)
-{
-   u_int v[N_ETH_ALEN];
-   int i,res;
-
-   /* First try, standard format (00:01:02:03:04:05) */
-   res = sscanf(str,"%x:%x:%x:%x:%x:%x",&v[0],&v[1],&v[2],&v[3],&v[4],&v[5]);
-
-   if (res == 6) {
-      for(i=0;i<N_ETH_ALEN;i++)
-         addr->eth_addr_byte[i] = v[i];
-      return(0);
-   }
-
-   /* Second try, Cisco format (0001.0002.0003) */
-   res = sscanf(str,"%x.%x.%x",&v[0],&v[1],&v[2]);
-
-   if (res == 3) {
-      addr->eth_addr_byte[0] = (v[0] >> 8) & 0xFF;
-      addr->eth_addr_byte[1] = v[0] & 0xFF;
-      addr->eth_addr_byte[2] = (v[1] >> 8) & 0xFF;
-      addr->eth_addr_byte[3] = v[1] & 0xFF;
-      addr->eth_addr_byte[4] = (v[2] >> 8) & 0xFF;
-      addr->eth_addr_byte[5] = v[2] & 0xFF;
-      return(0);
-   }
-
-   return(-1);
-}
-
 /* Convert an Ethernet address into a string */
 char *n_eth_ntoa(char *buffer,n_eth_addr_t *addr,int format)
 {

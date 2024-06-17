@@ -475,3 +475,66 @@ pub unsafe extern "C" fn n_ip_ntoa(buffer: *mut c_char, mut ip_addr: n_ip_addr_t
 pub unsafe extern "C" fn n_ipv6_ntoa(buffer: *mut c_char, ipv6_addr: *mut n_ipv6_addr_t) -> *mut c_char {
     inet_ntop(libc::AF_INET6, ipv6_addr.cast::<_>(), buffer, c_INET6_ADDRSTRLEN()).cast_mut()
 }
+
+/// Parse a processor board id and return the eeprom settings in a buffer
+#[no_mangle]
+pub unsafe extern "C" fn parse_board_id(buf: *mut m_uint8_t, id: *const c_char, encode: c_int) -> c_int {
+    // Encode the serial board id
+    //   encode 4 maps this into 4 bytes
+    //   encode 9 maps into 9 bytes
+    //   encode 11 maps into 11 bytes
+
+    libc::memset(buf.cast::<_>(), 0, 11);
+    if encode == 4 {
+        let mut v: c_int = 0;
+        let res: c_int = libc::sscanf(id, cstr!("%d"), addr_of_mut!(v));
+        if res != 1 {
+            return -1;
+        }
+        *buf.add(3) = (v & 0xFF) as m_uint8_t;
+        v >>= 8;
+        *buf.add(2) = (v & 0xFF) as m_uint8_t;
+        v >>= 8;
+        *buf.add(1) = (v & 0xFF) as m_uint8_t;
+        v >>= 8;
+        *buf.add(0) = (v & 0xFF) as m_uint8_t;
+        v >>= 8;
+        if false {
+            let _ = v;
+            libc::printf(cstr!("%x %x %x %x \n"), *buf.add(0) as c_uint, *buf.add(1) as c_uint, *buf.add(2) as c_uint, *buf.add(3) as c_uint);
+        }
+        return 0;
+    } else if encode == 9 {
+        let res: c_int = libc::sscanf(id, cstr!("%c%c%c%2hx%2hx%c%c%c%c"), buf.add(0), buf.add(1), buf.add(2), buf.add(3).cast::<c_ushort>(), buf.add(4).cast::<c_ushort>(), buf.add(5), buf.add(6), buf.add(7), buf.add(8));
+        if res != 9 {
+            return -1;
+        }
+        if false {
+            libc::printf(cstr!("%x %x %x %x %x %x %x %x .. %x\n"), *buf.add(0) as c_uint, *buf.add(1) as c_uint, *buf.add(2) as c_uint, *buf.add(3) as c_uint, *buf.add(4) as c_uint, *buf.add(5) as c_uint, *buf.add(6) as c_uint, *buf.add(7) as c_uint, *buf.add(8) as c_uint);
+        }
+        return 0;
+    } else if encode == 11 {
+        let res: c_int = libc::sscanf(id, cstr!("%c%c%c%c%c%c%c%c%c%c%c"), buf.add(0), buf.add(1), buf.add(2), buf.add(3), buf.add(4), buf.add(5), buf.add(6), buf.add(7), buf.add(8), buf.add(9), buf.add(10));
+        if res != 11 {
+            return -1;
+        }
+        if false {
+            libc::printf(
+                cstr!("%x %x %x %x %x %x %x %x %x %x .. %x\n"),
+                *buf.add(0) as c_uint,
+                *buf.add(1) as c_uint,
+                *buf.add(2) as c_uint,
+                *buf.add(3) as c_uint,
+                *buf.add(4) as c_uint,
+                *buf.add(5) as c_uint,
+                *buf.add(6) as c_uint,
+                *buf.add(7) as c_uint,
+                *buf.add(8) as c_uint,
+                *buf.add(9) as c_uint,
+                *buf.add(10) as c_uint,
+            );
+        }
+        return 0;
+    }
+    -1
+}

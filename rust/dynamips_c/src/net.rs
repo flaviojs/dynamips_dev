@@ -571,3 +571,12 @@ pub unsafe extern "C" fn parse_mac_addr(addr: *mut n_eth_addr_t, str_: *mut c_ch
 
     -1
 }
+
+/// Convert an Ethernet address into a string
+#[no_mangle]
+pub unsafe extern "C" fn n_eth_ntoa(buffer: *mut c_char, addr: *mut n_eth_addr_t, format: c_int) -> *mut c_char {
+    let str_format: *mut c_char = if format == 0 { cstr!("%2.2x:%2.2x:%2.2x:%2.2x:%2.2x:%2.2x") } else { cstr!("%2.2x%2.2x.%2.2x%2.2x.%2.2x%2.2x") };
+
+    libc::sprintf(buffer, str_format, (*addr).eth_addr_byte[0] as c_uint, (*addr).eth_addr_byte[1] as c_uint, (*addr).eth_addr_byte[2] as c_uint, (*addr).eth_addr_byte[3] as c_uint, (*addr).eth_addr_byte[4] as c_uint, (*addr).eth_addr_byte[5] as c_uint);
+    buffer
+}

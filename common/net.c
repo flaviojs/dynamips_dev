@@ -9,24 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-/* Convert an Ethernet address into a string */
-char *n_eth_ntoa(char *buffer,n_eth_addr_t *addr,int format)
-{
-   char *str_format;
-
-   if (format == 0) {
-      str_format = "%2.2x:%2.2x:%2.2x:%2.2x:%2.2x:%2.2x";
-   } else {
-      str_format = "%2.2x%2.2x.%2.2x%2.2x.%2.2x%2.2x";
-   }
-
-   sprintf(buffer,str_format,
-           addr->eth_addr_byte[0],addr->eth_addr_byte[1],
-           addr->eth_addr_byte[2],addr->eth_addr_byte[3],
-           addr->eth_addr_byte[4],addr->eth_addr_byte[5]);
-   return(buffer);
-}
-
 #if HAS_RFC2553
 /* Get port in an address info structure */
 static int ip_socket_get_port(struct sockaddr *addr)

@@ -10,28 +10,6 @@
 #include "rust_dynamips_c.h"
 
 #if HAS_RFC2553
-/* Set port in an address info structure */
-static int ip_socket_set_port(struct sockaddr *addr,int port)
-{
-   if (!addr)
-      return(-1);
-   
-   switch(addr->sa_family) {
-      case AF_INET:
-         ((struct sockaddr_in *)addr)->sin_port = htons(port);
-         return(0);
-                  
-      case AF_INET6:
-         ((struct sockaddr_in6 *)addr)->sin6_port = htons(port);
-         return(0);
-         
-      default:
-         fprintf(stderr,"ip_socket_set_port: unknown address family %d\n",
-                 addr->sa_family);
-         return(-1);
-   }
-}
-
 /* Try to create a socket and bind to the specified address info */
 static int ip_socket_bind(struct addrinfo *addr)
 {

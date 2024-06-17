@@ -593,3 +593,26 @@ pub unsafe extern "C" fn ip_socket_get_port(addr: *mut libc::sockaddr) -> c_int 
         }
     }
 }
+
+/// Set port in an address info structure
+#[no_mangle]
+pub unsafe extern "C" fn ip_socket_set_port(addr: *mut libc::sockaddr, port: c_int) -> c_int {
+    if addr.is_null() {
+        return -1;
+    }
+
+    match (*addr).sa_family as c_int {
+        libc::AF_INET => {
+            (*addr.cast::<libc::sockaddr_in>()).sin_port = htons(port as u16);
+            0
+        }
+        libc::AF_INET6 => {
+            (*addr.cast::<libc::sockaddr_in6>()).sin6_port = htons(port as u16);
+            0
+        }
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("ip_socket_set_port: unknown address family %d\n"), (*addr).sa_family as c_int);
+            -1
+        }
+    }
+}

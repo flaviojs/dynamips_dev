@@ -44,6 +44,7 @@ pub use std::ptr::null_mut;
 extern "C" {
     // _ext.c
     pub fn c_errno() -> c_int;
+    pub fn c_INET6_ADDRSTRLEN() -> libc::socklen_t;
     pub fn c_set_errno(x: c_int);
     pub fn c_stderr() -> *mut libc::FILE;
     pub fn c_timezone() -> c_long;
@@ -52,6 +53,7 @@ extern "C" {
     pub fn htons(x: u16) -> u16;
     pub fn inet_addr(cp: *const libc::c_char) -> libc::in_addr_t;
     pub fn inet_aton(cp: *const c_char, inp: *mut libc::in_addr) -> c_int;
+    pub fn inet_ntop(af: c_int, src: *const c_void, dst: *mut c_char, size: libc::socklen_t) -> *const c_char;
     pub fn inet_pton(af: c_int, src: *const c_char, dst: *mut c_void) -> c_int;
     pub fn ntohl(x: u32) -> u32;
 }

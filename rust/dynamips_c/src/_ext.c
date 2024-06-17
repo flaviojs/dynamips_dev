@@ -1,5 +1,6 @@
 //! Required C code for the crate dynamips_c.
 
+#include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
 #include <time.h>
@@ -24,4 +25,8 @@ FILE *c_stderr(void) {
 
 long c_timezone(void) {
     return(GET_TIMEZONE);
+}
+
+socklen_t c_INET6_ADDRSTRLEN(void) {
+    return(INET6_ADDRSTRLEN);
 }

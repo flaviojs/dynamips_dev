@@ -9,14 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-#if HAS_RFC2553
-/* Convert in IPv6 address into a string */
-char *n_ipv6_ntoa(char *buffer,n_ipv6_addr_t *ipv6_addr)
-{
-   return((char *)inet_ntop(AF_INET6,ipv6_addr,buffer,INET6_ADDRSTRLEN));
-}
-#endif
-
 /* Parse a processor board id and return the eeprom settings in a buffer */
 int parse_board_id(m_uint8_t *buf,const char *id,int encode)
 {

@@ -469,3 +469,9 @@ pub unsafe extern "C" fn n_ip_ntoa(buffer: *mut c_char, mut ip_addr: n_ip_addr_t
     libc::sprintf(buffer, cstr!("%u.%u.%u.%u"), *p.add(0) as c_uint, *p.add(1) as c_uint, *p.add(2) as c_uint, *p.add(3) as c_uint);
     buffer
 }
+
+/// Convert in IPv6 address into a string
+#[no_mangle]
+pub unsafe extern "C" fn n_ipv6_ntoa(buffer: *mut c_char, ipv6_addr: *mut n_ipv6_addr_t) -> *mut c_char {
+    inet_ntop(libc::AF_INET6, ipv6_addr.cast::<_>(), buffer, c_INET6_ADDRSTRLEN()).cast_mut()
+}

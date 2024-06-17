@@ -580,3 +580,16 @@ pub unsafe extern "C" fn n_eth_ntoa(buffer: *mut c_char, addr: *mut n_eth_addr_t
     libc::sprintf(buffer, str_format, (*addr).eth_addr_byte[0] as c_uint, (*addr).eth_addr_byte[1] as c_uint, (*addr).eth_addr_byte[2] as c_uint, (*addr).eth_addr_byte[3] as c_uint, (*addr).eth_addr_byte[4] as c_uint, (*addr).eth_addr_byte[5] as c_uint);
     buffer
 }
+
+/// Get port in an address info structure
+#[no_mangle]
+pub unsafe extern "C" fn ip_socket_get_port(addr: *mut libc::sockaddr) -> c_int {
+    match (*addr).sa_family as c_int {
+        libc::AF_INET => ntohs((*addr.cast::<libc::sockaddr_in>()).sin_port) as c_int,
+        libc::AF_INET6 => ntohs((*addr.cast::<libc::sockaddr_in6>()).sin6_port) as c_int,
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("ip_socket_get_port: unknown address family %d\n"), (*addr).sa_family as c_int);
+            -1
+        }
+    }
+}

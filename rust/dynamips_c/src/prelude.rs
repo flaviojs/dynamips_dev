@@ -56,4 +56,5 @@ extern "C" {
     pub fn inet_ntop(af: c_int, src: *const c_void, dst: *mut c_char, size: libc::socklen_t) -> *const c_char;
     pub fn inet_pton(af: c_int, src: *const c_char, dst: *mut c_void) -> c_int;
     pub fn ntohl(x: u32) -> u32;
+    pub fn ntohs(x: u16) -> u16;
 }

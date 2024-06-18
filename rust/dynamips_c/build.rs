@@ -31,4 +31,5 @@ fn main() {
     emit_dep_expr_cfg("libc", "{ use libc::B230400; }", "has_libc_B230400");
     emit_dep_expr_cfg("libc", "{ use libc::CRTSCTS; }", "has_libc_CRTSCTS");
     emit_dep_expr_cfg("libc", "{ use libc::CNEW_RTSCTS; }", "has_libc_CNEW_RTSCTS");
+    emit_dep_expr_cfg("libc", "{ use libc::IPV6_V6ONLY; }", "has_libc_IPV6_V6ONLY");
 }

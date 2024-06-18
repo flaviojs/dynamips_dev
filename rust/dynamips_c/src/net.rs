@@ -616,3 +616,142 @@ pub unsafe extern "C" fn ip_socket_set_port(addr: *mut libc::sockaddr, port: c_i
         }
     }
 }
+
+/// Try to create a socket and bind to the specified address info
+unsafe fn ip_socket_bind_ipv4_ipv6(addr: *mut libc::addrinfo) -> c_int {
+    let off: c_int = 0;
+
+    let fd: c_int = libc::socket((*addr).ai_family, (*addr).ai_socktype, (*addr).ai_protocol);
+    if fd < 0 {
+        return -1;
+    }
+
+    #[cfg(has_libc_IPV6_V6ONLY)]
+    {
+        if (*addr).ai_family == libc::AF_INET6 {
+            // if supported, allow packets to/from IPv4-mapped IPv6 addresses
+            libc::setsockopt(fd, libc::IPPROTO_IPV6, libc::IPV6_V6ONLY, addr_of!(off).cast::<_>(), size_of::<c_int>() as libc::socklen_t);
+        }
+    }
+
+    if (libc::bind(fd, (*addr).ai_addr, (*addr).ai_addrlen) < 0) || (((*addr).ai_socktype == libc::SOCK_STREAM) && (libc::listen(fd, 5) < 0)) {
+        libc::close(fd);
+        return -1;
+    }
+
+    fd
+}
+
+/// Listen on a TCP/UDP port - port is choosen in the specified range
+unsafe fn ip_listen_range_ipv4_ipv6(ip_addr: *mut c_char, port_start: c_int, port_end: c_int, port: *mut c_int, sock_type: c_int) -> c_int {
+    let mut hints: libc::addrinfo = zeroed::<_>();
+    let mut res: *mut libc::addrinfo;
+    let mut res0: *mut libc::addrinfo = null_mut();
+    let mut st: libc::sockaddr_storage = zeroed::<_>();
+    let mut st_len: libc::socklen_t;
+    let mut port_str: [c_char; 20] = [0; 20];
+    let mut fd: c_int = -1;
+
+    libc::memset(addr_of_mut!(hints).cast::<_>(), 0, size_of::<libc::addrinfo>());
+    hints.ai_family = libc::PF_UNSPEC;
+    hints.ai_socktype = sock_type;
+    hints.ai_flags = libc::AI_PASSIVE;
+
+    libc::snprintf(port_str.as_c_mut(), port_str.len(), cstr!("%d"), port_start);
+    let addr: *mut c_char = if !ip_addr.is_null() && libc::strlen(ip_addr) != 0 { ip_addr } else { null_mut() };
+
+    let error: c_int = libc::getaddrinfo(addr, port_str.as_c(), addr_of!(hints), addr_of_mut!(res0));
+    if error != 0 {
+        libc::fprintf(c_stderr(), cstr!("ip_listen_range: %s"), libc::gai_strerror(error));
+        return -1;
+    }
+
+    'done: for i in port_start..=port_end {
+        res = res0;
+        while !res.is_null() {
+            ip_socket_set_port((*res).ai_addr, i);
+
+            fd = ip_socket_bind_ipv4_ipv6(res);
+            if fd >= 0 {
+                st_len = size_of::<libc::sockaddr_storage>() as libc::socklen_t;
+                if libc::getsockname(fd, addr_of_mut!(st).cast::<libc::sockaddr>(), addr_of_mut!(st_len)) != 0 {
+                    libc::close(fd);
+                    res = (*res).ai_next;
+                    continue;
+                }
+                *port = ip_socket_get_port(addr_of_mut!(st).cast::<libc::sockaddr>());
+                break 'done;
+            }
+            res = (*res).ai_next;
+        }
+    }
+
+    libc::freeaddrinfo(res0);
+    fd
+}
+
+/// Try to create a socket and bind to the specified address info
+unsafe fn ip_socket_bind_ipv4(sin: *mut libc::sockaddr_in, sock_type: c_int) -> c_int {
+    let fd: c_int = libc::socket((*sin).sin_family as c_int, sock_type, 0);
+    if fd < 0 {
+        return -1;
+    }
+
+    if (libc::bind(fd, sin.cast::<libc::sockaddr>(), size_of::<libc::sockaddr_in>() as libc::socklen_t) < 0) || ((sock_type == libc::SOCK_STREAM) && (libc::listen(fd, 5) < 0)) {
+        libc::close(fd);
+        return -1;
+    }
+
+    fd
+}
+
+/// Listen on a TCP/UDP port - port is choosen in the specified range
+unsafe fn ip_listen_range_ipv4(ip_addr: *mut c_char, port_start: c_int, port_end: c_int, port: *mut c_int, sock_type: c_int) -> c_int {
+    let hp: *mut libc::hostent;
+    let mut sin: libc::sockaddr_in = zeroed();
+    let mut len: libc::socklen_t;
+    let mut fd: c_int;
+
+    libc::memset(addr_of_mut!(sin).cast::<_>(), 0, size_of::<libc::sockaddr_in>());
+    sin.sin_family = libc::PF_INET as libc::sa_family_t;
+
+    if !ip_addr.is_null() && libc::strlen(ip_addr) != 0 {
+        hp = gethostbyname(ip_addr);
+        if hp.is_null() {
+            libc::fprintf(c_stderr(), cstr!("ip_listen_range: unable to resolve '%s'\n"), ip_addr);
+            return -1;
+        }
+
+        libc::memcpy(addr_of_mut!(sin.sin_addr).cast::<_>(), (*(*hp).h_addr_list.add(0)).cast::<_>(), size_of::<libc::in_addr>());
+    }
+
+    for i in port_start..=port_end {
+        sin.sin_port = htons(i as u16);
+
+        fd = ip_socket_bind_ipv4(addr_of_mut!(sin), sock_type);
+        if fd >= 0 {
+            len = size_of::<libc::sockaddr_in>() as libc::socklen_t;
+            if libc::getsockname(fd, addr_of_mut!(sin).cast::<libc::sockaddr>(), addr_of_mut!(len)) != 0 {
+                libc::close(fd);
+                continue;
+            }
+            *port = ntohs(sin.sin_port) as c_int;
+            return fd;
+        }
+    }
+
+    -1
+}
+
+/// Listen on a TCP/UDP port - port is choosen in the specified range
+#[no_mangle]
+pub unsafe extern "C" fn ip_listen_range(ip_addr: *mut c_char, port_start: c_int, port_end: c_int, port: *mut c_int, sock_type: c_int) -> c_int {
+    #[cfg(feature = "ENABLE_IPV6")]
+    {
+        ip_listen_range_ipv4_ipv6(ip_addr, port_start, port_end, port, sock_type)
+    }
+    #[cfg(not(feature = "ENABLE_IPV6"))]
+    {
+        ip_listen_range_ipv4(ip_addr, port_start, port_end, port, sock_type)
+    }
+}

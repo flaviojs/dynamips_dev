@@ -10,75 +10,6 @@
 #include "rust_dynamips_c.h"
 
 #if HAS_RFC2553
-/* Try to create a socket and bind to the specified address info */
-static int ip_socket_bind(struct addrinfo *addr)
-{
-   int fd,off=0;
-   
-   if ((fd = socket(addr->ai_family,addr->ai_socktype,addr->ai_protocol)) < 0)
-      return(-1);
-      
-#ifdef IPV6_V6ONLY
-   if (addr->ai_family == AF_INET6) {
-      // if supported, allow packets to/from IPv4-mapped IPv6 addresses
-      (void)setsockopt(fd,IPPROTO_IPV6,IPV6_V6ONLY,&off,sizeof(off));
-   }
-#endif
-
-   if ( (bind(fd,addr->ai_addr,addr->ai_addrlen) < 0) ||
-        ((addr->ai_socktype == SOCK_STREAM) && (listen(fd,5) < 0)) )
-   {
-      close(fd);
-      return(-1);
-   }
-
-   return(fd);
-}
-
-/* Listen on a TCP/UDP port - port is choosen in the specified range */
-int ip_listen_range(char *ip_addr,int port_start,int port_end,int *port,
-                    int sock_type)
-{
-   struct addrinfo hints,*res,*res0;
-   struct sockaddr_storage st;
-   socklen_t st_len;
-   char port_str[20],*addr;
-   int error,i,fd = -1;
-
-   memset(&hints,0,sizeof(hints));
-   hints.ai_family   = PF_UNSPEC;
-   hints.ai_socktype = sock_type;
-   hints.ai_flags    = AI_PASSIVE;
-
-   snprintf(port_str,sizeof(port_str),"%d",port_start);
-   addr = (ip_addr && strlen(ip_addr)) ? ip_addr : NULL;
-
-   if ((error = getaddrinfo(addr,port_str,&hints,&res0)) != 0) {
-      fprintf(stderr,"ip_listen_range: %s", gai_strerror(error));
-      return(-1);
-   }
-
-   for(i=port_start;i<=port_end;i++) {
-      for(res=res0;res!=NULL;res=res->ai_next) {
-         ip_socket_set_port(res->ai_addr,i);
-         
-         if ((fd = ip_socket_bind(res)) >= 0) {
-            st_len = sizeof(st);
-            if (getsockname(fd,(struct sockaddr *)&st,&st_len) != 0) {
-               close(fd);
-               continue;
-            }
-            *port = ip_socket_get_port((struct sockaddr *)&st);
-            goto done;
-         }
-      }
-   }
-   
- done:
-   freeaddrinfo(res0);
-   return(fd);
-}
-
 /* Connect an existing socket to connect to specified host */
 int ip_connect_fd(int fd,char *remote_host,int remote_port)
 {
@@ -108,62 +39,6 @@ int ip_connect_fd(int fd,char *remote_host,int remote_port)
    return(0);
 }
 #else
-/* Try to create a socket and bind to the specified address info */
-static int ip_socket_bind(struct sockaddr_in *sin,int sock_type)
-{
-   int fd;
-   
-   if ((fd = socket(sin->sin_family,sock_type,0)) < 0)
-      return(-1);
-   
-   if ( (bind(fd,(struct sockaddr *)sin,sizeof(*sin)) < 0) ||
-        ((sock_type == SOCK_STREAM) && (listen(fd,5) < 0)) )
-   {
-      close(fd);
-      return(-1);
-   }
-   
-   return(fd);
-}
-
-/* Listen on a TCP/UDP port - port is choosen in the specified range */
-int ip_listen_range(char *ip_addr,int port_start,int port_end,int *port,
-                    int sock_type)
-{
-   struct hostent *hp;
-   struct sockaddr_in sin;
-   socklen_t len;
-   int i,fd;
-
-   memset(&sin,0,sizeof(sin));
-   sin.sin_family = PF_INET;
-   
-   if (ip_addr && strlen(ip_addr)) {
-      if (!(hp = gethostbyname(ip_addr))) {
-         fprintf(stderr,"ip_listen_range: unable to resolve '%s'\n",ip_addr);
-         return(-1);
-      }
-   
-      memcpy(&sin.sin_addr,hp->h_addr_list[0],sizeof(struct in_addr));
-   }
-      
-   for(i=port_start;i<=port_end;i++) {
-      sin.sin_port = htons(i);
-      
-      if ((fd = ip_socket_bind(&sin,sock_type)) >= 0) {
-         len = sizeof(sin);
-         if (getsockname(fd,(struct sockaddr *)&sin,&len) != 0) {
-            close(fd);
-            continue;
-         }
-         *port = ntohs(sin.sin_port);
-         return(fd);
-      }
-   }
-   
-   return(-1);
-}
-
 /* Connect an existing socket to connect to specified host */
 int ip_connect_fd(int fd,char *remote_host,int remote_port)
 {

@@ -9,13 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-/* Create a socket UDP listening in a port of specified range */
-int udp_listen_range(char *ip_addr,int port_start,int port_end,int *port)
-{
-   return(ip_listen_range(ip_addr,port_start,port_end,port,SOCK_DGRAM));
-}
-
-
 /* 
  * ISL rewrite.
  *

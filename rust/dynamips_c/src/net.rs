@@ -822,3 +822,9 @@ pub unsafe extern "C" fn ip_connect_fd(fd: c_int, remote_host: *mut c_char, remo
         ip_connect_fd_ipv4(fd, remote_host, remote_port)
     }
 }
+
+/// Create a socket UDP listening in a port of specified range
+#[no_mangle]
+pub unsafe extern "C" fn udp_listen_range(ip_addr: *mut c_char, port_start: c_int, port_end: c_int, port: *mut c_int) -> c_int {
+    ip_listen_range(ip_addr, port_start, port_end, port, libc::SOCK_DGRAM)
+}

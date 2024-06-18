@@ -755,3 +755,70 @@ pub unsafe extern "C" fn ip_listen_range(ip_addr: *mut c_char, port_start: c_int
         ip_listen_range_ipv4(ip_addr, port_start, port_end, port, sock_type)
     }
 }
+
+/// Connect an existing socket to connect to specified host
+unsafe fn ip_connect_fd_ipv4_ipv6(fd: c_int, remote_host: *mut c_char, remote_port: c_int) -> c_int {
+    let mut hints: libc::addrinfo = zeroed::<_>();
+    let mut res: *mut libc::addrinfo;
+    let mut res0: *mut libc::addrinfo = null_mut();
+    let mut port_str: [c_char; 20] = [0; 20];
+
+    libc::memset(addr_of_mut!(hints).cast::<_>(), 0, size_of::<libc::addrinfo>());
+    hints.ai_family = libc::PF_UNSPEC;
+
+    libc::snprintf(port_str.as_c_mut(), port_str.len(), cstr!("%d"), remote_port);
+
+    let error: c_int = libc::getaddrinfo(remote_host, port_str.as_c(), addr_of!(hints), addr_of_mut!(res0));
+    if error != 0 {
+        libc::fprintf(c_stderr(), cstr!("%s\n"), libc::gai_strerror(error));
+        return -1;
+    }
+
+    res = res0;
+    while !res.is_null() {
+        if ((*res).ai_family != libc::PF_INET) && ((*res).ai_family != libc::PF_INET6) {
+            res = (*res).ai_next;
+            continue;
+        }
+
+        if libc::connect(fd, (*res).ai_addr, (*res).ai_addrlen) == 0 {
+            break;
+        }
+        res = (*res).ai_next;
+    }
+
+    libc::freeaddrinfo(res0);
+    0
+}
+
+/// Connect an existing socket to connect to specified host
+unsafe fn ip_connect_fd_ipv4(fd: c_int, remote_host: *mut c_char, remote_port: c_int) -> c_int {
+    let mut sin: libc::sockaddr_in = zeroed::<_>();
+
+    let hp: *mut libc::hostent = gethostbyname(remote_host);
+    if hp.is_null() {
+        libc::fprintf(c_stderr(), cstr!("ip_connect_fd: unable to resolve '%s'\n"), remote_host);
+        return -1;
+    }
+
+    // try to connect to remote host
+    libc::memset(addr_of_mut!(sin).cast::<_>(), 0, size_of::<libc::sockaddr_in>());
+    libc::memcpy(addr_of_mut!(sin.sin_addr).cast::<_>(), (*(*hp).h_addr_list.add(0)).cast::<_>(), size_of::<libc::in_addr>());
+    sin.sin_family = libc::PF_INET as libc::sa_family_t;
+    sin.sin_port = htons(remote_port as u16);
+
+    libc::connect(fd, addr_of!(sin).cast::<libc::sockaddr>(), size_of::<libc::sockaddr_in>() as libc::socklen_t)
+}
+
+/// Connect an existing socket to connect to specified host
+#[no_mangle]
+pub unsafe extern "C" fn ip_connect_fd(fd: c_int, remote_host: *mut c_char, remote_port: c_int) -> c_int {
+    #[cfg(feature = "ENABLE_IPV6")]
+    {
+        ip_connect_fd_ipv4_ipv6(fd, remote_host, remote_port)
+    }
+    #[cfg(not(feature = "ENABLE_IPV6"))]
+    {
+        ip_connect_fd_ipv4(fd, remote_host, remote_port)
+    }
+}

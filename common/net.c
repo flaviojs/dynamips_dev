@@ -9,57 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-#if HAS_RFC2553
-/* Connect an existing socket to connect to specified host */
-int ip_connect_fd(int fd,char *remote_host,int remote_port)
-{
-   struct addrinfo hints,*res,*res0;
-   char port_str[20];
-   int error;
-
-   memset(&hints,0,sizeof(hints));
-   hints.ai_family = PF_UNSPEC;
-
-   snprintf(port_str,sizeof(port_str),"%d",remote_port);
-
-   if ((error = getaddrinfo(remote_host,port_str,&hints,&res0)) != 0) {
-      fprintf(stderr,"%s\n",gai_strerror(error));
-      return(-1);
-   }
-
-   for(res=res0;res;res=res->ai_next) {
-      if ((res->ai_family != PF_INET) && (res->ai_family != PF_INET6))
-         continue;
-
-      if (!connect(fd,res->ai_addr,res->ai_addrlen))
-         break;
-   }
-
-   freeaddrinfo(res0);
-   return(0);
-}
-#else
-/* Connect an existing socket to connect to specified host */
-int ip_connect_fd(int fd,char *remote_host,int remote_port)
-{
-   struct sockaddr_in sin;
-   struct hostent *hp;
- 
-   if (!(hp = gethostbyname(remote_host))) {
-      fprintf(stderr,"ip_connect_fd: unable to resolve '%s'\n",remote_host);
-      return(-1);
-   }
-   
-   /* try to connect to remote host */
-   memset(&sin,0,sizeof(sin));
-   memcpy(&sin.sin_addr,hp->h_addr_list[0],sizeof(struct in_addr));
-   sin.sin_family = PF_INET;
-   sin.sin_port   = htons(remote_port);
-
-   return(connect(fd,(struct sockaddr *)&sin,sizeof(sin)));
-}
-#endif
-
 /* Create a socket UDP listening in a port of specified range */
 int udp_listen_range(char *ip_addr,int port_start,int port_end,int *port)
 {

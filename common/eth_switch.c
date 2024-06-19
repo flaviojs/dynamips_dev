@@ -77,7 +77,7 @@ static void dot1q_push_tag(m_uint8_t *pkt,ethsw_packet_t *sp,u_int vlan,m_uint16
    memcpy(pkt,sp->pkt,(N_ETH_HLEN - 2));
 
    hdr = (n_eth_dot1q_hdr_t *)pkt;
-   hdr->type    = htons(ethertype);
+   hdr->type_   = htons(ethertype);
    hdr->vlan_id = htons(sp->input_vlan);
 
    memcpy(pkt + sizeof(n_eth_dot1q_hdr_t),
@@ -346,7 +346,7 @@ static inline int ethsw_receive(ethsw_table_t *t,netio_desc_t *nio,
 
       case ETHSW_PORT_TYPE_DOT1Q:
          dot1q_hdr = (n_eth_dot1q_hdr_t *)sp.pkt;
-         ethertype = ntohs(dot1q_hdr->type);
+         ethertype = ntohs(dot1q_hdr->type_);
 
          /* use the native VLAN if no tag is found */
          if (ethertype != N_ETH_PROTO_DOT1Q &&
@@ -363,7 +363,7 @@ static inline int ethsw_receive(ethsw_table_t *t,netio_desc_t *nio,
 
       case ETHSW_PORT_TYPE_QINQ:
          dot1q_hdr = (n_eth_dot1q_hdr_t *)sp.pkt;
-         ethertype = ntohs(dot1q_hdr->type);
+         ethertype = ntohs(dot1q_hdr->type_);
 
          /* Drop untagged traffic */
          if (ethertype != N_ETH_PROTO_DOT1Q &&

@@ -5,6 +5,37 @@ use crate::prelude::*;
 use crate::utils::*;
 
 pub type n_eth_addr_t = n_eth_addr;
+pub type n_ip_network_t = n_ip_network;
+pub type n_ipv6_network_t = n_ipv6_network;
+pub type n_eth_hdr_t = n_eth_hdr;
+pub type n_eth_dot1q_hdr_t = n_eth_dot1q_hdr;
+pub type n_eth_llc_hdr_t = n_eth_llc_hdr;
+pub type n_eth_snap_hdr_t = n_eth_snap_hdr;
+pub type n_eth_isl_hdr_t = n_eth_isl_hdr;
+pub type n_scp_hdr_t = n_scp_hdr;
+pub type n_arp_hdr_t = n_arp_hdr;
+pub type n_ip_hdr_t = n_ip_hdr;
+pub type n_udp_hdr_t = n_udp_hdr;
+pub type n_tcp_hdr_t = n_tcp_hdr;
+pub type n_pkt_ctx_t = n_pkt_ctx;
+
+#[no_mangle]
+pub extern "C" fn _export_net(
+    _: *mut n_ip_network_t,
+    _: *mut n_ipv6_network,
+    _: *mut n_eth_hdr_t,
+    _: *mut n_eth_dot1q_hdr_t,
+    _: *mut n_eth_llc_hdr_t,
+    _: *mut n_eth_snap_hdr_t,
+    _: *mut n_eth_isl_hdr_t,
+    _: *mut n_scp_hdr_t,
+    _: *mut n_arp_hdr_t,
+    _: *mut n_ip_hdr_t,
+    _: *mut n_udp_hdr_t,
+    _: *mut n_tcp_hdr_t,
+    _: *mut n_pkt_ctx_t,
+) {
+}
 
 pub const N_IP_ADDR_LEN: usize = 4;
 pub const N_IP_ADDR_BITS: usize = 32;
@@ -40,6 +71,282 @@ pub const N_ETH_ALEN: usize = 6;
 #[derive(Debug, Copy, Clone)]
 pub struct n_eth_addr {
     pub eth_addr_byte: [m_uint8_t; N_ETH_ALEN],
+}
+
+/// IP Network definition
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_ip_network {
+    pub net_addr: n_ip_addr_t,
+    pub net_mask: n_ip_addr_t,
+}
+
+/// IPv6 Network definition
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct n_ipv6_network {
+    pub net_addr: n_ipv6_addr_t,
+    pub net_mask: u_int,
+}
+
+/// IP header minimum length
+pub const N_IP_MIN_HLEN: u_int = 5;
+
+/// IP: Common Protocols
+pub const N_IP_PROTO_ICMP: u_int = 1;
+pub const N_IP_PROTO_IGMP: u_int = 2;
+pub const N_IP_PROTO_TCP: u_int = 6;
+pub const N_IP_PROTO_UDP: u_int = 17;
+pub const N_IP_PROTO_IPV6: u_int = 41;
+pub const N_IP_PROTO_GRE: u_int = 47;
+pub const N_IP_PROTO_ESP: u_int = 50;
+pub const N_IP_PROTO_AH: u_int = 51;
+pub const N_IP_PROTO_ICMPV6: u_int = 58;
+pub const N_IP_PROTO_EIGRP: u_int = 88;
+pub const N_IP_PROTO_OSPF: u_int = 89;
+pub const N_IP_PROTO_PIM: u_int = 103;
+pub const N_IP_PROTO_SCTP: u_int = 132;
+pub const N_IP_PROTO_MAX: u_int = 256;
+
+pub const N_IP_FLAG_DF: u_int = 0x4000;
+pub const N_IP_FLAG_MF: u_int = 0x2000;
+pub const N_IP_OFFMASK: u_int = 0x1fff;
+
+/// Maximum number of ports
+pub const N_IP_PORT_MAX: usize = 65536;
+
+/// TCP: Header Flags
+pub const N_TCP_FIN: u8 = 0x01;
+pub const N_TCP_SYN: u8 = 0x02;
+pub const N_TCP_RST: u8 = 0x04;
+pub const N_TCP_PUSH: u8 = 0x08;
+pub const N_TCP_ACK: u8 = 0x10;
+pub const N_TCP_URG: u8 = 0x20;
+
+pub const N_TCP_FLAGMASK: u8 = 0x3F;
+
+/// IPv6 Header Codes
+pub const N_IPV6_PROTO_ICMP: u8 = 58;
+pub const N_IPV6_OPT_HOP_BY_HOP: u8 = 0; // Hop-by-Hop header
+pub const N_IPV6_OPT_DST: u8 = 60; // Destination Options Header
+pub const N_IPV6_OPT_ROUTE: u8 = 43; // Routing header
+pub const N_IPV6_OPT_FRAG: u8 = 44; // Fragment Header
+pub const N_IPV6_OPT_AH: u8 = 51; // Authentication Header
+pub const N_IPV6_OPT_ESP: u8 = 50; // Encryption Security Payload
+pub const N_IPV6_OPT_COMP: u8 = 108; // Payload Compression Protocol
+pub const N_IPV6_OPT_END: u8 = 59; // No more headers
+
+/// Standard Ethernet MTU
+pub const N_ETH_MTU: u16 = 1500;
+
+/// Ethernet Constants
+pub const N_ETH_HLEN: usize = 14; // XXX cbindgen does not support size_of
+#[cfg(test)]
+#[test]
+fn test_N_ETH_HLEN() {
+    assert_eq!(N_ETH_HLEN, size_of::<n_eth_hdr_t>());
+}
+
+/// CRC Length
+pub const N_ETH_CRC_LEN: usize = 4;
+
+/// Minimum size for ethernet payload
+pub const N_ETH_MIN_DATA_LEN: usize = 46;
+pub const N_ETH_MIN_FRAME_LEN: usize = N_ETH_MIN_DATA_LEN + N_ETH_HLEN;
+
+pub const N_ETH_PROTO_IP: u16 = 0x0800;
+pub const N_ETH_PROTO_IPV6: u16 = 0x86DD;
+pub const N_ETH_PROTO_ARP: u16 = 0x0806;
+pub const N_ETH_PROTO_DOT1Q: u16 = 0x8100;
+pub const N_ETH_PROTO_DOT1Q_2: u16 = 0x9100;
+pub const N_ETH_PROTO_DOT1Q_3: u16 = 0x9200;
+pub const N_ETH_PROTO_DOT1Q_4: u16 = 0x88A8;
+pub const N_ETH_PROTO_MPLS: u16 = 0x8847;
+pub const N_ETH_PROTO_MPLS_MC: u16 = 0x8848;
+pub const N_ETH_PROTO_LOOP: u16 = 0x9000;
+
+/// size needed for a string buffer
+pub const N_ETH_SLEN: usize = N_ETH_ALEN * 3;
+
+/// ARP opcodes
+pub const N_ARP_REQUEST: u16 = 0x1;
+pub const N_ARP_REPLY: u16 = 0x2;
+
+/// Ethernet Header
+#[repr(C, packed)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_eth_hdr {
+    pub daddr: n_eth_addr_t, // destination eth addr
+    pub saddr: n_eth_addr_t, // source ether addr
+    pub type_: m_uint16_t,   // packet type ID field
+}
+
+/* 802.1Q Ethernet Header */
+#[repr(C, packed)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_eth_dot1q_hdr {
+    pub daddr: n_eth_addr_t, // destination eth addr
+    pub saddr: n_eth_addr_t, // source ether addr
+    pub type_: m_uint16_t,   // packet type ID field (0x8100)
+    pub vlan_id: m_uint16_t, // VLAN id + CoS
+}
+
+/// LLC header
+#[repr(C, packed)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_eth_llc_hdr {
+    pub dsap: m_uint8_t,
+    pub ssap: m_uint8_t,
+    pub ctrl: m_uint8_t,
+}
+
+/// SNAP header
+#[repr(C, packed)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_eth_snap_hdr {
+    pub oui: [m_uint8_t; 3],
+    pub type_: m_uint16_t,
+}
+
+/* Cisco ISL header */
+#[repr(C, packed)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_eth_isl_hdr {
+    pub hsa1: m_uint16_t,  // High bits of source MAC address
+    pub hsa2: m_uint8_t,   // (in theory: 0x00-00-0c)
+    pub vlan: m_uint16_t,  // VLAN + BPDU
+    pub index: m_uint16_t, // Index port of source
+    pub res: m_uint16_t,   // Reserved for TokenRing and FDDI
+}
+
+pub const N_ISL_HDR_SIZE: usize = 12; // XXX cbindgen does not support size_of
+#[cfg(test)]
+#[test]
+fn test_N_ISL_HDR_SIZE() {
+    assert_eq!(N_ISL_HDR_SIZE, size_of::<n_eth_llc_hdr_t>() + size_of::<n_eth_isl_hdr_t>());
+}
+
+/// Cisco SCP/RBCP header
+#[repr(C, packed)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_scp_hdr {
+    pub sa: m_uint8_t,      // Source Address
+    pub da: m_uint8_t,      // Destination Address
+    pub len: m_uint16_t,    // Data Length
+    pub dsap: m_uint8_t,    // Destination Service Access Point
+    pub ssap: m_uint8_t,    // Source Service Access Point
+    pub opcode: m_uint16_t, // Opcode
+    pub seqno: m_uint16_t,  // Sequence Number
+    pub flags: m_uint8_t,   // Flags: command/response
+    pub unk1: m_uint8_t,    // Unknown
+    pub unk2: m_uint16_t,   // Unknown
+    pub unk3: m_uint16_t,   // Unknown
+}
+
+/// ----- ARP Header for the IPv4 protocol over Ethernet ------------------
+#[repr(C, packed)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_arp_hdr {
+    pub hw_type: m_uint16_t,     // Hardware type
+    pub proto_type: m_uint16_t,  // L3 protocol
+    pub hw_len: m_uint8_t,       // Length of hardware address
+    pub proto_len: m_uint8_t,    // Length of L3 address
+    pub opcode: m_uint16_t,      // ARP Opcode
+    pub eth_saddr: n_eth_addr_t, // Source hardware address
+    pub ip_saddr: m_uint32_t,    // Source IP address
+    pub eth_daddr: n_eth_addr_t, // Dest. hardware address
+    pub ip_daddr: m_uint32_t,    // Dest. IP address
+}
+
+/// ----- IP Header -------------------------------------------------------
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_ip_hdr {
+    pub ihl: m_uint8_t,
+    pub tos: m_uint8_t,
+    pub tot_len: m_uint16_t,
+    pub id: m_uint16_t,
+    pub frag_off: m_uint16_t,
+    pub ttl: m_uint8_t,
+    pub proto: m_uint8_t,
+    pub cksum: m_uint16_t,
+    pub saddr: m_uint32_t,
+    pub daddr: m_uint32_t,
+}
+
+/// ----- UDP Header ------------------------------------------------------
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_udp_hdr {
+    pub sport: m_uint16_t,
+    pub dport: m_uint16_t,
+    pub len: m_uint16_t,
+    pub cksum: m_uint16_t,
+}
+
+/// ----- TCP Header ------------------------------------------------------
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct n_tcp_hdr {
+    pub sport: m_uint16_t,
+    pub dport: m_uint16_t,
+    pub seq: m_uint32_t,
+    pub ack_seq: m_uint32_t,
+    pub offset: m_uint8_t,
+    pub flags: m_uint8_t,
+    pub window: m_uint16_t,
+    pub cksum: m_uint16_t,
+    pub urg_ptr: m_uint16_t,
+}
+
+/// ----- Packet Context --------------------------------------------------
+pub const N_PKT_CTX_FLAG_ETHV2: m_uint32_t = 0x0001;
+pub const N_PKT_CTX_FLAG_VLAN: m_uint32_t = 0x0002;
+pub const N_PKT_CTX_FLAG_L3_ARP: m_uint32_t = 0x0008;
+pub const N_PKT_CTX_FLAG_L3_IP: m_uint32_t = 0x0010;
+pub const N_PKT_CTX_FLAG_L4_UDP: m_uint32_t = 0x0020;
+pub const N_PKT_CTX_FLAG_L4_TCP: m_uint32_t = 0x0040;
+pub const N_PKT_CTX_FLAG_L4_ICMP: m_uint32_t = 0x0080;
+pub const N_PKT_CTX_FLAG_IPH_OK: m_uint32_t = 0x0100;
+pub const N_PKT_CTX_FLAG_IP_FRAG: m_uint32_t = 0x0200;
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct n_pkt_ctx {
+    /// full packet
+    pub pkt: *mut m_uint8_t,
+    pub pkt_len: size_t,
+
+    /// Packet flags
+    pub flags: m_uint32_t,
+
+    /// VLAN information
+    pub vlan_id: m_uint16_t,
+
+    /// L4 protocol for IP
+    pub ip_l4_proto: u_int,
+
+    /// L3 header
+    pub l3: n_pkt_ctx_l3,
+
+    /// L4 header
+    pub l4: n_pkt_ctx_l4,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union n_pkt_ctx_l3 {
+    pub arp: *mut n_arp_hdr_t,
+    pub ip: *mut n_ip_hdr_t,
+    pub ptr: *mut c_void,
+}
+
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union n_pkt_ctx_l4 {
+    pub udp: *mut n_udp_hdr_t,
+    pub tcp: *mut n_tcp_hdr_t,
+    pub ptr: *mut c_void,
 }
 
 /// IP mask table, which allows to find quickly a network mask 

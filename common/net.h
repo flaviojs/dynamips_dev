@@ -19,18 +19,6 @@
 
 /* ----------------------------------------------------------------------- */
 
-/* Number of bits in a contiguous netmask */
-static inline int ip_bits_mask(n_ip_addr_t mask)
-{
-   int prefix = 0;
-
-   while(mask) {
-      prefix++;
-      mask = mask & (mask - 1);
-   }
-   return(prefix);
-}
-
 /* Initialize IPv6 masks */
 void ipv6_init_masks(void);
 

@@ -1154,3 +1154,16 @@ pub unsafe extern "C" fn eth_addr_is_cisco_isl(addr: *mut n_eth_addr_t) -> c_int
 pub unsafe extern "C" fn eth_llc_check_snap(llc_hdr: *mut n_eth_llc_hdr_t) -> c_int {
     ((*llc_hdr).dsap == 0xAA && (*llc_hdr).ssap == 0xAA && (*llc_hdr).ctrl == 0x03).into()
 }
+
+/// Number of bits in a contiguous netmask
+#[no_mangle]
+pub unsafe extern "C" fn ip_bits_mask(mut mask: n_ip_addr_t) -> c_int {
+    let mut prefix: c_int = 0;
+
+    while mask != 0 {
+        prefix += 1;
+        mask = mask & (mask - 1);
+    }
+
+    prefix
+}

@@ -1,5 +1,6 @@
 //! Network Utility functions.
 
+use crate::crc::*;
 use crate::dynamips_common::*;
 use crate::prelude::*;
 use crate::utils::*;
@@ -1166,4 +1167,36 @@ pub unsafe extern "C" fn ip_bits_mask(mut mask: n_ip_addr_t) -> c_int {
     }
 
     prefix
+}
+
+/// ISL rewrite.
+///
+/// See: http://www.cisco.com/en/US/tech/tk389/tk390/technologies_tech_note09186a0080094665.shtml
+#[no_mangle]
+pub unsafe extern "C" fn cisco_isl_rewrite(pkt: *mut m_uint8_t, tot_len: m_uint32_t) {
+    static mut isl_xaddr: [m_uint8_t; N_ETH_ALEN] = [0x01, 0x00, 0x0c, 0x00, 0x10, 0x00];
+    let real_offset: u_int;
+    let mut real_len: u_int;
+    let ifcs: m_uint32_t;
+
+    let hdr: *mut n_eth_hdr_t = pkt.cast::<_>();
+    if libc::memcmp(addr_of!((*hdr).daddr).cast::<_>(), isl_xaddr.as_c_void(), N_ETH_ALEN) == 0 {
+        real_offset = (N_ETH_HLEN + N_ISL_HDR_SIZE) as u_int;
+        real_len = ntohs((*hdr).type_) as u_int;
+        real_len -= (N_ISL_HDR_SIZE + 4) as u_int;
+
+        if real_offset + real_len > tot_len {
+            return;
+        }
+
+        // Rewrite the destination MAC address
+        (*hdr).daddr.eth_addr_byte[4] = 0x00;
+
+        // Compute the internal FCS on the encapsulated packet
+        ifcs = crc32_compute(0xFFFFFFFF, pkt.add(real_offset as usize), real_len as c_int);
+        *pkt.add(tot_len as usize - 4) = (ifcs & 0xff) as u8;
+        *pkt.add(tot_len as usize - 3) = ((ifcs >> 8) & 0xff) as u8;
+        *pkt.add(tot_len as usize - 2) = ((ifcs >> 16) & 0xff) as u8;
+        *pkt.add(tot_len as usize - 1) = (ifcs >> 24) as u8;
+    }
 }

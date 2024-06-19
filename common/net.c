@@ -9,39 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-/* 
- * ISL rewrite.
- *
- * See: http://www.cisco.com/en/US/tech/tk389/tk390/technologies_tech_note09186a0080094665.shtml
- */
-void cisco_isl_rewrite(m_uint8_t *pkt,m_uint32_t tot_len)
-{
-   static m_uint8_t isl_xaddr[N_ETH_ALEN] = { 0x01,0x00,0x0c,0x00,0x10,0x00 };
-   u_int real_offset,real_len;
-   n_eth_hdr_t *hdr;
-   m_uint32_t ifcs;
-
-   hdr = (n_eth_hdr_t *)pkt;
-   if (!memcmp(&hdr->daddr,isl_xaddr,N_ETH_ALEN)) {
-      real_offset = N_ETH_HLEN + N_ISL_HDR_SIZE;
-      real_len    = ntohs(hdr->type_);
-      real_len    -= (N_ISL_HDR_SIZE + 4);
-   
-      if ((real_offset+real_len) > tot_len)
-         return;
-   
-      /* Rewrite the destination MAC address */
-      hdr->daddr.eth_addr_byte[4] = 0x00;
-
-      /* Compute the internal FCS on the encapsulated packet */
-      ifcs = crc32_compute(0xFFFFFFFF,pkt+real_offset,real_len);
-      pkt[tot_len-4] = ifcs & 0xff;
-      pkt[tot_len-3] = (ifcs >> 8) & 0xff;
-      pkt[tot_len-2] = (ifcs >> 16) & 0xff;
-      pkt[tot_len-1] = ifcs >> 24;
-   }
-}
-
 /* Verify checksum of an IP header */
 int ip_verify_cksum(n_ip_hdr_t *hdr)
 {

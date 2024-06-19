@@ -9,25 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-/* Verify checksum of an IP header */
-int ip_verify_cksum(n_ip_hdr_t *hdr)
-{
-   m_uint8_t *p = (m_uint8_t *)hdr;
-   m_uint32_t sum = 0;
-   u_int len;
-
-   len = (hdr->ihl & 0x0F) << 1;
-   while(len-- > 0) {
-      sum += ((m_uint16_t)p[0] << 8) | p[1];
-      p += sizeof(m_uint16_t);
-   }
-
-   while(sum >> 16)
-      sum = (sum & 0xFFFF) + (sum >> 16);
-
-   return(sum == 0xFFFF);
-}
-
 /* Compute an IP checksum */
 void ip_compute_cksum(n_ip_hdr_t *hdr)
 {  

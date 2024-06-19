@@ -1200,3 +1200,24 @@ pub unsafe extern "C" fn cisco_isl_rewrite(pkt: *mut m_uint8_t, tot_len: m_uint3
         *pkt.add(tot_len as usize - 1) = (ifcs >> 24) as u8;
     }
 }
+
+/// Verify checksum of an IP header
+#[no_mangle]
+pub unsafe extern "C" fn ip_verify_cksum(hdr: *mut n_ip_hdr_t) -> c_int {
+    let mut p: *mut m_uint8_t = hdr.cast::<_>();
+    let mut sum: m_uint32_t = 0;
+    let mut len: u_int;
+
+    len = (((*hdr).ihl & 0x0F) as u_int) << 1;
+    while len > 0 {
+        len -= 1;
+        sum += (((*p.add(0) as m_uint16_t) << 8) | *p.add(1) as m_uint16_t) as u_int;
+        p = p.add(size_of::<m_uint16_t>());
+    }
+
+    while (sum >> 16) != 0 {
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    }
+
+    (sum == 0xFFFF).into()
+}

@@ -19,19 +19,6 @@
 
 /* ----------------------------------------------------------------------- */
 
-/* Check for a broadcast/multicast ethernet address */
-static inline int eth_addr_is_mcast(n_eth_addr_t *addr)
-{
-   return(addr->eth_addr_byte[0] & 1);
-}
-
-/* Check for Cisco ISL destination address */
-static inline int eth_addr_is_cisco_isl(n_eth_addr_t *addr)
-{
-   static const char *isl_addr = "\x01\x00\x0c\x00\x00";
-   return(!memcmp(addr,isl_addr,5));  /* only 40 bits to compare */
-}
-
 /* Check for a SNAP header */
 static inline int eth_llc_check_snap(n_eth_llc_hdr_t *llc_hdr)
 {

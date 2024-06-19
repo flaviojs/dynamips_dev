@@ -1135,3 +1135,16 @@ pub unsafe extern "C" fn ip_connect_fd(fd: c_int, remote_host: *mut c_char, remo
 pub unsafe extern "C" fn udp_listen_range(ip_addr: *mut c_char, port_start: c_int, port_end: c_int, port: *mut c_int) -> c_int {
     ip_listen_range(ip_addr, port_start, port_end, port, libc::SOCK_DGRAM)
 }
+
+/// Check for a broadcast/multicast ethernet address
+#[no_mangle]
+pub unsafe extern "C" fn eth_addr_is_mcast(addr: *mut n_eth_addr_t) -> c_int {
+    ((*addr).eth_addr_byte[0] & 1).into()
+}
+
+/// Check for Cisco ISL destination address
+#[no_mangle]
+pub unsafe extern "C" fn eth_addr_is_cisco_isl(addr: *mut n_eth_addr_t) -> c_int {
+    static mut isl_addr: *const c_char = cstr!("\x01\x00\x0c\x00\x00");
+    (libc::memcmp(addr.cast::<_>(), isl_addr.cast::<_>(), 5) == 0).into() // only 40 bits to compare
+}

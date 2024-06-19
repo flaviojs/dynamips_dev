@@ -23,6 +23,10 @@ FILE *c_stderr(void) {
     return(stderr);
 }
 
+FILE *c_stdout(void) {
+    return(stderr);
+}
+
 long c_timezone(void) {
     return(GET_TIMEZONE);
 }

@@ -47,6 +47,7 @@ extern "C" {
     pub fn c_INET6_ADDRSTRLEN() -> libc::socklen_t;
     pub fn c_set_errno(x: c_int);
     pub fn c_stderr() -> *mut libc::FILE;
+    pub fn c_stdout() -> *mut libc::FILE;
     pub fn c_timezone() -> c_long;
     // libc
     pub fn gethostbyname(name: *const c_char) -> *mut libc::hostent;

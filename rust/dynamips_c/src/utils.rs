@@ -485,3 +485,51 @@ pub unsafe extern "C" fn fd_pool_check_input(pool: *mut fd_pool_t, fds: *mut lib
 
     count
 }
+
+/// Generate a pseudo random block of data
+#[no_mangle]
+pub unsafe extern "C" fn m_randomize_block(buf: *mut m_uint8_t, len: size_t) {
+    for i in 0..len {
+        *buf.add(i) = (libc::rand() & 0xFF) as m_uint8_t;
+    }
+}
+
+/// Ugly function that dumps a structure in hexa and ascii.
+#[no_mangle]
+pub unsafe extern "C" fn mem_dump(f_output: *mut libc::FILE, pkt: *mut u_char, len: u_int) {
+    let mut x: u_int;
+    let mut i: u_int = 0;
+
+    while i < len {
+        if (len - i) > 16 {
+            x = 16;
+        } else {
+            x = len - i;
+        }
+
+        libc::fprintf(f_output, cstr!("%4.4x: "), i);
+
+        for tmp in 0..x {
+            libc::fprintf(f_output, cstr!("%2.2x "), *pkt.add((i + tmp) as usize) as u_int);
+        }
+        for _ in x..16 {
+            libc::fprintf(f_output, cstr!("   "));
+        }
+
+        for tmp in 0..x {
+            let c: u_char = *pkt.add((i + tmp) as usize);
+
+            if c.is_ascii_alphanumeric() {
+                libc::fprintf(f_output, cstr!("%c"), c as u_int);
+            } else {
+                libc::fputs(cstr!("."), f_output);
+            }
+        }
+
+        i += x;
+        libc::fprintf(f_output, cstr!("\n"));
+    }
+
+    libc::fprintf(f_output, cstr!("\n"));
+    libc::fflush(f_output);
+}

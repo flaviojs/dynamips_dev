@@ -178,42 +178,6 @@ int hex_decode(unsigned char *out,const unsigned char *in,int maxlen)
    return(len);
 }
 
-/* Ugly function that dumps a structure in hexa and ascii. */
-void mem_dump(FILE *f_output,u_char *pkt,u_int len)
-{
-   u_int x,i = 0, tmp;
-
-   while (i < len)
-   {
-      if ((len - i) > 16)
-         x = 16;
-      else x = len - i;
-
-      fprintf(f_output,"%4.4x: ",i);
-
-      for (tmp=0;tmp<x;tmp++)
-         fprintf(f_output,"%2.2x ",pkt[i+tmp]);
-      for (tmp=x;tmp<16;tmp++) fprintf(f_output,"   ");
-
-      for (tmp=0;tmp<x;tmp++) {
-         char c = pkt[i+tmp];
-
-         if (((c >= 'A') && (c <= 'Z')) ||
-             ((c >= 'a') && (c <= 'z')) ||
-             ((c >= '0') && (c <= '9')))
-            fprintf(f_output,"%c",c);
-         else
-            fputs(".",f_output);
-      }
-
-      i += x;
-      fprintf(f_output,"\n");
-   }
-
-   fprintf(f_output,"\n");
-   fflush(f_output);
-}
-
 /* Logging function */
 void m_flog(FILE *fd,char *module,char *fmt,va_list ap)
 {
@@ -511,15 +475,6 @@ m_uint8_t m_reverse_u8(m_uint8_t val)
          res |= 1 << (7 - i);
    
    return(res);
-}
-
-/* Generate a pseudo random block of data */
-void m_randomize_block(m_uint8_t *buf,size_t len)
-{
-   int i;
-
-   for(i=0;i<len;i++)
-      buf[i] = rand() & 0xFF;
 }
 
 /* Equivalent to fprintf, but for a posix fd */

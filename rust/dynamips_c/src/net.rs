@@ -1244,3 +1244,129 @@ pub unsafe extern "C" fn ip_compute_cksum(hdr: *mut n_ip_hdr_t) {
 
     (*hdr).cksum = htons(!sum as u16);
 }
+
+/// Partial checksum (for UDP/TCP)
+#[inline]
+unsafe fn ip_cksum_partial(mut buf: *mut m_uint8_t, mut len: c_int) -> m_uint32_t {
+    let mut sum: m_uint32_t = 0;
+
+    while len > 1 {
+        sum += (((*buf.add(0) as m_uint16_t) << 8) | *buf.add(1) as m_uint16_t) as m_uint32_t;
+        buf = buf.add(size_of::<m_uint16_t>());
+        len -= size_of::<m_uint16_t>() as c_int;
+    }
+
+    if len == 1 {
+        sum += ((*buf as m_uint16_t) << 8) as m_uint32_t;
+    }
+
+    sum
+}
+
+/// Partial checksum test
+#[cfg(test)]
+#[test]
+fn test_ip_cksum_partial() {
+    unsafe {
+        const N_BUF: usize = 4;
+        let mut buffer: [[m_uint8_t; 512]; N_BUF] = [[0; 512]; N_BUF];
+        let mut psum: [m_uint16_t; N_BUF] = [0; N_BUF];
+        let mut tmp: m_uint32_t;
+        let mut sum: m_uint32_t;
+        let gsum: m_uint32_t;
+
+        for i in 0..N_BUF {
+            m_randomize_block(buffer[i].as_c_mut(), size_of::<[m_uint8_t; 512]>());
+            if false {
+                mem_dump(c_stdout(), buffer[i].as_c_mut(), size_of::<[m_uint8_t; 512]>() as u_int);
+            }
+
+            sum = ip_cksum_partial(buffer[i].as_c_mut(), size_of::<[m_uint8_t; 512]>() as c_int);
+
+            while (sum >> 16) != 0 {
+                sum = (sum & 0xFFFF) + (sum >> 16);
+            }
+
+            psum[i] = !sum as m_uint16_t;
+        }
+
+        // partial sums + accumulator
+        tmp = 0;
+        for i in 0..N_BUF {
+            if false {
+                libc::printf(cstr!("psum[%d] = 0x%4.4x\n"), i, psum[i] as u_int);
+            }
+            tmp += !psum[i] as m_uint16_t as m_uint32_t;
+        }
+
+        // global sum
+        sum = ip_cksum_partial(buffer.as_c_mut().cast::<_>(), size_of::<[[m_uint8_t; 512]; N_BUF]>() as c_int);
+
+        while (sum >> 16) != 0 {
+            sum = (sum & 0xFFFF) + (sum >> 16);
+        }
+
+        gsum = sum;
+
+        // accumulator
+        while (tmp >> 16) != 0 {
+            tmp = (tmp & 0xFFFF) + (tmp >> 16);
+        }
+
+        if false {
+            libc::printf(cstr!("gsum = 0x%4.4x, tmp = 0x%4.4x : %s\n"), gsum, tmp, if gsum == tmp { cstr!("OK") } else { cstr!("FAILURE") });
+        }
+
+        assert!(tmp == gsum);
+    }
+}
+
+/// Compute TCP/UDP checksum
+#[no_mangle]
+pub unsafe extern "C" fn pkt_ctx_tcp_cksum(ctx: *mut n_pkt_ctx_t, ph: c_int) -> m_uint16_t {
+    let mut sum: m_uint32_t;
+    let mut old_cksum: m_uint16_t = 0;
+
+    // replace the actual checksum value with 0 to recompute it
+    if ((*ctx).flags & N_PKT_CTX_FLAG_IP_FRAG) == 0 {
+        match (*ctx).ip_l4_proto {
+            N_IP_PROTO_TCP => {
+                old_cksum = (*(*ctx).l4.tcp).cksum;
+                (*(*ctx).l4.tcp).cksum = 0;
+            }
+            N_IP_PROTO_UDP => {
+                old_cksum = (*(*ctx).l4.udp).cksum;
+                (*(*ctx).l4.udp).cksum = 0;
+            }
+            _ => {}
+        }
+    }
+
+    let len: u_int = (ntohs((*(*ctx).l3.ip).tot_len) - (((*(*ctx).l3.ip).ihl & 0x0F) << 2) as u16) as u_int;
+    sum = ip_cksum_partial((*ctx).l4.ptr.cast::<_>(), len as c_int);
+
+    // include pseudo-header
+    if ph != 0 {
+        sum += ip_cksum_partial(addr_of_mut!((*(*ctx).l3.ip).saddr).cast::<_>(), 8);
+        sum += (*ctx).ip_l4_proto + len;
+    }
+
+    while (sum >> 16) != 0 {
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    }
+
+    // restore the old value
+    if ((*ctx).flags & N_PKT_CTX_FLAG_IP_FRAG) == 0 {
+        match (*ctx).ip_l4_proto {
+            N_IP_PROTO_TCP => {
+                (*(*ctx).l4.tcp).cksum = old_cksum;
+            }
+            N_IP_PROTO_UDP => {
+                (*(*ctx).l4.udp).cksum = old_cksum;
+            }
+            _ => {}
+        }
+    }
+
+    (!sum) as m_uint16_t
+}

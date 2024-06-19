@@ -1221,3 +1221,26 @@ pub unsafe extern "C" fn ip_verify_cksum(hdr: *mut n_ip_hdr_t) -> c_int {
 
     (sum == 0xFFFF).into()
 }
+
+/// Compute an IP checksum
+#[no_mangle]
+pub unsafe extern "C" fn ip_compute_cksum(hdr: *mut n_ip_hdr_t) {
+    let mut p: *mut m_uint8_t = hdr.cast::<_>();
+    let mut sum: m_uint32_t = 0;
+    let mut len: u_int;
+
+    (*hdr).cksum = 0;
+
+    len = (((*hdr).ihl & 0x0F) as u_int) << 1;
+    while len > 0 {
+        len -= 1;
+        sum += (((*p.add(0) as m_uint16_t) << 8) | *p.add(1) as m_uint16_t) as u_int;
+        p = p.add(size_of::<m_uint16_t>());
+    }
+
+    while (sum >> 16) != 0 {
+        sum = (sum & 0xFFFF) + (sum >> 16);
+    }
+
+    (*hdr).cksum = htons(!sum as u16);
+}

@@ -19,14 +19,6 @@
 
 /* ----------------------------------------------------------------------- */
 
-/* Check for a SNAP header */
-static inline int eth_llc_check_snap(n_eth_llc_hdr_t *llc_hdr)
-{
-   return((llc_hdr->dsap == 0xAA) &&
-          (llc_hdr->ssap == 0xAA) &&
-          (llc_hdr->ctrl == 0x03));
-}
-
 /* Number of bits in a contiguous netmask */
 static inline int ip_bits_mask(n_ip_addr_t mask)
 {

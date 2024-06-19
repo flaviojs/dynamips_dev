@@ -1148,3 +1148,9 @@ pub unsafe extern "C" fn eth_addr_is_cisco_isl(addr: *mut n_eth_addr_t) -> c_int
     static mut isl_addr: *const c_char = cstr!("\x01\x00\x0c\x00\x00");
     (libc::memcmp(addr.cast::<_>(), isl_addr.cast::<_>(), 5) == 0).into() // only 40 bits to compare
 }
+
+/// Check for a SNAP header
+#[no_mangle]
+pub unsafe extern "C" fn eth_llc_check_snap(llc_hdr: *mut n_eth_llc_hdr_t) -> c_int {
+    ((*llc_hdr).dsap == 0xAA && (*llc_hdr).ssap == 0xAA && (*llc_hdr).ctrl == 0x03).into()
+}

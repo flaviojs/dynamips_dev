@@ -13,7 +13,7 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net.h"
+#include "rust_dynamips_c.h"
 #include "net_io.h"
 
 /* Hash entries for the MAC address table */

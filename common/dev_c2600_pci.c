@@ -12,7 +12,7 @@
 #include <string.h>
 
 #include "utils.h"
-#include "net.h"
+#include "rust_dynamips_c.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

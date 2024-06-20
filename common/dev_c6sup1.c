@@ -28,7 +28,6 @@
 #include "dev_i8254x.h"
 #include "dev_c6sup1.h"
 #include "dev_c6sup1_mpfpga.h"
-#include "net.h"
 
 /* ====================================================================== */
 /* EOBC - Ethernet Out of Band Channel                                    */

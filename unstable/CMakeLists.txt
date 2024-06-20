@@ -44,7 +44,6 @@ add_definitions( "-DUSE_UNSTABLE" )
 set ( _files
    "${COMMON}/utils.c"
    "${COMMON}/plugin.c"
-   "${COMMON}/net.c"
    "${COMMON}/net_io.c"
    "${COMMON}/net_io_bridge.c"
    "${COMMON}/net_io_filter.c"

@@ -17,7 +17,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "net.h"
 #include "net_io.h"
 #include "dev_c7200.h"
 

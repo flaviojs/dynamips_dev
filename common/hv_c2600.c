@@ -29,7 +29,6 @@
 #include "device.h"
 #include "dev_c2600.h"
 #include "utils.h"
-#include "net.h"
 #include "atm.h"
 #include "frame_relay.h"
 #include "net_io.h"

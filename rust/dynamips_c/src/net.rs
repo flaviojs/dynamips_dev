@@ -1389,3 +1389,80 @@ pub unsafe extern "C" fn pkt_ctx_ip_analyze_l4(ctx: *mut n_pkt_ctx_t) -> c_int {
 
     TRUE
 }
+
+/// Analyze a packet
+#[no_mangle]
+pub unsafe extern "C" fn pkt_ctx_analyze(ctx: *mut n_pkt_ctx_t, pkt: *mut m_uint8_t, pkt_len: size_t) -> c_int {
+    let eth: *mut n_eth_dot1q_hdr_t = pkt.cast::<_>();
+    let mut eth_type: m_uint16_t;
+    let mut p: *mut m_uint8_t;
+
+    (*ctx).pkt = pkt;
+    (*ctx).pkt_len = pkt_len;
+    (*ctx).flags = 0;
+    (*ctx).vlan_id = 0;
+    (*ctx).l3.ptr = null_mut();
+    (*ctx).l4.ptr = null_mut();
+
+    eth_type = ntohs((*eth).type_);
+    p = PTR_ADJUST(eth, N_ETH_HLEN);
+
+    #[allow(clippy::collapsible_if)]
+    if eth_type >= N_ETH_MTU {
+        if eth_type == N_ETH_PROTO_DOT1Q {
+            (*ctx).flags |= N_PKT_CTX_FLAG_VLAN;
+            (*ctx).vlan_id = htons((*eth).vlan_id);
+
+            // override the ethernet type
+            eth_type = ntohs(*p.add(2).cast::<m_uint16_t>());
+
+            // skip 802.1Q header info
+            p = p.byte_add(size_of::<m_uint32_t>());
+        }
+    }
+
+    if eth_type < N_ETH_MTU {
+        // LLC/SNAP: TODO
+        return TRUE;
+    } else {
+        (*ctx).flags |= N_PKT_CTX_FLAG_ETHV2;
+    }
+
+    match eth_type {
+        N_ETH_PROTO_IP => {
+            (*ctx).flags |= N_PKT_CTX_FLAG_L3_IP;
+            let ip: *mut n_ip_hdr_t = p.cast::<n_ip_hdr_t>();
+            (*ctx).l3.ip = ip;
+
+            // Check header
+            let len: u_int = ((*ip).ihl & 0x0F) as u_int;
+            if ((*ip).ihl & 0xF0) != 0x40 || len < N_IP_MIN_HLEN || (len << 2) > ntohs((*ip).tot_len) as u_int || ip_verify_cksum((*ctx).l3.ip) == 0 {
+                return TRUE;
+            }
+
+            (*ctx).flags |= N_PKT_CTX_FLAG_IPH_OK;
+            (*ctx).ip_l4_proto = (*ip).proto as u_int;
+            (*ctx).l4.ptr = PTR_ADJUST(ip, (len << 2) as usize);
+
+            // Check if the packet is a fragment
+            let offset: u_int = ntohs((*ip).frag_off) as u_int;
+
+            if (offset & N_IP_OFFMASK) != 0 || (offset & N_IP_FLAG_MF) != 0 {
+                (*ctx).flags |= N_PKT_CTX_FLAG_IP_FRAG;
+            }
+        }
+
+        N_ETH_PROTO_ARP => {
+            (*ctx).flags |= N_PKT_CTX_FLAG_L3_ARP;
+            (*ctx).l3.arp = p.cast::<n_arp_hdr_t>();
+            return TRUE;
+        }
+
+        _ => {
+            // other: unknown, stop now
+            return TRUE;
+        }
+    }
+
+    TRUE
+}

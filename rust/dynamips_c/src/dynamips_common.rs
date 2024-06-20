@@ -20,6 +20,11 @@ pub type m_uint64_t = c_ulonglong;
 
 pub type m_tmcnt_t = m_uint64_t;
 
+/// A simple macro for adjusting pointers
+pub unsafe fn PTR_ADJUST<T, U>(ptr: *mut U, size: usize) -> *mut T {
+    ptr.byte_add(size).cast::<_>()
+}
+
 #[cfg(test)]
 mod test {
     use super::*;

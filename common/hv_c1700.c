@@ -30,7 +30,6 @@
 #include "dev_c1700.h"
 #include "dev_vtty.h"
 #include "utils.h"
-#include "net.h"
 #include "atm.h"
 #include "frame_relay.h"
 #include "net_io.h"

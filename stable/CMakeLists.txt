@@ -9,7 +9,6 @@ include_directories ( "${CMAKE_CURRENT_SOURCE_DIR}" "${COMMON}" "${CMAKE_CURRENT
 # udp_send
 if ( BUILD_UDP_SEND )
 add_executable ( udp_send
-   "${COMMON}/net.c"
    "${COMMON}/udp_send.c"
    "${COMMON}/utils.c"
    )
@@ -20,7 +19,6 @@ endif ( BUILD_UDP_SEND )
 # udp_recv
 if ( BUILD_UDP_RECV )
 add_executable ( udp_recv
-   "${COMMON}/net.c"
    "${COMMON}/udp_recv.c"
    "${COMMON}/utils.c"
    )
@@ -97,7 +95,6 @@ set ( _files
    "${COMMON}/ptask.c"
    "${COMMON}/timer.c"
    "${COMMON}/base64.c"
-   "${COMMON}/net.c"
    "${COMMON}/net_io.c"
    "${COMMON}/net_io_bridge.c"
    "${COMMON}/net_io_filter.c"

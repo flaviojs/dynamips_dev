@@ -10,7 +10,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "net.h"
 
 #define MAX_PKT_SIZE  2048
 

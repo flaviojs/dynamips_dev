@@ -25,7 +25,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net.h"
 #include "frame_relay.h"
 #include "net_io.h"
 #include "registry.h"

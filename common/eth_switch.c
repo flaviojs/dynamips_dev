@@ -19,7 +19,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "net.h"
 #include "registry.h"
 #include "net_io.h"
 #include "eth_switch.h"

@@ -1466,3 +1466,9 @@ pub unsafe extern "C" fn pkt_ctx_analyze(ctx: *mut n_pkt_ctx_t, pkt: *mut m_uint
 
     TRUE
 }
+
+/// Dump packet context
+#[no_mangle]
+pub unsafe extern "C" fn pkt_ctx_dump(ctx: *mut n_pkt_ctx_t) {
+    libc::printf(cstr!("pkt=%p (len=%lu), flags=0x%8.8x, vlan_id=0x%4.4x, l3=%p, l4=%p\n"), (*ctx).pkt, (*ctx).pkt_len as u_long, (*ctx).flags, (*ctx).vlan_id as u_int, (*ctx).l3.ptr, (*ctx).l4.ptr);
+}

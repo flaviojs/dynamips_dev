@@ -1370,3 +1370,22 @@ pub unsafe extern "C" fn pkt_ctx_tcp_cksum(ctx: *mut n_pkt_ctx_t, ph: c_int) -> 
 
     (!sum) as m_uint16_t
 }
+
+/// Analyze L4 for an IP packet
+#[no_mangle]
+pub unsafe extern "C" fn pkt_ctx_ip_analyze_l4(ctx: *mut n_pkt_ctx_t) -> c_int {
+    match (*ctx).ip_l4_proto {
+        N_IP_PROTO_TCP => {
+            (*ctx).flags |= N_PKT_CTX_FLAG_L4_TCP;
+        }
+        N_IP_PROTO_UDP => {
+            (*ctx).flags |= N_PKT_CTX_FLAG_L4_UDP;
+        }
+        N_IP_PROTO_ICMP => {
+            (*ctx).flags |= N_PKT_CTX_FLAG_L4_ICMP;
+        }
+        _ => {}
+    }
+
+    TRUE
+}

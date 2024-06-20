@@ -9,24 +9,6 @@
 #include "net.h"
 #include "rust_dynamips_c.h"
 
-/* Analyze L4 for an IP packet */
-int pkt_ctx_ip_analyze_l4(n_pkt_ctx_t *ctx)
-{
-   switch(ctx->ip_l4_proto) {
-      case N_IP_PROTO_TCP:
-         ctx->flags |= N_PKT_CTX_FLAG_L4_TCP;
-         break;
-      case N_IP_PROTO_UDP:
-         ctx->flags |= N_PKT_CTX_FLAG_L4_UDP;
-         break;
-      case N_IP_PROTO_ICMP:
-         ctx->flags |= N_PKT_CTX_FLAG_L4_ICMP;
-         break;
-   }
-
-   return(TRUE);
-}
-
 /* Analyze a packet */
 int pkt_ctx_analyze(n_pkt_ctx_t *ctx,m_uint8_t *pkt,size_t pkt_len)
 {

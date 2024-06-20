@@ -28,7 +28,6 @@
 #include "dev_c6msfc1.h"
 #include "dev_c6msfc1_mpfpga.h"
 #include "rust_dynamips_c.h"
-#include "net.h"
 
 /* MSFC1 EEPROM */
 static m_uint16_t eeprom_msfc1_data[128] = {

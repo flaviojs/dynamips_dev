@@ -21,7 +21,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "net.h"
 #include "net_io.h"
 #include "dev_nm_16esw.h"
 

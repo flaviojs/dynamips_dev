@@ -23,7 +23,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net.h"
 #include "eth_switch.h"
 #include "net_io.h"
 #include "rust_dynamips_c.h"

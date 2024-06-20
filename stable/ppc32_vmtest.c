@@ -20,7 +20,6 @@
 #include "dev_rom.h"
 #include "pci_io.h"
 #include "rust_dynamips_c.h"
-#include "net.h"
 #include "ppc32_mem.h"
 #include "ppc32_vmtest.h"
 

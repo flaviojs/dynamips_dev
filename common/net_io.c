@@ -56,12 +56,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/* Release an NIO (decrement reference count) */
-int netio_release(char *name)
-{
-   return(registry_unref(name,OBJ_TYPE_NIO));
-}
-
 /* Record an NIO in registry */
 static int netio_record(netio_desc_t *nio)
 {

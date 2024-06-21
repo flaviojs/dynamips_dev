@@ -372,3 +372,9 @@ pub unsafe extern "C" fn netio_show_types() {
 pub unsafe extern "C" fn netio_acquire(name: *mut c_char) -> *mut netio_desc_t {
     registry_find(name, OBJ_TYPE_NIO).cast::<_>()
 }
+
+/// Release an NIO (decrement reference count)
+#[no_mangle]
+pub unsafe extern "C" fn netio_release(name: *mut c_char) -> c_int {
+    registry_unref(name, OBJ_TYPE_NIO)
+}

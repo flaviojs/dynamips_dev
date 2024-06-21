@@ -40,6 +40,7 @@ pub mod mips64_exec;
 pub mod mips64_jit;
 pub mod mips64_mem;
 pub mod net;
+pub mod net_io;
 pub mod parser;
 pub mod pci_dev;
 pub mod pci_io;

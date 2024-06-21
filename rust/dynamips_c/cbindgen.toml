@@ -4,7 +4,7 @@ include_guard = "RUST_DYNAMIPS_C_H"
 pragma_once = true
 documentation_style = "c++"
 style = "tag"
-sys_includes = ["pthread.h","setjmp.h"]
+sys_includes = ["pthread.h","setjmp.h","sys/un.h"]
 after_includes = """
 
 // forward declarations (cbindgen places typedefs after the struct definitions, preventing you from using them in the structs)
@@ -24,6 +24,17 @@ typedef struct memblock memblock_t;
 typedef struct mempool mempool_t;
 typedef struct mips_cp0 mips_cp0_t;
 typedef struct mips_cp1 mips_cp1_t;
+typedef struct netio_desc netio_desc_t;
+typedef struct netio_fifo_desc netio_fifo_desc_t;
+typedef struct netio_fifo_pkt netio_fifo_pkt_t;
+typedef struct netio_geneth_desc netio_geneth_desc_t;
+typedef struct netio_inet_desc netio_inet_desc_t;
+typedef struct netio_lnxeth_desc netio_lnxeth_desc_t;
+typedef struct netio_pktfilter netio_pktfilter_t;
+typedef struct netio_stat netio_stat_t;
+typedef struct netio_tap_desc netio_tap_desc_t;
+typedef struct netio_unix_desc netio_unix_desc_t;
+typedef struct netio_vde_desc netio_vde_desc_t;
 typedef struct parser_context parser_context_t;
 typedef struct parser_token parser_token_t;
 typedef struct ptask ptask_t;
@@ -34,6 +45,7 @@ typedef struct registry_entry registry_entry_t;
 typedef struct rfc_array rfc_array_t;
 typedef struct rfc_eqclass rfc_eqclass_t;
 typedef struct sockaddr sockaddr;
+typedef struct sockaddr_un sockaddr_un;
 typedef struct timer_entry timer_entry_t;
 typedef struct timer_queue timer_queue_t;
 typedef struct tlb_entry tlb_entry_t;
@@ -71,6 +83,8 @@ typedef volatile u_int Volatile_u_int;
 
 [defines]
 "feature = USE_UNSTABLE" = "USE_UNSTABLE"
+"feature = ENABLE_LINUX_ETH" = "LINUX_ETH"
+"feature = ENABLE_GEN_ETH" = "GEN_ETH"
 
 [layout]
 packed = "__attribute__ ((__packed__))"

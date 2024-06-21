@@ -4,6 +4,8 @@
 
 pub use crate::_ext::cfunc;
 pub use crate::_ext::cstr;
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub use crate::_ext::pcap_t;
 pub use crate::_ext::str0;
 pub use crate::_ext::u_char;
 pub use crate::_ext::u_int;

@@ -140,7 +140,7 @@ static netio_desc_t *netio_create(char *name)
 
    /* setup as a NULL descriptor */
    memset(nio,0,sizeof(*nio));
-   nio->type = NETIO_TYPE_NULL;
+   nio->type_ = NETIO_TYPE_NULL;
 
    /* save name for registry */
    if (!(nio->name = strdup(name))) {
@@ -266,7 +266,7 @@ int netio_get_fd(netio_desc_t *nio)
 {
    int fd = -1;
 
-   switch(nio->type) {
+   switch(nio->type_) {
       case NETIO_TYPE_UNIX:
          fd = nio->u.nud.fd;
          break;
@@ -396,7 +396,7 @@ netio_desc_t *netio_desc_create_unix(char *nio_name,char *local,char *remote)
       return NULL;
    }
 
-   nio->type     = NETIO_TYPE_UNIX;
+   nio->type_    = NETIO_TYPE_UNIX;
    nio->send     = (void *)netio_unix_send;
    nio->recv     = (void *)netio_unix_recv;
    nio->free     = (void *)netio_unix_free;
@@ -495,7 +495,7 @@ static int netio_vde_create(netio_vde_desc_t *nvd,char *control,char *local)
    strcpy(req.sock.sun_path,local);
    req.magic   = VDE_SWITCH_MAGIC;
    req.version = VDE_SWITCH_VERSION;
-   req.type    = VDE_REQ_NEW_CONTROL;
+   req.type_   = VDE_REQ_NEW_CONTROL;
    
    len = write(nvd->ctrl_fd,&req,sizeof(req));
    if (len != sizeof(req)) {
@@ -551,7 +551,7 @@ netio_desc_t *netio_desc_create_vde(char *nio_name,char *control,char *local)
       return NULL;
    }
 
-   nio->type     = NETIO_TYPE_VDE;
+   nio->type_    = NETIO_TYPE_VDE;
    nio->send     = (void *)netio_vde_send;
    nio->recv     = (void *)netio_vde_recv;
    nio->free     = (void *)netio_vde_free;
@@ -685,7 +685,7 @@ netio_desc_t *netio_desc_create_tap(char *nio_name,char *tap_name)
       return NULL;
    }
 
-   nio->type     = NETIO_TYPE_TAP;
+   nio->type_    = NETIO_TYPE_TAP;
    nio->send     = (void *)netio_tap_send;
    nio->recv     = (void *)netio_tap_recv;
    nio->free     = (void *)netio_tap_free;
@@ -797,7 +797,7 @@ netio_desc_t *netio_desc_create_tcp_cli(char *nio_name,char *host,char *port)
       return NULL;
    }
 
-   nio->type = NETIO_TYPE_TCP_CLI;
+   nio->type_ = NETIO_TYPE_TCP_CLI;
    nio->send = (void *)netio_tcp_send;
    nio->recv = (void *)netio_tcp_recv;
    nio->free = (void *)netio_tcp_free;
@@ -879,7 +879,7 @@ netio_desc_t *netio_desc_create_tcp_ser(char *nio_name,char *port)
       return NULL;
    }
 
-   nio->type = NETIO_TYPE_TCP_SER;
+   nio->type_ = NETIO_TYPE_TCP_SER;
    nio->send = (void *)netio_tcp_send;
    nio->recv = (void *)netio_tcp_recv;
    nio->free = (void *)netio_tcp_free;
@@ -956,7 +956,7 @@ netio_desc_t *netio_desc_create_udp(char *nio_name,int local_port,
       goto error;
    }
 
-   nio->type     = NETIO_TYPE_UDP;
+   nio->type_    = NETIO_TYPE_UDP;
    nio->send     = (void *)netio_udp_send;
    nio->recv     = (void *)netio_udp_recv;
    nio->free     = (void *)netio_udp_free;
@@ -982,7 +982,7 @@ netio_desc_t *netio_desc_create_udp(char *nio_name,int local_port,
 /* Get local port */
 int netio_udp_auto_get_local_port(netio_desc_t *nio)
 {
-   if (nio->type != NETIO_TYPE_UDP_AUTO)
+   if (nio->type_ != NETIO_TYPE_UDP_AUTO)
       return(-1);
    
    return(nio->u.nid.local_port);
@@ -1038,7 +1038,7 @@ netio_desc_t *netio_desc_create_udp_auto(char *nio_name,char *local_addr,
       goto error;
    }
    
-   nio->type     = NETIO_TYPE_UDP_AUTO;
+   nio->type_    = NETIO_TYPE_UDP_AUTO;
    nio->send     = (void *)netio_udp_send;
    nio->recv     = (void *)netio_udp_recv;
    nio->free     = (void *)netio_udp_free;
@@ -1117,7 +1117,7 @@ netio_desc_t *netio_desc_create_lnxeth(char *nio_name,char *dev_name)
       return NULL;
    }
 
-   nio->type     = NETIO_TYPE_LINUX_ETH;
+   nio->type_    = NETIO_TYPE_LINUX_ETH;
    nio->send     = (void *)netio_lnxeth_send;
    nio->recv     = (void *)netio_lnxeth_recv;
    nio->free     = (void *)netio_lnxeth_free;
@@ -1191,7 +1191,7 @@ netio_desc_t *netio_desc_create_geneth(char *nio_name,char *dev_name)
       return NULL;
    }
 
-   nio->type     = NETIO_TYPE_GEN_ETH;
+   nio->type_    = NETIO_TYPE_GEN_ETH;
    nio->send     = (void *)netio_geneth_send;
    nio->recv     = (void *)netio_geneth_recv;
    nio->free     = (void *)netio_geneth_free;
@@ -1267,7 +1267,7 @@ int netio_fifo_crossconnect(netio_desc_t *a,netio_desc_t *b)
 {
    netio_fifo_desc_t *pa,*pb;
 
-   if ((a->type != NETIO_TYPE_FIFO) || (b->type != NETIO_TYPE_FIFO))
+   if ((a->type_ != NETIO_TYPE_FIFO) || (b->type_ != NETIO_TYPE_FIFO))
       return(-1);
 
    pa = &a->u.nfd;
@@ -1382,7 +1382,7 @@ netio_desc_t *netio_desc_create_fifo(char *nio_name)
    pthread_mutex_init(&nfd->endpoint_lock,NULL);
    pthread_cond_init(&nfd->cond,NULL);
 
-   nio->type = NETIO_TYPE_FIFO;
+   nio->type_ = NETIO_TYPE_FIFO;
    nio->send = (void *)netio_fifo_send;
    nio->recv = (void *)netio_fifo_recv;
    nio->free = (void *)netio_fifo_free;
@@ -1425,7 +1425,7 @@ netio_desc_t *netio_desc_create_null(char *nio_name)
    if (!(nio = netio_create(nio_name)))
       return NULL;
 
-   nio->type     = NETIO_TYPE_NULL;
+   nio->type_    = NETIO_TYPE_NULL;
    nio->send     = (void *)netio_null_send;
    nio->recv     = (void *)netio_null_recv;
    nio->save_cfg = netio_null_save_cfg;

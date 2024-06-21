@@ -6,6 +6,17 @@ use std::ffi::CString;
 use std::ptr::read_volatile;
 use std::ptr::write_volatile;
 
+/// cbindgen:no-export
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub type pcap_t = pcap;
+
+/// cbindgen:no-export
+#[cfg(feature = "ENABLE_GEN_ETH")]
+#[repr(C)]
+pub struct pcap {
+    _todo: u8,
+}
+
 /// Make rust memory compatible with C malloc/free/...
 #[global_allocator]
 static GLOBAL_ALLOCATOR: LibcAlloc = LibcAlloc;

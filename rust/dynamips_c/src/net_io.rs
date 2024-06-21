@@ -2,6 +2,7 @@
 
 use crate::dynamips_common::*;
 use crate::prelude::*;
+use crate::registry::*;
 
 pub type netio_unix_desc_t = netio_unix_desc;
 pub type netio_vde_desc_t = netio_vde_desc;
@@ -360,4 +361,14 @@ pub unsafe extern "C" fn netio_show_types() {
     }
 
     libc::printf(cstr!("\n"));
+}
+
+// =========================================================================
+// Generic functions (abstraction layer)
+// =========================================================================
+
+/// Acquire a reference to NIO from registry (increment reference count)
+#[no_mangle]
+pub unsafe extern "C" fn netio_acquire(name: *mut c_char) -> *mut netio_desc_t {
+    registry_find(name, OBJ_TYPE_NIO).cast::<_>()
 }

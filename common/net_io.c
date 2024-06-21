@@ -56,18 +56,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/*
- * =========================================================================
- * Generic functions (abstraction layer)
- * =========================================================================
- */
-
-/* Acquire a reference to NIO from registry (increment reference count) */
-netio_desc_t *netio_acquire(char *name)
-{
-   return(registry_find(name,OBJ_TYPE_NIO));
-}
-
 /* Release an NIO (decrement reference count) */
 int netio_release(char *name)
 {

@@ -56,12 +56,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/* Record an NIO in registry */
-static int netio_record(netio_desc_t *nio)
-{
-   return(registry_add(nio->name,OBJ_TYPE_NIO,nio));
-}
-
 /* Create a new NetIO descriptor */
 static netio_desc_t *netio_create(char *name)
 {

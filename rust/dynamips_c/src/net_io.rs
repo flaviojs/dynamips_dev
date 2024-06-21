@@ -378,3 +378,9 @@ pub unsafe extern "C" fn netio_acquire(name: *mut c_char) -> *mut netio_desc_t {
 pub unsafe extern "C" fn netio_release(name: *mut c_char) -> c_int {
     registry_unref(name, OBJ_TYPE_NIO)
 }
+
+/// Record an NIO in registry
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn netio_record(nio: *mut netio_desc_t) -> c_int {
+    registry_add((*nio).name, OBJ_TYPE_NIO, nio.cast::<_>())
+}

@@ -56,56 +56,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/* NetIO type */
-typedef struct {
-   char *name;
-   char *desc;
-}netio_type_t;
-
-/* NETIO types (must follow the enum definition) */
-static netio_type_t netio_types[NETIO_TYPE_MAX] = {
-   { "unix"      , "UNIX local sockets" },
-   { "vde"       , "Virtual Distributed Ethernet / UML switch" },
-   { "tap"       , "Linux/FreeBSD TAP device" },
-   { "udp"       , "UDP sockets" },
-   { "udp_auto"  , "Auto UDP sockets" },
-   { "tcp_cli"   , "TCP client" },
-   { "tcp_ser"   , "TCP server" },
-#ifdef LINUX_ETH
-   { "linux_eth" , "Linux Ethernet device" },
-#endif
-#ifdef GEN_ETH
-   { "gen_eth"   , "Generic Ethernet device (PCAP)" },
-#endif
-   { "fifo"      , "FIFO (intra-hypervisor)" },
-   { "null"      , "Null device" },
-};
-
-/* Get NETIO type given a description */
-int netio_get_type(char *type)
-{
-   int i;
-
-   for(i=0;i<NETIO_TYPE_MAX;i++)
-      if (!strcmp(type,netio_types[i].name))
-         return(i);
-
-   return(-1);
-}
-
-/* Show the NETIO types */
-void netio_show_types(void)
-{
-   int i;
-
-   printf("Available NETIO types:\n");
-
-   for(i=0;i<NETIO_TYPE_MAX;i++)
-      printf("  * %-10s : %s\n",netio_types[i].name,netio_types[i].desc);
-
-   printf("\n");
-}
-
 /*
  * =========================================================================
  * Generic functions (abstraction layer)

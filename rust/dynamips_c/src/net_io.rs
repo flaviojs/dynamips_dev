@@ -307,3 +307,57 @@ pub extern "C" fn _export_net_io_linux_eth(_: *mut netio_lnxeth_desc_t) {}
 #[cfg(feature = "ENABLE_GEN_ETH")]
 #[no_mangle]
 pub extern "C" fn _export_net_io_gen_eth(_: *mut netio_geneth_desc_t) {}
+
+/// NetIO type
+struct netio_type_t {
+    name: *mut c_char,
+    desc: *mut c_char,
+}
+impl netio_type_t {
+    pub const fn new(name: *mut c_char, desc: *mut c_char) -> Self {
+        Self { name, desc }
+    }
+}
+
+/// NETIO types (must follow the enum definition)
+static mut netio_types: [netio_type_t; NETIO_TYPE_MAX] = [
+    netio_type_t::new(cstr!("unix"), cstr!("UNIX local sockets")),
+    netio_type_t::new(cstr!("vde"), cstr!("Virtual Distributed Ethernet / UML switch")),
+    netio_type_t::new(cstr!("tap"), cstr!("Linux/FreeBSD TAP device")),
+    netio_type_t::new(cstr!("udp"), cstr!("UDP sockets")),
+    netio_type_t::new(cstr!("udp_auto"), cstr!("Auto UDP sockets")),
+    netio_type_t::new(cstr!("tcp_cli"), cstr!("TCP client")),
+    netio_type_t::new(cstr!("tcp_ser"), cstr!("TCP server")),
+    #[cfg(feature = "ENABLE_LINUX_ETH")]
+    netio_type_t::new(cstr!("linux_eth"), cstr!("Linux Ethernet device")),
+    #[cfg(feature = "ENABLE_GEN_ETH")]
+    netio_type_t::new(cstr!("gen_eth"), cstr!("Generic Ethernet device (PCAP)")),
+    netio_type_t::new(cstr!("fifo"), cstr!("FIFO (intra-hypervisor)")),
+    netio_type_t::new(cstr!("null"), cstr!("Null device")),
+];
+
+/// Get NETIO type given a description
+#[no_mangle]
+pub unsafe extern "C" fn netio_get_type(type_: *mut c_char) -> c_int {
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..NETIO_TYPE_MAX {
+        if libc::strcmp(type_, netio_types[i].name) == 0 {
+            return i as c_int;
+        }
+    }
+
+    -1
+}
+
+/// Show the NETIO types
+#[no_mangle]
+pub unsafe extern "C" fn netio_show_types() {
+    libc::printf(cstr!("Available NETIO types:\n"));
+
+    #[allow(clippy::needless_range_loop)]
+    for i in 0..NETIO_TYPE_MAX {
+        libc::printf(cstr!("  * %-10s : %s\n"), netio_types[i].name, netio_types[i].desc);
+    }
+
+    libc::printf(cstr!("\n"));
+}

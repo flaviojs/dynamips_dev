@@ -57,18 +57,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/* Save configurations of all NetIO descriptors */
-static void netio_reg_save_config(registry_entry_t *entry,void *opt,int *err)
-{
-   netio_save_config((netio_desc_t *)entry->data,(FILE *)opt);
-}
-
-void netio_save_config_all(FILE *fd)
-{
-   registry_foreach_type(OBJ_TYPE_NIO,netio_reg_save_config,fd,NULL);
-   fprintf(fd,"\n");
-}
-
 /* Send a packet through a NetIO descriptor */
 ssize_t netio_send(netio_desc_t *nio,void *pkt,size_t len)
 {

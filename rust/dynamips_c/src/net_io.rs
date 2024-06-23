@@ -430,3 +430,14 @@ pub unsafe extern "C" fn netio_save_config(nio: *mut netio_desc_t, fd: *mut libc
         (*nio).save_cfg.unwrap()(nio, fd);
     }
 }
+
+unsafe extern "C" fn netio_reg_save_config(entry: *mut registry_entry_t, opt: *mut c_void, _err: *mut c_int) {
+    netio_save_config((*entry).data.cast::<netio_desc_t>(), opt.cast::<libc::FILE>());
+}
+
+/// Save configurations of all NetIO descriptors
+#[no_mangle]
+pub unsafe extern "C" fn netio_save_config_all(fd: *mut libc::FILE) {
+    registry_foreach_type(OBJ_TYPE_NIO, Some(netio_reg_save_config), fd.cast::<_>(), null_mut());
+    libc::fprintf(fd, cstr!("\n"));
+}

@@ -416,3 +416,9 @@ pub unsafe extern "C" fn netio_create(name: *mut c_char) -> *mut netio_desc_t {
 pub unsafe extern "C" fn netio_delete(name: *mut c_char) -> c_int {
     registry_delete_if_unused(name, OBJ_TYPE_NIO, Some(netio_free), null_mut())
 }
+
+/// Delete all NetIO descriptors
+#[no_mangle]
+pub unsafe extern "C" fn netio_delete_all() -> c_int {
+    registry_delete_type(OBJ_TYPE_NIO, Some(netio_free), null_mut())
+}

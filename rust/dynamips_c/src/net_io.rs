@@ -4,6 +4,10 @@ use crate::dynamips_common::*;
 use crate::prelude::*;
 use crate::registry::*;
 
+extern "C" {
+    pub fn netio_free(data: *mut c_void, arg: *mut c_void) -> c_int;
+}
+
 pub type netio_unix_desc_t = netio_unix_desc;
 pub type netio_vde_desc_t = netio_vde_desc;
 pub type netio_tap_desc_t = netio_tap_desc;
@@ -405,4 +409,10 @@ pub unsafe extern "C" fn netio_create(name: *mut c_char) -> *mut netio_desc_t {
     }
 
     nio
+}
+
+/// Delete a NetIO descriptor
+#[no_mangle]
+pub unsafe extern "C" fn netio_delete(name: *mut c_char) -> c_int {
+    registry_delete_if_unused(name, OBJ_TYPE_NIO, Some(netio_free), null_mut())
 }

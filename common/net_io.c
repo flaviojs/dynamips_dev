@@ -39,7 +39,8 @@
 #include "net_io_filter.h"
 
 /* Free a NetIO descriptor */
-static int netio_free(void *data,void *arg);
+// TODO static
+int netio_free(void *data,void *arg);
 
 /* NIO RX listener */
 static pthread_mutex_t netio_rxl_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -55,12 +56,6 @@ static pthread_cond_t netio_rxl_cond;
 
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
-
-/* Delete a NetIO descriptor */
-int netio_delete(char *name)
-{
-   return(registry_delete_if_unused(name,OBJ_TYPE_NIO,netio_free,NULL));
-}
 
 /* Delete all NetIO descriptors */
 int netio_delete_all(void)
@@ -1345,7 +1340,8 @@ netio_desc_t *netio_desc_create_null(char *nio_name)
 }
 
 /* Free a NetIO descriptor */
-static int netio_free(void *data,void *arg)
+// TODO static
+int netio_free(void *data,void *arg)
 {
    netio_desc_t *nio = data;
 

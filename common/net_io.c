@@ -56,27 +56,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/* Create a new NetIO descriptor */
-static netio_desc_t *netio_create(char *name)
-{
-   netio_desc_t *nio;
-
-   if (!(nio = malloc(sizeof(*nio))))
-      return NULL;
-
-   /* setup as a NULL descriptor */
-   memset(nio,0,sizeof(*nio));
-   nio->type_ = NETIO_TYPE_NULL;
-
-   /* save name for registry */
-   if (!(nio->name = strdup(name))) {
-      free(nio);
-      return NULL;
-   }
-
-   return nio;
-}
-
 /* Delete a NetIO descriptor */
 int netio_delete(char *name)
 {

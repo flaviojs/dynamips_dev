@@ -384,3 +384,25 @@ pub unsafe extern "C" fn netio_release(name: *mut c_char) -> c_int {
 pub unsafe extern "C" fn netio_record(nio: *mut netio_desc_t) -> c_int {
     registry_add((*nio).name, OBJ_TYPE_NIO, nio.cast::<_>())
 }
+
+/// Create a new NetIO descriptor
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn netio_create(name: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = libc::malloc(size_of::<netio_desc_t>()).cast::<_>();
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    // setup as a NULL descriptor
+    libc::memset(nio.cast::<_>(), 0, size_of::<netio_desc_t>());
+    (*nio).type_ = NETIO_TYPE_NULL;
+
+    // save name for registry
+    (*nio).name = libc::strdup(name);
+    if (*nio).name.is_null() {
+        libc::free(nio.cast::<_>());
+        return null_mut();
+    }
+
+    nio
+}

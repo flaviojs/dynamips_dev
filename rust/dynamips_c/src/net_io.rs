@@ -3,9 +3,11 @@
 use crate::dynamips_common::*;
 use crate::prelude::*;
 use crate::registry::*;
+use crate::utils::*;
 
 extern "C" {
     pub fn netio_free(data: *mut c_void, arg: *mut c_void) -> c_int;
+    pub fn netio_update_bw_stat(nio: *mut netio_desc_t, bytes: m_uint64_t);
 }
 
 pub type netio_unix_desc_t = netio_unix_desc;
@@ -440,4 +442,43 @@ unsafe extern "C" fn netio_reg_save_config(entry: *mut registry_entry_t, opt: *m
 pub unsafe extern "C" fn netio_save_config_all(fd: *mut libc::FILE) {
     registry_foreach_type(OBJ_TYPE_NIO, Some(netio_reg_save_config), fd.cast::<_>(), null_mut());
     libc::fprintf(fd, cstr!("\n"));
+}
+
+/// Send a packet through a NetIO descriptor
+#[no_mangle]
+pub unsafe extern "C" fn netio_send(nio: *mut netio_desc_t, pkt: *mut c_void, len: size_t) -> ssize_t {
+    if nio.is_null() {
+        return -1;
+    }
+
+    if (*nio).debug != 0 {
+        libc::printf(cstr!("NIO %s: sending a packet of %lu bytes:\n"), (*nio).name, len as u_long);
+        mem_dump(c_stdout(), pkt.cast::<_>(), len as u_int);
+    }
+
+    // Apply the TX filter
+    if !(*nio).tx_filter.is_null() {
+        let res: c_int = (*(*nio).tx_filter).pkt_handler.unwrap()(nio, pkt, len, (*nio).tx_filter_data);
+
+        if res <= 0 {
+            return -1;
+        }
+    }
+
+    // Apply the bidirectional filter
+    if !(*nio).both_filter.is_null() {
+        let res: c_int = (*(*nio).both_filter).pkt_handler.unwrap()(nio, pkt, len, (*nio).both_filter_data);
+
+        if res == NETIO_FILTER_ACTION_DROP {
+            return -1;
+        }
+    }
+
+    // Update output statistics
+    (*nio).stats_pkts_out += 1;
+    (*nio).stats_bytes_out += len as m_uint64_t;
+
+    netio_update_bw_stat(nio, len as m_uint64_t);
+
+    (*nio).send.unwrap()((*nio).dptr, pkt, len)
 }

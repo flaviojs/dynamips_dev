@@ -57,44 +57,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/* Send a packet through a NetIO descriptor */
-ssize_t netio_send(netio_desc_t *nio,void *pkt,size_t len)
-{
-   int res;
-
-   if (!nio)
-      return(-1);
-
-   if (nio->debug) {
-      printf("NIO %s: sending a packet of %lu bytes:\n",nio->name,(u_long)len);
-      mem_dump(stdout,pkt,len);
-   }
-
-   /* Apply the TX filter */
-   if (nio->tx_filter != NULL) {
-      res = nio->tx_filter->pkt_handler(nio,pkt,len,nio->tx_filter_data);
-
-      if (res <= 0)
-         return(-1);
-   }
-
-   /* Apply the bidirectional filter */
-   if (nio->both_filter != NULL) {
-      res = nio->both_filter->pkt_handler(nio,pkt,len,nio->both_filter_data);
-
-      if (res == NETIO_FILTER_ACTION_DROP)
-         return(-1);
-   }
-
-   /* Update output statistics */
-   nio->stats_pkts_out++;
-   nio->stats_bytes_out += len;
-
-   netio_update_bw_stat(nio,len);
-
-   return(nio->send(nio->dptr,pkt,len));
-}
-
 /* Receive a packet through a NetIO descriptor */
 ssize_t netio_recv(netio_desc_t *nio,void *pkt,size_t max_len)
 {

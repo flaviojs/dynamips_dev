@@ -482,3 +482,46 @@ pub unsafe extern "C" fn netio_send(nio: *mut netio_desc_t, pkt: *mut c_void, le
 
     (*nio).send.unwrap()((*nio).dptr, pkt, len)
 }
+
+/// Receive a packet through a NetIO descriptor
+#[no_mangle]
+pub unsafe extern "C" fn netio_recv(nio: *mut netio_desc_t, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    if nio.is_null() {
+        return -1;
+    }
+
+    // Receive the packet
+    libc::memset(pkt, 0, max_len);
+    let len: ssize_t = (*nio).recv.unwrap()((*nio).dptr, pkt, max_len);
+    if len <= 0 {
+        return -1;
+    }
+
+    if (*nio).debug != 0 {
+        libc::printf(cstr!("NIO %s: receiving a packet of %ld bytes:\n"), (*nio).name, len as c_long);
+        mem_dump(c_stdout(), pkt.cast::<_>(), len as u_int);
+    }
+
+    // Apply the RX filter
+    if !(*nio).rx_filter.is_null() {
+        let res: c_int = (*(*nio).rx_filter).pkt_handler.unwrap()(nio, pkt, len as size_t, (*nio).rx_filter_data);
+
+        if res == NETIO_FILTER_ACTION_DROP {
+            return -1;
+        }
+    }
+
+    // Apply the bidirectional filter
+    if !(*nio).both_filter.is_null() {
+        let res: c_int = (*(*nio).both_filter).pkt_handler.unwrap()(nio, pkt, len as size_t, (*nio).both_filter_data);
+
+        if res == NETIO_FILTER_ACTION_DROP {
+            return -1;
+        }
+    }
+
+    // Update input statistics
+    (*nio).stats_pkts_in += 1;
+    (*nio).stats_bytes_in += len as m_uint64_t;
+    len
+}

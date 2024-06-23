@@ -57,47 +57,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/* Receive a packet through a NetIO descriptor */
-ssize_t netio_recv(netio_desc_t *nio,void *pkt,size_t max_len)
-{
-   ssize_t len;
-   int res;
-
-   if (!nio)
-      return(-1);
-
-   /* Receive the packet */
-   memset(pkt, 0, max_len);
-   if ((len = nio->recv(nio->dptr,pkt,max_len)) <= 0)
-      return(-1);
-
-   if (nio->debug) {
-      printf("NIO %s: receiving a packet of %ld bytes:\n",nio->name,(long)len);
-      mem_dump(stdout,pkt,len);
-   }
-
-   /* Apply the RX filter */
-   if (nio->rx_filter != NULL) {
-      res = nio->rx_filter->pkt_handler(nio,pkt,len,nio->rx_filter_data);
-
-      if (res == NETIO_FILTER_ACTION_DROP)
-         return(-1);
-   }
-
-   /* Apply the bidirectional filter */
-   if (nio->both_filter != NULL) {
-      res = nio->both_filter->pkt_handler(nio,pkt,len,nio->both_filter_data);
-
-      if (res == NETIO_FILTER_ACTION_DROP)
-         return(-1);
-   }
-
-   /* Update input statistics */
-   nio->stats_pkts_in++;
-   nio->stats_bytes_in += len;
-   return(len);
-}
-
 /* Get a NetIO FD */
 int netio_get_fd(netio_desc_t *nio)
 {

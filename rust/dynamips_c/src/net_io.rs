@@ -666,3 +666,152 @@ pub unsafe extern "C" fn netio_desc_create_unix(nio_name: *mut c_char, local: *m
 
     nio
 }
+
+// =========================================================================
+// VDE (Virtual Distributed Ethernet) interface
+// =========================================================================
+
+/// Free a NetIO VDE descriptor
+unsafe extern "C" fn netio_vde_free(nvd: *mut c_void) {
+    let nvd: *mut netio_vde_desc_t = nvd.cast::<_>();
+    if (*nvd).data_fd != -1 {
+        libc::close((*nvd).data_fd);
+    }
+
+    if (*nvd).ctrl_fd != -1 {
+        libc::close((*nvd).ctrl_fd);
+    }
+
+    if !(*nvd).local_filename.is_null() {
+        libc::unlink((*nvd).local_filename);
+        libc::free((*nvd).local_filename.cast::<_>());
+    }
+}
+
+/// Create a new NetIO VDE descriptor
+unsafe fn netio_vde_create(nvd: *mut netio_vde_desc_t, control: *mut c_char, local: *mut c_char) -> c_int {
+    let mut ctrl_sock: libc::sockaddr_un = zeroed::<_>();
+    let mut tst: libc::sockaddr_un = zeroed::<_>();
+    let mut req: vde_request_v3 = zeroed::<_>();
+    let mut len: ssize_t;
+
+    libc::memset(nvd.cast::<_>(), 0, size_of::<netio_vde_desc_t>());
+    (*nvd).ctrl_fd = -1;
+    (*nvd).data_fd = -1;
+
+    if (libc::strlen(control) >= ctrl_sock.sun_path.len()) || (libc::strlen(local) >= (*nvd).remote_sock.sun_path.len()) {
+        libc::fprintf(c_stderr(), cstr!("netio_vde_create: bad filenames specified\n"));
+        return -1;
+    }
+
+    // Copy the local filename
+    (*nvd).local_filename = libc::strdup(local);
+    if (*nvd).local_filename.is_null() {
+        libc::fprintf(c_stderr(), cstr!("netio_vde_create: insufficient memory\n"));
+        return -1;
+    }
+
+    // Connect to the VDE switch controller
+    (*nvd).ctrl_fd = libc::socket(libc::AF_UNIX, libc::SOCK_STREAM, 0);
+    if (*nvd).ctrl_fd < 0 {
+        libc::perror(cstr!("netio_vde_create: socket(control)"));
+        return -1;
+    }
+
+    libc::memset(addr_of_mut!(ctrl_sock).cast::<_>(), 0, size_of::<libc::sockaddr_un>());
+    ctrl_sock.sun_family = libc::AF_UNIX as libc::sa_family_t;
+    libc::strcpy(ctrl_sock.sun_path.as_c_mut(), control);
+
+    let res: c_int = libc::connect((*nvd).ctrl_fd, addr_of!(ctrl_sock).cast::<_>(), size_of::<libc::sockaddr_un>() as libc::socklen_t);
+
+    if res < 0 {
+        libc::perror(cstr!("netio_vde_create: connect(control)"));
+        return -1;
+    }
+
+    tst.sun_family = libc::AF_UNIX as libc::sa_family_t;
+    libc::strcpy(tst.sun_path.as_c_mut(), local);
+
+    // Create the data connection
+    (*nvd).data_fd = libc::socket(libc::AF_UNIX, libc::SOCK_DGRAM, 0);
+    if (*nvd).data_fd < 0 {
+        libc::perror(cstr!("netio_vde_create: socket(data)"));
+        return -1;
+    }
+
+    if libc::bind((*nvd).data_fd, addr_of!(tst).cast::<_>(), size_of::<libc::sockaddr_un>() as libc::socklen_t) < 0 {
+        libc::perror(cstr!("netio_vde_create: bind(data)"));
+        return -1;
+    }
+
+    // Now, process to registration
+    libc::memset(addr_of_mut!(req).cast::<_>(), 0, size_of::<vde_request_v3>());
+    req.sock.sun_family = libc::AF_UNIX as libc::sa_family_t;
+    libc::strcpy(req.sock.sun_path.as_c_mut(), local);
+    req.magic = VDE_SWITCH_MAGIC;
+    req.version = VDE_SWITCH_VERSION;
+    req.type_ = vde_request_type::VDE_REQ_NEW_CONTROL;
+
+    len = libc::write((*nvd).ctrl_fd, addr_of!(req).cast::<_>(), size_of::<vde_request_v3>());
+    if len != size_of::<vde_request_v3>() as ssize_t {
+        libc::perror(cstr!("netio_vde_create: write(req)"));
+        return -1;
+    }
+
+    // Read the remote socket descriptor
+    len = libc::read((*nvd).ctrl_fd, addr_of_mut!((*nvd).remote_sock).cast::<_>(), size_of::<libc::sockaddr_un>());
+    if len != size_of::<libc::sockaddr_un>() as ssize_t {
+        libc::perror(cstr!("netio_vde_create: read(req)"));
+        return -1;
+    }
+
+    0
+}
+
+/// Send a packet to a VDE data socket
+unsafe extern "C" fn netio_vde_send(nvd: *mut c_void, pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    let nvd: *mut netio_vde_desc_t = nvd.cast::<_>();
+    libc::sendto((*nvd).data_fd, pkt, pkt_len, 0, addr_of!((*nvd).remote_sock).cast::<_>(), size_of::<libc::sockaddr_un>() as libc::socklen_t)
+}
+
+/// Receive a packet from a VDE socket
+unsafe extern "C" fn netio_vde_recv(nvd: *mut c_void, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    let nvd: *mut netio_vde_desc_t = nvd.cast::<_>();
+    libc::recvfrom((*nvd).data_fd, pkt, max_len, 0, null_mut(), null_mut())
+}
+
+/// Save the NIO configuration
+unsafe extern "C" fn netio_vde_save_cfg(nio: *mut netio_desc_t, fd: *mut libc::FILE) {
+    let nvd: *mut netio_vde_desc_t = (*nio).dptr.cast::<_>();
+    libc::fprintf(fd, cstr!("nio create_vde %s %s %s\n"), (*nio).name, (*nvd).remote_sock.sun_path.as_c(), (*nvd).local_filename);
+}
+
+/// Create a new NetIO descriptor with VDE method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_vde(nio_name: *mut c_char, control: *mut c_char, local: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    let nvd: *mut netio_vde_desc_t = addr_of_mut!((*nio).u.nvd);
+
+    if netio_vde_create(nvd, control, local) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_VDE;
+    (*nio).send = Some(netio_vde_send);
+    (*nio).recv = Some(netio_vde_recv);
+    (*nio).free = Some(netio_vde_free);
+    (*nio).save_cfg = Some(netio_vde_save_cfg);
+    (*nio).dptr = addr_of_mut!((*nio).u.nvd).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}

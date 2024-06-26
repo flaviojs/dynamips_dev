@@ -815,3 +815,148 @@ pub unsafe extern "C" fn netio_desc_create_vde(nio_name: *mut c_char, control: *
 
     nio
 }
+
+// =========================================================================
+// TAP devices
+// =========================================================================
+
+/// Free a NetIO TAP descriptor
+unsafe extern "C" fn netio_tap_free(ntd: *mut c_void) {
+    let ntd: *mut netio_tap_desc_t = ntd.cast::<_>();
+    if (*ntd).fd != -1 {
+        libc::close((*ntd).fd);
+    }
+}
+
+/// Open a TAP device (linux)
+#[cfg(target_os = "linux")]
+unsafe fn netio_tap_open_linux(tap_devname: *mut c_char) -> c_int {
+    let mut ifr: libc::ifreq = zeroed::<_>();
+
+    let fd: c_int = libc::open(cstr!("/dev/net/tun"), libc::O_RDWR);
+    if fd < 0 {
+        return -1;
+    }
+
+    libc::memset(addr_of_mut!(ifr).cast::<_>(), 0, size_of::<libc::ifreq>());
+
+    // Flags: IFF_TUN   - TUN device (no Ethernet headers)
+    //        IFF_TAP   - TAP device
+    //
+    //        IFF_NO_PI - Do not provide packet information
+    ifr.ifr_ifru.ifru_flags = (libc::IFF_TAP | libc::IFF_NO_PI) as c_short;
+    if *tap_devname != 0 {
+        libc::strncpy(ifr.ifr_name.as_c_mut(), tap_devname, libc::IFNAMSIZ - 1);
+        ifr.ifr_name[libc::IFNAMSIZ - 1] = 0;
+    }
+
+    let err: c_int = libc::ioctl(fd, linux_raw_sys::ioctl::TUNSETIFF as _, addr_of!(ifr));
+    if err < 0 {
+        libc::close(fd);
+        return err;
+    }
+
+    libc::strcpy(tap_devname, ifr.ifr_name.as_c());
+    fd
+}
+
+/// Open a TAP device (not linux)
+unsafe fn netio_tap_open_not_linux(tap_devname: *mut c_char) -> c_int {
+    let mut fd: c_int = -1;
+    let mut tap_fullname: [c_char; NETIO_DEV_MAXLEN] = [0; NETIO_DEV_MAXLEN];
+
+    if *tap_devname != 0 {
+        libc::snprintf(tap_fullname.as_c_mut(), NETIO_DEV_MAXLEN, cstr!("/dev/%s"), tap_devname);
+        fd = libc::open(tap_fullname.as_c(), libc::O_RDWR);
+    } else {
+        for i in 0..16 {
+            libc::snprintf(tap_devname, NETIO_DEV_MAXLEN, cstr!("/dev/tap%d"), i);
+
+            fd = libc::open(tap_devname, libc::O_RDWR);
+            if fd >= 0 {
+                break;
+            }
+        }
+    }
+
+    fd
+}
+
+/// Open a TAP device
+unsafe fn netio_tap_open(tap_devname: *mut c_char) -> c_int {
+    #[cfg(target_os = "linux")]
+    {
+        netio_tap_open_linux(tap_devname)
+    }
+    #[cfg(not(target_os = "linux"))]
+    {
+        netio_tap_open_not_linux(tap_devname)
+    }
+}
+
+/// Allocate a new NetIO TAP descriptor
+unsafe fn netio_tap_create(ntd: *mut netio_tap_desc_t, tap_name: *mut c_char) -> c_int {
+    if libc::strlen(tap_name) >= NETIO_DEV_MAXLEN {
+        libc::fprintf(c_stderr(), cstr!("netio_tap_create: bad TAP device string specified.\n"));
+        return -1;
+    }
+
+    libc::memset(ntd.cast::<_>(), 0, size_of::<netio_tap_desc_t>());
+    libc::strcpy((*ntd).filename.as_c_mut(), tap_name);
+    (*ntd).fd = netio_tap_open((*ntd).filename.as_c_mut());
+
+    if (*ntd).fd == -1 {
+        libc::fprintf(c_stderr(), cstr!("netio_tap_create: unable to open TAP device %s (%s)\n"), tap_name, libc::strerror(c_errno()));
+        return -1;
+    }
+
+    0
+}
+
+/// Send a packet to a TAP device
+unsafe extern "C" fn netio_tap_send(ntd: *mut c_void, pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    let ntd: *mut netio_tap_desc_t = ntd.cast::<_>();
+    libc::write((*ntd).fd, pkt, pkt_len)
+}
+
+/// Receive a packet through a TAP device
+unsafe extern "C" fn netio_tap_recv(ntd: *mut c_void, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    let ntd: *mut netio_tap_desc_t = ntd.cast::<_>();
+    libc::read((*ntd).fd, pkt, max_len)
+}
+
+/// Save the NIO configuration
+unsafe extern "C" fn netio_tap_save_cfg(nio: *mut netio_desc_t, fd: *mut libc::FILE) {
+    let ntd: *mut netio_tap_desc_t = (*nio).dptr.cast::<_>();
+    libc::fprintf(fd, cstr!("nio create_tap %s %s\n"), (*nio).name, (*ntd).filename);
+}
+
+/// Create a new NetIO descriptor with TAP method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_tap(nio_name: *mut c_char, tap_name: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    let ntd: *mut netio_tap_desc_t = addr_of_mut!((*nio).u.ntd);
+
+    if netio_tap_create(ntd, tap_name) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_TAP;
+    (*nio).send = Some(netio_tap_send);
+    (*nio).recv = Some(netio_tap_recv);
+    (*nio).free = Some(netio_tap_free);
+    (*nio).save_cfg = Some(netio_tap_save_cfg);
+    (*nio).dptr = addr_of_mut!((*nio).u.ntd).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}

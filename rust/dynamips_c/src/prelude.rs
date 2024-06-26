@@ -21,6 +21,8 @@ pub use libc::size_t;
 pub use libc::ssize_t;
 pub use likely_stable::likely;
 pub use likely_stable::unlikely;
+#[cfg(target_os = "linux")]
+pub use linux_raw_sys;
 pub use setjmp;
 pub use std::ffi::c_char;
 pub use std::ffi::c_int;

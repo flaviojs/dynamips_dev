@@ -1,6 +1,8 @@
 //! Network Input/Output Abstraction Layer.
 
 use crate::dynamips_common::*;
+#[cfg(feature = "ENABLE_LINUX_ETH")]
+use crate::linux_eth::*;
 use crate::net::*;
 use crate::prelude::*;
 use crate::registry::*;
@@ -1298,6 +1300,82 @@ pub unsafe extern "C" fn netio_desc_create_udp_auto(nio_name: *mut c_char, local
     (*nio).free = Some(netio_udp_free);
     (*nio).save_cfg = Some(netio_udp_save_cfg);
     (*nio).dptr = addr_of_mut!((*nio).u.nid).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}
+
+// =========================================================================
+// Linux RAW Ethernet driver
+// =========================================================================
+
+/// Free a NetIO raw ethernet descriptor
+#[cfg(feature = "ENABLE_LINUX_ETH")]
+unsafe extern "C" fn netio_lnxeth_free(nled: *mut c_void) {
+    let nled: *mut netio_lnxeth_desc_t = nled.cast::<_>();
+    if (*nled).fd != -1 {
+        libc::close((*nled).fd);
+    }
+}
+
+/// Send a packet to a raw Ethernet socket
+#[cfg(feature = "ENABLE_LINUX_ETH")]
+unsafe extern "C" fn netio_lnxeth_send(nled: *mut c_void, pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    let nled: *mut netio_lnxeth_desc_t = nled.cast::<_>();
+    lnx_eth_send((*nled).fd, (*nled).dev_id, pkt.cast::<_>(), pkt_len)
+}
+
+/// Receive a packet from an raw Ethernet socket
+#[cfg(feature = "ENABLE_LINUX_ETH")]
+unsafe extern "C" fn netio_lnxeth_recv(nled: *mut c_void, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    let nled: *mut netio_lnxeth_desc_t = nled.cast::<_>();
+    lnx_eth_recv((*nled).fd, pkt.cast::<_>(), max_len)
+}
+
+/// Save the NIO configuration
+#[cfg(feature = "ENABLE_LINUX_ETH")]
+unsafe extern "C" fn netio_lnxeth_save_cfg(nio: *mut netio_desc_t, fd: *mut libc::FILE) {
+    let nled: *mut netio_lnxeth_desc_t = (*nio).dptr.cast::<_>();
+    libc::fprintf(fd, cstr!("nio create_linux_eth %s %s\n"), (*nio).name, (*nled).dev_name);
+}
+
+/// Create a new NetIO descriptor with raw Ethernet method
+#[cfg(feature = "ENABLE_LINUX_ETH")]
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_lnxeth(nio_name: *mut c_char, dev_name: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    let nled: *mut netio_lnxeth_desc_t = addr_of_mut!((*nio).u.nled);
+
+    if libc::strlen(dev_name) >= NETIO_DEV_MAXLEN {
+        libc::fprintf(c_stderr(), cstr!("netio_desc_create_lnxeth: bad Ethernet device string specified.\n"));
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    libc::strcpy((*nled).dev_name.as_c_mut(), dev_name);
+
+    (*nled).fd = lnx_eth_init_socket(dev_name);
+    (*nled).dev_id = lnx_eth_get_dev_index(dev_name);
+
+    if (*nled).fd < 0 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_LINUX_ETH;
+    (*nio).send = Some(netio_lnxeth_send);
+    (*nio).recv = Some(netio_lnxeth_recv);
+    (*nio).free = Some(netio_lnxeth_free);
+    (*nio).save_cfg = Some(netio_lnxeth_save_cfg);
+    (*nio).dptr = addr_of_mut!((*nio).u.nled).cast::<_>();
 
     if netio_record(nio) == -1 {
         netio_free(nio.cast::<_>(), null_mut());

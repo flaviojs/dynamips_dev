@@ -32,6 +32,8 @@ pub mod fs_nvram;
 pub mod hash;
 pub mod insn_lookup;
 pub mod jit_op;
+#[cfg(feature = "ENABLE_LINUX_ETH")]
+pub mod linux_eth;
 pub mod memory;
 pub mod mempool;
 pub mod mips64;

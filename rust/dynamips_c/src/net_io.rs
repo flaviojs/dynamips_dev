@@ -553,3 +553,116 @@ pub unsafe extern "C" fn netio_get_fd(nio: *mut netio_desc_t) -> c_int {
 
     fd
 }
+
+// =========================================================================
+// UNIX sockets
+// =========================================================================
+
+// Create an UNIX socket
+unsafe fn netio_unix_create_socket(nud: *mut netio_unix_desc_t) -> c_int {
+    let mut local_sock: libc::sockaddr_un = zeroed::<_>();
+
+    (*nud).fd = libc::socket(libc::AF_UNIX, libc::SOCK_DGRAM, 0);
+    if (*nud).fd == -1 {
+        libc::perror(cstr!("netio_unix: socket"));
+        return -1;
+    }
+
+    libc::memset(addr_of_mut!(local_sock).cast::<_>(), 0, size_of::<libc::sockaddr_un>());
+    local_sock.sun_family = libc::AF_UNIX as libc::sa_family_t;
+    libc::strncpy(local_sock.sun_path.as_c_mut(), (*nud).local_filename, local_sock.sun_path.len() - 1);
+    local_sock.sun_path[local_sock.sun_path.len() - 1] = 0;
+
+    if libc::bind((*nud).fd, addr_of!(local_sock).cast::<_>(), size_of::<libc::sockaddr_un>() as libc::socklen_t) == -1 {
+        libc::perror(cstr!("netio_unix: bind"));
+        return -1;
+    }
+
+    (*nud).fd
+}
+
+/// Free a NetIO unix descriptor
+unsafe extern "C" fn netio_unix_free(nud: *mut c_void) {
+    let nud: *mut netio_unix_desc_t = nud.cast::<_>();
+    if (*nud).fd != -1 {
+        libc::close((*nud).fd);
+    }
+
+    if !(*nud).local_filename.is_null() {
+        libc::unlink((*nud).local_filename);
+        libc::free((*nud).local_filename.cast::<_>());
+    }
+}
+
+/// Allocate a new NetIO UNIX descriptor
+unsafe fn netio_unix_create(nud: *mut netio_unix_desc_t, local: *mut c_char, remote: *mut c_char) -> c_int {
+    libc::memset(nud.cast::<_>(), 0, size_of::<netio_unix_desc_t>());
+    (*nud).fd = -1;
+
+    // check lengths
+    if (libc::strlen(local) >= (*nud).remote_sock.sun_path.len()) || (libc::strlen(remote) >= (*nud).remote_sock.sun_path.len()) {
+        libc::fprintf(c_stderr(), cstr!("netio_unix_create: invalid file size or insufficient memory\n"));
+        return -1;
+    }
+
+    (*nud).local_filename = libc::strdup(local);
+    if (*nud).local_filename.is_null() {
+        libc::fprintf(c_stderr(), cstr!("netio_unix_create: invalid file size or insufficient memory\n"));
+        return -1;
+    }
+
+    if netio_unix_create_socket(nud) == -1 {
+        return -1;
+    }
+
+    // prepare the remote info
+    (*nud).remote_sock.sun_family = libc::AF_UNIX as libc::sa_family_t;
+    libc::strcpy((*nud).remote_sock.sun_path.as_c_mut(), remote);
+    0
+}
+
+/// Send a packet to an UNIX socket
+unsafe extern "C" fn netio_unix_send(nud: *mut c_void, pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    let nud: *mut netio_unix_desc_t = nud.cast::<_>();
+    libc::sendto((*nud).fd, pkt, pkt_len, 0, addr_of!((*nud).remote_sock).cast::<_>(), size_of::<libc::sockaddr_un>() as libc::socklen_t)
+}
+
+/// Receive a packet from an UNIX socket
+unsafe extern "C" fn netio_unix_recv(nud: *mut c_void, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    let nud: *mut netio_unix_desc_t = nud.cast::<_>();
+    libc::recvfrom((*nud).fd, pkt, max_len, 0, null_mut(), null_mut())
+}
+
+/// Save the NIO configuration
+unsafe extern "C" fn netio_unix_save_cfg(nio: *mut netio_desc_t, fd: *mut libc::FILE) {
+    let nud: *mut netio_unix_desc_t = (*nio).dptr.cast::<_>();
+    libc::fprintf(fd, cstr!("nio create_unix %s %s %s\n"), (*nio).name, (*nud).local_filename, (*nud).remote_sock.sun_path.as_c());
+}
+
+/// Create a new NetIO descriptor with UNIX method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_unix(nio_name: *mut c_char, local: *mut c_char, remote: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    if netio_unix_create(addr_of_mut!((*nio).u.nud), local, remote) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_UNIX;
+    (*nio).send = Some(netio_unix_send);
+    (*nio).recv = Some(netio_unix_recv);
+    (*nio).free = Some(netio_unix_free);
+    (*nio).save_cfg = Some(netio_unix_save_cfg);
+    (*nio).dptr = addr_of_mut!((*nio).u.nud).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}

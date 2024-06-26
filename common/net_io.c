@@ -57,37 +57,6 @@ static pthread_cond_t netio_rxl_cond;
 #define NETIO_RXQ_LOCK()   pthread_mutex_lock(&netio_rxq_mutex);
 #define NETIO_RXQ_UNLOCK() pthread_mutex_unlock(&netio_rxq_mutex);
 
-/* Get a NetIO FD */
-int netio_get_fd(netio_desc_t *nio)
-{
-   int fd = -1;
-
-   switch(nio->type_) {
-      case NETIO_TYPE_UNIX:
-         fd = nio->u.nud.fd;
-         break;
-      case NETIO_TYPE_VDE:
-         fd = nio->u.nvd.data_fd;
-         break;
-      case NETIO_TYPE_TAP:
-         fd = nio->u.ntd.fd;
-         break;
-      case NETIO_TYPE_TCP_CLI:
-      case NETIO_TYPE_TCP_SER:
-      case NETIO_TYPE_UDP:
-      case NETIO_TYPE_UDP_AUTO:
-         fd = nio->u.nid.fd;
-         break;
-#ifdef LINUX_ETH
-      case NETIO_TYPE_LINUX_ETH:
-         fd = nio->u.nled.fd;
-         break;
-#endif
-   }
-   
-   return(fd);
-}
-
 /*
  * =========================================================================
  * UNIX sockets

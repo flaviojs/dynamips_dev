@@ -525,3 +525,31 @@ pub unsafe extern "C" fn netio_recv(nio: *mut netio_desc_t, pkt: *mut c_void, ma
     (*nio).stats_bytes_in += len as m_uint64_t;
     len
 }
+
+/// Get a NetIO FD
+#[no_mangle]
+pub unsafe extern "C" fn netio_get_fd(nio: *mut netio_desc_t) -> c_int {
+    let mut fd: c_int = -1;
+
+    match (*nio).type_ {
+        NETIO_TYPE_UNIX => {
+            fd = (*nio).u.nud.fd;
+        }
+        NETIO_TYPE_VDE => {
+            fd = (*nio).u.nvd.data_fd;
+        }
+        NETIO_TYPE_TAP => {
+            fd = (*nio).u.ntd.fd;
+        }
+        NETIO_TYPE_TCP_CLI | NETIO_TYPE_TCP_SER | NETIO_TYPE_UDP | NETIO_TYPE_UDP_AUTO => {
+            fd = (*nio).u.nid.fd;
+        }
+        #[cfg(featuren = "ENABLE_LINUX_ETH")]
+        NETIO_TYPE_LINUX_ETH => {
+            fd = (*nio).u.nled.fd;
+        }
+        _ => {}
+    }
+
+    fd
+}

@@ -960,3 +960,196 @@ pub unsafe extern "C" fn netio_desc_create_tap(nio_name: *mut c_char, tap_name: 
 
     nio
 }
+
+// =========================================================================
+// TCP sockets
+// =========================================================================
+
+/// Free a NetIO TCP descriptor
+unsafe extern "C" fn netio_tcp_free(nid: *mut c_void) {
+    let nid: *mut netio_inet_desc_t = nid.cast::<_>();
+    if (*nid).fd != -1 {
+        libc::close((*nid).fd);
+    }
+}
+
+// very simple protocol to send packets over tcp
+// 32 bits in network format - size of packet, then packet itself and so on.
+unsafe extern "C" fn netio_tcp_send(nid: *mut c_void, pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    let nid: *mut netio_inet_desc_t = nid.cast::<_>();
+    let l: m_uint32_t = htonl(pkt_len as m_uint32_t);
+
+    if libc::write((*nid).fd, addr_of!(l).cast::<_>(), size_of::<m_uint32_t>()) == -1 {
+        return -1;
+    }
+
+    libc::write((*nid).fd, pkt, pkt_len)
+}
+
+unsafe extern "C" fn netio_tcp_recv(nid: *mut c_void, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    let nid: *mut netio_inet_desc_t = nid.cast::<_>();
+    let mut l: m_uint32_t = 0;
+
+    if libc::read((*nid).fd, addr_of_mut!(l).cast::<_>(), size_of::<m_uint32_t>()) != size_of::<m_uint32_t>() as ssize_t {
+        return -1;
+    }
+
+    if ntohl(l) as size_t > max_len {
+        return -1;
+    }
+
+    libc::read((*nid).fd, pkt, ntohl(l) as size_t)
+}
+
+unsafe fn netio_tcp_cli_create(nid: *mut netio_inet_desc_t, host: *mut c_char, port: *mut c_char) -> c_int {
+    let mut serv: libc::sockaddr_in = zeroed::<_>();
+    let sp: *mut libc::servent;
+    let hp: *mut libc::hostent;
+
+    (*nid).fd = libc::socket(libc::PF_INET, libc::SOCK_STREAM, 0);
+    if (*nid).fd < 0 {
+        libc::perror(cstr!("netio_tcp_cli_create: socket"));
+        return -1;
+    }
+
+    libc::memset(addr_of_mut!(serv).cast::<_>(), 0, size_of::<libc::sockaddr_in>());
+    serv.sin_family = libc::AF_INET as libc::sa_family_t;
+
+    if libc::atoi(port) == 0 {
+        sp = libc::getservbyname(port, cstr!("tcp"));
+        if sp.is_null() {
+            libc::fprintf(c_stderr(), cstr!("netio_tcp_cli_create: port %s is neither number not service %s\n"), port, libc::strerror(c_errno()));
+            libc::close((*nid).fd);
+            return -1;
+        }
+        serv.sin_port = (*sp).s_port as u16;
+    } else {
+        serv.sin_port = htons(libc::atoi(port) as u16);
+    }
+
+    if inet_addr(host) == libc::INADDR_NONE {
+        hp = gethostbyname(host);
+        if hp.is_null() {
+            libc::fprintf(c_stderr(), cstr!("netio_tcp_cli_create: no host %s\n"), host);
+            libc::close((*nid).fd);
+            return -1;
+        }
+        serv.sin_addr.s_addr = *(*(*hp).h_addr_list).cast::<u32>();
+    } else {
+        serv.sin_addr.s_addr = inet_addr(host);
+    }
+
+    if libc::connect((*nid).fd, addr_of!(serv).cast::<_>(), size_of::<libc::sockaddr_in>() as libc::socklen_t) < 0 {
+        libc::fprintf(c_stderr(), cstr!("netio_tcp_cli_create: connect to %s:%s failed %s\n"), host, port, libc::strerror(c_errno()));
+        libc::close((*nid).fd);
+        return -1;
+    }
+    0
+}
+
+/// Create a new NetIO descriptor with TCP_CLI method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_tcp_cli(nio_name: *mut c_char, host: *mut c_char, port: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    if netio_tcp_cli_create(addr_of_mut!((*nio).u.nid), host, port) < 0 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_TCP_CLI;
+    (*nio).send = Some(netio_tcp_send);
+    (*nio).recv = Some(netio_tcp_recv);
+    (*nio).free = Some(netio_tcp_free);
+    (*nio).dptr = addr_of_mut!((*nio).u.nid).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}
+
+unsafe fn netio_tcp_ser_create(nid: *mut netio_inet_desc_t, port: *mut c_char) -> c_int {
+    let mut serv: libc::sockaddr_in = zeroed::<_>();
+    let sp: *mut libc::servent;
+
+    let sock_fd: c_int = libc::socket(libc::PF_INET, libc::SOCK_STREAM, 0);
+    if sock_fd < 0 {
+        libc::perror(cstr!("netio_tcp_cli_create: socket\n"));
+        return -1;
+    }
+
+    libc::memset(addr_of_mut!(serv).cast::<_>(), 0, size_of::<libc::sockaddr_in>());
+    serv.sin_family = libc::AF_INET as libc::sa_family_t;
+    serv.sin_addr.s_addr = htonl(libc::INADDR_ANY);
+
+    if libc::atoi(port) == 0 {
+        sp = libc::getservbyname(port, cstr!("tcp"));
+        if sp.is_null() {
+            libc::fprintf(c_stderr(), cstr!("netio_tcp_ser_create: port %s is neither number not service %s\n"), port, libc::strerror(c_errno()));
+            libc::close(sock_fd);
+            return -1;
+        }
+        serv.sin_port = (*sp).s_port as u16;
+    } else {
+        serv.sin_port = htons(libc::atoi(port) as u16);
+    }
+
+    if libc::bind(sock_fd, addr_of!(serv).cast::<_>(), size_of::<libc::sockaddr_in>() as libc::socklen_t) < 0 {
+        libc::fprintf(c_stderr(), cstr!("netio_tcp_ser_create: bind %s failed %s\n"), port, libc::strerror(c_errno()));
+        libc::close(sock_fd);
+        return -1;
+    }
+
+    if libc::listen(sock_fd, 1) < 0 {
+        libc::fprintf(c_stderr(), cstr!("netio_tcp_ser_create: listen %s failed %s\n"), port, libc::strerror(c_errno()));
+        libc::close(sock_fd);
+        return -1;
+    }
+
+    libc::fprintf(c_stderr(), cstr!("Waiting connection on port %s...\n"), port);
+
+    (*nid).fd = libc::accept(sock_fd, null_mut(), null_mut());
+    if (*nid).fd < 0 {
+        libc::fprintf(c_stderr(), cstr!("netio_tcp_ser_create: accept %s failed %s\n"), port, libc::strerror(c_errno()));
+        libc::close(sock_fd);
+        return -1;
+    }
+
+    libc::fprintf(c_stderr(), cstr!("Connected\n"));
+
+    libc::close(sock_fd);
+    0
+}
+
+/// Create a new NetIO descriptor with TCP_SER method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_tcp_ser(nio_name: *mut c_char, port: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    if netio_tcp_ser_create(addr_of_mut!((*nio).u.nid), port) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_TCP_SER;
+    (*nio).send = Some(netio_tcp_send);
+    (*nio).recv = Some(netio_tcp_recv);
+    (*nio).free = Some(netio_tcp_free);
+    (*nio).dptr = addr_of_mut!((*nio).u.nid).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}

@@ -1,6 +1,7 @@
 //! Network Input/Output Abstraction Layer.
 
 use crate::dynamips_common::*;
+use crate::net::*;
 use crate::prelude::*;
 use crate::registry::*;
 use crate::utils::*;
@@ -1144,6 +1145,158 @@ pub unsafe extern "C" fn netio_desc_create_tcp_ser(nio_name: *mut c_char, port: 
     (*nio).send = Some(netio_tcp_send);
     (*nio).recv = Some(netio_tcp_recv);
     (*nio).free = Some(netio_tcp_free);
+    (*nio).dptr = addr_of_mut!((*nio).u.nid).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}
+
+// =========================================================================
+// UDP sockets
+// =========================================================================
+
+/// Free a NetIO UDP descriptor
+unsafe extern "C" fn netio_udp_free(nid: *mut c_void) {
+    let nid: *mut netio_inet_desc_t = nid.cast::<_>();
+    if !(*nid).remote_host.is_null() {
+        libc::free((*nid).remote_host.cast::<_>());
+        (*nid).remote_host = null_mut();
+    }
+
+    if (*nid).fd != -1 {
+        libc::close((*nid).fd);
+    }
+}
+
+/// Send a packet to an UDP socket
+unsafe extern "C" fn netio_udp_send(nid: *mut c_void, pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    let nid: *mut netio_inet_desc_t = nid.cast::<_>();
+    libc::send((*nid).fd, pkt, pkt_len, 0)
+}
+
+/// Receive a packet from an UDP socket
+unsafe extern "C" fn netio_udp_recv(nid: *mut c_void, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    let nid: *mut netio_inet_desc_t = nid.cast::<_>();
+    libc::recvfrom((*nid).fd, pkt, max_len, 0, null_mut(), null_mut())
+}
+
+/// Save the NIO configuration
+unsafe extern "C" fn netio_udp_save_cfg(nio: *mut netio_desc_t, fd: *mut libc::FILE) {
+    let nid: *mut netio_inet_desc_t = (*nio).dptr.cast::<_>();
+    libc::fprintf(fd, cstr!("nio create_udp %s %d %s %d\n"), (*nio).name, (*nid).local_port, (*nid).remote_host, (*nid).remote_port);
+}
+
+/// Create a new NetIO descriptor with UDP method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_udp(nio_name: *mut c_char, local_port: c_int, remote_host: *mut c_char, remote_port: c_int) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    let nid: *mut netio_inet_desc_t = addr_of_mut!((*nio).u.nid);
+    (*nid).local_port = local_port;
+    (*nid).remote_port = remote_port;
+
+    (*nid).remote_host = libc::strdup(remote_host);
+    if nid.is_null() {
+        libc::fprintf(c_stderr(), cstr!("netio_desc_create_udp: insufficient memory\n"));
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nid).fd = udp_connect(local_port, remote_host, remote_port);
+    if (*nid).fd < 0 {
+        libc::fprintf(c_stderr(), cstr!("netio_desc_create_udp: unable to connect to %s:%d\n"), remote_host, remote_port);
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_UDP;
+    (*nio).send = Some(netio_udp_send);
+    (*nio).recv = Some(netio_udp_recv);
+    (*nio).free = Some(netio_udp_free);
+    (*nio).save_cfg = Some(netio_udp_save_cfg);
+    (*nio).dptr = addr_of_mut!((*nio).u.nid).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}
+
+// =========================================================================
+// UDP sockets with auto allocation
+// =========================================================================
+
+/// Get local port
+#[no_mangle]
+pub unsafe extern "C" fn netio_udp_auto_get_local_port(nio: *mut netio_desc_t) -> c_int {
+    if (*nio).type_ != NETIO_TYPE_UDP_AUTO {
+        return -1;
+    }
+
+    (*nio).u.nid.local_port
+}
+
+/// Connect to a remote host/port
+#[no_mangle]
+pub unsafe extern "C" fn netio_udp_auto_connect(nio: *mut netio_desc_t, host: *mut c_char, port: c_int) -> c_int {
+    let nid: *mut netio_inet_desc_t = (*nio).dptr.cast::<_>();
+
+    // NIO already connected
+    if (*nid).remote_host.is_null() {
+        return -1;
+    }
+
+    (*nid).remote_host = libc::strdup(host);
+    if (*nid).remote_host.is_null() {
+        libc::fprintf(c_stderr(), cstr!("netio_desc_create_udp_auto: insufficient memory\n"));
+        return -1;
+    }
+
+    (*nid).remote_port = port;
+
+    if ip_connect_fd((*nid).fd, (*nid).remote_host, (*nid).remote_port) < 0 {
+        libc::free((*nid).remote_host.cast::<_>());
+        (*nid).remote_host = null_mut();
+        return -1;
+    }
+
+    0
+}
+
+/// Create a new NetIO descriptor with auto UDP method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_udp_auto(nio_name: *mut c_char, local_addr: *mut c_char, port_start: c_int, port_end: c_int) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    let nid: *mut netio_inet_desc_t = addr_of_mut!((*nio).u.nid);
+    (*nid).local_port = -1;
+    (*nid).remote_host = null_mut();
+    (*nid).remote_port = -1;
+
+    (*nid).fd = udp_listen_range(local_addr, port_start, port_end, addr_of_mut!((*nid).local_port));
+    if (*nid).fd < 0 {
+        libc::fprintf(c_stderr(), cstr!("netio_desc_create_udp_auto: unable to create socket (addr=%s,port_start=%d,port_end=%d)\n"), local_addr, port_start, port_end);
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_UDP_AUTO;
+    (*nio).send = Some(netio_udp_send);
+    (*nio).recv = Some(netio_udp_recv);
+    (*nio).free = Some(netio_udp_free);
+    (*nio).save_cfg = Some(netio_udp_save_cfg);
     (*nio).dptr = addr_of_mut!((*nio).u.nid).cast::<_>();
 
     if netio_record(nio) == -1 {

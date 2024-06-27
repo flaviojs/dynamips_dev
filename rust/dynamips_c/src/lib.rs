@@ -29,6 +29,8 @@ pub mod dynamips;
 pub mod dynamips_common;
 pub mod fs_fat;
 pub mod fs_nvram;
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub mod gen_eth;
 pub mod hash;
 pub mod insn_lookup;
 pub mod jit_op;

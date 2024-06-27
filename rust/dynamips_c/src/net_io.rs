@@ -1,6 +1,8 @@
 //! Network Input/Output Abstraction Layer.
 
 use crate::dynamips_common::*;
+#[cfg(feature = "ENABLE_GEN_ETH")]
+use crate::gen_eth::*;
 #[cfg(feature = "ENABLE_LINUX_ETH")]
 use crate::linux_eth::*;
 use crate::net::*;
@@ -1376,6 +1378,78 @@ pub unsafe extern "C" fn netio_desc_create_lnxeth(nio_name: *mut c_char, dev_nam
     (*nio).free = Some(netio_lnxeth_free);
     (*nio).save_cfg = Some(netio_lnxeth_save_cfg);
     (*nio).dptr = addr_of_mut!((*nio).u.nled).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}
+
+// =========================================================================
+// Generic RAW Ethernet driver
+// =========================================================================
+
+/// Free a NetIO raw ethernet descriptor
+#[cfg(feature = "ENABLE_GEN_ETH")]
+unsafe extern "C" fn netio_geneth_free(nged: *mut c_void) {
+    let nged: *mut netio_geneth_desc_t = nged.cast::<_>();
+    gen_eth_close((*nged).pcap_dev);
+}
+
+/// Send a packet to an Ethernet device
+#[cfg(feature = "ENABLE_GEN_ETH")]
+unsafe extern "C" fn netio_geneth_send(nged: *mut c_void, pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    let nged: *mut netio_geneth_desc_t = nged.cast::<_>();
+    gen_eth_send((*nged).pcap_dev, pkt.cast::<_>(), pkt_len)
+}
+
+/// Receive a packet from an Ethernet device
+#[cfg(feature = "ENABLE_GEN_ETH")]
+unsafe extern "C" fn netio_geneth_recv(nged: *mut c_void, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    let nged: *mut netio_geneth_desc_t = nged.cast::<_>();
+    gen_eth_recv((*nged).pcap_dev, pkt.cast::<_>(), max_len)
+}
+
+/// Save the NIO configuration
+#[cfg(feature = "ENABLE_GEN_ETH")]
+unsafe extern "C" fn netio_geneth_save_cfg(nio: *mut netio_desc_t, fd: *mut libc::FILE) {
+    let nged: *mut netio_geneth_desc_t = (*nio).dptr.cast::<_>();
+    libc::fprintf(fd, cstr!("nio create_gen_eth %s %s\n"), (*nio).name, (*nged).dev_name);
+}
+
+/// Create a new NetIO descriptor with generic raw Ethernet method
+#[cfg(feature = "ENABLE_GEN_ETH")]
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_geneth(nio_name: *mut c_char, dev_name: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    let nged: *mut netio_geneth_desc_t = addr_of_mut!((*nio).u.nged);
+
+    if libc::strlen(dev_name) >= NETIO_DEV_MAXLEN {
+        libc::fprintf(c_stderr(), cstr!("netio_desc_create_geneth: bad Ethernet device string specified.\n"));
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    libc::strcpy((*nged).dev_name.as_c_mut(), dev_name);
+
+    (*nged).pcap_dev = gen_eth_init(dev_name);
+    if (*nged).pcap_dev.is_null() {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_GEN_ETH;
+    (*nio).send = Some(netio_geneth_send);
+    (*nio).recv = Some(netio_geneth_recv);
+    (*nio).free = Some(netio_geneth_free);
+    (*nio).save_cfg = Some(netio_geneth_save_cfg);
+    (*nio).dptr = addr_of_mut!((*nio).u.nged).cast::<_>();
 
     if netio_record(nio) == -1 {
         netio_free(nio.cast::<_>(), null_mut());

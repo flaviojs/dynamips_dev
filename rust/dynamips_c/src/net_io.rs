@@ -9,6 +9,7 @@ use crate::net::*;
 use crate::prelude::*;
 use crate::registry::*;
 use crate::utils::*;
+use std::cmp::min;
 
 extern "C" {
     pub fn netio_free(data: *mut c_void, arg: *mut c_void) -> c_int;
@@ -1450,6 +1451,190 @@ pub unsafe extern "C" fn netio_desc_create_geneth(nio_name: *mut c_char, dev_nam
     (*nio).free = Some(netio_geneth_free);
     (*nio).save_cfg = Some(netio_geneth_save_cfg);
     (*nio).dptr = addr_of_mut!((*nio).u.nged).cast::<_>();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}
+
+// =========================================================================
+// FIFO Driver (intra-hypervisor communications)
+// =========================================================================
+
+/// Extract the first packet of the FIFO
+unsafe fn netio_fifo_extract_pkt(nfd: *mut netio_fifo_desc_t) -> *mut netio_fifo_pkt_t {
+    let p: *mut netio_fifo_pkt_t = (*nfd).head;
+    if p.is_null() {
+        return null_mut();
+    }
+
+    (*nfd).pkt_count -= 1;
+    (*nfd).head = (*p).next;
+
+    if (*nfd).head.is_null() {
+        (*nfd).last = null_mut();
+    }
+
+    p
+}
+
+/// Insert a packet into the FIFO (in tail)
+unsafe fn netio_fifo_insert_pkt(nfd: *mut netio_fifo_desc_t, p: *mut netio_fifo_pkt_t) {
+    libc::pthread_mutex_lock(addr_of_mut!((*nfd).lock));
+
+    (*nfd).pkt_count += 1;
+    (*p).next = null_mut();
+
+    if !(*nfd).last.is_null() {
+        (*(*nfd).last).next = p;
+    } else {
+        (*nfd).head = p;
+    }
+
+    (*nfd).last = p;
+    libc::pthread_mutex_unlock(addr_of_mut!((*nfd).lock));
+}
+
+/// Free the packet list
+unsafe fn netio_fifo_free_pkt_list(nfd: *mut netio_fifo_desc_t) {
+    let mut p: *mut netio_fifo_pkt_t;
+    let mut next: *mut netio_fifo_pkt_t;
+
+    p = (*nfd).head;
+    while !p.is_null() {
+        next = (*p).next;
+        libc::free(p.cast::<_>());
+        p = next;
+    }
+
+    (*nfd).head = null_mut();
+    (*nfd).last = null_mut();
+    (*nfd).pkt_count = 0;
+}
+
+/// Establish a cross-connect between two FIFO NetIO
+#[no_mangle]
+pub unsafe extern "C" fn netio_fifo_crossconnect(a: *mut netio_desc_t, b: *mut netio_desc_t) -> c_int {
+    if ((*a).type_ != NETIO_TYPE_FIFO) || ((*b).type_ != NETIO_TYPE_FIFO) {
+        return -1;
+    }
+
+    let pa: *mut netio_fifo_desc_t = addr_of_mut!((*a).u.nfd);
+    let pb: *mut netio_fifo_desc_t = addr_of_mut!((*b).u.nfd);
+
+    // A => B
+    libc::pthread_mutex_lock(addr_of_mut!((*pa).endpoint_lock));
+    libc::pthread_mutex_lock(addr_of_mut!((*pa).lock));
+    (*pa).endpoint = pb;
+    netio_fifo_free_pkt_list(pa);
+    libc::pthread_mutex_unlock(addr_of_mut!((*pa).lock));
+    libc::pthread_mutex_unlock(addr_of_mut!((*pa).endpoint_lock));
+
+    // B => A
+    libc::pthread_mutex_lock(addr_of_mut!((*pb).endpoint_lock));
+    libc::pthread_mutex_lock(addr_of_mut!((*pb).lock));
+    (*pb).endpoint = pa;
+    netio_fifo_free_pkt_list(pb);
+    libc::pthread_mutex_unlock(addr_of_mut!((*pb).lock));
+    libc::pthread_mutex_unlock(addr_of_mut!((*pb).endpoint_lock));
+    0
+}
+
+/// Unbind an endpoint
+unsafe fn netio_fifo_unbind_endpoint(nfd: *mut netio_fifo_desc_t) {
+    libc::pthread_mutex_lock(addr_of_mut!((*nfd).endpoint_lock));
+    (*nfd).endpoint = null_mut();
+    libc::pthread_mutex_unlock(addr_of_mut!((*nfd).endpoint_lock));
+}
+
+/// Free a NetIO FIFO descriptor
+unsafe extern "C" fn netio_fifo_free(nfd: *mut c_void) {
+    let nfd: *mut netio_fifo_desc_t = nfd.cast::<_>();
+    if !(*nfd).endpoint.is_null() {
+        netio_fifo_unbind_endpoint((*nfd).endpoint);
+    }
+
+    netio_fifo_free_pkt_list(nfd);
+    libc::pthread_mutex_destroy(addr_of_mut!((*nfd).lock));
+    libc::pthread_cond_destroy(addr_of_mut!((*nfd).cond));
+}
+
+/// Send a packet (to the endpoint FIFO)
+unsafe extern "C" fn netio_fifo_send(nfd: *mut c_void, pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    let nfd: *mut netio_fifo_desc_t = nfd.cast::<_>();
+
+    libc::pthread_mutex_lock(addr_of_mut!((*nfd).endpoint_lock));
+
+    // The cross-connect must have been established before
+    if (*nfd).endpoint.is_null() {
+        libc::pthread_mutex_unlock(addr_of_mut!((*nfd).endpoint_lock));
+        return -1;
+    }
+
+    // Allocate a a new packet and insert it into the endpoint FIFO
+    let len: size_t = size_of::<netio_fifo_pkt_t>() + pkt_len;
+    let p: *mut netio_fifo_pkt_t = libc::malloc(len).cast::<_>();
+    if p.is_null() {
+        libc::pthread_mutex_unlock(addr_of_mut!((*nfd).endpoint_lock));
+        return -1;
+    }
+
+    libc::memcpy((*p).pkt.as_c_void_mut(), pkt, pkt_len);
+    (*p).pkt_len = pkt_len;
+    netio_fifo_insert_pkt((*nfd).endpoint, p);
+    libc::pthread_cond_signal(addr_of_mut!((*(*nfd).endpoint).cond));
+    libc::pthread_mutex_unlock(addr_of_mut!((*nfd).endpoint_lock));
+    pkt_len as ssize_t
+}
+
+/// Read a packet from the local FIFO queue
+unsafe extern "C" fn netio_fifo_recv(nfd: *mut c_void, pkt: *mut c_void, max_len: size_t) -> ssize_t {
+    let nfd: *mut netio_fifo_desc_t = nfd.cast::<_>();
+    let mut ts: libc::timespec = zeroed::<_>();
+    let mut len: size_t = -1 as ssize_t as size_t;
+
+    // Wait for the endpoint to signal a new arriving packet
+    let expire: m_tmcnt_t = m_gettime_usec() + 50000;
+    ts.tv_sec = (expire / 1000000) as _;
+    ts.tv_nsec = ((expire % 1000000) * 1000) as _;
+
+    libc::pthread_mutex_lock(addr_of_mut!((*nfd).lock));
+    libc::pthread_cond_timedwait(addr_of_mut!((*nfd).cond), addr_of_mut!((*nfd).lock), addr_of!(ts));
+
+    // Extract a packet from the list
+    let p: *mut netio_fifo_pkt_t = netio_fifo_extract_pkt(nfd);
+    libc::pthread_mutex_unlock(addr_of_mut!((*nfd).lock));
+
+    if !p.is_null() {
+        len = min((*p).pkt_len, max_len);
+        libc::memcpy(pkt, (*p).pkt.as_c_void(), len);
+        libc::free(p.cast::<_>());
+    }
+
+    len as ssize_t
+}
+
+/// Create a new NetIO descriptor with FIFO method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_fifo(nio_name: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    let nfd: *mut netio_fifo_desc_t = addr_of_mut!((*nio).u.nfd);
+    libc::pthread_mutex_init(addr_of_mut!((*nfd).lock), null_mut());
+    libc::pthread_mutex_init(addr_of_mut!((*nfd).endpoint_lock), null_mut());
+    libc::pthread_cond_init(addr_of_mut!((*nfd).cond), null_mut());
+
+    (*nio).type_ = NETIO_TYPE_FIFO;
+    (*nio).send = Some(netio_fifo_send);
+    (*nio).recv = Some(netio_fifo_recv);
+    (*nio).free = Some(netio_fifo_free);
+    (*nio).dptr = nfd.cast::<_>();
 
     if netio_record(nio) == -1 {
         netio_free(nio.cast::<_>(), null_mut());

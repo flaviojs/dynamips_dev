@@ -6,15 +6,12 @@ use crate::gen_eth::*;
 #[cfg(feature = "ENABLE_LINUX_ETH")]
 use crate::linux_eth::*;
 use crate::net::*;
+use crate::net_io_filter::*;
 use crate::prelude::*;
+use crate::ptask::*;
 use crate::registry::*;
 use crate::utils::*;
 use std::cmp::min;
-
-extern "C" {
-    pub fn netio_free(data: *mut c_void, arg: *mut c_void) -> c_int;
-    pub fn netio_update_bw_stat(nio: *mut netio_desc_t, bytes: m_uint64_t);
-}
 
 pub type netio_unix_desc_t = netio_unix_desc;
 pub type netio_vde_desc_t = netio_vde_desc;
@@ -1642,4 +1639,119 @@ pub unsafe extern "C" fn netio_desc_create_fifo(nio_name: *mut c_char) -> *mut n
     }
 
     nio
+}
+
+// =========================================================================
+// NULL Driver (does nothing, used for debugging)
+// =========================================================================
+
+unsafe extern "C" fn netio_null_send(_null_ptr: *mut c_void, _pkt: *mut c_void, pkt_len: size_t) -> ssize_t {
+    pkt_len as ssize_t
+}
+
+unsafe extern "C" fn netio_null_recv(_null_ptr: *mut c_void, _pkt: *mut c_void, _max_len: size_t) -> ssize_t {
+    libc::usleep(200000);
+    -1
+}
+
+unsafe extern "C" fn netio_null_save_cfg(nio: *mut netio_desc_t, fd: *mut libc::FILE) {
+    libc::fprintf(fd, cstr!("nio create_null %s\n"), (*nio).name);
+}
+
+/// Create a new NetIO descriptor with NULL method
+#[no_mangle]
+pub unsafe extern "C" fn netio_desc_create_null(nio_name: *mut c_char) -> *mut netio_desc_t {
+    let nio: *mut netio_desc_t = netio_create(nio_name);
+    if nio.is_null() {
+        return null_mut();
+    }
+
+    (*nio).type_ = NETIO_TYPE_NULL;
+    (*nio).send = Some(netio_null_send);
+    (*nio).recv = Some(netio_null_recv);
+    (*nio).save_cfg = Some(netio_null_save_cfg);
+    (*nio).dptr = null_mut();
+
+    if netio_record(nio) == -1 {
+        netio_free(nio.cast::<_>(), null_mut());
+        return null_mut();
+    }
+
+    nio
+}
+
+/// Free a NetIO descriptor
+unsafe extern "C" fn netio_free(data: *mut c_void, _arg: *mut c_void) -> c_int {
+    let nio: *mut netio_desc_t = data.cast::<_>();
+
+    if !nio.is_null() {
+        netio_filter_unbind(nio, NETIO_FILTER_DIR_RX);
+        netio_filter_unbind(nio, NETIO_FILTER_DIR_TX);
+        netio_filter_unbind(nio, NETIO_FILTER_DIR_BOTH);
+
+        if (*nio).free.is_some() {
+            (*nio).free.unwrap()((*nio).dptr);
+        }
+
+        libc::free((*nio).name.cast::<_>());
+        libc::free(nio.cast::<_>());
+    }
+
+    TRUE
+}
+
+/// Reset NIO statistics
+#[no_mangle]
+pub unsafe extern "C" fn netio_reset_stats(nio: *mut netio_desc_t) {
+    (*nio).stats_pkts_in = 0;
+    (*nio).stats_pkts_out = 0;
+    (*nio).stats_bytes_in = 0;
+    (*nio).stats_bytes_out = 0;
+}
+
+/// Indicate if a NetIO can transmit a packet
+#[no_mangle]
+pub unsafe extern "C" fn netio_can_transmit(nio: *mut netio_desc_t) -> c_int {
+    let mut bw_current: u_int;
+
+    // No bandwidth constraint applied, can always transmit
+    if (*nio).bandwidth == 0 {
+        return TRUE;
+    }
+
+    // Check that we verify the bandwidth constraint
+    bw_current = ((*nio).bw_cnt_total * 8 * 1000) as u_int;
+    bw_current /= (1024 * NETIO_BW_SAMPLE_ITV * NETIO_BW_SAMPLES) as u_int;
+
+    (bw_current < (*nio).bandwidth).into()
+}
+
+/// Update bandwidth counter
+#[no_mangle]
+pub unsafe extern "C" fn netio_update_bw_stat(nio: *mut netio_desc_t, bytes: m_uint64_t) {
+    (*nio).bw_cnt[(*nio).bw_pos as usize] += bytes;
+    (*nio).bw_cnt_total += bytes;
+}
+
+/// Reset NIO bandwidth counter
+#[no_mangle]
+pub unsafe extern "C" fn netio_clear_bw_stat(nio: *mut netio_desc_t) {
+    (*nio).bw_ptask_cnt += 1;
+    if (*nio).bw_ptask_cnt == NETIO_BW_SAMPLE_ITV as u_int / ptask_sleep_time {
+        (*nio).bw_ptask_cnt = 0;
+
+        (*nio).bw_pos += 1;
+        if (*nio).bw_pos == NETIO_BW_SAMPLES as u_int {
+            (*nio).bw_pos = 0;
+        }
+
+        (*nio).bw_cnt_total -= (*nio).bw_cnt[(*nio).bw_pos as usize];
+        (*nio).bw_cnt[(*nio).bw_pos as usize] = 0;
+    }
+}
+
+/// Set the bandwidth constraint
+#[no_mangle]
+pub unsafe extern "C" fn netio_set_bandwidth(nio: *mut netio_desc_t, bandwidth: u_int) {
+    (*nio).bandwidth = bandwidth;
 }

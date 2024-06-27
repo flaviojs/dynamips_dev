@@ -34,30 +34,6 @@
 #include "rust_dynamips_c.h"
 #include "net_io_filter.h"
 
-/* Unbind a filter from a NIO */
-int netio_filter_unbind(netio_desc_t *nio,int direction)
-{  
-   netio_pktfilter_t *pf;
-   void **opt;
-
-   if (direction == NETIO_FILTER_DIR_RX) {
-      opt = &nio->rx_filter_data;
-      pf  = nio->rx_filter;
-   } else if (direction == NETIO_FILTER_DIR_TX) {
-      opt = &nio->tx_filter_data;
-      pf  = nio->tx_filter;
-   } else {
-      opt = &nio->both_filter_data;
-      pf  = nio->both_filter;
-   }
-
-   if (!pf)
-      return(-1);
-
-   pf->free(nio,opt);
-   return(0);
-}
-
 /* Setup a filter */
 int netio_filter_setup(netio_desc_t *nio,int direction,int argc,char *argv[])
 {

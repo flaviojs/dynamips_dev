@@ -3,10 +3,6 @@
 use crate::net_io::*;
 use crate::prelude::*;
 
-extern "C" {
-    pub fn netio_filter_unbind(nio: *mut netio_desc_t, direction: c_int) -> c_int;
-}
-
 pub const NETIO_FILTER_DIR_RX: c_int = 0;
 pub const NETIO_FILTER_DIR_TX: c_int = 1;
 pub const NETIO_FILTER_DIR_BOTH: c_int = 2;
@@ -60,5 +56,30 @@ pub unsafe extern "C" fn netio_filter_bind(nio: *mut netio_desc_t, direction: c_
         (*nio).both_filter_data = null_mut();
         (*nio).both_filter = pf;
     }
+    0
+}
+
+/// Unbind a filter from a NIO
+#[no_mangle]
+pub unsafe extern "C" fn netio_filter_unbind(nio: *mut netio_desc_t, direction: c_int) -> c_int {
+    let pf: *mut netio_pktfilter_t;
+    let opt: *mut *mut c_void;
+
+    if direction == NETIO_FILTER_DIR_RX {
+        opt = addr_of_mut!((*nio).rx_filter_data);
+        pf = (*nio).rx_filter;
+    } else if direction == NETIO_FILTER_DIR_TX {
+        opt = addr_of_mut!((*nio).tx_filter_data);
+        pf = (*nio).tx_filter;
+    } else {
+        opt = addr_of_mut!((*nio).both_filter_data);
+        pf = (*nio).both_filter;
+    }
+
+    if pf.is_null() {
+        return -1;
+    }
+
+    (*pf).free.unwrap()(nio, opt);
     0
 }

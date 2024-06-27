@@ -34,32 +34,6 @@
 #include "rust_dynamips_c.h"
 #include "net_io_filter.h"
 
-/* Filter list */
-static netio_pktfilter_t *pf_list = NULL;
-
-/* Find a filter */
-netio_pktfilter_t *netio_filter_find(char *name)
-{
-   netio_pktfilter_t *pf;
-
-   for(pf=pf_list;pf;pf=pf->next)
-      if (!strcmp(pf->name,name))
-         return pf;
-
-   return NULL;
-}
-
-/* Add a new filter */
-int netio_filter_add(netio_pktfilter_t *pf)
-{
-   if (netio_filter_find(pf->name) != NULL)
-      return(-1);
-
-   pf->next = pf_list;
-   pf_list = pf;
-   return(0);
-}
-
 /* Bind a filter to a NIO */
 int netio_filter_bind(netio_desc_t *nio,int direction,char *pf_name)
 {

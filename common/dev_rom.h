@@ -10,7 +10,7 @@
 #include "utils.h"
 #include "cpu.h"
 #include "device.h"
-#include "net_io.h"
+#include "rust_dynamips_c.h"
 #include "vm.h"
 
 /* MIPS64 ROM */

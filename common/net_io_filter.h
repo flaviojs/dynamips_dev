@@ -13,7 +13,7 @@
 #include <sys/un.h>
 #include <pthread.h>
 #include "utils.h"
-#include "net_io.h"
+#include "rust_dynamips_c.h"
 
 /* Directions for filters */
 #define NETIO_FILTER_DIR_RX  0

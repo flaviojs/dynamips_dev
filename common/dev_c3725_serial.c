@@ -15,7 +15,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "rust_dynamips_c.h"
 #include "dev_mueslix.h"
 #include "dev_c3725.h"

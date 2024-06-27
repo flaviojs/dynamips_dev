@@ -19,7 +19,6 @@
 #include "utils.h"
 #include "rust_dynamips_c.h"
 #include "atm.h"
-#include "net_io.h"
 #include "atm_vsar.h"
 
 /* Segmentation Context */

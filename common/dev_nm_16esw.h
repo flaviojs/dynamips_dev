@@ -12,7 +12,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "device.h"
-#include "net_io.h"
 #include "rust_dynamips_c.h"
 
 /* Forward declaration for NM-16ESW private data */

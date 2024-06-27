@@ -14,7 +14,6 @@
 #include "device.h"
 #include "pci_dev.h"
 #include "nmc93cX6.h"
-#include "net_io.h"
 #include "vm.h"
 #include "rust_dynamips_c.h"
 

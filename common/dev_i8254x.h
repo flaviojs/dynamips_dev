@@ -12,7 +12,7 @@
 #include "cpu.h"
 #include "vm.h"
 #include "device.h"
-#include "net_io.h"
+#include "rust_dynamips_c.h"
 
 /* Generic Intel i8254x initialization code */
 struct i8254x_data *

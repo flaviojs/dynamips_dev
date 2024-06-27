@@ -17,7 +17,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "net_io.h"
 #include "atm.h"
 #include "atm_vsar.h"
 #include "atm_bridge.h"

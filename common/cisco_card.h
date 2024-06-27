@@ -11,7 +11,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "rust_dynamips_c.h"
 
 #define CISCO_CARD_MAX_WIC  8

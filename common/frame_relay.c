@@ -17,7 +17,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "net_io.h"
 #include "frame_relay.h"
 
 #define DEBUG_FRSW  0

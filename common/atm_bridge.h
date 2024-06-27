@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
+#include "rust_dynamips_c.h"
 #include "atm.h"
 #include "atm_vsar.h"
 

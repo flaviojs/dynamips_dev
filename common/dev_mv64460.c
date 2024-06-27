@@ -17,7 +17,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "net_io.h"
 #include "rust_dynamips_c.h"
 #include "dev_mv64460.h"
 

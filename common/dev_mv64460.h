@@ -11,7 +11,7 @@
 #include "mips64.h"
 #include "cpu.h"
 #include "device.h"
-#include "net_io.h"
+#include "rust_dynamips_c.h"
 #include "vm.h"
 
 struct mv64460_data;

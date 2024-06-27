@@ -32,7 +32,6 @@
 #endif
 
 #include "rust_dynamips_c.h"
-#include "net_io.h"
 #include "net_io_filter.h"
 
 /* Filter list */

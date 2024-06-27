@@ -12,7 +12,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "net_io.h"
 
 /* ATM payload size */
 #define ATM_HDR_SIZE           5

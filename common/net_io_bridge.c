@@ -17,7 +17,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "net_io.h"
 #include "net_io_bridge.h"
 
 #define PKT_MAX_SIZE 2048

@@ -18,7 +18,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "net_io.h"
 #include "eth_switch.h"
 
 /* Debbuging message */

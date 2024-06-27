@@ -12,7 +12,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "net_io.h"
 
 /* DLCIs used for LMI */
 #define FR_DLCI_LMI_ANSI   0       /* ANSI LMI */

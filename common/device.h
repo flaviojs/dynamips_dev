@@ -9,7 +9,7 @@
 #include <sys/types.h>
 #include "utils.h"
 #include "cpu.h"
-#include "net_io.h"
+#include "rust_dynamips_c.h"
 #include "vm.h"
 
 /* Device Flags */

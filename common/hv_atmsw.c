@@ -24,7 +24,6 @@
 
 #include "utils.h"
 #include "atm.h"
-#include "net_io.h"
 #include "rust_dynamips_c.h"
 #include "hypervisor.h"
 

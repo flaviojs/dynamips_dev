@@ -15,7 +15,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "rust_dynamips_c.h"
 #include "vm.h"
 #include "dev_mpc860.h"

@@ -17,7 +17,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "vm.h"
 #include "dev_mpc860.h"
 #include "dev_c2600.h"

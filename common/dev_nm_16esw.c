@@ -22,7 +22,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "dev_nm_16esw.h"
 
 /* Debugging flags */

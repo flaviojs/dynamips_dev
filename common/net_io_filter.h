@@ -15,7 +15,6 @@
 #include <sys/un.h>
 #include <pthread.h>
 #include "utils.h"
-#include "net_io.h"
 
 /* Find a filter */
 netio_pktfilter_t *netio_filter_find(char *name);

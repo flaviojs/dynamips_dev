@@ -23,7 +23,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "net_io.h"
 #include "dev_c7200.h"
 #include "dev_c3600.h"
 #include "dev_c2691.h"

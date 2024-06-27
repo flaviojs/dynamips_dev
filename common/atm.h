@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
 
 /* ATM payload size */
 #define ATM_HDR_SIZE           5

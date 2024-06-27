@@ -29,7 +29,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "net_io.h"
 #include "dev_c7200.h"
 
 /* Debugging flags */

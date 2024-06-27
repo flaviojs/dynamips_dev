@@ -14,7 +14,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "device.h"
-#include "net_io.h"
 
 /* Generic Intel i8254x initialization code */
 struct i8254x_data *

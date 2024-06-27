@@ -196,6 +196,17 @@ extern "C" {
     pub fn ntohl(x: u32) -> u32;
     pub fn ntohs(x: u16) -> u16;
 }
+#[cfg(feature = "ENABLE_GEN_ETH")]
+extern "C" {
+    pub fn pcap_close(arg1: *mut pcap_t);
+    pub fn pcap_datalink_name_to_val(arg1: *const c_char) -> c_int;
+    pub fn pcap_dump_close(arg1: *mut pcap_dumper_t);
+    pub fn pcap_dump_flush(arg1: *mut pcap_dumper_t) -> c_int;
+    pub fn pcap_dump_open(arg1: *mut pcap_t, arg2: *const c_char) -> *mut pcap_dumper_t;
+    pub fn pcap_dump(arg1: *mut c_uchar, arg2: *const pcap_pkthdr, arg3: *const c_uchar);
+    pub fn pcap_open_dead(arg1: c_int, arg2: c_int) -> *mut pcap_t;
+    pub fn pcap_snapshot(arg1: *mut pcap_t) -> c_int;
+}
 
 pub use crate::_export::*;
 pub use function_name::named;
@@ -205,6 +216,10 @@ pub use libc::ssize_t;
 #[cfg(target_os = "linux")]
 pub use linux_raw_sys;
 pub use paste::paste;
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub use pcap_sys::pcap_dumper_t;
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub use pcap_sys::pcap_pkthdr;
 #[cfg(feature = "ENABLE_GEN_ETH")]
 pub use pcap_sys::pcap_t;
 pub use setjmp;
@@ -231,3 +246,8 @@ pub use std::mem::zeroed;
 pub use std::ptr::addr_of;
 pub use std::ptr::addr_of_mut;
 pub use std::ptr::null_mut;
+
+// libpcap stuff
+
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub const DLT_EN10MB: c_int = 1;

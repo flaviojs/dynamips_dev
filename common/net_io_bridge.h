@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
 
 #define NETIO_BRIDGE_MAX_NIO 32
 

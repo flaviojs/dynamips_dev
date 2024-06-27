@@ -191,6 +191,17 @@ pub struct netio_pktfilter {
     pub pkt_handler: Option<unsafe extern "C" fn(nio: *mut netio_desc_t, pkt: *mut c_void, len: size_t, opt: *mut c_void) -> c_int>,
     pub next: *mut netio_pktfilter_t,
 }
+impl netio_pktfilter {
+    pub const fn new(
+        name: *mut c_char,
+        setup: Option<unsafe extern "C" fn(nio: *mut netio_desc_t, opt: *mut *mut c_void, argc: c_int, argv: *mut *mut c_char) -> c_int>,
+        free: Option<unsafe extern "C" fn(nio: *mut netio_desc_t, opt: *mut *mut c_void)>,
+        pkt_handler: Option<unsafe extern "C" fn(nio: *mut netio_desc_t, pkt: *mut c_void, len: size_t, opt: *mut c_void) -> c_int>,
+        next: *mut netio_pktfilter_t,
+    ) -> Self {
+        Self { name, setup, free, pkt_handler, next }
+    }
+}
 
 /// Statistics
 #[repr(C)]

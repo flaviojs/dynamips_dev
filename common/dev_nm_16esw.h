@@ -14,7 +14,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "device.h"
-#include "net_io.h"
 
 /* Forward declaration for NM-16ESW private data */
 struct nm_16esw_data;

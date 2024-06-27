@@ -18,7 +18,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "net_io.h"
 
 /* Debugging flags */
 #define DEBUG_ACCESS    0

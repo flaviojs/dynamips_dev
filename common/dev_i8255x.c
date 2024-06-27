@@ -22,7 +22,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "net_io.h"
 #include "dev_i8255x.h"
 
 /* Debugging flags */

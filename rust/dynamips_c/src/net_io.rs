@@ -1755,3 +1755,269 @@ pub unsafe extern "C" fn netio_clear_bw_stat(nio: *mut netio_desc_t) {
 pub unsafe extern "C" fn netio_set_bandwidth(nio: *mut netio_desc_t, bandwidth: u_int) {
     (*nio).bandwidth = bandwidth;
 }
+
+// =========================================================================
+// RX Listeners
+// =========================================================================
+
+/// NIO RX listener
+static mut netio_rxl_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
+static mut netio_rxq_mutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
+static mut netio_rxl_list: *mut netio_rx_listener = null_mut();
+static mut netio_rxl_add_list: *mut netio_rx_listener = null_mut();
+static mut netio_rxl_remove_list: *mut netio_desc_t = null_mut();
+static mut netio_rxl_thread: libc::pthread_t = 0;
+static mut netio_rxl_cond: libc::pthread_cond_t = unsafe { zeroed::<_>() };
+
+unsafe fn NETIO_RXL_LOCK() {
+    libc::pthread_mutex_lock(addr_of_mut!(netio_rxl_mutex));
+}
+unsafe fn NETIO_RXL_UNLOCK() {
+    libc::pthread_mutex_unlock(addr_of_mut!(netio_rxl_mutex));
+}
+
+unsafe fn NETIO_RXQ_LOCK() {
+    libc::pthread_mutex_lock(addr_of_mut!(netio_rxq_mutex));
+}
+unsafe fn NETIO_RXQ_UNLOCK() {
+    libc::pthread_mutex_unlock(addr_of_mut!(netio_rxq_mutex));
+}
+
+/// Find a RX listener
+#[inline]
+unsafe fn netio_rxl_find(nio: *mut netio_desc_t) -> *mut netio_rx_listener {
+    let mut rxl: *mut netio_rx_listener = netio_rxl_list;
+
+    while !rxl.is_null() {
+        if (*rxl).nio == nio {
+            return rxl;
+        }
+        rxl = (*rxl).next;
+    }
+
+    null_mut()
+}
+
+/// Remove a NIO from the listener list
+unsafe fn netio_rxl_remove_internal(nio: *mut netio_desc_t) -> c_int {
+    let mut res: c_int = -1;
+
+    let rxl: *mut netio_rx_listener = netio_rxl_find(nio);
+    if !rxl.is_null() {
+        // we suppress this NIO only when the ref count hits 0
+        (*rxl).ref_count -= 1;
+
+        if (*rxl).ref_count == 0 {
+            // remove this listener from the double linked list
+            if !(*rxl).next.is_null() {
+                (*(*rxl).next).prev = (*rxl).prev;
+            }
+
+            if !(*rxl).prev.is_null() {
+                (*(*rxl).prev).next = (*rxl).next;
+            } else {
+                netio_rxl_list = (*rxl).next;
+            }
+
+            // if this is non-FD NIO, wait for thread to terminate
+            if netio_get_fd((*rxl).nio) == -1 {
+                (*rxl).running.set(FALSE);
+                libc::pthread_join((*rxl).spec_thread, null_mut());
+            }
+
+            libc::free(rxl.cast::<_>());
+        }
+
+        res = 0;
+    }
+
+    res
+}
+
+/// Add a RXL listener to the listener list
+unsafe fn netio_rxl_add_internal(rxl: *mut netio_rx_listener) {
+    let tmp: *mut netio_rx_listener = netio_rxl_find((*rxl).nio);
+    if !tmp.is_null() {
+        (*tmp).ref_count += 1;
+        libc::free(rxl.cast::<_>());
+    } else {
+        (*rxl).prev = null_mut();
+        (*rxl).next = netio_rxl_list;
+        if !(*rxl).next.is_null() {
+            (*(*rxl).next).prev = rxl;
+        }
+        netio_rxl_list = rxl;
+    }
+}
+
+/// RX Listener dedicated thread (for non-FD NIO)
+extern "C" fn netio_rxl_spec_thread(arg: *mut c_void) -> *mut c_void {
+    unsafe {
+        let rxl: *mut netio_rx_listener = arg.cast::<_>();
+        let nio: *mut netio_desc_t = (*rxl).nio;
+
+        while (*rxl).running.get() != 0 {
+            let pkt_len: ssize_t = netio_recv(nio, (*nio).rx_pkt.as_c_void_mut(), (*nio).rx_pkt.len());
+
+            if pkt_len > 0 {
+                (*rxl).rx_handler.unwrap()(nio, (*nio).rx_pkt.as_c_mut(), pkt_len, (*rxl).arg1, (*rxl).arg2);
+            }
+        }
+
+        null_mut()
+    }
+}
+
+/// RX Listener General Thread
+extern "C" fn netio_rxl_gen_thread(_arg: *mut c_void) -> *mut c_void {
+    unsafe {
+        let mut rxl: *mut netio_rx_listener;
+        let mut pkt_len: ssize_t;
+        let mut nio: *mut netio_desc_t;
+        let mut tv: libc::timeval = zeroed::<_>();
+        let mut fd: c_int;
+        let mut fd_max: c_int;
+        let mut res: c_int;
+        let mut rfds: libc::fd_set = zeroed::<_>();
+
+        loop {
+            NETIO_RXL_LOCK();
+
+            NETIO_RXQ_LOCK();
+            // Add the new waiting NIO to the active list
+            while !netio_rxl_add_list.is_null() {
+                rxl = netio_rxl_add_list;
+                netio_rxl_add_list = (*netio_rxl_add_list).next;
+                netio_rxl_add_internal(rxl);
+            }
+
+            // Delete the NIO present in the remove list
+            while !netio_rxl_remove_list.is_null() {
+                nio = netio_rxl_remove_list;
+                netio_rxl_remove_list = (*netio_rxl_remove_list).rxl_next;
+                netio_rxl_remove_internal(nio);
+            }
+
+            libc::pthread_cond_broadcast(addr_of_mut!(netio_rxl_cond));
+            NETIO_RXQ_UNLOCK();
+
+            // Build the FD set
+            libc::FD_ZERO(addr_of_mut!(rfds));
+            fd_max = -1;
+            rxl = netio_rxl_list;
+            while !rxl.is_null() {
+                fd = netio_get_fd((*rxl).nio);
+                if fd == -1 {
+                    rxl = (*rxl).next;
+                    continue;
+                }
+
+                if fd > fd_max {
+                    fd_max = fd;
+                }
+                libc::FD_SET(fd, addr_of_mut!(rfds));
+                rxl = (*rxl).next;
+            }
+            NETIO_RXL_UNLOCK();
+
+            // Wait for incoming packets
+            tv.tv_sec = 0;
+            tv.tv_usec = 20 * 1000; // 200 ms
+            res = libc::select(fd_max + 1, addr_of_mut!(rfds), null_mut(), null_mut(), addr_of_mut!(tv));
+
+            if res == -1 {
+                if c_errno() != libc::EINTR {
+                    libc::perror(cstr!("netio_rxl_thread: select"));
+                }
+                continue;
+            }
+
+            // Examine active FDs and call user handlers
+            NETIO_RXL_LOCK();
+
+            rxl = netio_rxl_list;
+            while !rxl.is_null() {
+                nio = (*rxl).nio;
+
+                fd = netio_get_fd(nio);
+                if fd == -1 {
+                    rxl = (*rxl).next;
+                    continue;
+                }
+
+                if libc::FD_ISSET(fd, addr_of!(rfds)) {
+                    pkt_len = netio_recv(nio, (*nio).rx_pkt.as_c_void_mut(), (*nio).rx_pkt.len());
+
+                    if pkt_len > 0 {
+                        (*rxl).rx_handler.unwrap()(nio, (*nio).rx_pkt.as_c_mut(), pkt_len, (*rxl).arg1, (*rxl).arg2);
+                    }
+                }
+                rxl = (*rxl).next;
+            }
+
+            NETIO_RXL_UNLOCK();
+        }
+    }
+}
+
+/// Add a RX listener in the listener list
+#[no_mangle]
+pub unsafe extern "C" fn netio_rxl_add(nio: *mut netio_desc_t, rx_handler: netio_rx_handler_t, arg1: *mut c_void, arg2: *mut c_void) -> c_int {
+    NETIO_RXQ_LOCK();
+
+    let rxl: *mut netio_rx_listener = libc::malloc(size_of::<netio_rx_listener>()).cast::<_>();
+    if rxl.is_null() {
+        NETIO_RXQ_UNLOCK();
+        libc::fprintf(c_stderr(), cstr!("netio_rxl_add: unable to create structure.\n"));
+        return -1;
+    }
+
+    libc::memset(rxl.cast::<_>(), 0, size_of::<netio_rx_listener>());
+    (*rxl).nio = nio;
+    (*rxl).ref_count = 1;
+    (*rxl).rx_handler = rx_handler;
+    (*rxl).arg1 = arg1;
+    (*rxl).arg2 = arg2;
+    (*rxl).running.set(TRUE);
+
+    if (netio_get_fd((*rxl).nio) == -1) && libc::pthread_create(addr_of_mut!((*rxl).spec_thread), null_mut(), netio_rxl_spec_thread, rxl.cast::<_>()) != 0 {
+        NETIO_RXQ_UNLOCK();
+        libc::fprintf(c_stderr(), cstr!("netio_rxl_add: unable to create specific thread.\n"));
+        libc::free(rxl.cast::<_>());
+        return -1;
+    }
+
+    (*rxl).next = netio_rxl_add_list;
+    netio_rxl_add_list = rxl;
+    while !netio_rxl_add_list.is_null() {
+        libc::pthread_cond_wait(addr_of_mut!(netio_rxl_cond), addr_of_mut!(netio_rxq_mutex));
+    }
+    NETIO_RXQ_UNLOCK();
+    0
+}
+
+/// Remove a NIO from the listener list
+#[no_mangle]
+pub unsafe extern "C" fn netio_rxl_remove(nio: *mut netio_desc_t) -> c_int {
+    NETIO_RXQ_LOCK();
+    (*nio).rxl_next = netio_rxl_remove_list;
+    netio_rxl_remove_list = nio;
+    while !netio_rxl_remove_list.is_null() {
+        libc::pthread_cond_wait(addr_of_mut!(netio_rxl_cond), addr_of_mut!(netio_rxq_mutex));
+    }
+    NETIO_RXQ_UNLOCK();
+    0
+}
+
+/// Initialize the RXL thread
+#[no_mangle]
+pub unsafe extern "C" fn netio_rxl_init() -> c_int {
+    libc::pthread_cond_init(addr_of_mut!(netio_rxl_cond), null_mut());
+
+    if libc::pthread_create(addr_of_mut!(netio_rxl_thread), null_mut(), netio_rxl_gen_thread, null_mut()) != 0 {
+        libc::perror(cstr!("netio_rxl_init: pthread_create"));
+        return -1;
+    }
+
+    0
+}

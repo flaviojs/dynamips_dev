@@ -40,3 +40,25 @@ pub unsafe extern "C" fn netio_filter_add(pf: *mut netio_pktfilter_t) -> c_int {
     pf_list = pf;
     0
 }
+
+/// Bind a filter to a NIO
+#[no_mangle]
+pub unsafe extern "C" fn netio_filter_bind(nio: *mut netio_desc_t, direction: c_int, pf_name: *mut c_char) -> c_int {
+    let pf: *mut netio_pktfilter_t = netio_filter_find(pf_name);
+
+    if pf.is_null() {
+        return -1;
+    }
+
+    if direction == NETIO_FILTER_DIR_RX {
+        (*nio).rx_filter_data = null_mut();
+        (*nio).rx_filter = pf;
+    } else if direction == NETIO_FILTER_DIR_TX {
+        (*nio).tx_filter_data = null_mut();
+        (*nio).tx_filter = pf;
+    } else {
+        (*nio).both_filter_data = null_mut();
+        (*nio).both_filter = pf;
+    }
+    0
+}

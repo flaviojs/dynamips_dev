@@ -83,3 +83,27 @@ pub unsafe extern "C" fn netio_filter_unbind(nio: *mut netio_desc_t, direction: 
     (*pf).free.unwrap()(nio, opt);
     0
 }
+
+/// Setup a filter
+#[no_mangle]
+pub unsafe extern "C" fn netio_filter_setup(nio: *mut netio_desc_t, direction: c_int, argc: c_int, argv: *mut *mut c_char) -> c_int {
+    let pf: *mut netio_pktfilter_t;
+    let opt: *mut *mut c_void;
+
+    if direction == NETIO_FILTER_DIR_RX {
+        opt = addr_of_mut!((*nio).rx_filter_data);
+        pf = (*nio).rx_filter;
+    } else if direction == NETIO_FILTER_DIR_TX {
+        opt = addr_of_mut!((*nio).tx_filter_data);
+        pf = (*nio).tx_filter;
+    } else {
+        opt = addr_of_mut!((*nio).both_filter_data);
+        pf = (*nio).both_filter;
+    }
+
+    if pf.is_null() {
+        return -1;
+    }
+
+    (*pf).setup.unwrap()(nio, opt, argc, argv)
+}

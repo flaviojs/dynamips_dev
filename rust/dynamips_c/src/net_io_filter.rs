@@ -228,8 +228,7 @@ unsafe extern "C" fn pf_capture_pkt_handler(_nio: *mut netio_desc_t, pkt: *mut c
 
 /// Packet capture
 #[cfg(feature = "ENABLE_GEN_ETH")]
-#[no_mangle] // TODO private
-pub static mut pf_capture_def: netio_pktfilter_t = netio_pktfilter_t::new(cstr!("capture"), Some(pf_capture_setup), Some(pf_capture_free), Some(pf_capture_pkt_handler), null_mut());
+static mut pf_capture_def: netio_pktfilter_t = netio_pktfilter_t::new(cstr!("capture"), Some(pf_capture_setup), Some(pf_capture_free), Some(pf_capture_pkt_handler), null_mut());
 
 // ========================================================================
 // Frequency Dropping ("freq_drop").
@@ -300,8 +299,7 @@ unsafe extern "C" fn pf_freqdrop_pkt_handler(_nio: *mut netio_desc_t, _pkt: *mut
 }
 
 /// Packet dropping at 1/n frequency
-#[no_mangle] // TODO private
-pub static mut pf_freqdrop_def: netio_pktfilter_t = netio_pktfilter_t::new(cstr!("freq_drop"), Some(pf_freqdrop_setup), Some(pf_freqdrop_free), Some(pf_freqdrop_pkt_handler), null_mut());
+static mut pf_freqdrop_def: netio_pktfilter_t = netio_pktfilter_t::new(cstr!("freq_drop"), Some(pf_freqdrop_setup), Some(pf_freqdrop_free), Some(pf_freqdrop_pkt_handler), null_mut());
 
 // ========================================================================
 // Initialization of packet filters.

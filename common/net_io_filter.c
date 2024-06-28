@@ -33,15 +33,3 @@
 
 #include "rust_dynamips_c.h"
 #include "net_io_filter.h"
-
-/* ======================================================================== */
-/* Initialization of packet filters.                                        */
-/* ======================================================================== */
-
-void netio_filter_load_all(void)
-{
-   netio_filter_add(&pf_freqdrop_def);
-#ifdef GEN_ETH
-   netio_filter_add(&pf_capture_def);
-#endif
-}

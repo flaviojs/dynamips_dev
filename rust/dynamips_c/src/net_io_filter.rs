@@ -2,6 +2,8 @@
 
 use crate::net_io::*;
 use crate::prelude::*;
+#[cfg(feature = "ENABLE_GEN_ETH")]
+use std::cmp::min;
 
 pub const NETIO_FILTER_DIR_RX: c_int = 0;
 pub const NETIO_FILTER_DIR_TX: c_int = 1;
@@ -107,3 +109,124 @@ pub unsafe extern "C" fn netio_filter_setup(nio: *mut netio_desc_t, direction: c
 
     (*pf).setup.unwrap()(nio, opt, argc, argv)
 }
+
+// ========================================================================
+// Packet Capture ("capture")
+// GFA
+// ========================================================================
+
+#[cfg(feature = "ENABLE_GEN_ETH")]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct netio_filter_capture {
+    pub desc: *mut pcap_t,
+    pub dumper: *mut pcap_dumper_t,
+    pub lock: libc::pthread_mutex_t,
+}
+
+/// Free resources used by filter
+#[cfg(feature = "ENABLE_GEN_ETH")]
+unsafe extern "C" fn pf_capture_free(nio: *mut netio_desc_t, opt: *mut *mut c_void) {
+    let c: *mut netio_filter_capture = (*opt).cast::<_>();
+
+    if !c.is_null() {
+        libc::printf(cstr!("NIO %s: ending packet capture.\n"), (*nio).name);
+
+        // Close dumper
+        if !(*c).dumper.is_null() {
+            pcap_dump_close((*c).dumper);
+        }
+
+        // Close PCAP descriptor
+        if !(*c).desc.is_null() {
+            pcap_close((*c).desc);
+        }
+
+        libc::pthread_mutex_destroy(addr_of_mut!((*c).lock));
+
+        libc::free(c.cast::<_>());
+        *opt = null_mut();
+    }
+}
+
+/// Setup filter resources
+#[cfg(feature = "ENABLE_GEN_ETH")]
+unsafe extern "C" fn pf_capture_setup(nio: *mut netio_desc_t, opt: *mut *mut c_void, argc: c_int, argv: *mut *mut c_char) -> c_int {
+    let c: *mut netio_filter_capture;
+    let mut link_type: c_int;
+
+    // We must have a link type and a filename
+    if argc != 2 {
+        return -1;
+    }
+
+    // Free resources if something has already been done
+    pf_capture_free(nio, opt);
+
+    // Allocate structure to hold PCAP info
+    c = libc::malloc(size_of::<netio_filter_capture>()).cast::<_>();
+    if c.is_null() {
+        return -1;
+    }
+
+    if libc::pthread_mutex_init(addr_of_mut!((*c).lock), null_mut()) != 0 {
+        libc::fprintf(c_stderr(), cstr!("NIO %s: pthread_mutex_init failure (file %s)\n"), (*nio).name, *argv.add(0));
+        libc::free(c.cast::<_>());
+        return -1;
+    }
+
+    link_type = pcap_datalink_name_to_val(*argv.add(0));
+    if link_type == -1 {
+        libc::fprintf(c_stderr(), cstr!("NIO %s: unknown link type %s, assuming Ethernet.\n"), (*nio).name, *argv.add(0));
+        link_type = DLT_EN10MB;
+    }
+
+    // Open a dead pcap descriptor
+    (*c).desc = pcap_open_dead(link_type, 65535);
+    if (*c).desc.is_null() {
+        libc::fprintf(c_stderr(), cstr!("NIO %s: pcap_open_dead failure\n"), (*nio).name);
+        libc::pthread_mutex_destroy(addr_of_mut!((*c).lock));
+        libc::free(c.cast::<_>());
+        return -1;
+    }
+
+    // Open the output file
+    (*c).dumper = pcap_dump_open((*c).desc, *argv.add(1));
+    if (*c).dumper.is_null() {
+        libc::fprintf(c_stderr(), cstr!("NIO %s: pcap_dump_open failure (file %s)\n"), (*nio).name, *argv.add(0));
+        pcap_close((*c).desc);
+        libc::pthread_mutex_destroy(addr_of_mut!((*c).lock));
+        libc::free(c.cast::<_>());
+        return -1;
+    }
+
+    libc::printf(cstr!("NIO %s: capturing to file '%s'\n"), (*nio).name, *argv.add(1));
+    *opt = c.cast::<_>();
+    0
+}
+
+/// Packet handler: write packets to a file in CAP format
+#[cfg(feature = "ENABLE_GEN_ETH")]
+unsafe extern "C" fn pf_capture_pkt_handler(_nio: *mut netio_desc_t, pkt: *mut c_void, len: size_t, opt: *mut c_void) -> c_int {
+    let c: *mut netio_filter_capture = opt.cast::<_>();
+    let mut pkt_hdr: pcap_pkthdr = zeroed::<_>();
+
+    if !c.is_null() {
+        libc::gettimeofday(addr_of_mut!(pkt_hdr.ts), null_mut());
+        pkt_hdr.caplen = min(len as u_int, pcap_snapshot((*c).desc) as u_int);
+        pkt_hdr.len = len as u_int;
+
+        // thread safe dump
+        libc::pthread_mutex_lock(addr_of_mut!((*c).lock));
+        pcap_dump((*c).dumper as *mut u_char, addr_of_mut!(pkt_hdr), pkt.cast::<_>());
+        pcap_dump_flush((*c).dumper);
+        libc::pthread_mutex_unlock(addr_of_mut!((*c).lock));
+    }
+
+    NETIO_FILTER_ACTION_PASS
+}
+
+/// Packet capture
+#[cfg(feature = "ENABLE_GEN_ETH")]
+#[no_mangle] // TODO private
+pub static mut pf_capture_def: netio_pktfilter_t = netio_pktfilter_t::new(cstr!("capture"), Some(pf_capture_setup), Some(pf_capture_free), Some(pf_capture_pkt_handler), null_mut());

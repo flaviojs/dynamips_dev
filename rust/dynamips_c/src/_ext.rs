@@ -9,11 +9,21 @@ use std::ptr::write_volatile;
 /// cbindgen:no-export
 #[cfg(feature = "ENABLE_GEN_ETH")]
 pub type pcap_t = pcap;
+/// cbindgen:no-export
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub type pcap_dumper_t = pcap_dumper;
 
 /// cbindgen:no-export
 #[cfg(feature = "ENABLE_GEN_ETH")]
 #[repr(C)]
 pub struct pcap {
+    _todo: u8,
+}
+
+/// cbindgen:no-export
+#[cfg(feature = "ENABLE_GEN_ETH")]
+#[repr(C)]
+pub struct pcap_dumper {
     _todo: u8,
 }
 

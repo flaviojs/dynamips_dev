@@ -5,6 +5,8 @@
 pub use crate::_ext::cfunc;
 pub use crate::_ext::cstr;
 #[cfg(feature = "ENABLE_GEN_ETH")]
+pub use crate::_ext::pcap_dumper_t;
+#[cfg(feature = "ENABLE_GEN_ETH")]
 pub use crate::_ext::pcap_t;
 pub use crate::_ext::str0;
 pub use crate::_ext::u_char;
@@ -63,4 +65,30 @@ extern "C" {
     pub fn inet_pton(af: c_int, src: *const c_char, dst: *mut c_void) -> c_int;
     pub fn ntohl(x: u32) -> u32;
     pub fn ntohs(x: u16) -> u16;
+}
+
+// libpcap stuff
+
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub const DLT_EN10MB: c_int = 1;
+
+#[cfg(feature = "ENABLE_GEN_ETH")]
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct pcap_pkthdr {
+    pub ts: libc::timeval,
+    pub caplen: c_uint,
+    pub len: c_uint,
+}
+
+#[cfg(feature = "ENABLE_GEN_ETH")]
+extern "C" {
+    pub fn pcap_close(arg1: *mut pcap_t);
+    pub fn pcap_datalink_name_to_val(arg1: *const c_char) -> c_int;
+    pub fn pcap_dump_close(arg1: *mut pcap_dumper_t);
+    pub fn pcap_dump_flush(arg1: *mut pcap_dumper_t) -> c_int;
+    pub fn pcap_dump_open(arg1: *mut pcap_t, arg2: *const c_char) -> *mut pcap_dumper_t;
+    pub fn pcap_dump(arg1: *mut c_uchar, arg2: *const pcap_pkthdr, arg3: *const c_uchar);
+    pub fn pcap_open_dead(arg1: c_int, arg2: c_int) -> *mut pcap_t;
+    pub fn pcap_snapshot(arg1: *mut pcap_t) -> c_int;
 }

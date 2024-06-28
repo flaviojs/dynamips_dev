@@ -230,3 +230,75 @@ unsafe extern "C" fn pf_capture_pkt_handler(_nio: *mut netio_desc_t, pkt: *mut c
 #[cfg(feature = "ENABLE_GEN_ETH")]
 #[no_mangle] // TODO private
 pub static mut pf_capture_def: netio_pktfilter_t = netio_pktfilter_t::new(cstr!("capture"), Some(pf_capture_setup), Some(pf_capture_free), Some(pf_capture_pkt_handler), null_mut());
+
+// ========================================================================
+// Frequency Dropping ("freq_drop").
+// ========================================================================
+
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct pf_freqdrop_data {
+    pub frequency: ::std::os::raw::c_int,
+    pub current: ::std::os::raw::c_int,
+}
+
+/// Setup filter ressources
+unsafe extern "C" fn pf_freqdrop_setup(_nio: *mut netio_desc_t, opt: *mut *mut c_void, argc: c_int, argv: *mut *mut c_char) -> c_int {
+    let mut data: *mut pf_freqdrop_data = (*opt).cast::<_>();
+
+    if argc != 1 {
+        return -1;
+    }
+
+    if data.is_null() {
+        data = libc::malloc(size_of::<pf_freqdrop_data>()).cast::<_>();
+        if data.is_null() {
+            return -1;
+        }
+
+        *opt = data.cast::<_>();
+    }
+
+    (*data).current = 0;
+    (*data).frequency = libc::atoi(*argv.add(0));
+    0
+}
+
+/// Free ressources used by filter
+unsafe extern "C" fn pf_freqdrop_free(_nio: *mut netio_desc_t, opt: *mut *mut c_void) {
+    if !(*opt).is_null() {
+        libc::free(*opt);
+    }
+
+    *opt = null_mut();
+}
+
+/// Packet handler: drop 1 out of n packets
+unsafe extern "C" fn pf_freqdrop_pkt_handler(_nio: *mut netio_desc_t, _pkt: *mut c_void, _len: size_t, opt: *mut c_void) -> c_int {
+    let data: *mut pf_freqdrop_data = opt.cast::<_>();
+
+    if !data.is_null() {
+        match (*data).frequency {
+            -1 => {
+                return NETIO_FILTER_ACTION_DROP;
+            }
+            0 => {
+                return NETIO_FILTER_ACTION_PASS;
+            }
+            _ => {
+                (*data).current += 1;
+
+                if (*data).current == (*data).frequency {
+                    (*data).current = 0;
+                    return NETIO_FILTER_ACTION_DROP;
+                }
+            }
+        }
+    }
+
+    NETIO_FILTER_ACTION_PASS
+}
+
+/// Packet dropping at 1/n frequency
+#[no_mangle] // TODO private
+pub static mut pf_freqdrop_def: netio_pktfilter_t = netio_pktfilter_t::new(cstr!("freq_drop"), Some(pf_freqdrop_setup), Some(pf_freqdrop_free), Some(pf_freqdrop_pkt_handler), null_mut());

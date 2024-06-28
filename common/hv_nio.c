@@ -28,7 +28,6 @@
 #include "atm.h"
 #include "frame_relay.h"
 #include "net_io_bridge.h"
-#include "net_io_filter.h"
 #ifdef GEN_ETH
 #include "gen_eth.h"
 #endif

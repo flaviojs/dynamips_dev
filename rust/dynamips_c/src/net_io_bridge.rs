@@ -111,3 +111,43 @@ pub unsafe extern "C" fn netio_bridge_add_netio(t: *mut netio_bridge_t, nio_name
     NETIO_BRIDGE_UNLOCK(t);
     0
 }
+
+/// Free resources used by a NIO in a bridge
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn netio_bridge_free_nio(nio: *mut netio_desc_t) {
+    netio_rxl_remove(nio);
+    netio_release((*nio).name);
+}
+
+/// Remove a NetIO descriptor from a virtual bridge
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_remove_netio(t: *mut netio_bridge_t, nio_name: *mut c_char) -> c_int {
+    NETIO_BRIDGE_LOCK(t);
+
+    let nio: *mut netio_desc_t = registry_exists(nio_name, OBJ_TYPE_NIO).cast::<_>();
+    if nio.is_null() {
+        NETIO_BRIDGE_UNLOCK(t);
+        return -1;
+    }
+
+    // Try to find the NIO in the NIO array
+    let mut i: usize = 0;
+    while i < NETIO_BRIDGE_MAX_NIO {
+        if (*t).nio[i] == nio {
+            break;
+        }
+        i += 1;
+    }
+
+    if i == NETIO_BRIDGE_MAX_NIO {
+        NETIO_BRIDGE_UNLOCK(t);
+        return -1;
+    }
+
+    // Remove the NIO from the RX multiplexer
+    netio_bridge_free_nio((*t).nio[i]);
+    (*t).nio[i] = null_mut();
+
+    NETIO_BRIDGE_UNLOCK(t);
+    0
+}

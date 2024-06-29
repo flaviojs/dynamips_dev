@@ -21,44 +21,6 @@
 
 #define PKT_MAX_SIZE 2048
 
-/* Free resources used by a NIO in a bridge */
-static void netio_bridge_free_nio(netio_desc_t *nio)
-{
-   netio_rxl_remove(nio);
-   netio_release(nio->name);
-}
-
-/* Remove a NetIO descriptor from a virtual bridge */
-int netio_bridge_remove_netio(netio_bridge_t *t,char *nio_name)
-{
-   netio_desc_t *nio;
-   int i;
-
-   NETIO_BRIDGE_LOCK(t);
-
-   if (!(nio = registry_exists(nio_name,OBJ_TYPE_NIO)))
-      goto error;
-
-   /* Try to find the NIO in the NIO array */
-   for(i=0;i<NETIO_BRIDGE_MAX_NIO;i++)
-      if (t->nio[i] == nio)
-         break;
-
-   if (i == NETIO_BRIDGE_MAX_NIO)
-      goto error;
-
-   /* Remove the NIO from the RX multiplexer */
-   netio_bridge_free_nio(t->nio[i]);
-   t->nio[i] = NULL;
-
-   NETIO_BRIDGE_UNLOCK(t);
-   return(0);
-
- error:
-   NETIO_BRIDGE_UNLOCK(t);
-   return(-1);
-}
-
 /* Save the configuration of a bridge */
 void netio_bridge_save_config(netio_bridge_t *t,FILE *fd)
 {

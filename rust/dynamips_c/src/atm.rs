@@ -131,3 +131,49 @@ pub unsafe extern "C" fn atm_insert_hec(cell_header: *mut m_uint8_t) {
 pub unsafe extern "C" fn atm_init() {
     gen_syndrome_table();
 }
+
+/// VPC hash function
+#[no_mangle] // TODO private
+#[inline]
+pub unsafe extern "C" fn atmsw_vpc_hash(vpi: u_int) -> u_int {
+    (vpi ^ (vpi >> 8)) & (ATMSW_VP_HASH_SIZE as u_int - 1)
+}
+
+/// VCC hash function
+#[no_mangle] // TODO private
+#[inline]
+pub unsafe extern "C" fn atmsw_vcc_hash(vpi: u_int, vci: u_int) -> u_int {
+    (vpi ^ vci) & (ATMSW_VC_HASH_SIZE as u_int - 1)
+}
+
+/// VP lookup
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_vp_lookup(t: *mut atmsw_table_t, input: *mut netio_desc_t, vpi: u_int) -> *mut atmsw_vp_conn_t {
+    let mut swc: *mut atmsw_vp_conn_t;
+
+    swc = (*t).vp_table[atmsw_vpc_hash(vpi) as usize];
+    while !swc.is_null() {
+        if ((*swc).input == input) && ((*swc).vpi_in == vpi) {
+            return swc;
+        }
+        swc = (*swc).next
+    }
+
+    null_mut()
+}
+
+/// VC lookup
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_vc_lookup(t: *mut atmsw_table_t, input: *mut netio_desc_t, vpi: u_int, vci: u_int) -> *mut atmsw_vc_conn_t {
+    let mut swc: *mut atmsw_vc_conn_t;
+
+    swc = (*t).vc_table[atmsw_vcc_hash(vpi, vci) as usize];
+    while !swc.is_null() {
+        if ((*swc).input == input) && ((*swc).vpi_in == vpi) && ((*swc).vci_in == vci) {
+            return swc;
+        }
+        swc = (*swc).next;
+    }
+
+    null_mut()
+}

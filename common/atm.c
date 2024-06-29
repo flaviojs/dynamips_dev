@@ -24,45 +24,6 @@
 #include "rust_dynamips_c.h"
 #include "atm.h"
 
-/* VPC hash function */
-static inline u_int atmsw_vpc_hash(u_int vpi)
-{
-   return((vpi ^ (vpi >> 8)) & (ATMSW_VP_HASH_SIZE-1));
-}
-
-/* VCC hash function */
-static inline u_int atmsw_vcc_hash(u_int vpi,u_int vci)
-{
-   return((vpi ^ vci) & (ATMSW_VC_HASH_SIZE-1));
-}
-
-/* VP lookup */
-atmsw_vp_conn_t *atmsw_vp_lookup(atmsw_table_t *t,netio_desc_t *input,
-                                 u_int vpi)
-{
-   atmsw_vp_conn_t *swc;
-   
-   for(swc=t->vp_table[atmsw_vpc_hash(vpi)];swc;swc=swc->next)
-      if ((swc->input == input) && (swc->vpi_in == vpi))
-         return swc;
-
-   return NULL;
-}
-
-/* VC lookup */
-atmsw_vc_conn_t *atmsw_vc_lookup(atmsw_table_t *t,netio_desc_t *input,
-                                 u_int vpi,u_int vci)
-{
-   atmsw_vc_conn_t *swc;
-
-   for(swc=t->vc_table[atmsw_vcc_hash(vpi,vci)];swc;swc=swc->next)
-      if ((swc->input == input) && (swc->vpi_in == vpi) && 
-          (swc->vci_in == vci))
-         return swc;
-
-   return NULL;
-}
-
 /* VP switching */
 void atmsw_vp_switch(atmsw_vp_conn_t *vpc,m_uint8_t *cell)
 {

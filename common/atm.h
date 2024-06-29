@@ -14,66 +14,8 @@
 
 #include "utils.h"
 
-/* ATM payload size */
-#define ATM_HDR_SIZE           5
-#define ATM_PAYLOAD_SIZE       48
-#define ATM_CELL_SIZE          (ATM_HDR_SIZE + ATM_PAYLOAD_SIZE)
-#define ATM_AAL5_TRAILER_SIZE  8
-#define ATM_AAL5_TRAILER_POS   (ATM_CELL_SIZE - ATM_AAL5_TRAILER_SIZE)
-
-/* ATM header structure */
-#define ATM_HDR_VPI_MASK       0xFFF00000
-#define ATM_HDR_VPI_SHIFT      20
-#define ATM_HDR_VCI_MASK       0x000FFFF0
-#define ATM_HDR_VCI_SHIFT      4
-#define ATM_HDR_PTI_MASK       0x0000000E
-#define ATM_HDR_PTI_SHIFT      1
-
-/* PTI bits */
-#define ATM_PTI_EOP            0x00000002  /* End of packet */
-#define ATM_PTI_CONGESTION     0x00000004  /* Congestion detected */
-#define ATM_PTI_NETWORK        0x00000008  /* Network traffic */
-
-/* VP-level switch table */
-typedef struct atmsw_vp_conn atmsw_vp_conn_t;
-struct atmsw_vp_conn {
-   atmsw_vp_conn_t *next;
-   netio_desc_t *input,*output;
-   u_int vpi_in,vpi_out;
-   m_uint64_t cell_cnt;
-};
-
-/* VC-level switch table */
-typedef struct atmsw_vc_conn atmsw_vc_conn_t;
-struct atmsw_vc_conn {
-   atmsw_vc_conn_t *next;
-   netio_desc_t *input,*output;
-   u_int vpi_in,vci_in;
-   u_int vpi_out,vci_out;
-   m_uint64_t cell_cnt;
-};
-
-/* Virtual ATM switch table */
-#define ATMSW_NIO_MAX       32
-#define ATMSW_VP_HASH_SIZE  256
-#define ATMSW_VC_HASH_SIZE  1024
-
-typedef struct atmsw_table atmsw_table_t;
-struct atmsw_table {
-   char *name;
-   pthread_mutex_t lock;
-   mempool_t mp;
-   m_uint64_t cell_drop;
-   atmsw_vp_conn_t *vp_table[ATMSW_VP_HASH_SIZE];
-   atmsw_vc_conn_t *vc_table[ATMSW_VC_HASH_SIZE];
-};
-
 #define ATMSW_LOCK(t)   pthread_mutex_lock(&(t)->lock)
 #define ATMSW_UNLOCK(t) pthread_mutex_unlock(&(t)->lock)
-
-/* RFC1483 bridged mode header */
-#define ATM_RFC1483B_HLEN  10
-extern m_uint8_t atm_rfc1483b_header[ATM_RFC1483B_HLEN];
 
 /* Compute HEC field for ATM header */
 m_uint8_t atm_compute_hec(m_uint8_t *cell_header);

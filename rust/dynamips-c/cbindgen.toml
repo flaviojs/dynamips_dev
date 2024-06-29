@@ -30,6 +30,9 @@ struct vdevice;
 
 // cbindgen 0.27.0 puts the typedef of a struct after the struct declaration,
 // so structs that use that typedef internally need a forward declaration of the typedef
+typedef struct atmsw_table atmsw_table_t;
+typedef struct atmsw_vc_conn atmsw_vc_conn_t;
+typedef struct atmsw_vp_conn atmsw_vp_conn_t;
 typedef struct c3600_router c3600_t;
 typedef struct c7200_router c7200_t;
 typedef struct cpu_gen cpu_gen_t;

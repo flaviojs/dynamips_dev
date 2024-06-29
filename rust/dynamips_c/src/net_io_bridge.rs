@@ -16,6 +16,13 @@ pub struct netio_bridge {
     pub nio: [*mut netio_desc_t; NETIO_BRIDGE_MAX_NIO],
 }
 
+unsafe fn NETIO_BRIDGE_LOCK(t: *mut netio_bridge_t) {
+    libc::pthread_mutex_lock(addr_of_mut!((*t).lock));
+}
+unsafe fn NETIO_BRIDGE_UNLOCK(t: *mut netio_bridge_t) {
+    libc::pthread_mutex_unlock(addr_of_mut!((*t).lock));
+}
+
 /// Create a virtual bridge
 #[no_mangle]
 pub unsafe extern "C" fn netio_bridge_create(name: *mut c_char) -> *mut netio_bridge_t {
@@ -55,4 +62,52 @@ pub unsafe extern "C" fn netio_bridge_acquire(name: *mut c_char) -> *mut netio_d
 #[no_mangle]
 pub unsafe extern "C" fn netio_bridge_release(name: *mut c_char) -> c_int {
     registry_unref(name, OBJ_TYPE_NIO_BRIDGE)
+}
+
+/// Receive a packet
+unsafe extern "C" fn netio_bridge_recv_pkt(nio: *mut netio_desc_t, pkt: *mut u_char, pkt_len: ssize_t, t: *mut c_void, _: *mut c_void) -> c_int {
+    let t: *mut netio_bridge_t = t.cast::<_>();
+    NETIO_BRIDGE_LOCK(t);
+
+    for i in 0..NETIO_BRIDGE_MAX_NIO {
+        if !(*t).nio[i].is_null() && (*t).nio[i] != nio {
+            netio_send((*t).nio[i], pkt.cast::<_>(), pkt_len as size_t);
+        }
+    }
+
+    NETIO_BRIDGE_UNLOCK(t);
+    0
+}
+
+/// Add a NetIO descriptor to a virtual bridge
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_add_netio(t: *mut netio_bridge_t, nio_name: *mut c_char) -> c_int {
+    NETIO_BRIDGE_LOCK(t);
+
+    // Try to find a free slot in the NIO array
+    let mut i: usize = 0;
+    while i < NETIO_BRIDGE_MAX_NIO {
+        if (*t).nio[i].is_null() {
+            break;
+        }
+        i += 1;
+    }
+
+    // No free slot found ...
+    if i == NETIO_BRIDGE_MAX_NIO {
+        NETIO_BRIDGE_UNLOCK(t);
+        return -1;
+    }
+
+    // Acquire the NIO descriptor and increment its reference count
+    let nio: *mut netio_desc_t = netio_acquire(nio_name);
+    if nio.is_null() {
+        NETIO_BRIDGE_UNLOCK(t);
+        return -1;
+    }
+
+    (*t).nio[i] = nio;
+    netio_rxl_add(nio, Some(netio_bridge_recv_pkt), t.cast::<_>(), null_mut());
+    NETIO_BRIDGE_UNLOCK(t);
+    0
 }

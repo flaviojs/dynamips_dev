@@ -21,53 +21,6 @@
 
 #define PKT_MAX_SIZE 2048
 
-/* Receive a packet */
-static int netio_bridge_recv_pkt(netio_desc_t *nio,u_char *pkt,ssize_t pkt_len,
-                                 netio_bridge_t *t)
-{
-   int i;
-
-   NETIO_BRIDGE_LOCK(t);
-
-   for(i=0;i<NETIO_BRIDGE_MAX_NIO;i++)
-      if ((t->nio[i] != NULL) && (t->nio[i] != nio))
-         netio_send(t->nio[i],pkt,pkt_len);
-   
-   NETIO_BRIDGE_UNLOCK(t);
-   return(0);
-}
-
-/* Add a NetIO descriptor to a virtual bridge */
-int netio_bridge_add_netio(netio_bridge_t *t,char *nio_name)
-{
-   netio_desc_t *nio;
-   int i;
-
-   NETIO_BRIDGE_LOCK(t);
-
-   /* Try to find a free slot in the NIO array */
-   for(i=0;i<NETIO_BRIDGE_MAX_NIO;i++)
-      if (t->nio[i] == NULL)
-         break;
-   
-   /* No free slot found ... */
-   if (i == NETIO_BRIDGE_MAX_NIO)
-      goto error;
-
-   /* Acquire the NIO descriptor and increment its reference count */
-   if (!(nio = netio_acquire(nio_name)))
-      goto error;
-
-   t->nio[i] = nio;
-   netio_rxl_add(nio,(netio_rx_handler_t)netio_bridge_recv_pkt,t,NULL);
-   NETIO_BRIDGE_UNLOCK(t);
-   return(0);
-
- error:
-   NETIO_BRIDGE_UNLOCK(t);
-   return(-1);
-}
-
 /* Free resources used by a NIO in a bridge */
 static void netio_bridge_free_nio(netio_desc_t *nio)
 {

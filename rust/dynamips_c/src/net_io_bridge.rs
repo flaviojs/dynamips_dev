@@ -4,6 +4,7 @@ use crate::dynamips_common::*;
 use crate::net_io::*;
 use crate::prelude::*;
 use crate::registry::*;
+use crate::utils::*;
 
 pub type netio_bridge_t = netio_bridge;
 
@@ -206,4 +207,159 @@ pub unsafe extern "C" fn netio_bridge_delete(name: *mut c_char) -> c_int {
 #[no_mangle]
 pub unsafe extern "C" fn netio_bridge_delete_all() -> c_int {
     registry_delete_type(OBJ_TYPE_NIO_BRIDGE, Some(netio_bridge_free), null_mut())
+}
+
+/// Create a new interface
+unsafe fn netio_bridge_cfg_create_if(t: *mut netio_bridge_t, tokens: *mut *mut c_char, count: c_int) -> c_int {
+    let mut nio: *mut netio_desc_t = null_mut();
+
+    let nio_type: c_int = netio_get_type(*tokens.add(1));
+    match nio_type as u_int {
+        NETIO_TYPE_UNIX => 'block: {
+            if count != 4 {
+                libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: invalid number of arguments for UNIX NIO\n"));
+                break 'block;
+            }
+
+            nio = netio_desc_create_unix(*tokens.add(0), *tokens.add(2), *tokens.add(3));
+        }
+
+        NETIO_TYPE_TAP => 'block: {
+            if count != 3 {
+                libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: invalid number of arguments for TAP NIO\n"));
+                break 'block;
+            }
+
+            nio = netio_desc_create_tap(*tokens.add(0), *tokens.add(2));
+        }
+
+        NETIO_TYPE_UDP => 'block: {
+            if count != 5 {
+                libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: invalid number of arguments for UDP NIO\n"));
+                break 'block;
+            }
+
+            nio = netio_desc_create_udp(*tokens.add(0), libc::atoi(*tokens.add(2)), *tokens.add(3), libc::atoi(*tokens.add(4)));
+        }
+
+        NETIO_TYPE_TCP_CLI => 'block: {
+            if count != 4 {
+                libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: invalid number of arguments for TCP CLI NIO\n"));
+                break 'block;
+            }
+
+            nio = netio_desc_create_tcp_cli(*tokens.add(0), *tokens.add(2), *tokens.add(3));
+        }
+
+        NETIO_TYPE_TCP_SER => 'block: {
+            if count != 3 {
+                libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: invalid number of arguments for TCP SER NIO\n"));
+                break 'block;
+            }
+
+            nio = netio_desc_create_tcp_ser(*tokens.add(0), *tokens.add(2));
+        }
+
+        #[cfg(feature = "ENABLE_GEN_ETH")]
+        NETIO_TYPE_GEN_ETH => 'block: {
+            if count != 3 {
+                libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: invalid number of arguments for Generic Ethernet NIO\n"));
+                break 'block;
+            }
+
+            nio = netio_desc_create_geneth(*tokens.add(0), *tokens.add(2));
+        }
+
+        #[cfg(feature = "ENABLE_LINUX_ETH")]
+        NETIO_TYPE_LINUX_ETH => 'block: {
+            if count != 3 {
+                libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: invalid number of arguments for Linux Ethernet NIO\n"));
+                break 'block;
+            }
+
+            nio = netio_desc_create_lnxeth(*tokens.add(0), *tokens.add(2));
+        }
+
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: unknown/invalid NETIO type '%s'\n"), *tokens.add(1));
+        }
+    }
+
+    if nio.is_null() {
+        libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: unable to create NETIO descriptor\n"));
+        return -1;
+    }
+
+    if netio_bridge_add_netio(t, *tokens.add(0)) == -1 {
+        libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: unable to add NETIO descriptor.\n"));
+        netio_release((*nio).name);
+        return -1;
+    }
+
+    netio_release((*nio).name);
+    0
+}
+
+const NETIO_BRIDGE_MAX_TOKENS: usize = 16;
+
+/// Handle a configuration line
+unsafe fn netio_bridge_handle_cfg_line(t: *mut netio_bridge_t, str_: *mut c_char) -> c_int {
+    let mut tokens: [*mut c_char; NETIO_BRIDGE_MAX_TOKENS] = [null_mut(); NETIO_BRIDGE_MAX_TOKENS];
+
+    let count: c_int = m_strsplit(str_, b':' as c_char, tokens.as_c_mut(), NETIO_BRIDGE_MAX_TOKENS as c_int);
+    if count <= 2 {
+        return -1;
+    }
+
+    netio_bridge_cfg_create_if(t, tokens.as_c_mut(), count)
+}
+
+/// Read a configuration file
+unsafe fn netio_bridge_read_cfg_file(t: *mut netio_bridge_t, filename: *mut c_char) -> c_int {
+    let mut buffer: [c_char; 1024] = [0; 1024];
+    let mut ptr: *mut c_char;
+
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("r"));
+    if fd.is_null() {
+        libc::perror(cstr!("fopen"));
+        return -1;
+    }
+
+    while libc::feof(fd) == 0 {
+        if libc::fgets(buffer.as_c_mut(), buffer.len() as c_int, fd).is_null() {
+            break;
+        }
+
+        // skip comments and end of line
+        ptr = libc::strpbrk(buffer.as_c(), cstr!("#\r\n"));
+        if !ptr.is_null() {
+            *ptr = 0;
+        }
+
+        // analyze non-empty lines
+        if !libc::strchr(buffer.as_c(), b':' as c_int).is_null() {
+            netio_bridge_handle_cfg_line(t, buffer.as_c_mut());
+        }
+    }
+
+    libc::fclose(fd);
+    0
+}
+
+/// Start a virtual bridge
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_start(filename: *mut c_char) -> c_int {
+    let t: *mut netio_bridge_t = netio_bridge_create(cstr!("default"));
+    if t.is_null() {
+        libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: unable to create virtual fabric table.\n"));
+        return -1;
+    }
+
+    if netio_bridge_read_cfg_file(t, filename) == -1 {
+        libc::fprintf(c_stderr(), cstr!("NETIO_BRIDGE: unable to parse configuration file.\n"));
+        return -1;
+    }
+
+    netio_bridge_release(cstr!("default"));
+    0
 }

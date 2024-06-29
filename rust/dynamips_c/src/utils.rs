@@ -533,3 +533,50 @@ pub unsafe extern "C" fn mem_dump(f_output: *mut libc::FILE, pkt: *mut u_char, l
     libc::fprintf(f_output, cstr!("\n"));
     libc::fflush(f_output);
 }
+
+/// Split a string
+#[no_mangle]
+pub unsafe extern "C" fn m_strsplit(mut str_: *mut c_char, delim: c_char, array: *mut *mut c_char, max_count: c_int) -> c_int {
+    let mut pos: c_int = 0;
+    let mut len: size_t;
+    let mut ptr: *mut c_char;
+
+    for i in 0..max_count {
+        *array.offset(i as isize) = null_mut();
+    }
+
+    loop {
+        if pos == max_count {
+            for i in 0..max_count {
+                libc::free((*array.offset(i as isize)).cast::<_>());
+            }
+            return -1;
+        }
+
+        ptr = libc::strchr(str_, delim as c_int);
+        if ptr.is_null() {
+            ptr = str_.wrapping_add(libc::strlen(str_));
+        }
+
+        len = ptr.offset_from(str_) as size_t;
+
+        *array.offset(pos as isize) = libc::malloc(len + 1).cast::<_>();
+        if (*array.offset(pos as isize)).is_null() {
+            for i in 0..max_count {
+                libc::free((*array.offset(i as isize)).cast::<_>());
+            }
+            return -1;
+        }
+
+        libc::memcpy((*array.offset(pos as isize)).cast::<_>(), str_.cast::<_>(), len);
+        *(*array.offset(pos as isize)).add(len) = 0;
+
+        str_ = ptr.wrapping_add(1);
+        pos += 1;
+        if *ptr == 0 {
+            break;
+        }
+    }
+
+    pos
+}

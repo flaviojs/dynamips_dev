@@ -49,37 +49,6 @@ int netio_bridge_release(char *name)
    return(registry_unref(name,OBJ_TYPE_NIO_BRIDGE));
 }
 
-/* Create a virtual bridge */
-netio_bridge_t *netio_bridge_create(char *name)
-{
-   netio_bridge_t *t;
-
-   /* Allocate a new bridge structure */
-   if (!(t = malloc(sizeof(*t))))
-      return NULL;
-
-   memset(t,0,sizeof(*t));
-   pthread_mutex_init(&t->lock,NULL);
-
-   if (!(t->name = strdup(name)))
-      goto err_name;
-
-   /* Record this object in registry */
-   if (registry_add(t->name,OBJ_TYPE_NIO_BRIDGE,t) == -1) {
-      fprintf(stderr,"netio_bridge_create: unable to register bridge '%s'\n",
-              name);
-      goto err_reg;
-   }
-
-   return t;
-
- err_reg:
-   free(t->name);
- err_name:
-   free(t);
-   return NULL;
-}
-
 /* Add a NetIO descriptor to a virtual bridge */
 int netio_bridge_add_netio(netio_bridge_t *t,char *nio_name)
 {

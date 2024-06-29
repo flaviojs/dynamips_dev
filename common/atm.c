@@ -39,12 +39,6 @@ static int atmsw_recv_cell(netio_desc_t *nio,u_char *atm_cell,ssize_t cell_len,
    return(res);
 }
 
-/* Acquire a reference to an ATM switch (increment reference count) */
-atmsw_table_t *atmsw_acquire(char *name)
-{
-   return(registry_find(name,OBJ_TYPE_ATMSW));
-}
-
 /* Release an ATM switch (decrement reference count) */
 int atmsw_release(char *name)
 {

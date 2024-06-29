@@ -9,6 +9,7 @@ use crate::dynamips_common::*;
 use crate::mempool::*;
 use crate::net_io::*;
 use crate::prelude::*;
+use crate::registry::*;
 use crate::utils::*;
 
 pub type atmsw_vp_conn_t = atmsw_vp_conn;
@@ -250,4 +251,10 @@ pub unsafe extern "C" fn atmsw_handle_cell(t: *mut atmsw_table_t, input: *mut ne
     }
 
     0
+}
+
+/// Acquire a reference to an ATM switch (increment reference count)
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_acquire(name: *mut c_char) -> *mut atmsw_table_t {
+    registry_find(name, OBJ_TYPE_ATMSW).cast::<_>()
 }

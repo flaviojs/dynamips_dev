@@ -374,3 +374,40 @@ pub unsafe extern "C" fn atmsw_create_vpc(t: *mut atmsw_table_t, nio_input: *mut
     ATMSW_UNLOCK(t);
     0
 }
+
+/// Delete a VP switch connection
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_delete_vpc(t: *mut atmsw_table_t, nio_input: *mut c_char, vpi_in: u_int, nio_output: *mut c_char, vpi_out: u_int) -> c_int {
+    let mut swc: *mut *mut atmsw_vp_conn_t;
+    let mut p: *mut atmsw_vp_conn_t;
+
+    ATMSW_LOCK(t);
+
+    let input: *mut netio_desc_t = registry_exists(nio_input, OBJ_TYPE_NIO).cast::<_>();
+    let output: *mut netio_desc_t = registry_exists(nio_output, OBJ_TYPE_NIO).cast::<_>();
+
+    if input.is_null() || output.is_null() {
+        ATMSW_UNLOCK(t);
+        return -1;
+    }
+
+    let hbucket: u_int = atmsw_vpc_hash(vpi_in);
+    swc = addr_of_mut!((*t).vp_table[hbucket as usize]);
+    while !(*swc).is_null() {
+        p = *swc;
+
+        if ((*p).input == input) && ((*p).output == output) && ((*p).vpi_in == vpi_in) && ((*p).vpi_out == vpi_out) {
+            // found a matching VP, remove it
+            *swc = (*(*swc)).next;
+            ATMSW_UNLOCK(t);
+
+            atmsw_release_vpc(p);
+            mp_free(p.cast::<_>());
+            return 0;
+        }
+        swc = addr_of_mut!((*(*swc)).next);
+    }
+
+    ATMSW_UNLOCK(t);
+    -1
+}

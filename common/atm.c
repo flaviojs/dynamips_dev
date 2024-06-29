@@ -40,46 +40,6 @@ static void atmsw_release_vcc(atmsw_vc_conn_t *swc)
    }
 }
 
-/* Delete a VP switch connection */
-int atmsw_delete_vpc(atmsw_table_t *t,char *nio_input,u_int vpi_in,
-                     char *nio_output,u_int vpi_out)
-{   
-   netio_desc_t *input,*output;
-   atmsw_vp_conn_t **swc,*p;
-   u_int hbucket;
-
-   ATMSW_LOCK(t);
-
-   input = registry_exists(nio_input,OBJ_TYPE_NIO);
-   output = registry_exists(nio_output,OBJ_TYPE_NIO);
-
-   if (!input || !output) {
-      ATMSW_UNLOCK(t);
-      return(-1);
-   }
-
-   hbucket = atmsw_vpc_hash(vpi_in);
-   for(swc=&t->vp_table[hbucket];*swc;swc=&(*swc)->next) 
-   {
-      p = *swc;
-
-      if ((p->input == input) && (p->output == output) &&
-          (p->vpi_in == vpi_in) && (p->vpi_out == vpi_out))
-      {
-         /* found a matching VP, remove it */
-         *swc = (*swc)->next;
-         ATMSW_UNLOCK(t);
-
-         atmsw_release_vpc(p);
-         mp_free(p);
-         return(0);
-      }
-   }
-
-   ATMSW_UNLOCK(t);
-   return(-1);
-}
-
 /* Create a VC switch connection */
 int atmsw_create_vcc(atmsw_table_t *t,
                      char *input,u_int vpi_in,u_int vci_in,

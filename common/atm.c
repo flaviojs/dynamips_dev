@@ -24,11 +24,6 @@
 #include "rust_dynamips_c.h"
 #include "atm.h"
 
-/* RFC1483 bridged mode header */
-m_uint8_t atm_rfc1483b_header[ATM_RFC1483B_HLEN] = { 
-   0xaa, 0xaa, 0x03, 0x00, 0x80, 0xc2, 0x00, 0x07, 0x00, 0x00,
-};
-
 /********************************************************************/
 #define HEC_GENERATOR   0x107               /* x^8 + x^2 +  x  + 1  */
 #define COSET_LEADER    0x055               /* x^6 + x^4 + x^2 + 1  */

@@ -9,6 +9,7 @@
 #![allow(non_upper_case_globals)]
 
 pub mod _ext;
+pub mod atm;
 pub mod base64;
 pub mod cisco_card;
 pub mod cisco_eeprom;

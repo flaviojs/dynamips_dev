@@ -8,6 +8,9 @@ sys_includes = ["pthread.h","setjmp.h","sys/un.h"]
 after_includes = """
 
 // forward declarations (cbindgen places typedefs after the struct definitions, preventing you from using them in the structs)
+typedef struct atmsw_table atmsw_table_t;
+typedef struct atmsw_vc_conn atmsw_vc_conn_t;
+typedef struct atmsw_vp_conn atmsw_vp_conn_t;
 typedef struct cbm_array cbm_array_t;
 typedef struct cpu_gen cpu_gen_t;
 typedef struct cpu_group cpu_group_t;

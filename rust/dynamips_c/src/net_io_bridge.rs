@@ -44,3 +44,9 @@ pub unsafe extern "C" fn netio_bridge_create(name: *mut c_char) -> *mut netio_br
 
     t
 }
+
+/// Acquire a reference to NetIO bridge from the registry (inc ref count)
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_acquire(name: *mut c_char) -> *mut netio_desc_t {
+    registry_find(name, OBJ_TYPE_NIO_BRIDGE).cast::<_>()
+}

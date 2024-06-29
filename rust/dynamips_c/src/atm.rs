@@ -258,3 +258,9 @@ pub unsafe extern "C" fn atmsw_handle_cell(t: *mut atmsw_table_t, input: *mut ne
 pub unsafe extern "C" fn atmsw_acquire(name: *mut c_char) -> *mut atmsw_table_t {
     registry_find(name, OBJ_TYPE_ATMSW).cast::<_>()
 }
+
+/// Release an ATM switch (decrement reference count)
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_release(name: *mut c_char) -> c_int {
+    registry_unref(name, OBJ_TYPE_ATMSW)
+}

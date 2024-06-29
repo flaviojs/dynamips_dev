@@ -25,7 +25,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io_bridge.h"
 #include "hypervisor.h"
 
 /* Create a new NIO bridge */

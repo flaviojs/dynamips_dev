@@ -70,7 +70,6 @@ endif()
 # dynamips_*_stable
 set ( _files
    "${COMMON}/utils.c"
-   "${COMMON}/net_io_bridge.c"
    "${COMMON}/atm.c"
    "${COMMON}/atm_vsar.c"
    "${COMMON}/atm_bridge.c"

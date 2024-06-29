@@ -118,8 +118,7 @@ pub unsafe extern "C" fn netio_bridge_add_netio(t: *mut netio_bridge_t, nio_name
 }
 
 /// Free resources used by a NIO in a bridge
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn netio_bridge_free_nio(nio: *mut netio_desc_t) {
+unsafe fn netio_bridge_free_nio(nio: *mut netio_desc_t) {
     netio_rxl_remove(nio);
     netio_release((*nio).name);
 }

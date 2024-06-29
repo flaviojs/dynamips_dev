@@ -23,7 +23,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io_bridge.h"
 #include "rust_dynamips_c.h"
 #include "hypervisor.h"
 

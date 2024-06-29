@@ -38,7 +38,6 @@
 #include "dev_c2600.h"
 #include "dev_c1700.h"
 #include "hypervisor.h"
-#include "net_io_bridge.h"
 #include "frame_relay.h"
 #include "atm.h"
 

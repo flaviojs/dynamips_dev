@@ -1,5 +1,6 @@
 //! NetIO bridge.
 
+use crate::dynamips_common::*;
 use crate::net_io::*;
 use crate::prelude::*;
 use crate::registry::*;
@@ -173,4 +174,36 @@ unsafe extern "C" fn netio_bridge_reg_save_config(entry: *mut registry_entry_t, 
 #[no_mangle]
 pub unsafe extern "C" fn netio_bridge_save_config_all(fd: *mut libc::FILE) {
     registry_foreach_type(OBJ_TYPE_NIO_BRIDGE, Some(netio_bridge_reg_save_config), fd.cast::<_>(), null_mut());
+}
+
+/// Free resources used by a NIO bridge
+unsafe extern "C" fn netio_bridge_free(data: *mut c_void, _arg: *mut c_void) -> c_int {
+    let t: *mut netio_bridge_t = data.cast::<_>();
+
+    NETIO_BRIDGE_LOCK(t);
+
+    for i in 0..NETIO_BRIDGE_MAX_NIO {
+        if (*t).nio[i].is_null() {
+            continue;
+        }
+
+        netio_bridge_free_nio((*t).nio[i]);
+    }
+
+    NETIO_BRIDGE_UNLOCK(t);
+    libc::free((*t).name.cast::<_>());
+    libc::free(t.cast::<_>());
+    TRUE
+}
+
+/// Delete a virtual bridge
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_delete(name: *mut c_char) -> c_int {
+    registry_delete_if_unused(name, OBJ_TYPE_NIO_BRIDGE, Some(netio_bridge_free), null_mut())
+}
+
+/// Delete all virtual bridges
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_delete_all() -> c_int {
+    registry_delete_type(OBJ_TYPE_NIO_BRIDGE, Some(netio_bridge_free), null_mut())
 }

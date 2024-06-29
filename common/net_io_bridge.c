@@ -21,40 +21,6 @@
 
 #define PKT_MAX_SIZE 2048
 
-/* Free resources used by a NIO bridge */
-static int netio_bridge_free(void *data,void *arg)
-{
-   netio_bridge_t *t = data;
-   int i;
-
-   NETIO_BRIDGE_LOCK(t);
-
-   for(i=0;i<NETIO_BRIDGE_MAX_NIO;i++) {
-      if (!t->nio[i])
-         continue;
-
-      netio_bridge_free_nio(t->nio[i]);
-   }
-
-   NETIO_BRIDGE_UNLOCK(t);
-   free(t->name);
-   free(t);
-   return(TRUE);
-}
-
-/* Delete a virtual bridge */
-int netio_bridge_delete(char *name)
-{
-   return(registry_delete_if_unused(name,OBJ_TYPE_NIO_BRIDGE,
-                                    netio_bridge_free,NULL));
-}
-
-/* Delete all virtual bridges */
-int netio_bridge_delete_all(void)
-{
-   return(registry_delete_type(OBJ_TYPE_NIO_BRIDGE,netio_bridge_free,NULL));
-}
-
 /* Create a new interface */
 static int netio_bridge_cfg_create_if(netio_bridge_t *t,
                                       char **tokens,int count)

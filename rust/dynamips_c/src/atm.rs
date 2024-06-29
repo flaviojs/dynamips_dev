@@ -264,3 +264,34 @@ pub unsafe extern "C" fn atmsw_acquire(name: *mut c_char) -> *mut atmsw_table_t 
 pub unsafe extern "C" fn atmsw_release(name: *mut c_char) -> c_int {
     registry_unref(name, OBJ_TYPE_ATMSW)
 }
+
+/// Create a virtual switch table
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_create_table(name: *mut c_char) -> *mut atmsw_table_t {
+    // Allocate a new switch structure
+    let t: *mut atmsw_table_t = libc::malloc(size_of::<atmsw_table_t>()).cast::<_>();
+    if t.is_null() {
+        return null_mut();
+    }
+
+    libc::memset(t.cast::<_>(), 0, size_of::<atmsw_table_t>());
+    libc::pthread_mutex_init(addr_of_mut!((*t).lock), null_mut());
+    mp_create_fixed_pool(addr_of_mut!((*t).mp), cstr!("ATM Switch"));
+
+    (*t).name = mp_strdup(addr_of_mut!((*t).mp), name);
+    if (*t).name.is_null() {
+        mp_free_pool(addr_of_mut!((*t).mp));
+        libc::free(t.cast::<_>());
+        return null_mut();
+    }
+
+    // Record this object in registry
+    if registry_add((*t).name, OBJ_TYPE_ATMSW, t.cast::<_>()) == -1 {
+        libc::fprintf(c_stderr(), cstr!("atmsw_create_table: unable to create switch '%s'\n"), name);
+        mp_free_pool(addr_of_mut!((*t).mp));
+        libc::free(t.cast::<_>());
+        return null_mut();
+    }
+
+    t
+}

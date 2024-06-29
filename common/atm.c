@@ -39,38 +39,6 @@ static int atmsw_recv_cell(netio_desc_t *nio,u_char *atm_cell,ssize_t cell_len,
    return(res);
 }
 
-/* Create a virtual switch table */
-atmsw_table_t *atmsw_create_table(char *name)
-{
-   atmsw_table_t *t;
-
-   /* Allocate a new switch structure */
-   if (!(t = malloc(sizeof(*t))))
-      return NULL;
-
-   memset(t,0,sizeof(*t));
-   pthread_mutex_init(&t->lock,NULL);
-   mp_create_fixed_pool(&t->mp,"ATM Switch");
-
-   if (!(t->name = mp_strdup(&t->mp,name)))
-      goto err_name;
-
-   /* Record this object in registry */
-   if (registry_add(t->name,OBJ_TYPE_ATMSW,t) == -1) {
-      fprintf(stderr,"atmsw_create_table: unable to create switch '%s'\n",
-              name);
-      goto err_reg;
-   }
-
-   return t;
-
- err_reg:
- err_name:
-   mp_free_pool(&t->mp);
-   free(t);
-   return NULL;
-}
-
 /* Free resources used by a VPC */
 static void atmsw_release_vpc(atmsw_vp_conn_t *swc)
 {

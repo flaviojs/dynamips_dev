@@ -411,3 +411,71 @@ pub unsafe extern "C" fn atmsw_delete_vpc(t: *mut atmsw_table_t, nio_input: *mut
     ATMSW_UNLOCK(t);
     -1
 }
+
+/// Free resources used by a VCC
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn atmsw_release_vcc(swc: *mut atmsw_vc_conn_t) {
+    if !swc.is_null() {
+        // release input NIO
+        if !(*swc).input.is_null() {
+            netio_rxl_remove((*swc).input);
+            netio_release((*(*swc).input).name);
+        }
+
+        // release output NIO
+        if !(*swc).output.is_null() {
+            netio_release((*(*swc).output).name);
+        }
+    }
+}
+
+/// Create a VC switch connection
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_create_vcc(t: *mut atmsw_table_t, input: *mut c_char, vpi_in: u_int, vci_in: u_int, output: *mut c_char, vpi_out: u_int, vci_out: u_int) -> c_int {
+    ATMSW_LOCK(t);
+
+    // Allocate a new switch connection
+    let swc: *mut atmsw_vc_conn_t = mp_alloc(addr_of_mut!((*t).mp), size_of::<atmsw_vc_conn_t>()).cast::<_>();
+    if swc.is_null() {
+        ATMSW_UNLOCK(t);
+        return -1;
+    }
+
+    (*swc).input = netio_acquire(input);
+    (*swc).output = netio_acquire(output);
+    (*swc).vpi_in = vpi_in;
+    (*swc).vci_in = vci_in;
+    (*swc).vpi_out = vpi_out;
+    (*swc).vci_out = vci_out;
+
+    // Ensure that there is not already VP switching
+    if !atmsw_vp_lookup(t, (*swc).input, vpi_in).is_null() {
+        libc::fprintf(c_stderr(), cstr!("atmsw_create_vcc: VP switching already exists for VPI=%u\n"), vpi_in);
+        ATMSW_UNLOCK(t);
+        atmsw_release_vcc(swc);
+        mp_free(swc.cast::<_>());
+        return -1;
+    }
+
+    // Check these NIOs are valid and the input VPI does not exists
+    if (*swc).input.is_null() || (*swc).output.is_null() || !atmsw_vc_lookup(t, (*swc).input, vpi_in, vci_in).is_null() {
+        ATMSW_UNLOCK(t);
+        atmsw_release_vcc(swc);
+        mp_free(swc.cast::<_>());
+        return -1;
+    }
+
+    // Add as a RX listener
+    if netio_rxl_add((*swc).input, Some(atmsw_recv_cell), t.cast::<_>(), null_mut()) == -1 {
+        ATMSW_UNLOCK(t);
+        atmsw_release_vcc(swc);
+        mp_free(swc.cast::<_>());
+        return -1;
+    }
+
+    let hbucket: u_int = atmsw_vcc_hash(vpi_in, vci_in);
+    (*swc).next = (*t).vc_table[hbucket as usize];
+    (*t).vc_table[hbucket as usize] = swc;
+    ATMSW_UNLOCK(t);
+    0
+}

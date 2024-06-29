@@ -24,24 +24,6 @@
 #include "rust_dynamips_c.h"
 #include "atm.h"
 
-/* VP switching */
-void atmsw_vp_switch(atmsw_vp_conn_t *vpc,m_uint8_t *cell)
-{
-   m_uint32_t atm_hdr;
-
-   /* rewrite the atm header with new vpi */
-   atm_hdr =  m_ntoh32(cell);
-   atm_hdr &= ~ATM_HDR_VPI_MASK;
-   atm_hdr |= vpc->vpi_out << ATM_HDR_VPI_SHIFT;
-   m_hton32(cell,atm_hdr);
-
-   /* recompute HEC field */
-   atm_insert_hec(cell);
-
-   /* update the statistics counter */
-   vpc->cell_cnt++;
-}
-
 /* VC switching */
 void atmsw_vc_switch(atmsw_vc_conn_t *vcc,m_uint8_t *cell)
 {

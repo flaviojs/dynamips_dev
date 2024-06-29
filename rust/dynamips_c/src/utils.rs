@@ -580,3 +580,21 @@ pub unsafe extern "C" fn m_strsplit(mut str_: *mut c_char, delim: c_char, array:
 
     pos
 }
+
+/// Get a byte-swapped 32-bit value on a non-aligned area
+#[no_mangle]
+#[inline]
+pub unsafe extern "C" fn m_ntoh32(ptr: *mut m_uint8_t) -> m_uint32_t {
+    let val: m_uint32_t = ((*ptr.add(0) as m_uint32_t) << 24) | ((*ptr.add(1) as m_uint32_t) << 16) | ((*ptr.add(2) as m_uint32_t) << 8) | *ptr.add(3) as m_uint32_t;
+    val
+}
+
+/// Set a byte-swapped 32-bit value on a non-aligned area
+#[no_mangle]
+#[inline]
+pub unsafe extern "C" fn m_hton32(ptr: *mut m_uint8_t, val: m_uint32_t) {
+    *ptr.add(0) = (val >> 24) as m_uint8_t;
+    *ptr.add(1) = (val >> 16) as m_uint8_t;
+    *ptr.add(2) = (val >> 8) as m_uint8_t;
+    *ptr.add(3) = val as m_uint8_t;
+}

@@ -9,6 +9,7 @@ use crate::dynamips_common::*;
 use crate::mempool::*;
 use crate::net_io::*;
 use crate::prelude::*;
+use crate::utils::*;
 
 pub type atmsw_vp_conn_t = atmsw_vp_conn;
 pub type atmsw_vc_conn_t = atmsw_vc_conn;
@@ -176,4 +177,22 @@ pub unsafe extern "C" fn atmsw_vc_lookup(t: *mut atmsw_table_t, input: *mut neti
     }
 
     null_mut()
+}
+
+/// VP switching
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_vp_switch(vpc: *mut atmsw_vp_conn_t, cell: *mut m_uint8_t) {
+    let mut atm_hdr: m_uint32_t;
+
+    // rewrite the atm header with new vpi
+    atm_hdr = m_ntoh32(cell);
+    atm_hdr &= !ATM_HDR_VPI_MASK;
+    atm_hdr |= (*vpc).vpi_out << ATM_HDR_VPI_SHIFT;
+    m_hton32(cell, atm_hdr);
+
+    // recompute HEC field
+    atm_insert_hec(cell);
+
+    // update the statistics counter
+    (*vpc).cell_cnt += 1;
 }

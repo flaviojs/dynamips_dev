@@ -164,3 +164,13 @@ pub unsafe extern "C" fn netio_bridge_save_config(t: *mut netio_bridge_t, fd: *m
 
     libc::fprintf(fd, cstr!("\n"));
 }
+
+/// Save configurations of all NIO bridges
+unsafe extern "C" fn netio_bridge_reg_save_config(entry: *mut registry_entry_t, opt: *mut c_void, _err: *mut c_int) {
+    netio_bridge_save_config((*entry).data.cast::<netio_bridge_t>(), opt.cast::<libc::FILE>());
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_save_config_all(fd: *mut libc::FILE) {
+    registry_foreach_type(OBJ_TYPE_NIO_BRIDGE, Some(netio_bridge_reg_save_config), fd.cast::<_>(), null_mut());
+}

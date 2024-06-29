@@ -86,6 +86,13 @@ pub static mut atm_rfc1483b_header: [m_uint8_t; ATM_RFC1483B_HLEN] = [0xaa, 0xaa
 #[no_mangle]
 pub extern "C" fn _export_atm(_: *mut atmsw_vp_conn_t, _: *mut atmsw_vc_conn_t, _: *mut atmsw_table_t) {}
 
+unsafe fn ATMSW_LOCK(t: *mut atmsw_table_t) {
+    libc::pthread_mutex_lock(addr_of_mut!((*t).lock));
+}
+unsafe fn ATMSW_UNLOCK(t: *mut atmsw_table_t) {
+    libc::pthread_mutex_unlock(addr_of_mut!((*t).lock));
+}
+
 // ******************************************************************
 pub const HEC_GENERATOR: c_int = 0x107; //  x^8 + x^2 +  x  + 1
 pub const COSET_LEADER: m_uint8_t = 0x055; // x^6 + x^4 + x^2 + 1
@@ -294,4 +301,76 @@ pub unsafe extern "C" fn atmsw_create_table(name: *mut c_char) -> *mut atmsw_tab
     }
 
     t
+}
+
+/// Receive an ATM cell
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn atmsw_recv_cell(nio: *mut netio_desc_t, atm_cell: *mut u_char, cell_len: ssize_t, t: *mut c_void, _: *mut c_void) -> c_int {
+    let t: *mut atmsw_table_t = t.cast::<_>();
+
+    if cell_len != ATM_CELL_SIZE as ssize_t {
+        return -1;
+    }
+
+    ATMSW_LOCK(t);
+    let res: c_int = atmsw_handle_cell(t, nio, atm_cell) as c_int;
+    ATMSW_UNLOCK(t);
+    res
+}
+
+/// Free resources used by a VPC
+#[no_mangle] // TODO private
+pub unsafe extern "C" fn atmsw_release_vpc(swc: *mut atmsw_vp_conn_t) {
+    if !swc.is_null() {
+        // release input NIO
+        if !(*swc).input.is_null() {
+            netio_rxl_remove((*swc).input);
+            netio_release((*(*swc).input).name);
+        }
+
+        // release output NIO
+        if !(*swc).output.is_null() {
+            netio_release((*(*swc).output).name);
+        }
+    }
+}
+
+/// Create a VP switch connection
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_create_vpc(t: *mut atmsw_table_t, nio_input: *mut c_char, vpi_in: u_int, nio_output: *mut c_char, vpi_out: u_int) -> c_int {
+    ATMSW_LOCK(t);
+
+    // Allocate a new switch connection
+    let swc: *mut atmsw_vp_conn_t = mp_alloc(addr_of_mut!((*t).mp), size_of::<atmsw_vp_conn_t>()).cast::<_>();
+    if swc.is_null() {
+        ATMSW_UNLOCK(t);
+        return -1;
+    }
+
+    (*swc).input = netio_acquire(nio_input);
+    (*swc).output = netio_acquire(nio_output);
+    (*swc).vpi_in = vpi_in;
+    (*swc).vpi_out = vpi_out;
+
+    // Check these NIOs are valid and the input VPI does not exists
+    if (*swc).input.is_null() || (*swc).output.is_null() || !atmsw_vp_lookup(t, (*swc).input, vpi_in).is_null() {
+        ATMSW_UNLOCK(t);
+        atmsw_release_vpc(swc);
+        mp_free(swc.cast::<_>());
+        return -1;
+    }
+
+    // Add as a RX listener
+    if netio_rxl_add((*swc).input, Some(atmsw_recv_cell), t.cast::<_>(), null_mut()) == -1 {
+        ATMSW_UNLOCK(t);
+        atmsw_release_vpc(swc.cast::<_>());
+        mp_free(swc.cast::<_>());
+        return -1;
+    }
+
+    let hbucket: u_int = atmsw_vpc_hash(vpi_in);
+    (*swc).next = (*t).vp_table[hbucket as usize];
+    (*t).vp_table[hbucket as usize] = swc;
+    ATMSW_UNLOCK(t);
+    0
 }

@@ -216,3 +216,38 @@ pub unsafe extern "C" fn atmsw_vc_switch(vcc: *mut atmsw_vc_conn_t, cell: *mut m
     // update the statistics counter
     (*vcc).cell_cnt += 1;
 }
+
+/// Handle an ATM cell
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_handle_cell(t: *mut atmsw_table_t, input: *mut netio_desc_t, cell: *mut m_uint8_t) -> ssize_t {
+    let mut output: *mut netio_desc_t = null_mut();
+
+    // Extract VPI/VCI information
+    let atm_hdr: m_uint32_t = m_ntoh32(cell);
+
+    let vpi: m_uint32_t = (atm_hdr & ATM_HDR_VPI_MASK) >> ATM_HDR_VPI_SHIFT;
+    let vci: m_uint32_t = (atm_hdr & ATM_HDR_VCI_MASK) >> ATM_HDR_VCI_SHIFT;
+
+    // VP switching */
+    let vpc: *mut atmsw_vp_conn_t = atmsw_vp_lookup(t, input, vpi);
+    if !vpc.is_null() {
+        atmsw_vp_switch(vpc, cell);
+        output = (*vpc).output;
+    } else {
+        // VC switching
+        let vcc: *mut atmsw_vc_conn_t = atmsw_vc_lookup(t, input, vpi, vci);
+        if !vcc.is_null() {
+            atmsw_vc_switch(vcc, cell);
+            output = (*vcc).output;
+        }
+    }
+
+    let len: ssize_t = netio_send(output, cell.cast::<_>(), ATM_CELL_SIZE);
+
+    if len != ATM_CELL_SIZE as ssize_t {
+        (*t).cell_drop += 1;
+        return -1;
+    }
+
+    0
+}

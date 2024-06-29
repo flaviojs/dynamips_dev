@@ -14,15 +14,6 @@
 
 #include "utils.h"
 
-#define NETIO_BRIDGE_MAX_NIO 32
-
-typedef struct netio_bridge netio_bridge_t;
-struct netio_bridge {
-   char *name;
-   pthread_mutex_t lock;
-   netio_desc_t *nio[NETIO_BRIDGE_MAX_NIO];
-};
-
 #define NETIO_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)
 #define NETIO_BRIDGE_UNLOCK(t) pthread_mutex_unlock(&(t)->lock)
 

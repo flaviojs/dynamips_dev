@@ -196,3 +196,23 @@ pub unsafe extern "C" fn atmsw_vp_switch(vpc: *mut atmsw_vp_conn_t, cell: *mut m
     // update the statistics counter
     (*vpc).cell_cnt += 1;
 }
+
+/// VC switching
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_vc_switch(vcc: *mut atmsw_vc_conn_t, cell: *mut m_uint8_t) {
+    let mut atm_hdr: m_uint32_t;
+
+    // rewrite the atm header with new vpi/vci
+    atm_hdr = m_ntoh32(cell);
+
+    atm_hdr &= !(ATM_HDR_VPI_MASK | ATM_HDR_VCI_MASK);
+    atm_hdr |= (*vcc).vpi_out << ATM_HDR_VPI_SHIFT;
+    atm_hdr |= (*vcc).vci_out << ATM_HDR_VCI_SHIFT;
+    m_hton32(cell, atm_hdr);
+
+    // recompute HEC field
+    atm_insert_hec(cell);
+
+    // update the statistics counter
+    (*vcc).cell_cnt += 1;
+}

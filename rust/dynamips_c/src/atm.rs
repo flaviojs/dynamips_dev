@@ -83,3 +83,51 @@ pub static mut atm_rfc1483b_header: [m_uint8_t; ATM_RFC1483B_HLEN] = [0xaa, 0xaa
 
 #[no_mangle]
 pub extern "C" fn _export_atm(_: *mut atmsw_vp_conn_t, _: *mut atmsw_vc_conn_t, _: *mut atmsw_table_t) {}
+
+// ******************************************************************
+pub const HEC_GENERATOR: c_int = 0x107; //  x^8 + x^2 +  x  + 1
+pub const COSET_LEADER: m_uint8_t = 0x055; // x^6 + x^4 + x^2 + 1
+
+static mut hec_syndrome_table: [m_uint8_t; 256] = [0; 256];
+
+/// Generate a table of CRC-8 syndromes for all possible input bytes
+unsafe fn gen_syndrome_table() {
+    for i in 0..=255 {
+        let mut syndrome: c_int = i;
+
+        for _ in 0..8 {
+            if (syndrome & 0x80) != 0 {
+                syndrome = (syndrome << 1) ^ HEC_GENERATOR;
+            } else {
+                syndrome <<= 1;
+            }
+        }
+        hec_syndrome_table[i as usize] = syndrome as m_uint8_t;
+    }
+}
+
+/// Compute HEC field for ATM header */
+#[no_mangle]
+pub unsafe extern "C" fn atm_compute_hec(cell_header: *mut m_uint8_t) -> m_uint8_t {
+    let mut hec_accum: m_uint8_t = 0;
+
+    // calculate CRC-8 remainder over first four bytes of cell header.
+    // exclusive-or with coset leader & insert into fifth header byte.
+    for i in 0..4 {
+        hec_accum = hec_syndrome_table[(hec_accum ^ *cell_header.add(i)) as usize];
+    }
+
+    hec_accum ^ COSET_LEADER
+}
+
+/// Insert HEC field into an ATM header
+#[no_mangle]
+pub unsafe extern "C" fn atm_insert_hec(cell_header: *mut m_uint8_t) {
+    *cell_header.add(4) = atm_compute_hec(cell_header);
+}
+
+/// Initialize ATM code (for HEC checksums)
+#[no_mangle]
+pub unsafe extern "C" fn atm_init() {
+    gen_syndrome_table();
+}

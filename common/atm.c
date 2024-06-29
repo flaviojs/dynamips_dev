@@ -24,58 +24,6 @@
 #include "rust_dynamips_c.h"
 #include "atm.h"
 
-/********************************************************************/
-#define HEC_GENERATOR   0x107               /* x^8 + x^2 +  x  + 1  */
-#define COSET_LEADER    0x055               /* x^6 + x^4 + x^2 + 1  */
-
-m_uint8_t hec_syndrome_table[256];
-
-/* Generate a table of CRC-8 syndromes for all possible input bytes */
-static void gen_syndrome_table(void)
-{
-   int i,j,syndrome;
-
-   for(i=0;i<256;i++) {
-      syndrome = i;
-      
-      for(j=0;j<8;j++) {
-         if (syndrome & 0x80)
-            syndrome = (syndrome << 1) ^ HEC_GENERATOR;
-         else
-            syndrome = (syndrome << 1);
-      }
-      hec_syndrome_table[i] = (unsigned char)syndrome;
-   }
-}
-
-/* Compute HEC field for ATM header */
-m_uint8_t atm_compute_hec(m_uint8_t *cell_header)
-{
-   register m_uint8_t hec_accum = 0;
-   register int i;
-
-   /* 
-    * calculate CRC-8 remainder over first four bytes of cell header.
-    * exclusive-or with coset leader & insert into fifth header byte.
-    */
-   for(i=0;i<4;i++)
-      hec_accum = hec_syndrome_table[hec_accum ^ cell_header[i]];
-   
-   return(hec_accum ^ COSET_LEADER);
-}
-
-/* Insert HEC field into an ATM header */
-void atm_insert_hec(m_uint8_t *cell_header)
-{
-   cell_header[4] = atm_compute_hec(cell_header);
-}
-
-/* Initialize ATM code (for HEC checksums) */
-void atm_init(void)
-{
-   gen_syndrome_table();
-}
-
 /* VPC hash function */
 static inline u_int atmsw_vpc_hash(u_int vpi)
 {

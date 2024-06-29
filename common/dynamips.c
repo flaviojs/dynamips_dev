@@ -45,7 +45,6 @@
 #include "ppc32_vmtest.h"
 #include "plugin.h"
 #include "hypervisor.h"
-#include "net_io_bridge.h"
 #include "atm.h"
 #include "atm_bridge.h"
 #include "frame_relay.h"

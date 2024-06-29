@@ -50,3 +50,9 @@ pub unsafe extern "C" fn netio_bridge_create(name: *mut c_char) -> *mut netio_br
 pub unsafe extern "C" fn netio_bridge_acquire(name: *mut c_char) -> *mut netio_desc_t {
     registry_find(name, OBJ_TYPE_NIO_BRIDGE).cast::<_>()
 }
+
+/// Release a NetIO bridge (decrement reference count)
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_release(name: *mut c_char) -> c_int {
+    registry_unref(name, OBJ_TYPE_NIO_BRIDGE)
+}

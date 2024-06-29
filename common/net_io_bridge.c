@@ -37,12 +37,6 @@ static int netio_bridge_recv_pkt(netio_desc_t *nio,u_char *pkt,ssize_t pkt_len,
    return(0);
 }
 
-/* Release a NetIO bridge (decrement reference count) */
-int netio_bridge_release(char *name)
-{
-   return(registry_unref(name,OBJ_TYPE_NIO_BRIDGE));
-}
-
 /* Add a NetIO descriptor to a virtual bridge */
 int netio_bridge_add_netio(netio_bridge_t *t,char *nio_name)
 {

@@ -21,19 +21,6 @@
 
 #define PKT_MAX_SIZE 2048
 
-/* Save the configuration of a bridge */
-void netio_bridge_save_config(netio_bridge_t *t,FILE *fd)
-{
-   int i;
-   
-   fprintf(fd,"nio_bridge create %s\n",t->name);
-
-   for(i=0;i<NETIO_BRIDGE_MAX_NIO;i++)
-      fprintf(fd,"nio_bridge add_nio %s %s\n",t->name,t->nio[i]->name);
-
-   fprintf(fd,"\n");
-}
-
 /* Save configurations of all NIO bridges */
 static void netio_bridge_reg_save_config(registry_entry_t *entry,
                                              void *opt,int *err)

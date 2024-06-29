@@ -151,3 +151,16 @@ pub unsafe extern "C" fn netio_bridge_remove_netio(t: *mut netio_bridge_t, nio_n
     NETIO_BRIDGE_UNLOCK(t);
     0
 }
+
+/// Save the configuration of a bridge
+#[no_mangle]
+pub unsafe extern "C" fn netio_bridge_save_config(t: *mut netio_bridge_t, fd: *mut libc::FILE) {
+    libc::fprintf(fd, cstr!("nio_bridge create %s\n"), (*t).name);
+
+    for i in 0..NETIO_BRIDGE_MAX_NIO {
+        // FIXME does not check if nio is null
+        libc::fprintf(fd, cstr!("nio_bridge add_nio %s %s\n"), (*t).name, (*(*t).nio[i]).name);
+    }
+
+    libc::fprintf(fd, cstr!("\n"));
+}

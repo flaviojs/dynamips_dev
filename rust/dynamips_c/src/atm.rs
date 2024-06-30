@@ -511,3 +511,44 @@ pub unsafe extern "C" fn atmsw_delete_vcc(t: *mut atmsw_table_t, nio_input: *mut
     ATMSW_UNLOCK(t);
     -1
 }
+
+/// Free resources used by an ATM switch
+unsafe extern "C" fn atmsw_free(data: *mut c_void, _arg: *mut c_void) -> c_int {
+    let t: *mut atmsw_table_t = data.cast::<_>();
+    let mut vp: *mut atmsw_vp_conn_t;
+    let mut vc: *mut atmsw_vc_conn_t;
+
+    // Remove all VPs
+    for i in 0..ATMSW_VP_HASH_SIZE {
+        vp = (*t).vp_table[i];
+        while !vp.is_null() {
+            atmsw_release_vpc(vp);
+            vp = (*vp).next;
+        }
+    }
+
+    // Remove all VCs
+    for i in 0..ATMSW_VC_HASH_SIZE {
+        vc = (*t).vc_table[i];
+        while !vc.is_null() {
+            atmsw_release_vcc(vc);
+            vc = (*vc).next;
+        }
+    }
+
+    mp_free_pool(addr_of_mut!((*t).mp));
+    libc::free(t.cast::<_>());
+    TRUE
+}
+
+/// Delete an ATM switch
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_delete(name: *mut c_char) -> c_int {
+    registry_delete_if_unused(name, OBJ_TYPE_ATMSW, Some(atmsw_free), null_mut())
+}
+
+/// Delete all ATM switches
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_delete_all() -> c_int {
+    registry_delete_type(OBJ_TYPE_ATMSW, Some(atmsw_free), null_mut())
+}

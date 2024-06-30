@@ -24,41 +24,6 @@
 #include "rust_dynamips_c.h"
 #include "atm.h"
 
-/* Free resources used by an ATM switch */
-static int atmsw_free(void *data,void *arg)
-{
-   atmsw_table_t *t = data;
-   atmsw_vp_conn_t *vp;
-   atmsw_vc_conn_t *vc;
-   int i;
-
-   /* Remove all VPs */
-   for(i=0;i<ATMSW_VP_HASH_SIZE;i++)
-      for(vp=t->vp_table[i];vp;vp=vp->next)
-         atmsw_release_vpc(vp);
-
-   /* Remove all VCs */
-   for(i=0;i<ATMSW_VC_HASH_SIZE;i++)
-      for(vc=t->vc_table[i];vc;vc=vc->next)
-         atmsw_release_vcc(vc);
-
-   mp_free_pool(&t->mp);
-   free(t);
-   return(TRUE);
-}
-
-/* Delete an ATM switch */
-int atmsw_delete(char *name)
-{
-   return(registry_delete_if_unused(name,OBJ_TYPE_ATMSW,atmsw_free,NULL));
-}
-
-/* Delete all ATM switches */
-int atmsw_delete_all(void)
-{
-   return(registry_delete_type(OBJ_TYPE_ATMSW,atmsw_free,NULL));
-}
-
 /* Save the configuration of an ATM switch */
 void atmsw_save_config(atmsw_table_t *t,FILE *fd)
 {

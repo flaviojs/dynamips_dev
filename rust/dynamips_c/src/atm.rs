@@ -552,3 +552,44 @@ pub unsafe extern "C" fn atmsw_delete(name: *mut c_char) -> c_int {
 pub unsafe extern "C" fn atmsw_delete_all() -> c_int {
     registry_delete_type(OBJ_TYPE_ATMSW, Some(atmsw_free), null_mut())
 }
+
+/// Save the configuration of an ATM switch
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_save_config(t: *mut atmsw_table_t, fd: *mut libc::FILE) {
+    let mut vp: *mut atmsw_vp_conn_t;
+    let mut vc: *mut atmsw_vc_conn_t;
+
+    libc::fprintf(fd, cstr!("atmsw create %s\n"), (*t).name);
+
+    ATMSW_LOCK(t);
+
+    for i in 0..ATMSW_VP_HASH_SIZE {
+        vp = (*t).vp_table[i];
+        while !vp.is_null() {
+            libc::fprintf(fd, cstr!("atmsw create_vpc %s %s %u %s %u\n"), (*t).name, (*(*vp).input).name, (*vp).vpi_in, (*(*vp).output).name, (*vp).vpi_out);
+            vp = (*vp).next;
+        }
+    }
+
+    for i in 0..ATMSW_VC_HASH_SIZE {
+        vc = (*t).vc_table[i];
+        while !vc.is_null() {
+            libc::fprintf(fd, cstr!("atmsw create_vcc %s %s %u %u %s %u %u\n"), (*t).name, (*(*vc).input).name, (*vc).vpi_in, (*vc).vci_in, (*(*vc).output).name, (*vc).vpi_out, (*vc).vci_out);
+            vc = (*vc).next;
+        }
+    }
+
+    ATMSW_UNLOCK(t);
+
+    libc::fprintf(fd, cstr!("\n"));
+}
+
+/// Save configurations of all ATM switches
+unsafe extern "C" fn atmsw_reg_save_config(entry: *mut registry_entry_t, opt: *mut c_void, _err: *mut c_int) {
+    atmsw_save_config((*entry).data.cast::<_>(), opt.cast::<_>());
+}
+
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_save_config_all(fd: *mut libc::FILE) {
+    registry_foreach_type(OBJ_TYPE_ATMSW, Some(atmsw_reg_save_config), fd.cast::<_>(), null_mut());
+}

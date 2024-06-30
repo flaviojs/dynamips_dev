@@ -24,49 +24,6 @@
 #include "rust_dynamips_c.h"
 #include "atm.h"
 
-/* Save the configuration of an ATM switch */
-void atmsw_save_config(atmsw_table_t *t,FILE *fd)
-{
-   atmsw_vp_conn_t *vp;
-   atmsw_vc_conn_t *vc;
-   int i;
-
-   fprintf(fd,"atmsw create %s\n",t->name);
-
-   ATMSW_LOCK(t);
-
-   for(i=0;i<ATMSW_VP_HASH_SIZE;i++) {
-      for(vp=t->vp_table[i];vp;vp=vp->next) {
-         fprintf(fd,"atmsw create_vpc %s %s %u %s %u\n",
-                 t->name,vp->input->name,vp->vpi_in,
-                 vp->output->name,vp->vpi_out);
-      }
-   }
-
-   for(i=0;i<ATMSW_VC_HASH_SIZE;i++) {
-      for(vc=t->vc_table[i];vc;vc=vc->next) {
-         fprintf(fd,"atmsw create_vcc %s %s %u %u %s %u %u\n",
-                 t->name,vc->input->name,vc->vpi_in,vc->vci_in,
-                 vc->output->name,vc->vpi_out,vc->vci_out);
-      }
-   }
-   
-   ATMSW_UNLOCK(t);
-
-   fprintf(fd,"\n");
-}
-
-/* Save configurations of all ATM switches */
-static void atmsw_reg_save_config(registry_entry_t *entry,void *opt,int *err)
-{
-   atmsw_save_config((atmsw_table_t *)entry->data,(FILE *)opt);
-}
-
-void atmsw_save_config_all(FILE *fd)
-{
-   registry_foreach_type(OBJ_TYPE_ATMSW,atmsw_reg_save_config,fd,NULL);
-}
-
 /* Create a new interface */
 int atmsw_cfg_create_if(atmsw_table_t *t,char **tokens,int count)
 {

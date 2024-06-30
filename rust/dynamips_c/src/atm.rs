@@ -593,3 +593,90 @@ unsafe extern "C" fn atmsw_reg_save_config(entry: *mut registry_entry_t, opt: *m
 pub unsafe extern "C" fn atmsw_save_config_all(fd: *mut libc::FILE) {
     registry_foreach_type(OBJ_TYPE_ATMSW, Some(atmsw_reg_save_config), fd.cast::<_>(), null_mut());
 }
+
+/// Create a new interface
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_cfg_create_if(_t: *mut atmsw_table_t, tokens: *mut *mut c_char, count: c_int) -> c_int {
+    let mut nio: *mut netio_desc_t = null_mut();
+
+    // at least: IF, interface name, NetIO type
+    if count < 3 {
+        libc::fprintf(c_stderr(), cstr!("atmsw_cfg_create_if: invalid interface description\n"));
+        return -1;
+    }
+
+    let nio_type: c_int = netio_get_type(*tokens.add(2));
+    match nio_type as u_int {
+        NETIO_TYPE_UNIX => 'block: {
+            if count != 5 {
+                libc::fprintf(c_stderr(), cstr!("ATMSW: invalid number of arguments for UNIX NIO '%s'\n"), *tokens.add(1));
+                break 'block;
+            }
+
+            nio = netio_desc_create_unix(*tokens.add(1), *tokens.add(3), *tokens.add(4));
+        }
+
+        NETIO_TYPE_UDP => 'block: {
+            if count != 6 {
+                libc::fprintf(c_stderr(), cstr!("ATMSW: invalid number of arguments for UDP NIO '%s'\n"), *tokens.add(1));
+                break 'block;
+            }
+
+            nio = netio_desc_create_udp(*tokens.add(1), libc::atoi(*tokens.add(3)), *tokens.add(4), libc::atoi(*tokens.add(5)));
+        }
+
+        NETIO_TYPE_TCP_CLI => 'block: {
+            if count != 5 {
+                libc::fprintf(c_stderr(), cstr!("ATMSW: invalid number of arguments for TCP CLI NIO '%s'\n"), *tokens.add(1));
+                break 'block;
+            }
+
+            nio = netio_desc_create_tcp_cli(*tokens.add(1), *tokens.add(3), *tokens.add(4));
+        }
+
+        NETIO_TYPE_TCP_SER => 'block: {
+            if count != 4 {
+                libc::fprintf(c_stderr(), cstr!("ATMSW: invalid number of arguments for TCP SER NIO '%s'\n"), *tokens.add(1));
+                break 'block;
+            }
+
+            nio = netio_desc_create_tcp_ser(*tokens.add(1), *tokens.add(3));
+        }
+
+        _ => {
+            libc::fprintf(c_stderr(), cstr!("ATMSW: unknown/invalid NETIO type '%s'\n"), *tokens.add(2));
+        }
+    }
+
+    if nio.is_null() {
+        libc::fprintf(c_stderr(), cstr!("ATMSW: unable to create NETIO descriptor of interface %s\n"), *tokens.add(1));
+        return -1;
+    }
+
+    netio_release((*nio).name);
+    0
+}
+
+/// Create a new Virtual Path Connection
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_cfg_create_vpc(t: *mut atmsw_table_t, tokens: *mut *mut c_char, count: c_int) -> c_int {
+    // 5 parameters: "VP", InputIF, InVPI, OutputIF, OutVPI
+    if count != 5 {
+        libc::fprintf(c_stderr(), cstr!("ATMSW: invalid VPC descriptor.\n"));
+        return -1;
+    }
+
+    atmsw_create_vpc(t, *tokens.add(1), libc::atoi(*tokens.add(2)) as u_int, *tokens.add(3), libc::atoi(*tokens.add(4)) as u_int)
+}
+
+/// Create a new Virtual Channel Connection
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_cfg_create_vcc(t: *mut atmsw_table_t, tokens: *mut *mut c_char, count: c_int) -> c_int {
+    // 7 parameters: "VP", InputIF, InVPI/VCI, OutputIF, OutVPI/VCI
+    if count != 7 {
+        libc::fprintf(c_stderr(), cstr!("ATMSW: invalid VCC descriptor.\n"));
+        return -1;
+    }
+
+    atmsw_create_vcc(t, *tokens.add(1), libc::atoi(*tokens.add(2)) as u_int, libc::atoi(*tokens.add(3)) as u_int, *tokens.add(4), libc::atoi(*tokens.add(5)) as u_int, libc::atoi(*tokens.add(6)) as u_int)
+}

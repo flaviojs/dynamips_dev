@@ -12,7 +12,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "atm_vsar.h"
 
 typedef struct atm_bridge atm_bridge_t;
 struct atm_bridge {

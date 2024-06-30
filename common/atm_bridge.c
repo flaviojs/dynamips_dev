@@ -17,7 +17,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "atm_vsar.h"
 #include "atm_bridge.h"
 
 #define ATM_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)

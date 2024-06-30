@@ -24,3 +24,9 @@ pub struct atm_bridge {
 pub unsafe extern "C" fn atm_bridge_acquire(name: *mut c_char) -> *mut atm_bridge_t {
     registry_find(name, OBJ_TYPE_ATM_BRIDGE).cast::<_>()
 }
+
+/// Release an ATM switch (decrement reference count)
+#[no_mangle]
+pub unsafe extern "C" fn atm_bridge_release(name: *mut c_char) -> c_int {
+    registry_unref(name, OBJ_TYPE_ATM_BRIDGE)
+}

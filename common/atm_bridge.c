@@ -22,12 +22,6 @@
 #define ATM_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)
 #define ATM_BRIDGE_UNLOCK(t) pthread_mutex_unlock(&(t)->lock)
 
-/* Release an ATM switch (decrement reference count) */
-int atm_bridge_release(char *name)
-{
-   return(registry_unref(name,OBJ_TYPE_ATM_BRIDGE));
-}
-
 /* Receive an ATM cell */
 static int atm_bridge_recv_cell(netio_desc_t *nio,
                                 u_char *atm_cell,ssize_t cell_len,

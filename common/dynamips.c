@@ -44,7 +44,6 @@
 #include "plugin.h"
 #include "rust_dynamips_c.h"
 #include "hypervisor.h"
-#include "atm_bridge.h"
 #include "frame_relay.h"
 #include "eth_switch.h"
 #ifdef GEN_ETH

@@ -31,7 +31,6 @@
 #include "device.h"
 #include "dev_c7200.h"
 #include "utils.h"
-#include "atm.h"
 #include "frame_relay.h"
 #ifdef GEN_ETH
 #include "gen_eth.h"

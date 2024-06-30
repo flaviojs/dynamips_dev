@@ -338,3 +338,21 @@ pub unsafe extern "C" fn atm_bridge_read_cfg_file(t: *mut atm_bridge_t, filename
     libc::fclose(fd);
     0
 }
+
+/// Start a virtual ATM bridge
+#[no_mangle]
+pub unsafe extern "C" fn atm_bridge_start(filename: *mut c_char) -> c_int {
+    let t: *mut atm_bridge_t = atm_bridge_create(cstr!("default"));
+    if t.is_null() {
+        libc::fprintf(c_stderr(), cstr!("ATM Bridge: unable to create virtual fabric table.\n"));
+        return -1;
+    }
+
+    if atm_bridge_read_cfg_file(t, filename) == -1 {
+        libc::fprintf(c_stderr(), cstr!("ATM Bridge: unable to parse configuration file.\n"));
+        return -1;
+    }
+
+    atm_bridge_release(cstr!("default"));
+    0
+}

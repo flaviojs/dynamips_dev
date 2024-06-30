@@ -4,7 +4,7 @@ include_guard = "RUST_DYNAMIPS_C_H"
 pragma_once = true
 documentation_style = "c++"
 style = "tag"
-sys_includes = ["pthread.h","setjmp.h","sys/un.h"]
+sys_includes = ["pthread.h","setjmp.h","sys/un.h","sys/uio.h"]
 after_includes = """
 
 // forward declarations (cbindgen places typedefs after the struct definitions, preventing you from using them in the structs)
@@ -21,6 +21,7 @@ typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;
 typedef struct insn_lookup insn_lookup_t;
+typedef struct iovec iovec;
 typedef struct jit_op jit_op_t;
 typedef struct jit_op_data jit_op_data_t;
 typedef struct memblock memblock_t;

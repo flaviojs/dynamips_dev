@@ -74,7 +74,6 @@ endif()
 set ( _files
    "${COMMON}/utils.c"
    "${COMMON}/plugin.c"
-   "${COMMON}/atm_bridge.c"
    "${COMMON}/frame_relay.c"
    "${COMMON}/eth_switch.c"
    "${COMMON}/dynamips.c"

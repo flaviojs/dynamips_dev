@@ -45,7 +45,6 @@
 #include "ppc32_vmtest.h"
 #include "plugin.h"
 #include "hypervisor.h"
-#include "atm_bridge.h"
 #include "frame_relay.h"
 #include "eth_switch.h"
 #ifdef GEN_ETH

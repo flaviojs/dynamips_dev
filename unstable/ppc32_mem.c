@@ -516,23 +516,6 @@ static void *ppc32_mem_ifetch(cpu_ppc_t *cpu,m_uint32_t vaddr)
                            PPC_MEMOP_IFETCH,4,MTS_READ,&data));
 }
 
-/* Set a BAT register */
-int ppc32_set_bat(cpu_ppc_t *cpu,struct ppc32_bat_prog *bp)
-{
-   struct ppc32_bat_reg *bat;
-
-   if ((bp->type != PPC32_IBAT_IDX) && (bp->type != PPC32_DBAT_IDX))
-      return(-1);
-
-   if (bp->index >= PPC32_BAT_NR)
-      return(-1);
-
-   bat = &cpu->bat[bp->type][bp->index];
-   bat->reg[0] = bp->hi;
-   bat->reg[1] = bp->lo;
-   return(0);
-}
-
 /* Load BAT registers from a BAT array */
 void ppc32_load_bat_array(cpu_ppc_t *cpu,struct ppc32_bat_prog *bp)
 {

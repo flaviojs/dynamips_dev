@@ -47,6 +47,7 @@ typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;
 typedef struct insn_exec_page insn_exec_page_t;
 typedef struct insn_lookup insn_lookup_t;
+typedef struct iovec iovec;
 typedef struct jit_op jit_op_t;
 typedef struct jit_op_data jit_op_data_t;
 typedef struct m_list m_list_t;

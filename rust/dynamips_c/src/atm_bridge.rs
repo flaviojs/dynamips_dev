@@ -283,3 +283,25 @@ pub unsafe extern "C" fn atm_bridge_cfg_setup(t: *mut atm_bridge_t, tokens: *mut
 
     atm_bridge_configure(t, *tokens.add(1), *tokens.add(2), libc::atoi(*tokens.add(3)) as u_int, libc::atoi(*tokens.add(4)) as u_int)
 }
+
+const ATM_BRIDGE_MAX_TOKENS: usize = 16;
+
+/// Handle an ATMSW configuration line
+#[no_mangle]
+pub unsafe extern "C" fn atm_bridge_handle_cfg_line(t: *mut atm_bridge_t, str_: *mut c_char) -> c_int {
+    let mut tokens: [*mut c_char; ATM_BRIDGE_MAX_TOKENS] = [null_mut(); ATM_BRIDGE_MAX_TOKENS];
+
+    let count: c_int = m_strsplit(str_, b':' as c_char, tokens.as_c_mut(), ATM_BRIDGE_MAX_TOKENS as c_int);
+    if count <= 1 {
+        return -1;
+    }
+
+    if libc::strcmp(tokens[0], cstr!("IF")) == 0 {
+        return atm_bridge_cfg_create_if(t, tokens.as_c_mut(), count);
+    } else if libc::strcmp(tokens[0], cstr!("BRIDGE")) == 0 {
+        return atm_bridge_cfg_setup(t, tokens.as_c_mut(), count);
+    }
+
+    libc::fprintf(c_stderr(), cstr!("ATM Bridge: Unknown statement \"%s\" (allowed: IF,BRIDGE)\n"), tokens[0]);
+    -1
+}

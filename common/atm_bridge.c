@@ -22,29 +22,6 @@
 #define ATM_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)
 #define ATM_BRIDGE_UNLOCK(t) pthread_mutex_unlock(&(t)->lock)
 
-#define ATM_BRIDGE_MAX_TOKENS  16
-
-/* Handle an ATMSW configuration line */
-int atm_bridge_handle_cfg_line(atm_bridge_t *t,char *str)
-{  
-   char *tokens[ATM_BRIDGE_MAX_TOKENS];
-   int count;
-
-   if ((count = m_strsplit(str,':',tokens,ATM_BRIDGE_MAX_TOKENS)) <= 1)
-      return(-1);
-
-   if (!strcmp(tokens[0],"IF"))
-      return(atm_bridge_cfg_create_if(t,tokens,count));
-   else if (!strcmp(tokens[0],"BRIDGE"))
-      return(atm_bridge_cfg_setup(t,tokens,count));
-
-   fprintf(stderr,"ATM Bridge: "
-           "Unknown statement \"%s\" (allowed: IF,BRIDGE)\n",
-           tokens[0]);
-   return(-1);
-}
-
-
 /* Read an ATM bridge configuration file */
 int atm_bridge_read_cfg_file(atm_bridge_t *t,char *filename)
 {

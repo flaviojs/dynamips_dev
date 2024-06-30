@@ -19,6 +19,7 @@ after_includes = """
 #define _attribute_aligned(n) __attribute__ ((aligned(n)))
 
 // cbindgen 0.27.0 assumes unknown types are opaque typedefs, but some C types need struct
+typedef struct iovec iovec;
 typedef struct sockaddr sockaddr;
 typedef struct sockaddr_un sockaddr_un;
 

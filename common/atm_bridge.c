@@ -22,19 +22,6 @@
 #define ATM_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)
 #define ATM_BRIDGE_UNLOCK(t) pthread_mutex_unlock(&(t)->lock)
 
-/* Bridge setup */
-int atm_bridge_cfg_setup(atm_bridge_t *t,char **tokens,int count)
-{
-   /* 5 parameters: "BRIDGE", Eth_IF, ATM_IF, VPI, VCI */
-   if (count != 5) {
-      fprintf(stderr,"ATM Bridge: invalid VPC descriptor.\n");
-      return(-1);
-   }
-
-   return(atm_bridge_configure(t,tokens[1],tokens[2],
-                               atoi(tokens[3]),atoi(tokens[4])));
-}
-
 #define ATM_BRIDGE_MAX_TOKENS  16
 
 /* Handle an ATMSW configuration line */

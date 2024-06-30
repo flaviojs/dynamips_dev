@@ -271,3 +271,15 @@ pub unsafe extern "C" fn atm_bridge_cfg_create_if(_t: *mut atm_bridge_t, tokens:
     netio_release((*nio).name);
     0
 }
+
+/// Bridge setup
+#[no_mangle]
+pub unsafe extern "C" fn atm_bridge_cfg_setup(t: *mut atm_bridge_t, tokens: *mut *mut c_char, count: c_int) -> c_int {
+    // 5 parameters: "BRIDGE", Eth_IF, ATM_IF, VPI, VCI
+    if count != 5 {
+        libc::fprintf(c_stderr(), cstr!("ATM Bridge: invalid VPC descriptor.\n"));
+        return -1;
+    }
+
+    atm_bridge_configure(t, *tokens.add(1), *tokens.add(2), libc::atoi(*tokens.add(3)) as u_int, libc::atoi(*tokens.add(4)) as u_int)
+}

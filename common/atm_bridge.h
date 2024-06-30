@@ -14,15 +14,6 @@
 
 #include "utils.h"
 
-typedef struct atm_bridge atm_bridge_t;
-struct atm_bridge {
-   char *name;
-   pthread_mutex_t lock;
-   netio_desc_t *eth_nio,*atm_nio;
-   u_int vpi,vci;
-   struct atm_reas_context arc;
-};
-
 /* Acquire a reference to an ATM bridge (increment reference count) */
 atm_bridge_t *atm_bridge_acquire(char *name);
 

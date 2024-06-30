@@ -86,9 +86,6 @@ pub const ATM_RFC1483B_HLEN: usize = 10;
 #[no_mangle]
 pub static mut atm_rfc1483b_header: [m_uint8_t; ATM_RFC1483B_HLEN] = [0xaa, 0xaa, 0x03, 0x00, 0x80, 0xc2, 0x00, 0x07, 0x00, 0x00];
 
-#[no_mangle]
-pub extern "C" fn _export_atm(_: *mut atmsw_vp_conn_t, _: *mut atmsw_vc_conn_t, _: *mut atmsw_table_t) {}
-
 unsafe fn ATMSW_LOCK(t: *mut atmsw_table_t) {
     libc::pthread_mutex_lock(addr_of_mut!((*t).lock));
 }
@@ -145,16 +142,14 @@ pub unsafe extern "C" fn atm_init() {
 }
 
 /// VPC hash function
-#[no_mangle] // TODO private
 #[inline]
-pub unsafe extern "C" fn atmsw_vpc_hash(vpi: u_int) -> u_int {
+unsafe fn atmsw_vpc_hash(vpi: u_int) -> u_int {
     (vpi ^ (vpi >> 8)) & (ATMSW_VP_HASH_SIZE as u_int - 1)
 }
 
 /// VCC hash function
-#[no_mangle] // TODO private
 #[inline]
-pub unsafe extern "C" fn atmsw_vcc_hash(vpi: u_int, vci: u_int) -> u_int {
+unsafe fn atmsw_vcc_hash(vpi: u_int, vci: u_int) -> u_int {
     (vpi ^ vci) & (ATMSW_VC_HASH_SIZE as u_int - 1)
 }
 
@@ -307,8 +302,7 @@ pub unsafe extern "C" fn atmsw_create_table(name: *mut c_char) -> *mut atmsw_tab
 }
 
 /// Receive an ATM cell
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn atmsw_recv_cell(nio: *mut netio_desc_t, atm_cell: *mut u_char, cell_len: ssize_t, t: *mut c_void, _: *mut c_void) -> c_int {
+unsafe extern "C" fn atmsw_recv_cell(nio: *mut netio_desc_t, atm_cell: *mut u_char, cell_len: ssize_t, t: *mut c_void, _: *mut c_void) -> c_int {
     let t: *mut atmsw_table_t = t.cast::<_>();
 
     if cell_len != ATM_CELL_SIZE as ssize_t {
@@ -322,8 +316,7 @@ pub unsafe extern "C" fn atmsw_recv_cell(nio: *mut netio_desc_t, atm_cell: *mut 
 }
 
 /// Free resources used by a VPC
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn atmsw_release_vpc(swc: *mut atmsw_vp_conn_t) {
+unsafe fn atmsw_release_vpc(swc: *mut atmsw_vp_conn_t) {
     if !swc.is_null() {
         // release input NIO
         if !(*swc).input.is_null() {
@@ -416,8 +409,7 @@ pub unsafe extern "C" fn atmsw_delete_vpc(t: *mut atmsw_table_t, nio_input: *mut
 }
 
 /// Free resources used by a VCC
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn atmsw_release_vcc(swc: *mut atmsw_vc_conn_t) {
+unsafe fn atmsw_release_vcc(swc: *mut atmsw_vc_conn_t) {
     if !swc.is_null() {
         // release input NIO
         if !(*swc).input.is_null() {

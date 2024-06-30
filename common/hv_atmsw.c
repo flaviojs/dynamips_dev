@@ -25,7 +25,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "atm.h"
 #include "hypervisor.h"
 
 /* Create a new ATMSW object */

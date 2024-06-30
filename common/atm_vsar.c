@@ -19,7 +19,6 @@
 #include <sys/uio.h>
 
 #include "utils.h"
-#include "atm.h"
 #include "atm_vsar.h"
 
 /* Segmentation Context */

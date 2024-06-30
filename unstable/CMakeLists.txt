@@ -43,7 +43,6 @@ add_definitions( "-DUSE_UNSTABLE" )
 
 set ( _files
    "${COMMON}/utils.c"
-   "${COMMON}/atm.c"
    "${COMMON}/atm_vsar.c"
    "${COMMON}/atm_bridge.c"
    "${COMMON}/frame_relay.c"

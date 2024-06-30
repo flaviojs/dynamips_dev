@@ -25,7 +25,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "atm.h"
 #include "frame_relay.h"
 #include "hypervisor.h"
 

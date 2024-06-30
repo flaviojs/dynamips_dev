@@ -30,7 +30,6 @@
 #include "dynamips.h"
 #include "dev_c7200.h"
 #include "utils.h"
-#include "atm.h"
 #include "frame_relay.h"
 #include "hypervisor.h"
 #include "get_cpu_time.h"

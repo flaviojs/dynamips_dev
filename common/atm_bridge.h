@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "atm.h"
 #include "atm_vsar.h"
 
 typedef struct atm_bridge atm_bridge_t;

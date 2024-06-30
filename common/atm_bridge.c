@@ -18,7 +18,6 @@
 #include <sys/types.h>
 
 #include "utils.h"
-#include "atm.h"
 #include "atm_vsar.h"
 #include "atm_bridge.h"
 

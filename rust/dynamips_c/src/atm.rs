@@ -680,3 +680,77 @@ pub unsafe extern "C" fn atmsw_cfg_create_vcc(t: *mut atmsw_table_t, tokens: *mu
 
     atmsw_create_vcc(t, *tokens.add(1), libc::atoi(*tokens.add(2)) as u_int, libc::atoi(*tokens.add(3)) as u_int, *tokens.add(4), libc::atoi(*tokens.add(5)) as u_int, libc::atoi(*tokens.add(6)) as u_int)
 }
+
+const ATMSW_MAX_TOKENS: usize = 16;
+
+/// Handle an ATMSW configuration line
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_handle_cfg_line(t: *mut atmsw_table_t, str_: *mut c_char) -> c_int {
+    let mut tokens: [*mut c_char; ATMSW_MAX_TOKENS] = [null_mut(); ATMSW_MAX_TOKENS];
+
+    let count: c_int = m_strsplit(str_, b':' as c_char, tokens.as_c_mut(), ATMSW_MAX_TOKENS as c_int);
+    if count <= 1 {
+        return -1;
+    }
+
+    if libc::strcmp(tokens[0], cstr!("IF")) == 0 {
+        return atmsw_cfg_create_if(t, tokens.as_c_mut(), count);
+    } else if libc::strcmp(tokens[0], cstr!("VP")) == 0 {
+        return atmsw_cfg_create_vpc(t, tokens.as_c_mut(), count);
+    } else if libc::strcmp(tokens[0], cstr!("VC")) == 0 {
+        return atmsw_cfg_create_vcc(t, tokens.as_c_mut(), count);
+    }
+
+    libc::fprintf(c_stderr(), cstr!("ATMSW: Unknown statement \"%s\" (allowed: IF,VP,VC)\n"), tokens[0]);
+    -1
+}
+
+/// Read an ATMSW configuration file
+pub unsafe extern "C" fn atmsw_read_cfg_file(t: *mut atmsw_table_t, filename: *mut c_char) -> c_int {
+    let mut buffer: [c_char; 1024] = [0; 1024];
+    let mut ptr: *mut c_char;
+
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("r"));
+    if fd.is_null() {
+        libc::perror(cstr!("fopen"));
+        return -1;
+    }
+
+    while libc::feof(fd) == 0 {
+        if libc::fgets(buffer.as_c_mut(), buffer.len() as c_int, fd).is_null() {
+            break;
+        }
+
+        // skip comments and end of line
+        ptr = libc::strpbrk(buffer.as_c(), cstr!("#\r\n"));
+        if !ptr.is_null() {
+            *ptr = 0;
+        }
+
+        // analyze non-empty lines
+        if !libc::strchr(buffer.as_c(), b':' as c_int).is_null() {
+            atmsw_handle_cfg_line(t, buffer.as_c_mut());
+        }
+    }
+
+    libc::fclose(fd);
+    0
+}
+
+/// Start a virtual ATM switch
+#[no_mangle]
+pub unsafe extern "C" fn atmsw_start(filename: *mut c_char) -> c_int {
+    let t: *mut atmsw_table_t = atmsw_create_table(cstr!("default"));
+    if t.is_null() {
+        libc::fprintf(c_stderr(), cstr!("ATMSW: unable to create virtual fabric table.\n"));
+        return -1;
+    }
+
+    if atmsw_read_cfg_file(t, filename) == -1 {
+        libc::fprintf(c_stderr(), cstr!("ATMSW: unable to parse configuration file.\n"));
+        return -1;
+    }
+
+    atmsw_release(cstr!("default"));
+    0
+}

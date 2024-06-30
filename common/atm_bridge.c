@@ -79,38 +79,6 @@ static int atm_bridge_recv_pkt(netio_desc_t *nio,u_char *pkt,ssize_t len,
    return(res);
 }
 
-/* Create a virtual ATM bridge */
-atm_bridge_t *atm_bridge_create(char *name)
-{
-   atm_bridge_t *t;
-
-   /* Allocate a new switch structure */
-   if (!(t = malloc(sizeof(*t))))
-      return NULL;
-
-   memset(t,0,sizeof(*t));
-   pthread_mutex_init(&t->lock,NULL);
-   atm_aal5_recv_reset(&t->arc);
-
-   if (!(t->name = strdup(name)))
-      goto err_name;
-
-   /* Record this object in registry */
-   if (registry_add(t->name,OBJ_TYPE_ATM_BRIDGE,t) == -1) {
-      fprintf(stderr,"atm_bridge_create: unable to create bridge '%s'\n",
-              name);
-      goto err_reg;
-   }
-
-   return t;
-
- err_reg:
-   free(t->name);
- err_name:
-   free(t);
-   return NULL;
-}
-
 /* Configure an ATM bridge */
 int atm_bridge_configure(atm_bridge_t *t,char *eth_nio,
                          char *atm_nio,u_int vpi,u_int vci)

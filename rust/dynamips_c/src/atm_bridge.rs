@@ -157,3 +157,54 @@ pub unsafe extern "C" fn atm_bridge_configure(t: *mut atm_bridge_t, eth_nio: *mu
     ATM_BRIDGE_UNLOCK(t);
     0
 }
+
+/// Release NIO used by an ATM bridge
+unsafe fn atm_bridge_clear_config(t: *mut atm_bridge_t) {
+    if !t.is_null() {
+        // release ethernet NIO
+        if !(*t).eth_nio.is_null() {
+            netio_rxl_remove((*t).eth_nio);
+            netio_release((*(*t).eth_nio).name);
+        }
+
+        // release ATM NIO
+        if !(*t).atm_nio.is_null() {
+            netio_rxl_remove((*t).atm_nio);
+            netio_release((*(*t).atm_nio).name);
+        }
+
+        (*t).eth_nio = null_mut();
+        (*t).atm_nio = null_mut();
+    }
+}
+
+/// Unconfigure an ATM bridge
+#[no_mangle]
+pub unsafe extern "C" fn atm_bridge_unconfigure(t: *mut atm_bridge_t) -> c_int {
+    ATM_BRIDGE_LOCK(t);
+    atm_bridge_clear_config(t);
+    ATM_BRIDGE_UNLOCK(t);
+    0
+}
+
+/// Free resources used by an ATM bridge
+unsafe extern "C" fn atm_bridge_free(data: *mut c_void, _arg: *mut c_void) -> c_int {
+    let t: *mut atm_bridge_t = data.cast::<_>();
+
+    atm_bridge_clear_config(t);
+    libc::free((*t).name.cast::<_>());
+    libc::free(t.cast::<_>());
+    TRUE
+}
+
+/// Delete an ATM bridge
+#[no_mangle]
+pub unsafe extern "C" fn atm_bridge_delete(name: *mut c_char) -> c_int {
+    registry_delete_if_unused(name, OBJ_TYPE_ATM_BRIDGE, Some(atm_bridge_free), null_mut())
+}
+
+/// Delete all ATM switches
+#[no_mangle]
+pub unsafe extern "C" fn atm_bridge_delete_all() -> c_int {
+    registry_delete_type(OBJ_TYPE_ATM_BRIDGE, Some(atm_bridge_free), null_mut())
+}

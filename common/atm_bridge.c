@@ -22,59 +22,6 @@
 #define ATM_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)
 #define ATM_BRIDGE_UNLOCK(t) pthread_mutex_unlock(&(t)->lock)
 
-/* Release NIO used by an ATM bridge */
-static void atm_bridge_clear_config(atm_bridge_t *t)
-{
-   if (t != NULL) {
-      /* release ethernet NIO */
-      if (t->eth_nio) {
-         netio_rxl_remove(t->eth_nio);
-         netio_release(t->eth_nio->name);
-      }
-
-      /* release ATM NIO */
-      if (t->atm_nio) {
-         netio_rxl_remove(t->atm_nio);
-         netio_release(t->atm_nio->name);
-      }
-
-      t->eth_nio = t->atm_nio = NULL;
-   }
-}
-
-/* Unconfigure an ATM bridge */
-int atm_bridge_unconfigure(atm_bridge_t *t)
-{
-   ATM_BRIDGE_LOCK(t);
-   atm_bridge_clear_config(t);
-   ATM_BRIDGE_UNLOCK(t);
-   return(0);
-}
-
-/* Free resources used by an ATM bridge */
-static int atm_bridge_free(void *data,void *arg)
-{
-   atm_bridge_t *t = data;
-
-   atm_bridge_clear_config(t);
-   free(t->name);
-   free(t);
-   return(TRUE);
-}
-
-/* Delete an ATM bridge */
-int atm_bridge_delete(char *name)
-{
-   return(registry_delete_if_unused(name,OBJ_TYPE_ATM_BRIDGE,
-                                    atm_bridge_free,NULL));
-}
-
-/* Delete all ATM switches */
-int atm_bridge_delete_all(void)
-{
-   return(registry_delete_type(OBJ_TYPE_ATM_BRIDGE,atm_bridge_free,NULL));
-}
-
 /* Create a new interface */
 int atm_bridge_cfg_create_if(atm_bridge_t *t,char **tokens,int count)
 {

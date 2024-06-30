@@ -22,34 +22,6 @@
 #define ATM_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)
 #define ATM_BRIDGE_UNLOCK(t) pthread_mutex_unlock(&(t)->lock)
 
-/* Read an ATM bridge configuration file */
-int atm_bridge_read_cfg_file(atm_bridge_t *t,char *filename)
-{
-   char buffer[1024],*ptr;
-   FILE *fd;
-
-   if (!(fd = fopen(filename,"r"))) {
-      perror("fopen");
-      return(-1);
-   }
-   
-   while(!feof(fd)) {
-      if (!fgets(buffer,sizeof(buffer),fd))
-         break;
-      
-      /* skip comments and end of line */
-      if ((ptr = strpbrk(buffer,"#\r\n")) != NULL)
-         *ptr = 0;
-
-      /* analyze non-empty lines */
-      if (strchr(buffer,':'))
-         atm_bridge_handle_cfg_line(t,buffer);
-   }
-   
-   fclose(fd);
-   return(0);
-}
-
 /* Start a virtual ATM bridge */
 int atm_bridge_start(char *filename)
 {

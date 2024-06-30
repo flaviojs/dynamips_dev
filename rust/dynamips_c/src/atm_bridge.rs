@@ -305,3 +305,36 @@ pub unsafe extern "C" fn atm_bridge_handle_cfg_line(t: *mut atm_bridge_t, str_: 
     libc::fprintf(c_stderr(), cstr!("ATM Bridge: Unknown statement \"%s\" (allowed: IF,BRIDGE)\n"), tokens[0]);
     -1
 }
+
+/// Read an ATM bridge configuration file
+#[no_mangle]
+pub unsafe extern "C" fn atm_bridge_read_cfg_file(t: *mut atm_bridge_t, filename: *mut c_char) -> c_int {
+    let mut buffer: [c_char; 1024] = [0; 1024];
+    let mut ptr: *mut c_char;
+
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("r"));
+    if fd.is_null() {
+        libc::perror(cstr!("fopen"));
+        return -1;
+    }
+
+    while libc::feof(fd) == 0 {
+        if libc::fgets(buffer.as_c_mut(), buffer.len() as c_int, fd).is_null() {
+            break;
+        }
+
+        // skip comments and end of line
+        ptr = libc::strpbrk(buffer.as_c(), cstr!("#\r\n"));
+        if !ptr.is_null() {
+            *ptr = 0;
+        }
+
+        // analyze non-empty lines
+        if !libc::strchr(buffer.as_c(), b':' as c_int).is_null() {
+            atm_bridge_handle_cfg_line(t, buffer.as_c_mut());
+        }
+    }
+
+    libc::fclose(fd);
+    0
+}

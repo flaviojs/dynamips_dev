@@ -19,17 +19,3 @@
 #include "utils.h"
 #include "rust_dynamips_c.h"
 #include "atm_vsar.h"
-
-/* Send a packet through a rfc1483 bridge encap */
-int atm_aal5_send_rfc1483b(netio_desc_t *nio,u_int vpi,u_int vci,
-                           void *pkt,size_t len)
-{
-   struct iovec vec[2];
-
-   vec[0].iov_base = (void *)atm_rfc1483b_header;
-   vec[0].iov_len  = ATM_RFC1483B_HLEN;
-   vec[1].iov_base = pkt;
-   vec[1].iov_len  = len;
-
-   return(atm_aal5_send(nio,vpi,vci,vec,2));
-}

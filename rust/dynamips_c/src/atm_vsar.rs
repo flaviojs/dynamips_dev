@@ -178,3 +178,16 @@ pub unsafe extern "C" fn atm_aal5_recv(arc: *mut atm_reas_context, cell: *mut m_
 
     0
 }
+
+/// Send a packet through a rfc1483 bridge encap
+#[no_mangle]
+pub unsafe extern "C" fn atm_aal5_send_rfc1483b(nio: *mut netio_desc_t, vpi: u_int, vci: u_int, pkt: *mut c_void, len: size_t) -> c_int {
+    let mut vec: [libc::iovec; 2] = zeroed::<_>();
+
+    vec[0].iov_base = atm_rfc1483b_header.as_c_void_mut();
+    vec[0].iov_len = ATM_RFC1483B_HLEN;
+    vec[1].iov_base = pkt;
+    vec[1].iov_len = len;
+
+    atm_aal5_send(nio, vpi, vci, vec.as_c_mut(), 2)
+}

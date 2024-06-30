@@ -22,12 +22,6 @@
 #define ATM_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)
 #define ATM_BRIDGE_UNLOCK(t) pthread_mutex_unlock(&(t)->lock)
 
-/* Acquire a reference to an ATM bridge (increment reference count) */
-atm_bridge_t *atm_bridge_acquire(char *name)
-{
-   return(registry_find(name,OBJ_TYPE_ATM_BRIDGE));
-}
-
 /* Release an ATM switch (decrement reference count) */
 int atm_bridge_release(char *name)
 {

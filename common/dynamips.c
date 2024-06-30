@@ -45,7 +45,6 @@
 #include "dev_c6sup1.h"
 #include "ppc32_vmtest.h"
 #include "hypervisor.h"
-#include "atm_bridge.h"
 #include "frame_relay.h"
 #include "eth_switch.h"
 #ifdef PROFILE

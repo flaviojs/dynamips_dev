@@ -25,7 +25,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "atm_bridge.h"
 #include "hypervisor.h"
 
 /* Create a new ATM bridge object */

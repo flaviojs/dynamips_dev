@@ -130,13 +130,6 @@ static forced_inline m_uint64_t swap64(m_uint64_t value)
    return(result);
 }
 
-/* Get a byte-swapped 16-bit value on a non-aligned area */
-static inline m_uint16_t m_ntoh16(m_uint8_t *ptr)
-{
-   m_uint16_t val = (ptr[0] << 8) | ptr[1];
-   return(val);
-}
-
 /* Set a byte-swapped 16-bit value on a non-aligned area */
 static inline void m_hton16(m_uint8_t *ptr,m_uint16_t val)
 {

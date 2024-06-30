@@ -148,3 +148,33 @@ pub unsafe extern "C" fn atm_aal5_send(nio: *mut netio_desc_t, vpi: u_int, vci: 
     atm_send_cell(addr_of_mut!(asc));
     0
 }
+
+/// Receive an ATM cell and process reassembly
+#[no_mangle]
+pub unsafe extern "C" fn atm_aal5_recv(arc: *mut atm_reas_context, cell: *mut m_uint8_t) -> c_int {
+    // Check buffer boundary
+    if ((*arc).buf_pos + ATM_PAYLOAD_SIZE) > ATM_REAS_MAX_SIZE {
+        atm_aal5_recv_reset(arc);
+        return -1;
+    }
+
+    // Get the PTI field: we cannot handle "network" traffic
+    let atm_hdr: m_uint32_t = m_ntoh32(cell);
+
+    if (atm_hdr & ATM_PTI_NETWORK) != 0 {
+        return 2;
+    }
+
+    // Copy the payload
+    libc::memcpy(addr_of_mut!((*arc).buffer[(*arc).buf_pos]).cast::<_>(), cell.add(ATM_HDR_SIZE).cast::<_>(), ATM_PAYLOAD_SIZE);
+    (*arc).buf_pos += ATM_PAYLOAD_SIZE;
+
+    // If this is the last cell of the packet, get the real length (the
+    // trailer is at the end).
+    if (atm_hdr & ATM_PTI_EOP) != 0 {
+        (*arc).len = m_ntoh16(cell.add(ATM_AAL5_TRAILER_POS + 2)) as size_t;
+        return if (*arc).len <= (*arc).buf_pos { 1 } else { -2 };
+    }
+
+    0
+}

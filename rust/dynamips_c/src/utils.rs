@@ -598,3 +598,11 @@ pub unsafe extern "C" fn m_hton32(ptr: *mut m_uint8_t, val: m_uint32_t) {
     *ptr.add(2) = (val >> 8) as m_uint8_t;
     *ptr.add(3) = val as m_uint8_t;
 }
+
+/// Get a byte-swapped 16-bit value on a non-aligned area
+#[inline]
+#[no_mangle]
+pub unsafe extern "C" fn m_ntoh16(ptr: *mut m_uint8_t) -> m_uint16_t {
+    let val: m_uint16_t = ((*ptr.add(0) as m_uint16_t) << 8) | *ptr.add(1) as m_uint16_t;
+    val
+}

@@ -38,7 +38,6 @@
 #include "dev_c1700.h"
 #include "hypervisor.h"
 #include "frame_relay.h"
-#include "atm.h"
 
 #define DEBUG_TOKEN  0
 

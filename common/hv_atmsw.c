@@ -23,7 +23,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "atm.h"
 #include "rust_dynamips_c.h"
 #include "hypervisor.h"
 

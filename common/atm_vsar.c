@@ -18,7 +18,6 @@
 
 #include "utils.h"
 #include "rust_dynamips_c.h"
-#include "atm.h"
 #include "atm_vsar.h"
 
 /* Segmentation Context */

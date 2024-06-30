@@ -10,6 +10,7 @@
 
 pub mod _ext;
 pub mod atm;
+pub mod atm_vsar;
 pub mod base64;
 pub mod cisco_card;
 pub mod cisco_eeprom;

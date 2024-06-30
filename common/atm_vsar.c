@@ -158,13 +158,6 @@ int atm_aal5_send(netio_desc_t *nio,u_int vpi,u_int vci,
    return(0);
 }
 
-/* Reset a receive context */
-void atm_aal5_recv_reset(struct atm_reas_context *arc)
-{
-   arc->buf_pos = 0;
-   arc->len = 0;
-}
-
 /* Receive an ATM cell and process reassembly */
 int atm_aal5_recv(struct atm_reas_context *arc,m_uint8_t *cell)
 {

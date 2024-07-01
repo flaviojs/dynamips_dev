@@ -27,3 +27,23 @@ pub unsafe extern "C" fn ppc32_exec_MTLR(cpu: *mut cpu_ppc_t, insn: ppc_insn_t) 
     (*cpu).lr = (*cpu).gpr[rs as usize];
     0
 }
+
+/// MFCTR - Move From Counter Register
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn ppc32_exec_MFCTR(cpu: *mut cpu_ppc_t, insn: ppc_insn_t) -> c_int {
+    let rd: c_int = bits(insn, 21, 25);
+
+    (*cpu).gpr[rd as usize] = (*cpu).ctr;
+    0
+}
+
+/// MTCTR - Move To Counter Register
+#[no_mangle] // TODO private
+#[cfg_attr(feature = "fastcall", abi("fastcall"))]
+pub unsafe extern "C" fn ppc32_exec_MTCTR(cpu: *mut cpu_ppc_t, insn: ppc_insn_t) -> c_int {
+    let rs: c_int = bits(insn, 21, 25);
+
+    (*cpu).ctr = (*cpu).gpr[rs as usize];
+    0
+}

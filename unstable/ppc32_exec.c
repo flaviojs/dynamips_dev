@@ -357,24 +357,6 @@ static forced_inline int ppc32_check_cond(cpu_ppc_t *cpu,m_uint32_t bo,
    return(ctr_ok & cond_ok);
 }
 
-/* MFCTR - Move From Counter Register */
-static fastcall int ppc32_exec_MFCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
-{
-   int rd = bits(insn,21,25);
-
-   cpu->gpr[rd] = cpu->ctr;
-   return(0);
-}
-
-/* MTCTR - Move To Counter Register */
-static fastcall int ppc32_exec_MTCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
-{
-   int rs = bits(insn,21,25);
-
-   cpu->ctr = cpu->gpr[rs];
-   return(0);
-}
-
 /* ADD */
 static fastcall int ppc32_exec_ADD(cpu_ppc_t *cpu,ppc_insn_t insn)
 {

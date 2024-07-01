@@ -34,9 +34,6 @@ struct insn_exec_page {
    int flags;
 };
 
-/* PowerPC instruction */
-typedef m_uint32_t ppc_insn_t;
-
 /* MMAP */
 #ifndef MAP_ANONYMOUS
 #define MAP_ANONYMOUS MAP_ANON

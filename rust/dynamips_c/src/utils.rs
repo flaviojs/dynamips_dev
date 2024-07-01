@@ -1,5 +1,8 @@
 //! Utility functions.
 
+#[no_mangle]
+pub unsafe extern "C" fn _export_utils(_: ppc_insn_t) {}
+
 use crate::dynamips_common::*;
 use crate::prelude::*;
 
@@ -81,6 +84,9 @@ pub struct fd_pool {
 
 /// MIPS instruction
 pub type mips_insn_t = m_uint32_t;
+
+/// PowerPC instruction
+pub type ppc_insn_t = m_uint32_t;
 
 /// cbindgen:no-export
 #[repr(C)]

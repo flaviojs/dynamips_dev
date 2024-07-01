@@ -357,15 +357,6 @@ static forced_inline int ppc32_check_cond(cpu_ppc_t *cpu,m_uint32_t bo,
    return(ctr_ok & cond_ok);
 }
 
-/* MFLR - Move From Link Register */
-static fastcall int ppc32_exec_MFLR(cpu_ppc_t *cpu,ppc_insn_t insn)
-{
-   int rd = bits(insn,21,25);
-
-   cpu->gpr[rd] = cpu->lr;
-   return(0);
-}
-
 /* MTLR - Move To Link Register */
 static fastcall int ppc32_exec_MTLR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {

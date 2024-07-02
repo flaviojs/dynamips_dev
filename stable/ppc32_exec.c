@@ -264,26 +264,6 @@ void *ppc32_exec_run_cpu(cpu_gen_t *gen)
 
 /* ========================================================================= */
 
-/* Update CR0 */
-static forced_inline void ppc32_exec_update_cr0(cpu_ppc_t *cpu,m_uint32_t val)
-{
-   m_uint32_t res;
-
-   if (val & 0x80000000)
-      res = 1 << PPC32_CR_LT_BIT;
-   else {
-      if (val > 0)
-         res = 1 << PPC32_CR_GT_BIT;
-      else
-         res = 1 << PPC32_CR_EQ_BIT;
-   }
-
-   if (cpu->xer & PPC32_XER_SO)
-      res |= 1 << PPC32_CR_SO_BIT;
-
-   cpu->cr_fields[0] = res;
-}
-
 /* 
  * Update Overflow bit from a sum result (r = a + b)
  *
@@ -355,31 +335,6 @@ static forced_inline int ppc32_check_cond(cpu_ppc_t *cpu,m_uint32_t bo,
    cond_ok = (bo >> 4) | ((cr_bit ^ (~bo >> 3)) & 0x1);
 
    return(ctr_ok & cond_ok);
-}
-
-/* ADD */
-static fastcall int ppc32_exec_ADD(cpu_ppc_t *cpu,ppc_insn_t insn)
-{
-   int rd = bits(insn,21,25);
-   int ra = bits(insn,16,20);
-   int rb = bits(insn,11,15);
-
-   cpu->gpr[rd] = cpu->gpr[ra] + cpu->gpr[rb];
-   return(0);
-}
-
-/* ADD. */
-static fastcall int ppc32_exec_ADD_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
-{
-   int rd = bits(insn,21,25);
-   int ra = bits(insn,16,20);
-   int rb = bits(insn,11,15);
-   register m_uint32_t tmp;
-
-   tmp = cpu->gpr[ra] + cpu->gpr[rb];
-   ppc32_exec_update_cr0(cpu,tmp);
-   cpu->gpr[rd] = tmp;
-   return(0);
 }
 
 /* ADDO - Add with Overflow */

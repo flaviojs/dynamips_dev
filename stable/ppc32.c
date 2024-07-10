@@ -21,7 +21,6 @@
 #include "memory.h"
 #include "device.h"
 #include "ppc32_mem.h"
-#include "ppc32_exec.h"
 #include "ppc32_jit.h"
 
 /* Initialize a PowerPC processor */

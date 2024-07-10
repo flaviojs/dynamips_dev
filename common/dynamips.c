@@ -31,7 +31,6 @@
 #endif
 
 #include "mips64_jit.h"
-#include "ppc32_exec.h"
 #include "ppc32_jit.h"
 #include "dev_c7200.h"
 #include "dev_c3600.h"

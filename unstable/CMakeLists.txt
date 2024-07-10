@@ -56,7 +56,6 @@ set ( _files
    "${LOCAL}/ppc32.c"
    "${LOCAL}/ppc32_mem.c"
    "${LOCAL}/ppc32_jit.c"
-   "${LOCAL}/ppc32_exec.c"
    "${LOCAL}/ppc32_vmtest.c"
    "${COMMON}/memory.c"
    "${COMMON}/device.c"

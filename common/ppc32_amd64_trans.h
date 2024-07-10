@@ -12,7 +12,6 @@
 #include "amd64-codegen.h"
 #include "cpu.h"
 #include "dynamips.h"
-#include "ppc32_exec.h"
 
 #define JIT_SUPPORT 1
 

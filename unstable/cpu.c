@@ -25,7 +25,6 @@
 #include "rust_dynamips_c.h"
 #include "mips64_jit.h"
 #include "ppc32.h"
-#include "ppc32_exec.h"
 #include "ppc32_jit.h"
 #include "dynamips.h"
 

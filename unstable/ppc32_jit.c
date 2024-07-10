@@ -20,7 +20,6 @@
 #include "cpu.h"
 #include "device.h"
 #include "ppc32.h"
-#include "ppc32_exec.h"
 #include "ppc32_jit.h"
 #include "memory.h"
 

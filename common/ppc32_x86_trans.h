@@ -11,7 +11,6 @@
 #include "utils.h"
 #include "x86-codegen.h"
 #include "cpu.h"
-#include "ppc32_exec.h"
 #include "dynamips.h"
 
 #define JIT_SUPPORT 1

@@ -106,17 +106,15 @@ pub unsafe extern "C" fn ppc32_dump_stats(cpu: *mut cpu_ppc_t) {
 }
 
 /// Execute a memory operation
-#[no_mangle] // TODO private
 #[inline(always)]
-pub unsafe extern "C" fn ppc32_exec_memop(cpu: *mut cpu_ppc_t, memop: c_int, vaddr: m_uint32_t, dst_reg: u_int) {
+unsafe fn ppc32_exec_memop(cpu: *mut cpu_ppc_t, memop: c_int, vaddr: m_uint32_t, dst_reg: u_int) {
     let fn_: ppc_memop_fn = (*cpu).mem_op_fn[memop as usize];
     fn_.unwrap()(cpu, vaddr, dst_reg);
 }
 
 /// Execute a single instruction
-#[no_mangle]
 #[inline(always)]
-pub unsafe extern "C" fn ppc32_exec_single_instruction(cpu: *mut cpu_ppc_t, instruction: ppc_insn_t) -> c_int {
+unsafe fn ppc32_exec_single_instruction(cpu: *mut cpu_ppc_t, instruction: ppc_insn_t) -> c_int {
     if DEBUG_INSN_PERF_CNT != 0 {
         (*cpu).perf_counter += 1;
     }
@@ -212,6 +210,7 @@ unsafe fn ppc32_exec_fetch(cpu: *mut cpu_ppc_t, ia: m_uint32_t, insn: *mut ppc_i
     0
 }
 
+// TODO remove
 extern "C" fn ppc32_timer_irq_run_(cpu: *mut c_void) -> *mut c_void {
     unsafe { ppc32_timer_irq_run(cpu.cast::<_>()) }
 }
@@ -312,9 +311,8 @@ pub unsafe extern "C" fn ppc32_exec_run_cpu(gen: *mut cpu_gen_t) -> *mut c_void 
 /// =========================================================================
 
 /// Update CR0
-#[no_mangle] // TODO private
 #[inline(always)]
-pub unsafe extern "C" fn ppc32_exec_update_cr0(cpu: *mut cpu_ppc_t, val: m_uint32_t) {
+unsafe fn ppc32_exec_update_cr0(cpu: *mut cpu_ppc_t, val: m_uint32_t) {
     let mut res: m_uint32_t;
 
     if (val & 0x80000000) != 0 {
@@ -336,9 +334,8 @@ pub unsafe extern "C" fn ppc32_exec_update_cr0(cpu: *mut cpu_ppc_t, val: m_uint3
 //
 // (a > 0) && (b > 0) => r > 0, otherwise overflow
 // (a < 0) && (a < 0) => r < 0, otherwise overflow.
-#[no_mangle] // TODO private
 #[inline(always)]
-pub unsafe extern "C" fn ppc32_exec_ov_sum(cpu: *mut cpu_ppc_t, r: m_uint32_t, a: m_uint32_t, b: m_uint32_t) {
+unsafe fn ppc32_exec_ov_sum(cpu: *mut cpu_ppc_t, r: m_uint32_t, a: m_uint32_t, b: m_uint32_t) {
     let sc: m_uint32_t = !(a ^ b) & (a ^ r) & 0x80000000;
     if unlikely(sc != 0) {
         (*cpu).xer |= PPC32_XER_SO | PPC32_XER_OV;
@@ -348,9 +345,8 @@ pub unsafe extern "C" fn ppc32_exec_ov_sum(cpu: *mut cpu_ppc_t, r: m_uint32_t, a
 }
 
 /// Update CA bit from a sum result (r = a + b)
-#[no_mangle] // TODO private
 #[inline(always)]
-pub unsafe extern "C" fn ppc32_exec_ca_sum(cpu: *mut cpu_ppc_t, r: m_uint32_t, a: m_uint32_t, _b: m_uint32_t) {
+unsafe fn ppc32_exec_ca_sum(cpu: *mut cpu_ppc_t, r: m_uint32_t, a: m_uint32_t, _b: m_uint32_t) {
     (*cpu).xer_ca = if r < a { 1 } else { 0 };
 }
 
@@ -375,9 +371,8 @@ unsafe fn ppc32_exec_ca_sub(cpu: *mut cpu_ppc_t, _r: m_uint32_t, a: m_uint32_t, 
 }
 
 /// Check condition code
-#[no_mangle] // TODO private
 #[inline(always)]
-pub unsafe extern "C" fn ppc32_check_cond(cpu: *mut cpu_ppc_t, bo: m_uint32_t, bi: m_uint32_t) -> c_int {
+unsafe fn ppc32_check_cond(cpu: *mut cpu_ppc_t, bo: m_uint32_t, bi: m_uint32_t) -> c_int {
     let mut ctr_ok: u_int = TRUE as u_int;
 
     if (bo & 0x04) == 0 {
@@ -3666,8 +3661,7 @@ unsafe extern "C" fn ppc32_exec_unknown(cpu: *mut cpu_ppc_t, insn: ppc_insn_t) -
 }
 
 /// PowerPC instruction array
-#[no_mangle] // TODO private
-pub static mut ppc32_exec_tags: [ppc32_insn_exec_tag; 195] = [
+static mut ppc32_exec_tags: [ppc32_insn_exec_tag; 195] = [
     ppc32_insn_exec_tag::new(cstr!("mflr"), Some(ppc32_exec_MFLR), 0xfc1fffff, 0x7c0802a6, 0),
     ppc32_insn_exec_tag::new(cstr!("mtlr"), Some(ppc32_exec_MTLR), 0xfc1fffff, 0x7c0803a6, 0),
     ppc32_insn_exec_tag::new(cstr!("mfctr"), Some(ppc32_exec_MFCTR), 0xfc1fffff, 0x7c0902a6, 0),

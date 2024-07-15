@@ -132,8 +132,7 @@ pub unsafe extern "C" fn cisco_card_check_eeprom(card: *mut cisco_card) -> c_int
 
 /// Create a card structure
 #[inline]
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_create(card_type: u_int) -> *mut cisco_card {
+unsafe fn cisco_card_create(card_type: u_int) -> *mut cisco_card {
     let card: *mut cisco_card = libc::malloc(size_of::<cisco_card>()).cast::<_>();
     if !card.is_null() {
         libc::memset(card.cast::<_>(), 0, size_of::<cisco_card>());
@@ -144,8 +143,7 @@ pub unsafe extern "C" fn cisco_card_create(card_type: u_int) -> *mut cisco_card 
 }
 
 /// Find a NIO binding
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_find_nio_binding(card: *mut cisco_card, port_id: u_int) -> *mut cisco_nio_binding {
+unsafe fn cisco_card_find_nio_binding(card: *mut cisco_card, port_id: u_int) -> *mut cisco_nio_binding {
     if card.is_null() {
         return null_mut();
     }
@@ -162,8 +160,7 @@ pub unsafe extern "C" fn cisco_card_find_nio_binding(card: *mut cisco_card, port
 }
 
 /// Remove all NIO bindings
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_remove_all_nio_bindings(vm: *mut vm_instance_t, card: *mut cisco_card) {
+unsafe fn cisco_card_remove_all_nio_bindings(vm: *mut vm_instance_t, card: *mut cisco_card) {
     let mut nb: *mut cisco_nio_binding = (*card).nio_list;
     while !nb.is_null() {
         let next: *mut cisco_nio_binding = (*nb).next;
@@ -184,8 +181,7 @@ pub unsafe extern "C" fn cisco_card_remove_all_nio_bindings(vm: *mut vm_instance
 
 /// Enable all NIO for the specified card
 #[inline]
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_enable_all_nio(vm: *mut vm_instance_t, card: *mut cisco_card) {
+unsafe fn cisco_card_enable_all_nio(vm: *mut vm_instance_t, card: *mut cisco_card) {
     if !card.is_null() && !(*card).driver.is_null() && !(*card).drv_info.is_null() {
         let mut nb: *mut cisco_nio_binding = (*card).nio_list;
         while !nb.is_null() {
@@ -197,8 +193,7 @@ pub unsafe extern "C" fn cisco_card_enable_all_nio(vm: *mut vm_instance_t, card:
 
 /// Disable all NIO for the specified card
 #[inline]
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_disable_all_nio(vm: *mut vm_instance_t, card: *mut cisco_card) {
+unsafe fn cisco_card_disable_all_nio(vm: *mut vm_instance_t, card: *mut cisco_card) {
     if !card.is_null() && !(*card).driver.is_null() && !(*card).drv_info.is_null() {
         let mut nb: *mut cisco_nio_binding = (*card).nio_list;
         while !nb.is_null() {
@@ -210,8 +205,7 @@ pub unsafe extern "C" fn cisco_card_disable_all_nio(vm: *mut vm_instance_t, card
 
 /// Initialize a card
 #[inline]
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_init(vm: *mut vm_instance_t, card: *mut cisco_card, id: u_int) -> c_int {
+unsafe fn cisco_card_init(vm: *mut vm_instance_t, card: *mut cisco_card, id: u_int) -> c_int {
     // Check that a device type is defined for this card
     if card.is_null() || (*card).dev_type.is_null() || (*card).driver.is_null() {
         return -1;
@@ -237,8 +231,7 @@ pub unsafe extern "C" fn cisco_card_init(vm: *mut vm_instance_t, card: *mut cisc
 }
 
 /// Shutdown card
-#[no_mangle]
-pub unsafe extern "C" fn cisco_card_shutdown(vm: *mut vm_instance_t, card: *mut cisco_card) -> c_int {
+unsafe fn cisco_card_shutdown(vm: *mut vm_instance_t, card: *mut cisco_card) -> c_int {
     // Check that a device type is defined for this card
     if card.is_null() || (*card).dev_type.is_null() || (*card).driver.is_null() {
         return -1;
@@ -257,8 +250,7 @@ pub unsafe extern "C" fn cisco_card_shutdown(vm: *mut vm_instance_t, card: *mut 
 }
 
 /// Show info for the specified card
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_show_info(vm: *mut vm_instance_t, card: *mut cisco_card) -> c_int {
+unsafe fn cisco_card_show_info(vm: *mut vm_instance_t, card: *mut cisco_card) -> c_int {
     // Check that a device type is defined for this card
     if card.is_null() || (*card).driver.is_null() || (*(*card).driver).card_show_info.is_none() {
         return -1;
@@ -269,8 +261,7 @@ pub unsafe extern "C" fn cisco_card_show_info(vm: *mut vm_instance_t, card: *mut
 }
 
 /// Save config for the specified card
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_save_config(vm: *mut vm_instance_t, card: *mut cisco_card, fd: *mut libc::FILE) -> c_int {
+unsafe fn cisco_card_save_config(vm: *mut vm_instance_t, card: *mut cisco_card, fd: *mut libc::FILE) -> c_int {
     if !card.is_null() {
         libc::fprintf(fd, cstr!("vm slot_add_binding %s %u %u %s\n"), (*vm).name, (*card).slot_id, (*card).subslot_id, (*card).dev_type);
 
@@ -285,8 +276,7 @@ pub unsafe extern "C" fn cisco_card_save_config(vm: *mut vm_instance_t, card: *m
 }
 
 /// Find a driver in a driver array
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn cisco_card_find_driver(array: *mut *mut cisco_card_driver, dev_type: *mut c_char) -> *mut cisco_card_driver {
+unsafe fn cisco_card_find_driver(array: *mut *mut cisco_card_driver, dev_type: *mut c_char) -> *mut cisco_card_driver {
     for i in 0.. {
         if !(*array.add(i)).is_null() && libc::strcmp((*(*array.add(i))).dev_type, dev_type) == 0 {
             return *array.add(i);
@@ -311,8 +301,7 @@ pub unsafe extern "C" fn vm_slot_get_card_ptr(vm: *mut vm_instance_t, slot_id: u
 }
 
 /// Get info for a slot/port (with sub-cards)
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vm_slot_get_info(vm: *mut vm_instance_t, slot_id: u_int, port_id: u_int, rc: *mut *mut *mut cisco_card, real_port_id: *mut u_int) -> c_int {
+unsafe fn vm_slot_get_info(vm: *mut vm_instance_t, slot_id: u_int, port_id: u_int, rc: *mut *mut *mut cisco_card, real_port_id: *mut u_int) -> c_int {
     if slot_id >= VM_MAX_SLOTS as u_int {
         *rc = null_mut();
         return -1;
@@ -365,8 +354,7 @@ pub unsafe extern "C" fn vm_slot_get_info(vm: *mut vm_instance_t, slot_id: u_int
 }
 
 /// Translate a port ID (for sub-cards)
-#[no_mangle] // TODO private
-pub unsafe extern "C" fn vm_slot_translate_port_id(vm: *mut vm_instance_t, slot_id: u_int, port_id: u_int, rc: *mut *mut cisco_card) -> u_int {
+unsafe fn vm_slot_translate_port_id(vm: *mut vm_instance_t, slot_id: u_int, port_id: u_int, rc: *mut *mut cisco_card) -> u_int {
     let mut tmp: *mut *mut cisco_card = null_mut();
     let mut real_port_id: u_int = 0;
 

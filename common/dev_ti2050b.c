@@ -14,7 +14,7 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "pci_dev.h"
+#include "rust_dynamips_c.h"
 
 #define PCI_VENDOR_TI         0x104C
 #define PCI_PRODUCT_PCI2050B  0xAC28

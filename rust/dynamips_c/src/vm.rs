@@ -12,8 +12,11 @@ use crate::rommon_var::*;
 use crate::utils::*;
 
 extern "C" {
+    pub fn vm_bind_device(vm: *mut vm_instance_t, dev: *mut vdevice) -> c_int;
     pub fn vm_ios_save_config(vm: *mut vm_instance_t) -> c_int;
+    pub fn vm_object_add(vm: *mut vm_instance_t, obj: *mut vm_obj_t);
     pub fn vm_object_dump(vm: *mut vm_instance_t);
+    pub fn vm_object_init(obj: *mut vm_obj_t);
     pub fn vm_resume(vm: *mut vm_instance_t) -> c_int;
     pub fn vm_suspend(vm: *mut vm_instance_t) -> c_int;
 }

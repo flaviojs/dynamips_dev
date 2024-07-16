@@ -13,9 +13,6 @@
 #include "cpu.h"
 #include "vm.h"
 
-/* PCI part */
-#include "pci_dev.h"
-
 /* device access function */
 #ifdef MAC64HACK
 static void *__dev_access_fast(cpu_gen_t *cpu,u_int dev_id,m_uint32_t offset,

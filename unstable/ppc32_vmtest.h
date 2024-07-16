@@ -15,7 +15,6 @@
 #include "utils.h"
 #include "rust_dynamips_c.h"
 #include "device.h"
-#include "pci_dev.h"
 #include "vm.h"
 
 /* Default parameters of the test VM */

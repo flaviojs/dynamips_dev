@@ -92,6 +92,9 @@ typedef struct vm_instance vm_instance_t;
 typedef struct vm_obj vm_obj_t;
 typedef struct vm_platform vm_platform_t;
 
+// opaque types
+struct gt_data;
+
 // volatile types (cbindgen does not emit the C volatile type qualifier)
 typedef timer_entry_t *volatile Volatile_____timer_entry_t;
 typedef volatile int Volatile_c_int;

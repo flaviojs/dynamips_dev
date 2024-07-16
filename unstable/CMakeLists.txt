@@ -60,7 +60,6 @@ set ( _files
    "${COMMON}/memory.c"
    "${COMMON}/device.c"
    "${COMMON}/nmc93cX6.c"
-   "${COMMON}/pci_dev.c"
    "${COMMON}/pci_io.c"
    "${COMMON}/dev_zero.c"
    "${COMMON}/dev_bswap.c"

@@ -16,7 +16,7 @@
 #include <assert.h>
 
 #include "device.h"
-#include "pci_dev.h"
+#include "rust_dynamips_c.h"
 #include "pci_io.h"
 #include "cpu.h"
 #include "vm.h"

@@ -14,7 +14,6 @@
 
 #include "utils.h"
 #include "device.h"
-#include "pci_dev.h"
 #include "nmc93cX6.h"
 #include "vm.h"
 

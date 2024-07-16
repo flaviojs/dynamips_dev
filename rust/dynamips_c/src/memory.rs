@@ -4,9 +4,16 @@
 
 use crate::_private::*;
 use crate::cpu::*;
+use crate::dynamips_common::*;
+use crate::vm::*;
 
 extern "C" {
     pub fn memlog_dump(cpu: *mut cpu_gen_t);
+    pub fn physmem_copy_from_vm(vm: *mut vm_instance_t, real_buffer: *mut c_void, paddr: m_uint64_t, len: size_t);
+    pub fn physmem_copy_to_vm(vm: *mut vm_instance_t, real_buffer: *mut c_void, paddr: m_uint64_t, len: size_t);
+    pub fn physmem_copy_u32_from_vm(vm: *mut vm_instance_t, paddr: m_uint64_t) -> m_uint32_t;
+    pub fn physmem_dma_transfer(vm: *mut vm_instance_t, src: m_uint64_t, dst: m_uint64_t, len: size_t);
+    pub fn physmem_copy_u32_to_vm(vm: *mut vm_instance_t, paddr: m_uint64_t, val: m_uint32_t);
 }
 
 /// MTS operation

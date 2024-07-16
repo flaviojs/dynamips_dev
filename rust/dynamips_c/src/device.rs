@@ -6,9 +6,15 @@
 #[no_mangle]
 pub extern "C" fn _export_device(_: *mut vdevice) {}
 
+extern "C" {
+    pub fn dev_init(dev: *mut vdevice);
+    pub fn dev_remove(vm: *mut vm_instance_t, dev: *mut vdevice);
+}
+
 use crate::_private::*;
 use crate::cpu::*;
 use crate::dynamips_common::*;
+use crate::vm::*;
 
 /// Device Flags
 pub const VDEVICE_FLAG_NO_MTS_MMAP: c_int = 0x01; // Prevent MMAPed access by MTS

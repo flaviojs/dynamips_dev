@@ -6,30 +6,6 @@ set ( COMMON "${CMAKE_SOURCE_DIR}/common" )
 set ( LOCAL "${CMAKE_CURRENT_SOURCE_DIR}" )
 include_directories ( "${CMAKE_CURRENT_SOURCE_DIR}" "${COMMON}" "${CMAKE_CURRENT_BINARY_DIR}" )
 
-# mips64_microcode_dump.inc
-set ( _input "${LOCAL}/mips64_microcode" )
-set ( _output "${CMAKE_CURRENT_BINARY_DIR}/mips64_microcode_dump.inc" )
-add_custom_command (
-   OUTPUT ${_output}
-   COMMAND ${ROM2C_EXECUTABLE} ARGS ${_input} ${_output} 0xbfc00000
-   DEPENDS rom2c ${_input}
-   )
-add_custom_target ( mips64_microcode_dump_unstable
-   DEPENDS ${_output}
-   )
-
-# ppc32_microcode_dump.inc
-set ( _input "${LOCAL}/ppc32_microcode" )
-set ( _output "${CMAKE_CURRENT_BINARY_DIR}/ppc32_microcode_dump.inc" )
-add_custom_command (
-   OUTPUT ${_output}
-   COMMAND ${ROM2C_EXECUTABLE} ARGS ${_input} ${_output} 0xfff00000
-   DEPENDS rom2c ${_input}
-   )
-add_custom_target ( ppc32_microcode_dump_unstable
-   DEPENDS ${_output}
-   )
-
 #-------------------------#
 # dynamips: unstable code #
 #-------------------------#
@@ -140,7 +116,6 @@ set ( _files
 if ( ENABLE_GEN_ETH )
    set ( _files ${_files} "${COMMON}/_link_pcap.c" )
 endif ( ENABLE_GEN_ETH )
-set ( _dependencies ppc32_microcode_dump_unstable mips64_microcode_dump_unstable )
 
 # dynamips_amd64_unstable
 if ( "amd64" STREQUAL "${DYNAMIPS_ARCH}" )
@@ -149,7 +124,6 @@ add_executable ( dynamips_amd64_unstable
    "${LOCAL}/mips64_amd64_trans.c"
    "${LOCAL}/ppc32_amd64_trans.c"
    )
-add_dependencies ( dynamips_amd64_unstable ${_dependencies} )
 target_link_libraries ( dynamips_amd64_unstable ${DYNAMIPS_LIBRARIES} )
 maybe_rename_to_dynamips ( dynamips_amd64_unstable )
 install_executable ( dynamips_amd64_unstable )
@@ -162,7 +136,6 @@ add_executable ( dynamips_x86_unstable
    "${LOCAL}/mips64_x86_trans.c"
    "${LOCAL}/ppc32_x86_trans.c"
    )
-add_dependencies ( dynamips_x86_unstable ${_dependencies} )
 target_link_libraries ( dynamips_x86_unstable ${DYNAMIPS_LIBRARIES} )
 maybe_rename_to_dynamips ( dynamips_x86_unstable )
 install_executable ( dynamips_x86_unstable )
@@ -175,7 +148,6 @@ add_executable ( dynamips_nojit_unstable
    "${LOCAL}/mips64_nojit_trans.c"
    "${COMMON}/ppc32_nojit_trans.c"
    )
-add_dependencies ( dynamips_nojit_unstable ${_dependencies} )
 target_link_libraries ( dynamips_nojit_unstable ${DYNAMIPS_LIBRARIES} )
 maybe_rename_to_dynamips ( dynamips_nojit_unstable )
 install_executable ( dynamips_nojit_unstable )

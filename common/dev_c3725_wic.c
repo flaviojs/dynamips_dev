@@ -18,7 +18,6 @@
 
 #include "utils.h"
 #include "vm.h"
-#include "dev_gt.h"
 #include "dev_c3725.h"
 #include "dev_wic_serial.h"
 

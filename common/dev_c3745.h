@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "dev_gt.h"
 #include "vm.h"
 
 /* Get WIC device address for the specified onboard port */

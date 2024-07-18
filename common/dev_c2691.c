@@ -19,7 +19,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "pci_io.h"
-#include "dev_gt.h"
 #include "dev_rom.h"
 #include "dev_c2691.h"
 #include "dev_c2691_iofpga.h"

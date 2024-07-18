@@ -61,7 +61,6 @@ set ( _files
    "${COMMON}/pci_io.c"
    "${COMMON}/dev_rom.c"
    "${COMMON}/dev_mpc860.c"
-   "${COMMON}/dev_gt.c"
    "${COMMON}/dev_mv64460.c"
    "${COMMON}/dev_plx.c"
    "${COMMON}/dev_dec21140.c"

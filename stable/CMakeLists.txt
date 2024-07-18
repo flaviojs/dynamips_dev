@@ -18,14 +18,6 @@ if ( BUILD_UDP_RECV )
 install ( IMPORTED_RUNTIME_ARTIFACTS udp_recv )
 endif ( BUILD_UDP_RECV )
 
-# rom2c
-# XXX must be built for the host, not target, to support cross-compiling
-add_executable ( rom2c EXCLUDE_FROM_ALL
-   "${COMMON}/rom2c.c"
-   )
-target_link_libraries ( rom2c ${DYNAMIPS_LIBRARIES} )
-set ( ROM2C_EXECUTABLE "${CMAKE_CURRENT_BINARY_DIR}/rom2c${CMAKE_EXECUTABLE_SUFFIX}" CACHE INTERNAL "rom2c executable" )
-
 # nvram_export
 if ( BUILD_NVRAM_EXPORT )
 # TODO IMPORTED_RUNTIME_ARTIFACTS requires cmake 3.21

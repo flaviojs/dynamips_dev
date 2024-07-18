@@ -18,7 +18,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "pci_io.h"
 #include "dev_rom.h"
 #include "dev_c3745.h"
 #include "dev_c3745_iofpga.h"

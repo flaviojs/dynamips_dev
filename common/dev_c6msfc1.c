@@ -20,7 +20,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "pci_io.h"
 #include "dev_rom.h"
 #include "dev_dec21140.h"
 #include "dev_i8254x.h"

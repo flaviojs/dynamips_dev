@@ -17,7 +17,6 @@
 #include <assert.h>
 #include <glob.h>
 
-#include "pci_io.h"
 #include "cpu.h"
 #include "vm.h"
 #include "tcb.h"

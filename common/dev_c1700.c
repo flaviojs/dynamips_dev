@@ -19,7 +19,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "ppc32_mem.h"
-#include "pci_io.h"
 #include "dev_mpc860.h"
 #include "dev_rom.h"
 #include "dev_c1700.h"

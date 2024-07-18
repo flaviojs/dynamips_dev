@@ -17,7 +17,6 @@
 
 #include "device.h"
 #include "rust_dynamips_c.h"
-#include "pci_io.h"
 #include "cpu.h"
 #include "vm.h"
 #include "tcb.h"

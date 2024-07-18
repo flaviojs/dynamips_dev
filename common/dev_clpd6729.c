@@ -19,7 +19,6 @@
 #include "memory.h"
 #include "device.h"
 #include "rust_dynamips_c.h"
-#include "pci_io.h"
 
 #define DEBUG_ACCESS  0
 

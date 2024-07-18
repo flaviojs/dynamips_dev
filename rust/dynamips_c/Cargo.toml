@@ -25,6 +25,7 @@ linux-raw-sys = { version = "0.6.4", features = ["ioctl"] }
 [build-dependencies]
 autocfg = "1"
 cc = "1.0"
+elf = "0.7.4"
 
 [features]
 ENABLE_LINUX_ETH = []

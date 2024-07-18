@@ -19,7 +19,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "dev_rom.h"
 #include "ppc32_mem.h"
 #include "ppc32_vmtest.h"
 

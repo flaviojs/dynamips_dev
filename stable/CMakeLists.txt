@@ -92,7 +92,6 @@ set ( _files
    "${COMMON}/dev_zero.c"
    "${COMMON}/dev_bswap.c"
    "${COMMON}/dev_ram.c"
-   "${COMMON}/dev_rom.c"
    "${COMMON}/dev_nvram.c"
    "${COMMON}/dev_bootflash.c"
    "${COMMON}/dev_flash.c"

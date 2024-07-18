@@ -22,7 +22,6 @@
 #include "device.h"
 #include "ppc32_mem.h"
 #include "dev_mpc860.h"
-#include "dev_rom.h"
 #include "dev_c1700.h"
 #include "dev_c1700_iofpga.h"
 

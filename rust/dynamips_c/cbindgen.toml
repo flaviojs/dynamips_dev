@@ -97,6 +97,7 @@ struct gt_data;
 
 // arrays with unknown size
 extern unsigned char mips64_microcode[];
+extern unsigned char ppc32_microcode[];
 
 // volatile types (cbindgen does not emit the C volatile type qualifier)
 typedef timer_entry_t *volatile Volatile_____timer_entry_t;

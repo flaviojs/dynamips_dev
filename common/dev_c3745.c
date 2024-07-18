@@ -20,7 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "dev_rom.h"
 #include "dev_c3745.h"
 #include "dev_c3745_iofpga.h"
 

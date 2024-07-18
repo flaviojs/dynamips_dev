@@ -22,7 +22,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "dev_rom.h"
 #include "dev_dec21140.h"
 #include "dev_i8254x.h"
 #include "dev_c6msfc1.h"

@@ -17,7 +17,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "dev_rom.h"
 #include "ppc32_mem.h"
 #include "ppc32_vmtest.h"
 

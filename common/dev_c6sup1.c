@@ -19,7 +19,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "dev_rom.h"
 #include "dev_am79c971.h"
 #include "dev_i8254x.h"
 #include "dev_c6sup1.h"

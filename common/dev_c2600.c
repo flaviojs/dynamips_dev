@@ -20,7 +20,6 @@
 #include "dynamips.h"
 #include "ppc32_mem.h"
 #include "dev_mpc860.h"
-#include "dev_rom.h"
 #include "dev_c2600.h"
 #include "dev_c2600_iofpga.h"
 

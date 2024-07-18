@@ -20,7 +20,6 @@
 #include "dynamips.h"
 #include "ppc32_mem.h"
 #include "dev_mv64460.h"
-#include "dev_rom.h"
 #include "dev_c7200.h"
 #include "dev_c7200_mpfpga.h"
 

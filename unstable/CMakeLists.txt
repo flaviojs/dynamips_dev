@@ -58,7 +58,6 @@ set ( _files
    "${LOCAL}/ppc32_jit.c"
    "${LOCAL}/ppc32_exec.c"
    "${LOCAL}/ppc32_vmtest.c"
-   "${COMMON}/dev_rom.c"
    "${COMMON}/dev_mpc860.c"
    "${COMMON}/dev_mv64460.c"
    "${COMMON}/dev_plx.c"

@@ -18,7 +18,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "dev_rom.h"
 #include "dev_c2691.h"
 #include "dev_c2691_iofpga.h"
 

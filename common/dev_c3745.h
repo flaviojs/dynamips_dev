@@ -15,7 +15,6 @@
 #include "utils.h"
 #include "device.h"
 #include "nmc93cX6.h"
-#include "dev_gt.h"
 #include "vm.h"
 #include "rust_dynamips_c.h"
 

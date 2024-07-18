@@ -19,7 +19,6 @@
 #include "utils.h"
 #include "dev_am79c971.h"
 #include "dev_nm_16esw.h"
-#include "dev_gt.h"
 #include "dev_c3725.h"
 
 /* Multi-Ethernet NM with Am79c971 chips */

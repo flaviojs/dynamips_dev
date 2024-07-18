@@ -20,7 +20,6 @@
 #include "memory.h"
 #include "device.h"
 #include "pci_io.h"
-#include "dev_gt.h"
 #include "dev_rom.h"
 #include "dev_c3600.h"
 #include "dev_c3600_iofpga.h"

@@ -15,6 +15,7 @@ use crate::dynamips_common::*;
 #[cfg(feature = "ENABLE_GEN_ETH")]
 use crate::gen_eth::*;
 use crate::net_io::*;
+use crate::net_io_bridge::*;
 use crate::net_io_filter::*;
 use crate::plugin::*;
 #[cfg(feature = "USE_PROFILER")]

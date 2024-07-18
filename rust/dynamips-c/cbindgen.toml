@@ -71,6 +71,10 @@ typedef struct vm_instance vm_instance_t;
 typedef struct mips64_jit_tcb mips64_jit_tcb_t;
 #endif
 
+// arrays with unknown size
+extern unsigned char mips64_microcode[];
+extern unsigned char ppc32_microcode[];
+
 // volatile types (cbindgen does not emit the C volatile type qualifier)
 typedef timer_entry_t *volatile Volatile_____timer_entry_t;
 typedef volatile int Volatile_c_int;

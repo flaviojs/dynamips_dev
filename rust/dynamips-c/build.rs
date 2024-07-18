@@ -88,9 +88,52 @@ fn generate_private_pcap_rs() {
     rs_bindings.write_to_file(&rs_path).expect("Failed to write _private_pcap.rs.");
 }
 
+/// Extract ROM code+data from an ELF file.
+/// The contents will be included as an array in dev_rom.
+///
+/// Replicates the code in rom2c.
+fn dump_microcode(input_file: &str, output_file: &str, target_addr: u64) {
+    use elf::endian::AnyEndian;
+    use elf::ElfBytes;
+    use std::env;
+    use std::fs;
+    use std::path::Path;
+
+    println!("cargo::rerun-if-changed={}", input_file);
+    eprintln!("Extracting ROM from ELF file {:?} to {:?}...", input_file, output_file);
+
+    let mut data: Vec<u8> = Vec::new();
+
+    // read data
+    let input_data = fs::read(input_file).expect("input data");
+    let slice = input_data.as_slice();
+    let elf_file = ElfBytes::<AnyEndian>::minimal_parse(slice).expect("elf file");
+    let elf_segments = elf_file.segments().expect("elf segments");
+    for segment in elf_segments.iter() {
+        if segment.p_vaddr == target_addr {
+            assert!(segment.p_type == elf::abi::PT_LOAD, "expect loadable segment");
+            assert!(segment.p_flags & elf::abi::PF_R != 0, "expect readable segment");
+            let segment_data: &[u8] = elf_file.segment_data(&segment).expect("segment data");
+
+            data.extend_from_slice(segment_data);
+            // TODO rom2c appended all segments with the target address... should we stop instead?
+        }
+    }
+
+    // write data
+    assert!(!data.is_empty(), "expect data");
+    let out_dir = env::var("OUT_DIR").expect("OUT_DIR");
+    let output_path = Path::new(&out_dir).join(output_file);
+    fs::write(output_path, data).expect("write output data");
+}
+
 fn main() {
     compile_private_c();
     probe_and_emit_config();
     #[cfg(feature = "ENABLE_GEN_ETH")]
     generate_private_pcap_rs();
+    dump_microcode("../../stable/mips64_microcode", "mips64_microcode_dump_stable", 0xbfc00000);
+    dump_microcode("../../stable/ppc32_microcode", "ppc32_microcode_dump_stable", 0xfff00000);
+    dump_microcode("../../unstable/mips64_microcode", "mips64_microcode_dump_unstable", 0xbfc00000);
+    dump_microcode("../../unstable/ppc32_microcode", "ppc32_microcode_dump_unstable", 0xfff00000);
 }

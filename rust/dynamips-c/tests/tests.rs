@@ -121,3 +121,17 @@ fn test_M_LIST() {
         assert_eq!(s3_data, S::default());
     }
 }
+
+#[test]
+fn test_N_ETH_HLEN() {
+    use dynamips_c::net::*;
+    // cbindgen 0.27.0 does not support size_of
+    assert_eq!(N_ETH_HLEN, size_of::<n_eth_hdr_t>());
+}
+
+#[test]
+fn test_N_ISL_HDR_SIZE() {
+    use dynamips_c::net::*;
+    // cbindgen 0.27.0 does not support size_of
+    assert_eq!(N_ISL_HDR_SIZE, size_of::<n_eth_llc_hdr_t>() + size_of::<n_eth_isl_hdr_t>());
+}

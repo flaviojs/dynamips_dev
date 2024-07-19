@@ -11,6 +11,9 @@ use std::ptr::write_volatile;
 #[no_mangle]
 pub extern "C" fn _export(
     _: *mut crate::dynamips_common::m_int16_t,
+    _: *mut crate::net::n_eth_dot1q_hdr_t,
+    _: *mut crate::net::n_eth_hdr_t,
+    _: *mut crate::net::n_eth_isl_hdr_t,
     _: *mut crate::utils::hreg_map,
     _: *mut crate::utils::insn_exec_page_t,
     _: *mut crate::utils::insn_tblock_fptr,

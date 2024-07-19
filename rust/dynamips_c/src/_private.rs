@@ -172,7 +172,11 @@ impl sprintf::Printf for CustomPrintf<&[c_char]> {
 }
 
 // dynamips C functions
-extern "C" {}
+extern "C" {
+    pub fn dev_create(name: *mut c_char) -> *mut crate::device::vdevice;
+    pub fn vm_map_device(vm: *mut crate::vm::vm_instance_t, dev: *mut crate::device::vdevice, base_addr: crate::dynamips_common::m_uint64_t) -> c_int;
+    pub fn vm_unbind_device(vm: *mut crate::vm::vm_instance_t, dev: *mut crate::device::vdevice) -> c_int;
+}
 
 // _private C functions
 extern "C" {

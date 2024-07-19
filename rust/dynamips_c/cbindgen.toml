@@ -93,6 +93,7 @@ typedef struct vm_obj vm_obj_t;
 typedef struct vm_platform vm_platform_t;
 
 // opaque types
+struct am79c971_data;
 struct gt_data;
 
 // arrays with unknown size

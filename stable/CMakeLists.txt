@@ -76,7 +76,6 @@ set ( _files
    "${COMMON}/dev_plx6520cb.c"
    "${COMMON}/dev_ns16552.c"
    "${COMMON}/dev_dec21140.c"
-   "${COMMON}/dev_am79c971.c"
    "${COMMON}/dev_i8254x.c"
    "${COMMON}/dev_i8255x.c"
    "${COMMON}/dev_mueslix.c"

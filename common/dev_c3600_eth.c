@@ -17,7 +17,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "dev_am79c971.h"
 #include "dev_nm_16esw.h"
 #include "dev_c3600.h"
 #include "dev_c3600_bay.h"

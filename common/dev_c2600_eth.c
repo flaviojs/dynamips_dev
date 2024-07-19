@@ -18,7 +18,6 @@
 
 #include "utils.h"
 #include "vm.h"
-#include "dev_am79c971.h"
 #include "dev_nm_16esw.h"
 #include "dev_c2600.h"
 

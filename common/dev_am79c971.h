@@ -14,10 +14,6 @@
 #include "cpu.h"
 #include "vm.h"
 
-/* Interface type */
-#define AM79C971_TYPE_100BASE_TX  1  /* 100baseTX */
-#define AM79C971_TYPE_10BASE_T    2  /* 10baseT */
-
 /* Generic AMD Am79c971 initialization code */
 struct am79c971_data *
 dev_am79c971_init(vm_instance_t *vm,char *name,int interface_type,

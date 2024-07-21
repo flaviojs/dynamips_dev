@@ -59,6 +59,7 @@ typedef struct registry registry_t;
 typedef struct registry_entry registry_entry_t;
 typedef struct rfc_array rfc_array_t;
 typedef struct rfc_eqclass rfc_eqclass_t;
+typedef struct sockaddr sockaddr;
 typedef struct timer_entry timer_entry_t;
 typedef struct timer_queue timer_queue_t;
 typedef struct tlb_entry tlb_entry_t;

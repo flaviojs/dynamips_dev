@@ -1980,7 +1980,7 @@ static void bcm5600_send_pkt_push_dot1q(struct nm_16esw_data *d,
       memcpy(p->rewr_pkt,p->pkt,(N_ETH_HLEN - 2));
 
       hdr = (n_eth_dot1q_hdr_t *)p->rewr_pkt;
-      hdr->type    = htons(N_ETH_PROTO_DOT1Q);
+      hdr->type_   = htons(N_ETH_PROTO_DOT1Q);
       hdr->vlan_id = htons(p->real_vlan);
 
       memcpy(p->rewr_pkt + sizeof(n_eth_dot1q_hdr_t),
@@ -2135,7 +2135,7 @@ static int bcm5600_handle_rx_pkt(struct nm_16esw_data *d,struct bcm5600_pkt *p)
    eth_hdr = (n_eth_dot1q_hdr_t *)p->pkt;
 
    /* Determine VLAN */
-   if (ntohs(eth_hdr->type) != N_ETH_PROTO_DOT1Q) {
+   if (ntohs(eth_hdr->type_) != N_ETH_PROTO_DOT1Q) {
       p->orig_vlan = -1;
       p->real_vlan = port_entry[0] & BCM5600_PTABLE_VLAN_TAG_MASK;
 
@@ -2221,7 +2221,7 @@ static int bcm5600_handle_tx_pkt(struct nm_16esw_data *d,
       /* The packet must be tagged so that we can determine the VLAN */
       eth_hdr = (n_eth_dot1q_hdr_t *)p->pkt;
 
-      if (ntohs(eth_hdr->type) != N_ETH_PROTO_DOT1Q) {
+      if (ntohs(eth_hdr->type_) != N_ETH_PROTO_DOT1Q) {
          BCM_LOG(d,"bcm5600_handle_tx_pkt: untagged packet ?\n");
          return(FALSE);
       }

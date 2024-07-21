@@ -2565,7 +2565,7 @@ static int gt_eth_handle_rxqueue(struct gt_data *d,u_int port_id,u_int queue,
    if (addr_action == 1)
       rxd0.cmd_stat |= GT_RXDESC_M;
 
-   if (ntohs(hdr->type) <= N_ETH_MTU)   /* 802.3 frame */
+   if (ntohs(hdr->type_) <= N_ETH_MTU)   /* 802.3 frame */
       rxd0.cmd_stat |= GT_RXDESC_FT;
 
    gt_sdma_desc_write(d,rx_start,&rxd0);

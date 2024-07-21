@@ -202,7 +202,11 @@ pub use function_name::named;
 pub use libc;
 pub use libc::size_t;
 pub use libc::ssize_t;
+#[cfg(target_os = "linux")]
+pub use linux_raw_sys;
 pub use paste::paste;
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub use pcap_sys::pcap_t;
 pub use setjmp;
 pub use std::ffi::c_char;
 pub use std::ffi::c_double;

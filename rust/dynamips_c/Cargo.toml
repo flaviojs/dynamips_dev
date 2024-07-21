@@ -28,7 +28,7 @@ cc = "1.0"
 
 [features]
 ENABLE_LINUX_ETH = []
-ENABLE_GEN_ETH = []
+ENABLE_GEN_ETH = ["pcap-sys"]
 ENABLE_IPV6 = []
 USE_UNSTABLE = []
 fastcall= []

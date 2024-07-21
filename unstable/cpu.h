@@ -18,19 +18,6 @@
 #define CPU_MIPS64(cpu) (&(cpu)->sp.mips64_cpu)
 #define CPU_PPC32(cpu)  (&(cpu)->sp.ppc32_cpu)
 
-/* Get CPU instruction pointer */
-static forced_inline m_uint64_t cpu_get_pc(cpu_gen_t *cpu)
-{
-   switch(cpu->type_) {
-      case CPU_TYPE_MIPS64:
-         return(CPU_MIPS64(cpu)->pc);
-      case CPU_TYPE_PPC32:
-         return((m_uint64_t)CPU_PPC32(cpu)->ia);
-      default:
-         return(0);
-   }
-}
-
 /* Get CPU performance counter */
 static forced_inline m_uint32_t cpu_get_perf_counter(cpu_gen_t *cpu)
 {

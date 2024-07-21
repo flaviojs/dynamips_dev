@@ -13,35 +13,6 @@
 #include "cpu.h"
 #include "vm.h"
 
-/* Device Flags */
-#define VDEVICE_FLAG_NO_MTS_MMAP  0x01  /* Prevent MMAPed access by MTS */
-#define VDEVICE_FLAG_CACHING      0x02  /* Device does support caching */
-#define VDEVICE_FLAG_REMAP        0x04  /* Physical address remapping */
-#define VDEVICE_FLAG_SYNC         0x08  /* Forced sync */
-#define VDEVICE_FLAG_SPARSE       0x10  /* Sparse device */
-#define VDEVICE_FLAG_GHOST        0x20  /* Ghost device */
-
-#define VDEVICE_PTE_DIRTY  0x01
-
-typedef void *(*dev_handler_t)(cpu_gen_t *cpu,struct vdevice *dev,
-                               m_uint32_t offset,u_int op_size,u_int op_type,
-                               m_uint64_t *data);
-
-/* Virtual Device */
-struct vdevice {
-   char *name;
-   u_int id;
-   m_uint64_t phys_addr;
-   m_uint32_t phys_len;
-   m_iptr_t host_addr;
-   void *priv_data;
-   int flags;
-   int fd;
-   dev_handler_t handler;
-   m_iptr_t *sparse_map;
-   struct vdevice *next,**pprev;
-};
-
 /* PCI part */
 #include "pci_dev.h"
 

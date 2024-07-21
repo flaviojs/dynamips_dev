@@ -32,6 +32,13 @@ after_includes = """
 #define JIT_HOST_NREG  0
 #endif
 
+// forward declarations to avoid the warning: ‘struct’ declared inside parameter list will not be visible outside of this definition or declaration
+// see https://stackoverflow.com/a/16831951
+// (cbindgen does not output struct forward declarations correctly)
+struct cisco_card_driver;
+struct cisco_card;
+struct vdevice;
+
 // cbindgen 0.26.0 puts the typedef of a struct after the struct declaration,
 // so structs that use that typedef internally need a forward declaration of the typedef
 typedef struct atmsw_table atmsw_table_t;

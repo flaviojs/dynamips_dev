@@ -338,3 +338,14 @@ pub unsafe extern "C" fn cpu_group_rebuild_mts(group: *mut cpu_group_t) -> c_int
 
     0
 }
+
+/// Get CPU instruction pointer
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn cpu_get_pc(cpu: *mut cpu_gen_t) -> m_uint64_t {
+    match (*cpu).type_ {
+        CPU_TYPE_MIPS64 => (*CPU_MIPS64(cpu)).pc,
+        CPU_TYPE_PPC32 => (*CPU_PPC32(cpu)).ia as m_uint64_t,
+        _ => 0,
+    }
+}

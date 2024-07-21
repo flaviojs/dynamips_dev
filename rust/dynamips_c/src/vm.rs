@@ -306,3 +306,12 @@ pub unsafe extern "C" fn vm_clear_irq(vm: *mut vm_instance_t, irq: u_int) {
         (*vm).clear_irq.unwrap()(vm, irq);
     }
 }
+
+/// Set an IRQ for a VM
+#[no_mangle]
+#[inline]
+pub unsafe extern "C" fn vm_set_irq(vm: *mut vm_instance_t, irq: u_int) {
+    if (*vm).set_irq.is_some() {
+        (*vm).set_irq.unwrap()(vm, irq);
+    }
+}

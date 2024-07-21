@@ -1,5 +1,13 @@
 //! PowerPC (32-bit) generic routines.
 
+extern "C" {
+    pub fn ppc32_dump_regs(cpu: *mut cpu_gen_t);
+    pub fn ppc32_timer_irq_run(cpu: *mut cpu_ppc_t) -> *mut c_void;
+    pub fn ppc32_trigger_exception(cpu: *mut cpu_ppc_t, exc_vector: u_int);
+    pub fn ppc32_trigger_irq(cpu: *mut cpu_ppc_t);
+    pub fn ppc32_trigger_timer_irq(cpu: *mut cpu_ppc_t);
+}
+
 use crate::_private::*;
 use crate::cpu::*;
 use crate::dynamips_common::*;
@@ -510,4 +518,55 @@ pub unsafe extern "C" fn ppc32_reset(cpu: *mut cpu_ppc_t) -> c_int {
     // Flush JIT structures
     ppc32_jit_flush(cpu, 0);
     0
+}
+
+/// Condition Register (CR) is accessed through 8 fields of 4 bits
+#[macro_export]
+macro_rules! ppc32_get_cr_field {
+    ($n:expr) => {
+        (($n) >> 2)
+    };
+}
+pub use ppc32_get_cr_field;
+#[macro_export]
+macro_rules! ppc32_get_cr_bit {
+    ($n:expr) => {
+        (!($n) & 0x03)
+    };
+}
+pub use ppc32_get_cr_bit;
+
+/// Get the full CR register
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn ppc32_get_cr(cpu: *mut cpu_ppc_t) -> m_uint32_t {
+    let mut cr: m_uint32_t = 0;
+
+    for i in 0..8 {
+        cr |= (*cpu).cr_fields[i] << (28 - (i << 2));
+    }
+
+    cr
+}
+
+/// Get a CR bit
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn ppc32_read_cr_bit(cpu: *mut cpu_ppc_t, bit: u_int) -> m_uint32_t {
+    let res: m_uint32_t = (*cpu).cr_fields[ppc32_get_cr_field!(bit) as usize] >> ppc32_get_cr_bit!(bit);
+    res & 0x01
+}
+
+/// Set a CR bit
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn ppc32_set_cr_bit(cpu: *mut cpu_ppc_t, bit: u_int) {
+    (*cpu).cr_fields[ppc32_get_cr_field!(bit) as usize] |= 1 << ppc32_get_cr_bit!(bit);
+}
+
+/// Clear a CR bit
+#[inline(always)]
+#[no_mangle]
+pub unsafe extern "C" fn ppc32_clear_cr_bit(cpu: *mut cpu_ppc_t, bit: u_int) {
+    (*cpu).cr_fields[ppc32_get_cr_field!(bit) as usize] &= !(1 << ppc32_get_cr_bit!(bit));
 }

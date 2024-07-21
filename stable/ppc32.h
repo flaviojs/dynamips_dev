@@ -19,18 +19,6 @@
 #define PPC32_CR_FIELD_OFFSET(f) \
    (OFFSET(cpu_ppc_t,cr_fields)+((f) * sizeof(u_int)))
 
-/* Get the full CR register */
-static forced_inline m_uint32_t ppc32_get_cr(cpu_ppc_t *cpu)
-{
-   m_uint32_t cr = 0;
-   int i;
-
-   for(i=0;i<8;i++)
-      cr |= cpu->cr_fields[i] << (28 - (i << 2));
-
-   return(cr);
-}
-
 /* Set the CR fields given a CR value */
 static forced_inline void ppc32_set_cr(cpu_ppc_t *cpu,m_uint32_t cr)
 {
@@ -38,27 +26,6 @@ static forced_inline void ppc32_set_cr(cpu_ppc_t *cpu,m_uint32_t cr)
 
    for(i=0;i<8;i++)
       cpu->cr_fields[i] = (cr >> (28 - (i << 2))) & 0x0F;
-}
-
-/* Get a CR bit */
-static forced_inline m_uint32_t ppc32_read_cr_bit(cpu_ppc_t *cpu,u_int bit)
-{
-   m_uint32_t res;
-
-   res = cpu->cr_fields[ppc32_get_cr_field(bit)] >> ppc32_get_cr_bit(bit);
-   return(res & 0x01);
-}
-
-/* Set a CR bit */
-static forced_inline void ppc32_set_cr_bit(cpu_ppc_t *cpu,u_int bit)
-{
-   cpu->cr_fields[ppc32_get_cr_field(bit)] |= 1 << ppc32_get_cr_bit(bit);
-}
-
-/* Clear a CR bit */
-static forced_inline void ppc32_clear_cr_bit(cpu_ppc_t *cpu,u_int bit)
-{
-   cpu->cr_fields[ppc32_get_cr_field(bit)] &= ~(1 << ppc32_get_cr_bit(bit));
 }
 
 /* Reset a PowerPC CPU */

@@ -1,10 +1,15 @@
 //! PowerPC MMU.
 
 use crate::_private::*;
+use crate::dynamips_common::*;
 use crate::ppc32::*;
 
 extern "C" {
+    pub fn ppc32_get_bat_spr(cpu: *mut cpu_ppc_t, spr: u_int) -> m_uint32_t;
+    pub fn ppc32_mem_invalidate_cache(cpu: *mut cpu_ppc_t);
     pub fn ppc32_mem_restart(cpu: *mut cpu_ppc_t) -> c_int;
+    pub fn ppc32_set_bat_spr(cpu: *mut cpu_ppc_t, spr: u_int, val: m_uint32_t);
+    pub fn ppc32_set_sdr1(cpu: *mut cpu_ppc_t, sdr1: m_uint32_t) -> c_int;
 }
 
 /// Set a BAT register

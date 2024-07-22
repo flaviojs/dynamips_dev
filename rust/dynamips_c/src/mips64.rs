@@ -15,6 +15,7 @@ use crate::utils::*;
 use crate::vm::*;
 
 extern "C" {
+    pub fn mips64_cca_cached(val: m_uint8_t) -> c_int;
     pub fn mips64_clear_irq(cpu: *mut cpu_mips_t, irq: m_uint8_t);
     pub fn mips64_dump_regs(cpu: *mut cpu_gen_t);
     #[cfg(feature = "USE_UNSTABLE")]
@@ -196,6 +197,16 @@ pub const MIPS_TLB_C_SHIFT: c_int = 3;
 pub const MIPS_CP0_LO_G_MASK: m_uint64_t = 0x00000001; // "Global" in Lo0/1 reg
 pub const MIPS_CP0_HI_SAFE_MASK: m_uint64_t = 0xffffe0ff; // Safety mask for Hi reg
 pub const MIPS_CP0_LO_SAFE_MASK: m_uint64_t = 0x7fffffff; // Safety mask for Lo reg
+
+/// results for TLB lookups // TODO enum
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_TLB_LOOKUP_OK: c_int = 0; // Entry found
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_TLB_LOOKUP_INVALID: c_int = 1; // Invalid entry found
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_TLB_LOOKUP_MISS: c_int = 2; // No matching entry found
+#[cfg(feature = "USE_UNSTABLE")]
+pub const MIPS_TLB_LOOKUP_MOD: c_int = 3; // Read-only
 
 /// Minimum page size: 4 Kb
 pub const MIPS_MIN_PAGE_SHIFT: c_int = 12;

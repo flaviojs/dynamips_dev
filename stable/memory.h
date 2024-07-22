@@ -10,10 +10,7 @@
 
 #include <sys/types.h>
 #include "utils.h"
-
-/* MTS operation */
-#define MTS_READ  0
-#define MTS_WRITE 1
+#include "rust_dynamips_c.h"
 
 /* 0.5GB value */
 #define MTS_SIZE_512M     0x20000000

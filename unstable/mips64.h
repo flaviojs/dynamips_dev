@@ -23,14 +23,6 @@
 #define MIPS_CP0_XCONTEXT_BADVPN2_SHIFT  4
 #define MIPS_CP0_XCONTEXT_R_SHIFT        31
 
-/* results for TLB lookups */
-enum {
-   MIPS_TLB_LOOKUP_OK = 0,     /* Entry found */
-   MIPS_TLB_LOOKUP_INVALID,    /* Invalid entry found */
-   MIPS_TLB_LOOKUP_MISS,       /* No matching entry found */
-   MIPS_TLB_LOOKUP_MOD,        /* Read-only */
-};
-
 /* Exceptions vectors */
 enum {
    MIPS_EXCVECT_RST = 0,          /* Soft Reset, Reset, NMI */

@@ -12,17 +12,6 @@
 
 #include "utils.h" 
 
-/* CP0 Context register */
-#define MIPS_CP0_CONTEXT_VPN2_MASK       0xffffe000ULL  /* applied to addr */
-#define MIPS_CP0_CONTEXT_BADVPN2_MASK    0x7fffffULL
-#define MIPS_CP0_CONTEXT_BADVPN2_SHIFT   4
-
-/* CP0 XContext register */
-#define MIPS_CP0_XCONTEXT_VPN2_MASK      0xffffffe000ULL
-#define MIPS_CP0_XCONTEXT_RBADVPN2_MASK  0x1ffffffffULL
-#define MIPS_CP0_XCONTEXT_BADVPN2_SHIFT  4
-#define MIPS_CP0_XCONTEXT_R_SHIFT        31
-
 /* Exceptions vectors */
 enum {
    MIPS_EXCVECT_RST = 0,          /* Soft Reset, Reset, NMI */

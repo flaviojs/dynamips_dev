@@ -23,23 +23,6 @@
 #define MIPS_CP0_XCONTEXT_BADVPN2_SHIFT  4
 #define MIPS_CP0_XCONTEXT_R_SHIFT        31
 
-/* TLB masks and shifts */
-#define MIPS_TLB_PAGE_MASK     0x01ffe000ULL
-#define MIPS_TLB_PAGE_SHIFT    13
-#define MIPS_TLB_VPN2_MASK_32  0xffffe000ULL
-#define MIPS_TLB_VPN2_MASK_64  0xc00000ffffffe000ULL
-#define MIPS_TLB_PFN_MASK      0x3fffffc0ULL
-#define MIPS_TLB_ASID_MASK     0x000000ff     /* "asid" in EntryHi */
-#define MIPS_TLB_G_MASK        0x00001000ULL  /* "Global" in EntryHi */
-#define MIPS_TLB_V_MASK        0x2ULL         /* "Valid" in EntryLo */
-#define MIPS_TLB_D_MASK        0x4ULL         /* "Dirty" in EntryLo */
-#define MIPS_TLB_C_MASK        0x38ULL        /* Page Coherency Attribute */
-#define MIPS_TLB_C_SHIFT       3
-
-#define MIPS_CP0_LO_G_MASK     0x00000001ULL  /* "Global" in Lo0/1 reg */
-#define MIPS_CP0_LO_SAFE_MASK  0x3fffffffULL  /* Safety mask for Lo reg */
-#define MIPS_CP0_HI_SAFE_MASK  0xc00000ffffffe0ffULL  /* Same for EntryHi */
-
 /* results for TLB lookups */
 enum {
    MIPS_TLB_LOOKUP_OK = 0,     /* Entry found */
@@ -109,11 +92,6 @@ enum {
 
 /* Number of registers in CP1 */
 #define MIPS64_CP1_REG_NR   32
-
-/* Number of TLB entries */
-#define MIPS64_TLB_STD_ENTRIES  48
-#define MIPS64_TLB_MAX_ENTRIES  64
-#define MIPS64_TLB_IDX_MASK     0x3f   /* 6 bits */
 
 /* Number of instructions per page */
 #define MIPS_INSN_PER_PAGE (MIPS_MIN_PAGE_SIZE/sizeof(mips_insn_t))

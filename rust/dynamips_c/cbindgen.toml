@@ -32,6 +32,7 @@ after_includes = """
 include = [
 ]
 exclude = [
+    "ARCH_BYTE_ORDER", # depends on target_endian
 ]
 
 [layout]

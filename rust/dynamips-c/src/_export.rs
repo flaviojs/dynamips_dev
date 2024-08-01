@@ -10,6 +10,14 @@ use std::ptr::write_volatile;
 #[rustfmt::skip]
 #[no_mangle]
 pub extern "C" fn _export(
+    _: *mut crate::dynamips_common::m_int16_t,
+    _: *mut crate::dynamips_common::m_int32_t,
+    _: *mut crate::dynamips_common::m_int64_t,
+    _: *mut crate::dynamips_common::m_iptr_t,
+    _: *mut crate::dynamips_common::m_tmcnt_t,
+    _: *mut crate::dynamips_common::m_uint16_t,
+    _: *mut crate::dynamips_common::m_uint32_t,
+    _: *mut crate::dynamips_common::m_uint8_t,
 ) {}
 
 // Non-standard unsigned integers

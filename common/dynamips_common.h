@@ -39,19 +39,6 @@
 
 #include <pthread.h>
 
-/* True/False definitions */
-#ifndef FALSE
-#define FALSE 0
-#endif
-
-#ifndef TRUE
-#define TRUE  1
-#endif
-
-/* Endianness */
-#define ARCH_BIG_ENDIAN     0x4321
-#define ARCH_LITTLE_ENDIAN  0x1234
-
 #if defined(PPC) || defined(__powerpc__) || defined(__ppc__)
 #define ARCH_BYTE_ORDER ARCH_BIG_ENDIAN
 #elif defined(__sparc) || defined(__sparc__)
@@ -115,22 +102,6 @@
 #ifndef _not_aligned
 #define _not_aligned __attribute__ ((aligned (1)))
 #endif
-
-/* Common types */
-typedef unsigned char m_uint8_t;
-typedef signed char m_int8_t;
-
-typedef unsigned short m_uint16_t;
-typedef signed short m_int16_t;
-
-typedef unsigned int m_uint32_t;
-typedef signed int m_int32_t;
-
-typedef unsigned long long m_uint64_t;
-typedef signed long long m_int64_t;
-
-typedef unsigned long m_iptr_t;
-typedef m_uint64_t m_tmcnt_t;
 
 /* Max and min macro */
 #define m_max(a,b) (((a) > (b)) ? (a) : (b))

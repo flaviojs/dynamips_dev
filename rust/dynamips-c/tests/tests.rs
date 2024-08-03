@@ -76,3 +76,48 @@ fn test_OFFSET() {
     assert_eq!(OFFSET!(S, offset4), 4);
     assert_eq!(OFFSET!(S, offset8), 8);
 }
+
+#[cfg(feature = "USE_UNSTABLE")]
+#[test]
+fn test_M_LIST() {
+    use dynamips_c::_private::*;
+    use dynamips_c::utils::*;
+    unsafe {
+        #[derive(Debug, Copy, Clone, PartialEq)]
+        struct S {
+            linked_list_next: *mut S,
+            linked_list_pprev: *mut *mut S,
+        }
+        impl Default for S {
+            fn default() -> S {
+                S { linked_list_next: null_mut(), linked_list_pprev: null_mut() }
+            }
+        }
+        let mut head: *mut S = null_mut();
+        let mut s1_data: S = S::default();
+        let mut s2_data: S = S::default();
+        let mut s3_data: S = S::default();
+        let s1: *mut S = addr_of_mut!(s1_data);
+        let s2: *mut S = addr_of_mut!(s2_data);
+        let s3: *mut S = addr_of_mut!(s3_data);
+
+        M_LIST_ADD!(s1, head, linked_list);
+        M_LIST_ADD!(s2, head, linked_list);
+        M_LIST_ADD!(s3, head, linked_list);
+        assert_eq!(head, s3);
+        assert_eq!(s3_data.linked_list_next, s2);
+        assert_eq!(s2_data.linked_list_next, s1);
+        assert_eq!(s1_data.linked_list_next, null_mut());
+        assert_eq!(s1_data.linked_list_pprev, addr_of_mut!(s2_data.linked_list_next));
+        assert_eq!(s2_data.linked_list_pprev, addr_of_mut!(s3_data.linked_list_next));
+        assert_eq!(s3_data.linked_list_pprev, addr_of_mut!(head));
+
+        M_LIST_REMOVE!(s2, linked_list); // remove middle
+        M_LIST_REMOVE!(s3, linked_list); // remove first
+        M_LIST_REMOVE!(s1, linked_list); // remove last
+        assert_eq!(head, null_mut());
+        assert_eq!(s1_data, S::default());
+        assert_eq!(s2_data, S::default());
+        assert_eq!(s3_data, S::default());
+    }
+}

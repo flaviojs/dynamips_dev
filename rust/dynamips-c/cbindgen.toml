@@ -17,6 +17,11 @@ after_includes = """
 #endif
 
 #define _attribute_aligned(n) __attribute__ ((aligned(n)))
+
+// cbindgen 0.27.0 puts the typedef of a struct after the struct declaration,
+// so structs that use that typedef internally need a forward declaration of the typedef
+typedef struct insn_exec_page insn_exec_page_t;
+typedef struct m_list m_list_t;
 """
 
 [defines]

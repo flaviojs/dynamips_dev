@@ -17,6 +17,25 @@ after_includes = """
 #endif
 
 #define _attribute_aligned(n) __attribute__ ((aligned(n)))
+
+/* Host CPU Types */
+#define CPU_x86    0
+#define CPU_amd64  1
+#define CPU_nojit  2
+
+/* Number of host registers available for JIT */
+#if JIT_CPU == CPU_x86
+#define JIT_HOST_NREG  8
+#elif JIT_CPU == CPU_amd64
+#define JIT_HOST_NREG  16
+#else
+#define JIT_HOST_NREG  0
+#endif
+
+// cbindgen 0.26.0 puts the typedef of a struct after the struct declaration,
+// so structs that use that typedef internally need a forward declaration of the typedef
+typedef struct insn_exec_page insn_exec_page_t;
+typedef struct m_list m_list_t;
 """
 
 [defines]
@@ -33,6 +52,8 @@ include = [
 ]
 exclude = [
     "ARCH_BYTE_ORDER", # depends on target_endian
+    "JIT_CPU", # depends on target_arch
+    "JIT_HOST_NREG", # depends on target_arch
 ]
 
 [layout]

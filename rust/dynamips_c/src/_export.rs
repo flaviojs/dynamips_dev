@@ -20,6 +20,16 @@ pub extern "C" fn _export(
     _: *mut crate::dynamips_common::m_uint32_t,
     _: *mut crate::dynamips_common::m_uint64_t,
     _: *mut crate::dynamips_common::m_uint8_t,
+    _: *mut crate::utils::fd_pool_t,
+    _: *mut crate::utils::hreg_map,
+    _: *mut crate::utils::insn_exec_page_t,
+    _: *mut crate::utils::insn_tblock_fptr,
+    _: *mut crate::utils::m_list_t,
+    _: *mut crate::utils::mips_insn_t,
+    _: *mut crate::utils::mts_map_t,
+    _: *mut crate::utils::mts32_entry_t,
+    _: *mut crate::utils::mts64_entry_t,
+    _: *mut crate::utils::ppc_insn_t,
 ) {}
 
 // Non-standard unsigned integers

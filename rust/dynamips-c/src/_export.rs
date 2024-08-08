@@ -16,12 +16,8 @@ pub extern "C" fn _export(
     _: *mut crate::net::n_eth_isl_hdr_t,
     _: *mut crate::timer::timer_entry_t,
     _: *mut crate::utils::hreg_map,
-    _: *mut crate::utils::insn_exec_page_t,
     _: *mut crate::utils::insn_tblock_fptr,
-    _: *mut crate::utils::mips_insn_t,
     _: *mut crate::utils::mts_map_t,
-    _: *mut crate::utils::mts32_entry_t,
-    _: *mut crate::utils::mts64_entry_t,
     _: *mut crate::utils::ppc_insn_t,
 ) {}
 

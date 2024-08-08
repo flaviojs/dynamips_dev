@@ -23,6 +23,7 @@ typedef struct sockaddr sockaddr;
 
 // cbindgen 0.27.0 puts the typedef of a struct after the struct declaration,
 // so structs that use that typedef internally need a forward declaration of the typedef
+typedef struct cpu_mips cpu_mips_t;
 typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;
@@ -42,6 +43,8 @@ typedef struct timer_queue timer_queue_t;
 // volatile types (cbindgen does not emit the C volatile type qualifier)
 typedef timer_entry_t *volatile Volatile_____timer_entry_t;
 typedef volatile int Volatile_c_int;
+typedef volatile unsigned int Volatile_u_int;
+typedef volatile unsigned long long Volatile_m_uint64_t;
 """
 
 [defines]

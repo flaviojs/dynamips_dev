@@ -224,3 +224,13 @@ fn test_parser() {
         }
     }
 }
+
+#[test]
+pub fn test_MIPS_INSN_PER_PAGE() {
+    use dynamips_c::mips64::*;
+    use dynamips_c::utils::*;
+
+    // cbindgen 0.26.0 does not support size_of
+    assert_eq!(size_of::<mips_insn_t>(), 4);
+    assert_eq!(MIPS_INSN_PER_PAGE, MIPS_MIN_PAGE_SIZE / size_of::<mips_insn_t>());
+}

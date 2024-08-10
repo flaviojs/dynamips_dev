@@ -23,6 +23,12 @@ pub extern "C" fn _export(
     _: *mut crate::vm::vm_obj_t,
     _: *mut crate::vm::vm_platform_list,
 ) {}
+#[cfg(feature = "USE_UNSTABLE")]
+#[rustfmt::skip]
+#[no_mangle]
+pub extern "C" fn _export_unstable(
+    _: *mut crate::tcb::tsg_stats,
+) {}
 
 // Non-standard unsigned integers
 pub type u_char = c_uchar;

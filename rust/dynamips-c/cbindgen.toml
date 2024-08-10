@@ -25,6 +25,8 @@ typedef struct sockaddr sockaddr;
 // so structs that use that typedef internally need a forward declaration of the typedef
 typedef struct cpu_mips cpu_mips_t;
 typedef struct cpu_ppc cpu_ppc_t;
+typedef struct cpu_tb cpu_tb_t;
+typedef struct cpu_tc cpu_tc_t;
 typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct hash_table hash_table_t;

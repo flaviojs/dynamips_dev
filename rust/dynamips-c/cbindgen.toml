@@ -40,6 +40,7 @@ typedef struct registry registry_t;
 typedef struct registry_entry registry_entry_t;
 typedef struct timer_entry timer_entry_t;
 typedef struct timer_queue timer_queue_t;
+typedef struct virtual_tty vtty_t;
 
 // volatile types (cbindgen does not emit the C volatile type qualifier)
 typedef timer_entry_t *volatile Volatile_____timer_entry_t;

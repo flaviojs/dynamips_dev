@@ -10,6 +10,8 @@ use std::ptr::write_volatile;
 #[rustfmt::skip]
 #[no_mangle]
 pub extern "C" fn _export(
+    _: *mut crate::dev_vtty::vtty_serial_option_t,
+    _: *mut crate::dev_vtty::vtty_t,
     _: *mut crate::dynamips_common::m_int16_t,
     _: *mut crate::net::n_eth_dot1q_hdr_t,
     _: *mut crate::net::n_eth_hdr_t,

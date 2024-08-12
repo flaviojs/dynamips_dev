@@ -234,3 +234,13 @@ pub fn test_MIPS_INSN_PER_PAGE() {
     assert_eq!(size_of::<mips_insn_t>(), 4);
     assert_eq!(MIPS_INSN_PER_PAGE, MIPS_MIN_PAGE_SIZE / size_of::<mips_insn_t>());
 }
+
+#[test]
+fn test_PPC32_INSN_PER_PAGE() {
+    use dynamips_c::ppc32::*;
+    use dynamips_c::utils::*;
+
+    // cbindgen 0.26.0 does not support size_of
+    assert_eq!(size_of::<ppc_insn_t>(), 4);
+    assert_eq!(PPC32_INSN_PER_PAGE, PPC32_MIN_PAGE_SIZE / size_of::<ppc_insn_t>());
+}

@@ -57,7 +57,6 @@ set ( _files
    "${LOCAL}/vm.c"
    "${LOCAL}/cpu.c"
    "${LOCAL}/tcb.c" # only present in unstable
-   "${COMMON}/jit_op.c"
    "${LOCAL}/mips64.c"
    "${LOCAL}/mips64_mem.c"
    "${LOCAL}/mips64_cp0.c"

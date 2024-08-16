@@ -14,7 +14,6 @@
 #include <fcntl.h>
 
 #include "cpu.h"
-#include "jit_op.h"
 #include "ppc32_jit.h"
 #include "ppc32_amd64_trans.h"
 #include "memory.h"

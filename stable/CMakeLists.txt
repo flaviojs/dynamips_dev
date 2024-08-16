@@ -87,7 +87,6 @@ set ( _files
    "${COMMON}/insn_lookup.c"
    "${LOCAL}/vm.c"
    "${LOCAL}/cpu.c"
-   "${COMMON}/jit_op.c"
    "${LOCAL}/mips64.c"
    "${LOCAL}/mips64_mem.c"
    "${LOCAL}/mips64_cp0.c"

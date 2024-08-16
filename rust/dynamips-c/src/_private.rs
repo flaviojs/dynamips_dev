@@ -172,7 +172,9 @@ impl sprintf::Printf for CustomPrintf<&[c_char]> {
 }
 
 // dynamips C functions
-extern "C" {}
+extern "C" {
+    pub fn ppc32_update_cr_set_altered_hreg(cpu: *mut crate::ppc32::cpu_ppc_t);
+}
 
 // _private C functions
 extern "C" {

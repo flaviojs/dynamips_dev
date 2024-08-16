@@ -40,6 +40,7 @@ typedef struct memblock memblock_t;
 typedef struct mempool mempool_t;
 typedef struct parser_context parser_context_t;
 typedef struct parser_token parser_token_t;
+typedef struct ppc32_jit_tcb ppc32_jit_tcb_t;
 typedef struct rbtree_node rbtree_node;
 typedef struct rbtree_tree rbtree_tree;
 typedef struct registry registry_t;

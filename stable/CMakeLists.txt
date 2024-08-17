@@ -99,7 +99,6 @@ set ( _files
    "${LOCAL}/ppc32_vmtest.c"
    "${COMMON}/memory.c"
    "${COMMON}/device.c"
-   "${COMMON}/nmc93cX6.c"
    "${COMMON}/cisco_card.c"
    "${COMMON}/pci_dev.c"
    "${COMMON}/pci_io.c"

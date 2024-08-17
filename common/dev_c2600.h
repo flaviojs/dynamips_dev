@@ -15,7 +15,6 @@
 #include "utils.h"
 #include "device.h"
 #include "pci_dev.h"
-#include "nmc93cX6.h"
 #include "net_io.h"
 #include "dev_mpc860.h"
 #include "vm.h"

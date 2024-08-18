@@ -14,88 +14,8 @@
 #include "net_io.h"
 #include "vm.h"
 
-/* Device Flags */
-#define VDEVICE_FLAG_NO_MTS_MMAP  0x01  /* Prevent MMAPed access by MTS */
-#define VDEVICE_FLAG_CACHING      0x02  /* Device does support caching */
-#define VDEVICE_FLAG_REMAP        0x04  /* Physical address remapping */
-#define VDEVICE_FLAG_SYNC         0x08  /* Forced sync */
-#define VDEVICE_FLAG_SPARSE       0x10  /* Sparse device */
-#define VDEVICE_FLAG_GHOST        0x20  /* Ghost device */
-
-#define VDEVICE_PTE_DIRTY  0x01
-
-typedef void *(*dev_handler_t)(cpu_gen_t *cpu,struct vdevice *dev,
-                               m_uint32_t offset,u_int op_size,u_int op_type,
-                               m_uint64_t *data);
-
-/* Virtual Device */
-struct vdevice {
-   char *name;
-   u_int id;
-   m_uint64_t phys_addr;
-   m_uint32_t phys_len;
-   m_iptr_t host_addr;
-   void *priv_data;
-   int flags;
-   int fd;
-   dev_handler_t handler;
-   m_iptr_t *sparse_map;
-   struct vdevice *next,**pprev;
-};
-
 /* PCI part */
 #include "pci_dev.h"
-
-/* device access function */
-#ifdef MAC64HACK
-static void *__dev_access_fast(cpu_gen_t *cpu,u_int dev_id,m_uint32_t offset,
-                      u_int op_size,u_int op_type,m_uint64_t *data)
-{
-   struct vdevice *dev = cpu->vm->dev_array[dev_id];
-
-   if (unlikely(!dev)) {
-      cpu_log(cpu,"dev_access_fast","null handler (dev_id=%u,offset=0x%x)\n",
-              dev_id,offset);
-      return NULL;
-   }
-
-#if DEBUG_DEV_PERF_CNT
-   cpu->dev_access_counter++;
-#endif
-
-   return(dev->handler(cpu,dev,offset,op_size,op_type,data));
-}
-
-static forced_inline
-void *dev_access_fast(cpu_gen_t *cpu,u_int dev_id,m_uint32_t offset,
-		      u_int op_size,u_int op_type,m_uint64_t *data)
-{
-  asm("sub $8, %rsp");
-  void* ret = __dev_access_fast(cpu, dev_id, offset, op_size, op_type, data);
-  asm("add $8, %rsp");
-  return ret;
-}
-
-#else
-static forced_inline 
-void *dev_access_fast(cpu_gen_t *cpu,u_int dev_id,m_uint32_t offset,
-                      u_int op_size,u_int op_type,m_uint64_t *data)
-{
-   struct vdevice *dev = cpu->vm->dev_array[dev_id];
-
-   if (unlikely(!dev)) {
-      cpu_log(cpu,"dev_access_fast","null handler (dev_id=%u,offset=0x%x)\n",
-              dev_id,offset);
-      return NULL;
-   }
-
-#if DEBUG_DEV_PERF_CNT
-   cpu->dev_access_counter++;
-#endif
-
-   return(dev->handler(cpu,dev,offset,op_size,op_type,data));
-}
-#endif
 
 /* Get device by ID */
 struct vdevice *dev_get_by_id(vm_instance_t *vm,u_int dev_id);

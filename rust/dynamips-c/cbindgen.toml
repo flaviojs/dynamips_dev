@@ -21,6 +21,10 @@ after_includes = """
 // cbindgen 0.27.0 assumes unknown types are opaque typedefs, but some C types need struct
 typedef struct sockaddr sockaddr;
 
+// forward declarations to avoid the warning: ‘struct’ declared inside parameter list will not be visible outside of this definition or declaration
+// see https://stackoverflow.com/a/16831951
+struct vdevice;
+
 // cbindgen 0.27.0 puts the typedef of a struct after the struct declaration,
 // so structs that use that typedef internally need a forward declaration of the typedef
 typedef struct c3600_router c3600_t;

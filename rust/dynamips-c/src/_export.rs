@@ -10,7 +10,7 @@ use std::ptr::write_volatile;
 #[rustfmt::skip]
 #[no_mangle]
 pub extern "C" fn _export(
-    _: *mut crate::cpu::cpu_gen_t,
+    _: *mut crate::device::vdevice,
     _: *mut crate::dynamips_common::m_int16_t,
     _: *mut crate::dynamips::symbol,
     _: *mut crate::mips64_jit::mips64_insn_jump,

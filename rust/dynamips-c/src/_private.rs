@@ -184,6 +184,11 @@ extern "C" {
     pub fn ppc32_jit_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;
     pub fn ppc32_jit_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn ppc32_update_cr_set_altered_hreg(cpu: *mut crate::ppc32::cpu_ppc_t);
+    pub fn vm_alloc_host_page(vm: *mut crate::vm::vm_instance_t) -> *mut c_void;
+    pub fn vm_bind_device(vm: *mut crate::vm::vm_instance_t, dev: *mut crate::device::vdevice) -> c_int;
+    pub fn vm_ghost_image_get(filename: *mut c_char, ptr: *mut *mut u_char, fd: *mut c_int) -> c_int;
+    pub fn vm_ghost_image_release(fd: c_int) -> c_int;
+    pub fn vm_unbind_device(vm: *mut crate::vm::vm_instance_t, dev: *mut crate::device::vdevice) -> c_int;
 }
 
 // _private C functions

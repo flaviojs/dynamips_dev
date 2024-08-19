@@ -173,6 +173,16 @@ impl sprintf::Printf for CustomPrintf<&[c_char]> {
 
 // dynamips C functions
 extern "C" {
+    pub fn mips64_delete(cpu: *mut crate::mips64::cpu_mips_t);
+    pub fn mips64_exec_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
+    pub fn mips64_init(cpu: *mut crate::mips64::cpu_mips_t) -> c_int;
+    pub fn mips64_jit_init(cpu: *mut crate::mips64::cpu_mips_t) -> c_int;
+    pub fn mips64_jit_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
+    pub fn ppc32_delete(cpu: *mut crate::ppc32::cpu_ppc_t);
+    pub fn ppc32_exec_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
+    pub fn ppc32_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;
+    pub fn ppc32_jit_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;
+    pub fn ppc32_jit_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn ppc32_update_cr_set_altered_hreg(cpu: *mut crate::ppc32::cpu_ppc_t);
 }
 

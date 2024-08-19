@@ -12,6 +12,7 @@ use crate::dynamips_common::*;
 use crate::pci_dev::*;
 use crate::pci_io::*;
 use crate::rommon_var::*;
+use crate::utils::*;
 
 pub type vm_chunk_t = vm_chunk;
 pub type vm_ghost_image_t = vm_ghost_image;
@@ -245,3 +246,53 @@ pub unsafe extern "C" fn vm_clear_irq(vm: *mut vm_instance_t, irq: u_int) {
         (*vm).clear_irq.unwrap()(vm, irq);
     }
 }
+
+/// Get log name
+pub unsafe fn vm_get_log_name(vm: *mut vm_instance_t) -> *mut c_char {
+    if !(*(*vm).platform).log_name.is_null() {
+        return (*(*vm).platform).log_name;
+    }
+
+    // default value
+    cstr!("VM")
+}
+
+/// Log a message
+pub unsafe fn vm_flog(vm: *mut vm_instance_t, module: *mut c_char, format: *mut c_char, args: &[&dyn sprintf::Printf]) {
+    if !(*vm).log_fd.is_null() {
+        m_flog((*vm).log_fd, module, format, args);
+    }
+}
+
+/// Log a message
+#[macro_export]
+macro_rules! vm_log {
+    ($vm:expr, $module:expr, $format: expr$(, $arg:expr)*) => {
+        let vm: *mut vm_instance_t = $vm;
+        let module: *mut c_char = $module;
+        let format: *mut c_char = $format;
+        let args: &[&dyn sprintf::Printf] = &[$(&CustomPrintf($arg)),*];
+
+        if !(*vm).log_fd.is_null() {
+            m_flog((*vm).log_fd, module, format, args);
+        }
+    };
+}
+pub use vm_log;
+
+/// Error message
+#[macro_export]
+macro_rules! vm_error {
+    ($vm:expr, $format:expr$(, $arg:expr)*) => {
+        let vm: *mut vm_instance_t = $vm;
+        let format: *mut c_char = $format;
+        let args: &[&dyn sprintf::Printf] = &[$(&CustomPrintf($arg)),*];
+
+        if let Ok(s) = sprintf::vsprintf(CStr::from_ptr(format).to_str().unwrap(), args) {
+            let mut bytes = s.into_bytes();
+            bytes.push(0);
+            libc::fprintf(c_stderr(), cstr!("%s '%s': %s"), $crate::vm::vm_get_log_name(vm), (*vm).name, bytes.as_ptr());
+        }
+    };
+}
+pub use vm_error;

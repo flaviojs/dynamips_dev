@@ -18,6 +18,7 @@ pub extern "C" fn _export(
     _: *mut crate::net::n_eth_dot1q_hdr_t,
     _: *mut crate::net::n_eth_hdr_t,
     _: *mut crate::net::n_eth_isl_hdr_t,
+    _: *mut crate::pci_dev::pci_io_device,
     _: *mut crate::ppc32_jit::ppc32_insn_patch,
     _: *mut crate::ppc32_jit::ppc32_insn_tag,
     _: *mut crate::ppc32_jit::ppc32_jit_patch_table,

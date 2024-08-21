@@ -8,8 +8,6 @@
 
 #include "rust_dynamips_c.h"
 
-#include "pci_dev.h"
-
 /* PCI I/O data */
 struct pci_io_data {
    struct vdevice dev;

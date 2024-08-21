@@ -19,7 +19,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "pci_dev.h"
 #include "dev_plx.h"
 
 #define DEBUG_ACCESS  1

@@ -14,9 +14,6 @@
 #include "net_io.h"
 #include "vm.h"
 
-/* PCI part */
-#include "pci_dev.h"
-
 /* Get device by ID */
 struct vdevice *dev_get_by_id(vm_instance_t *vm,u_int dev_id);
 

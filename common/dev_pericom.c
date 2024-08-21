@@ -16,7 +16,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "pci_dev.h"
 
 #define PCI_VENDOR_PERICOM   0x12d8
 #define PCI_PRODUCT_PERICOM  0x8150

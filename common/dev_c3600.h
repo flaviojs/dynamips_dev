@@ -14,7 +14,6 @@
 
 #include "utils.h"
 #include "device.h"
-#include "pci_dev.h"
 #include "net_io.h"
 #include "vm.h"
 

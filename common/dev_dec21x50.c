@@ -17,7 +17,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "pci_dev.h"
 
 #define PCI_VENDOR_DEC         0x1011
 #define PCI_PRODUCT_DEC_21050  0x0001

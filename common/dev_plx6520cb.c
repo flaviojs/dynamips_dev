@@ -17,7 +17,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "pci_dev.h"
 
 #define PCI_VENDOR_PLX          0x10b5
 #define PCI_PRODUCT_PLX_6520CB  0x6520

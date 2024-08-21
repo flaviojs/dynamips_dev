@@ -10,7 +10,6 @@
 
 #include "rust_dynamips_c.h"
 
-#include "pci_dev.h"
 #include "dev_c3600.h"
 
 /* NM Information */

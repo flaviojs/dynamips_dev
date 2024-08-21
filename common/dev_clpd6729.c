@@ -20,7 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "pci_dev.h"
 #include "pci_io.h"
 
 #define DEBUG_ACCESS  0

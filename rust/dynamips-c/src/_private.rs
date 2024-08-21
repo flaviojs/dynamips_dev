@@ -178,6 +178,7 @@ extern "C" {
     pub fn mips64_init(cpu: *mut crate::mips64::cpu_mips_t) -> c_int;
     pub fn mips64_jit_init(cpu: *mut crate::mips64::cpu_mips_t) -> c_int;
     pub fn mips64_jit_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
+    pub fn physmem_copy_u16_from_vm(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t) -> crate::dynamips_common::m_uint16_t;
     pub fn ppc32_delete(cpu: *mut crate::ppc32::cpu_ppc_t);
     pub fn ppc32_exec_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn ppc32_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;
@@ -189,6 +190,9 @@ extern "C" {
     pub fn vm_build_filename(vm: *mut crate::vm::vm_instance_t, name: *mut c_char) -> *mut c_char;
     pub fn vm_ghost_image_get(filename: *mut c_char, ptr: *mut *mut u_char, fd: *mut c_int) -> c_int;
     pub fn vm_ghost_image_release(fd: c_int) -> c_int;
+    pub fn vm_mmap_close_file(fd: c_int, ptr: *mut u_char, len: size_t) -> c_int;
+    pub fn vm_mmap_create_file(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, len: size_t, ptr: *mut *mut u_char) -> c_int;
+    pub fn vm_mmap_open_file(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, ptr: *mut *mut u_char, fsize: *mut libc::off_t) -> c_int;
     pub fn vm_object_add(vm: *mut crate::vm::vm_instance_t, obj: *mut crate::vm::vm_obj_t);
     pub fn vm_object_init(obj: *mut crate::vm::vm_obj_t);
     pub fn vm_unbind_device(vm: *mut crate::vm::vm_instance_t, dev: *mut crate::device::vdevice) -> c_int;

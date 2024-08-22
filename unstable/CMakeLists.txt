@@ -82,7 +82,6 @@ set ( _files
    "${COMMON}/dev_gt.c"
    "${COMMON}/dev_mv64460.c"
    "${COMMON}/dev_plx.c"
-   "${COMMON}/dev_pericom.c"
    "${COMMON}/dev_ti2050b.c"
    "${COMMON}/dev_ap1011.c"
    "${COMMON}/dev_plx6520cb.c"

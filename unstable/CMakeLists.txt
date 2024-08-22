@@ -75,7 +75,6 @@ set ( _files
    "${COMMON}/dev_bswap.c"
    "${COMMON}/dev_vtty.c"
    "${COMMON}/dev_rom.c"
-   "${COMMON}/dev_bootflash.c"
    "${COMMON}/dev_flash.c"
    "${COMMON}/dev_mpc860.c"
    "${COMMON}/dev_remote.c"

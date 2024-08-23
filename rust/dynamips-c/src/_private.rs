@@ -173,6 +173,7 @@ impl sprintf::Printf for CustomPrintf<&[c_char]> {
 
 // dynamips C functions
 extern "C" {
+    pub fn dev_bswap_init(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, paddr: crate::dynamips_common::m_uint64_t, len: crate::dynamips_common::m_uint32_t, remap_addr: crate::dynamips_common::m_uint64_t) -> c_int;
     pub fn dev_pcmcia_disk_init(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, paddr: crate::dynamips_common::m_uint64_t, len: crate::dynamips_common::m_uint32_t, disk_size: u_int, mode: ::std::os::raw::c_int) -> *mut crate::vm::vm_obj_t;
     pub fn mips64_delete(cpu: *mut crate::mips64::cpu_mips_t);
     pub fn mips64_exec_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
@@ -197,7 +198,9 @@ extern "C" {
     pub fn vm_mmap_create_file(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, len: size_t, ptr: *mut *mut u_char) -> c_int;
     pub fn vm_mmap_open_file(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, ptr: *mut *mut u_char, fsize: *mut libc::off_t) -> c_int;
     pub fn vm_object_add(vm: *mut crate::vm::vm_instance_t, obj: *mut crate::vm::vm_obj_t);
+    pub fn vm_object_find(vm: *mut crate::vm::vm_instance_t, name: *mut c_char) -> *mut crate::vm::vm_obj_t;
     pub fn vm_object_init(obj: *mut crate::vm::vm_obj_t);
+    pub fn vm_object_remove(vm: *mut crate::vm::vm_instance_t, obj: *mut crate::vm::vm_obj_t);
     pub fn vm_unbind_device(vm: *mut crate::vm::vm_instance_t, dev: *mut crate::device::vdevice) -> c_int;
     pub fn vtty_flush(vtty: *mut crate::dev_vtty::vtty_t);
     pub fn vtty_get_char(vtty: *mut crate::dev_vtty::vtty_t) -> c_int;

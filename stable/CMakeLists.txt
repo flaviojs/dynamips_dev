@@ -121,7 +121,6 @@ set ( _files
    "${COMMON}/dev_c7200.c"
    "${COMMON}/dev_c7200_iofpga.c"
    "${COMMON}/dev_c7200_mpfpga.c"
-   "${COMMON}/dev_c7200_sram.c"
    "${COMMON}/dev_c7200_eth.c"
    "${COMMON}/dev_c7200_serial.c"
    "${COMMON}/dev_c7200_pos.c"

@@ -103,7 +103,6 @@ set ( _files
    "${COMMON}/dev_rom.c"
    "${COMMON}/dev_mpc860.c"
    "${COMMON}/dev_remote.c"
-   "${COMMON}/dev_clpd6729.c"
    "${COMMON}/dev_pcmcia_disk.c"
    "${COMMON}/dev_gt.c"
    "${COMMON}/dev_mv64460.c"

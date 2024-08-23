@@ -199,6 +199,10 @@ extern "C" {
     pub fn vm_object_add(vm: *mut crate::vm::vm_instance_t, obj: *mut crate::vm::vm_obj_t);
     pub fn vm_object_init(obj: *mut crate::vm::vm_obj_t);
     pub fn vm_unbind_device(vm: *mut crate::vm::vm_instance_t, dev: *mut crate::device::vdevice) -> c_int;
+    pub fn vtty_flush(vtty: *mut crate::dev_vtty::vtty_t);
+    pub fn vtty_get_char(vtty: *mut crate::dev_vtty::vtty_t) -> c_int;
+    pub fn vtty_is_char_avail(vtty: *mut crate::dev_vtty::vtty_t) -> c_int;
+    pub fn vtty_put_char(vtty: *mut crate::dev_vtty::vtty_t, ch: c_char);
 }
 
 // _private C functions

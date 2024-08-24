@@ -71,7 +71,6 @@ set ( _files
    "${COMMON}/device.c"
    "${COMMON}/cisco_card.c"
    "${COMMON}/pci_io.c"
-   "${COMMON}/dev_zero.c"
    "${COMMON}/dev_bswap.c"
    "${COMMON}/dev_vtty.c"
    "${COMMON}/dev_rom.c"

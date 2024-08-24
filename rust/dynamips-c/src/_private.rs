@@ -184,6 +184,11 @@ extern "C" {
     pub fn pci_io_remove(dev: *mut crate::pci_dev::pci_io_device);
     pub fn physmem_copy_from_vm(vm: *mut crate::vm::vm_instance_t, real_buffer: *mut c_void, paddr: crate::dynamips_common::m_uint64_t, len: size_t);
     pub fn physmem_copy_u16_from_vm(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t) -> crate::dynamips_common::m_uint16_t;
+    pub fn physmem_copy_u16_to_vm(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t, val: crate::dynamips_common::m_uint16_t);
+    pub fn physmem_copy_u32_from_vm(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t) -> crate::dynamips_common::m_uint32_t;
+    pub fn physmem_copy_u32_to_vm(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t, val: crate::dynamips_common::m_uint32_t);
+    pub fn physmem_copy_u8_from_vm(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t) -> crate::dynamips_common::m_uint8_t;
+    pub fn physmem_copy_u8_to_vm(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t, val: crate::dynamips_common::m_uint8_t);
     pub fn physmem_strlen(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t) -> size_t;
     pub fn ppc32_delete(cpu: *mut crate::ppc32::cpu_ppc_t);
     pub fn ppc32_exec_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;

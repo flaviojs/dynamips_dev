@@ -162,7 +162,6 @@ set ( _files
    "${COMMON}/dev_nm_16esw.c"
    "${COMMON}/dev_pa_a1.c"
    "${COMMON}/dev_pa_mc8te1.c"
-   "${COMMON}/dev_sb1_io.c"
    "${COMMON}/dev_sb1_pci.c"
    "${LOCAL}/hypervisor.c"
    "${COMMON}/hv_nio.c"

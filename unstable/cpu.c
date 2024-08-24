@@ -21,7 +21,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "tcb.h"
-#include "memory.h"
 #include "mips64.h"
 #include "mips64_cp0.h"
 #include "mips64_exec.h"

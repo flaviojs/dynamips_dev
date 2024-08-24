@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "dynamips.h"
-#include "memory.h"
 #include "cpu.h"
 #include "dev_vtty.h"
 #include "cisco_card.h"

@@ -16,7 +16,6 @@
 #include "cpu.h"
 #include "ppc32_jit.h"
 #include "ppc32_amd64_trans.h"
-#include "memory.h"
 
 /* Macros for CPU structure access */
 #define REG_OFFSET(reg)   (OFFSET(cpu_ppc_t,gpr[(reg)]))

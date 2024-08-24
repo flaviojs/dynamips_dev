@@ -17,7 +17,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "cisco_card.h"
 
 /* Get cisco card type description */

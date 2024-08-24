@@ -14,7 +14,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "dev_c7200.h"
 
 #define DEBUG_UNKNOWN  1

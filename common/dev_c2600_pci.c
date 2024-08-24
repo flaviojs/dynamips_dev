@@ -15,7 +15,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "net_io.h"
 
 /* Debugging flags */

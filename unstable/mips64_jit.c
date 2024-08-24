@@ -24,7 +24,6 @@
 #include "mips64_exec.h"
 #include "mips64_jit.h"
 #include "insn_lookup.h"
-#include "memory.h"
 
 #include MIPS64_ARCH_INC_FILE
 

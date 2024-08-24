@@ -17,7 +17,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "dev_plx.h"
 
 #define DEBUG_ACCESS  1

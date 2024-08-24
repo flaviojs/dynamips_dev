@@ -20,7 +20,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "ppc32_jit.h"
 
 #define DEBUG_ICBI  0

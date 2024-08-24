@@ -17,7 +17,6 @@
 
 #include "cpu.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "pci_io.h"
 #include "dev_gt.h"
 #include "dev_rom.h"

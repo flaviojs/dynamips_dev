@@ -23,7 +23,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "net_io.h"
 #include "dev_gt.h"
 

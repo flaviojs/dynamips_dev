@@ -23,7 +23,6 @@
 #include "mips64_exec.h"
 #include "mips64_jit.h"
 #include "dynamips.h"
-#include "memory.h"
 
 /* MIPS general purpose registers names */
 char *mips64_gpr_reg_names[MIPS64_GPR_NR] = {

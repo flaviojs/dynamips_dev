@@ -15,7 +15,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "net_io.h"
 #include "dev_lxt970a.h"
 #include "dev_mpc860.h"

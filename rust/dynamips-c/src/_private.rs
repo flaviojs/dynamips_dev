@@ -182,7 +182,9 @@ extern "C" {
     pub fn mips64_jit_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn pci_io_add(d: *mut crate::pci_io::pci_io_data, start: crate::dynamips_common::m_uint32_t, end: crate::dynamips_common::m_uint32_t, dev: *mut crate::device::vdevice, handler: crate::device::dev_handler_t) -> *mut crate::pci_dev::pci_io_device;
     pub fn pci_io_remove(dev: *mut crate::pci_dev::pci_io_device);
+    pub fn physmem_copy_from_vm(vm: *mut crate::vm::vm_instance_t, real_buffer: *mut c_void, paddr: crate::dynamips_common::m_uint64_t, len: size_t);
     pub fn physmem_copy_u16_from_vm(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t) -> crate::dynamips_common::m_uint16_t;
+    pub fn physmem_strlen(vm: *mut crate::vm::vm_instance_t, paddr: crate::dynamips_common::m_uint64_t) -> size_t;
     pub fn ppc32_delete(cpu: *mut crate::ppc32::cpu_ppc_t);
     pub fn ppc32_exec_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn ppc32_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;

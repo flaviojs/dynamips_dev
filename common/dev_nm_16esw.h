@@ -13,7 +13,6 @@
 #include "utils.h"
 #include "cpu.h"
 #include "vm.h"
-#include "device.h"
 #include "net_io.h"
 
 /* Forward declaration for NM-16ESW private data */

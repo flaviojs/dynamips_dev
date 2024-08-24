@@ -20,7 +20,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "ppc32_mem.h"
-#include "device.h"
 #include "pci_io.h"
 #include "dev_gt.h"
 #include "dev_mv64460.h"

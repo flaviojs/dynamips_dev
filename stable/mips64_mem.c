@@ -20,7 +20,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "memory.h"
-#include "device.h"
 
 /* MTS access with special access mask */
 void mips64_access_special(cpu_mips_t *cpu,m_uint64_t vaddr,m_uint32_t mask,

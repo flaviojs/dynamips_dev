@@ -18,7 +18,6 @@
 #include <sys/types.h>
 #include <assert.h>
 
-#include "device.h"
 #include "pci_io.h"
 #include "cpu.h"
 #include "vm.h"

@@ -22,7 +22,6 @@
 #include "mips64_jit.h"
 #include "dynamips.h"
 #include "memory.h"
-#include "device.h"
 
 /* Undefined access */
 static void mips64_undef_access(cpu_mips_t *cpu,m_uint64_t vaddr,

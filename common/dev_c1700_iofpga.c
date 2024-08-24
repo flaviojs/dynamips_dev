@@ -18,7 +18,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "memory.h"
-#include "device.h"
 #include "dev_vtty.h"
 #include "dev_mpc860.h"
 #include "dev_c1700.h"

@@ -21,7 +21,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "memory.h"
-#include "device.h"
 #include "ppc32_jit.h"
 
 #define DEBUG_ICBI  0

@@ -26,7 +26,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "memory.h"
-#include "device.h"
 #include "dev_vtty.h"
 #include "dev_c6msfc1.h"
 

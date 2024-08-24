@@ -20,7 +20,6 @@
 
 #include "cpu.h"
 #include "memory.h"
-#include "device.h"
 #include "mips64.h"
 #include "mips64_cp0.h"
 #include "mips64_exec.h"

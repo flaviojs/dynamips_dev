@@ -12,7 +12,6 @@
 #include "utils.h"
 #include "mips64.h"
 #include "cpu.h"
-#include "device.h"
 #include "net_io.h"
 #include "vm.h"
 

@@ -16,7 +16,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#include "device.h"
+#include "cpu.h"
 #include "mips64.h"
 #include "mips64_cp0.h"
 #include "dynamips.h"

@@ -15,7 +15,6 @@
 #include "utils.h"
 #include "vm.h"
 #include "cpu.h"
-#include "device.h"
 
 enum {
    WIC_SERIAL_MODEL_1T = 1,

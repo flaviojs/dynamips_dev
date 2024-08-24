@@ -18,7 +18,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "memory.h"
-#include "device.h"
 #include "dev_rom.h"
 #include "pci_io.h"
 #include "dev_vtty.h"

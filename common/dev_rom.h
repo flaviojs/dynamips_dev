@@ -11,7 +11,6 @@
 #include <sys/types.h>
 #include "utils.h"
 #include "cpu.h"
-#include "device.h"
 #include "net_io.h"
 #include "vm.h"
 

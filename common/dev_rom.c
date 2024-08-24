@@ -17,7 +17,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "memory.h"
-#include "device.h"
 
 /* Embedded MIPS64 ROM */
 m_uint8_t mips64_microcode[] = {

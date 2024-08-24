@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "device.h"
 #include "vm.h"
 
 /* Default parameters of the test VM */

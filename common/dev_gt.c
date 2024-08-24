@@ -24,7 +24,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "memory.h"
-#include "device.h"
 #include "net_io.h"
 #include "dev_gt.h"
 

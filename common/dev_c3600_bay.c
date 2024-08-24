@@ -17,7 +17,6 @@
 
 #include "cpu.h"
 #include "vm.h"
-#include "device.h"
 #include "dev_c3600_bay.h"
 
 /* C3620 NM info */

@@ -13,7 +13,6 @@
 #include "utils.h"
 #include "vm.h"
 #include "cpu.h"
-#include "device.h"
 #include "net_io.h"
 
 /* Generic DEC21140 initialization code */

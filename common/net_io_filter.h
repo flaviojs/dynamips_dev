@@ -17,11 +17,6 @@
 #include "utils.h"
 #include "net_io.h"
 
-/* Directions for filters */
-#define NETIO_FILTER_DIR_RX  0
-#define NETIO_FILTER_DIR_TX  1
-#define NETIO_FILTER_DIR_BOTH 2 
-
 /* Find a filter */
 netio_pktfilter_t *netio_filter_find(char *name);
 

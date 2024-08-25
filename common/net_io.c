@@ -37,7 +37,6 @@
 #endif
 
 #include "net_io.h"
-#include "net_io_filter.h"
 
 /* Free a NetIO descriptor */
 static int netio_free(void *data,void *arg);

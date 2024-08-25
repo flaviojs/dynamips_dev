@@ -150,9 +150,6 @@ set ( _files
    "${COMMON}/get_cpu_time.c"
    "${COMMON}/dev_lxt970a.c"
    )
-if ( ENABLE_LINUX_ETH )
-   set ( _files ${_files} "${COMMON}/linux_eth.c" )
-endif ( ENABLE_LINUX_ETH )
 if ( ENABLE_GEN_ETH )
    set ( _files ${_files} "${COMMON}/gen_eth.c" )
 endif ( ENABLE_GEN_ETH )

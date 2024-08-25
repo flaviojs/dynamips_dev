@@ -20,6 +20,7 @@ after_includes = """
 
 // cbindgen 0.27.0 assumes unknown types are opaque typedefs, but some C types need struct
 typedef struct sockaddr sockaddr;
+typedef struct sockaddr_un sockaddr_un;
 
 // forward declarations to avoid the warning: ‘struct’ declared inside parameter list will not be visible outside of this definition or declaration
 // see https://stackoverflow.com/a/16831951
@@ -42,6 +43,10 @@ typedef struct insn_exec_page insn_exec_page_t;
 typedef struct m_list m_list_t;
 typedef struct memblock memblock_t;
 typedef struct mempool mempool_t;
+typedef struct netio_desc netio_desc_t;
+typedef struct netio_fifo_desc netio_fifo_desc_t;
+typedef struct netio_fifo_pkt netio_fifo_pkt_t;
+typedef struct netio_pktfilter netio_pktfilter_t;
 typedef struct parser_context parser_context_t;
 typedef struct parser_token parser_token_t;
 typedef struct ppc32_jit_tcb ppc32_jit_tcb_t;

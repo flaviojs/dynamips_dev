@@ -15,6 +15,8 @@ pub extern "C" fn _export(
     _: *mut crate::dynamips::symbol,
     _: *mut crate::mips64_jit::mips64_insn_jump,
     _: *mut crate::mips64_jit::mips64_insn_tag,
+    _: *mut crate::net_io::netio_rx_listener,
+    _: *mut crate::net_io::vde_request_v3,
     _: *mut crate::net::n_eth_dot1q_hdr_t,
     _: *mut crate::net::n_eth_hdr_t,
     _: *mut crate::net::n_eth_isl_hdr_t,

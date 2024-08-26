@@ -15,7 +15,6 @@
 #include "dynamips.h"
 #include "cpu.h"
 #include "dev_vtty.h"
-#include "cisco_card.h"
 
 extern int vm_file_naming_type;
 

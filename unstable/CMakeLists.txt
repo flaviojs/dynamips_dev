@@ -65,7 +65,6 @@ set ( _files
    "${LOCAL}/ppc32_jit.c"
    "${LOCAL}/ppc32_exec.c"
    "${LOCAL}/ppc32_vmtest.c"
-   "${COMMON}/cisco_card.c"
    "${COMMON}/pci_io.c"
    "${COMMON}/dev_vtty.c"
    "${COMMON}/dev_rom.c"

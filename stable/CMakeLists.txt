@@ -177,6 +177,7 @@ set ( _files
    "${COMMON}/dev_lxt970a.c"
    )
 if ( ENABLE_GEN_ETH )
+   set ( _files ${_files} "${COMMON}/_link_pcap.c" )
    set ( _files ${_files} "${COMMON}/gen_eth.c" )
 endif ( ENABLE_GEN_ETH )
 set ( _dependencies ppc32_microcode_dump_stable mips64_microcode_dump_stable )

@@ -29,9 +29,6 @@
 #include "frame_relay.h"
 #include "net_io.h"
 #include "net_io_bridge.h"
-#ifdef GEN_ETH
-#include "gen_eth.h"
-#endif
 #include "hypervisor.h"
 
 /* 

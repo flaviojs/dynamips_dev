@@ -17,10 +17,6 @@
 
 #include "utils.h"
 
-#ifdef GEN_ETH
-#include "gen_eth.h"
-#endif
-
 /* Get NETIO type given a description */
 int netio_get_type(char *type);
 

@@ -13,7 +13,6 @@
 #include "utils.h"
 #include "cpu.h"
 #include "vm.h"
-#include "net_io.h"
 
 /* Interface type */
 #define AM79C971_TYPE_100BASE_TX  1  /* 100baseTX */

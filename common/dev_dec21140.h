@@ -13,7 +13,6 @@
 #include "utils.h"
 #include "vm.h"
 #include "cpu.h"
-#include "net_io.h"
 
 /* Generic DEC21140 initialization code */
 struct dec21140_data *dev_dec21140_init(vm_instance_t *vm,char *name,

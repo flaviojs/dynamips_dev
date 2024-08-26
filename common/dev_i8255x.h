@@ -13,7 +13,6 @@
 #include "utils.h"
 #include "cpu.h"
 #include "vm.h"
-#include "net_io.h"
 
 /* Generic Intel i8255x initialization code */
 struct i8255x_data *

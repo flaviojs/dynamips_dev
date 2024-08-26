@@ -13,7 +13,6 @@
 #include "utils.h"
 #include "cpu.h"
 #include "vm.h"
-#include "net_io.h"
 
 /* Number of channels (4 interfaces) */
 #define MUESLIX_NR_CHANNELS  4

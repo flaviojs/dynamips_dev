@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "vm.h"
 
 /* Default MSFC1 parameters */

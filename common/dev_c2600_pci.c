@@ -15,7 +15,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "net_io.h"
 
 /* Debugging flags */
 #define DEBUG_ACCESS    0

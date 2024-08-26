@@ -26,7 +26,6 @@
 
 #include "utils.h"
 #include "eth_switch.h"
-#include "net_io.h"
 #include "hypervisor.h"
 
 /* Create a new Ethernet switch object */

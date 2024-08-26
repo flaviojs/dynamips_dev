@@ -20,7 +20,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "net_io.h"
 #include "dev_am79c971.h"
 
 /* Debugging flags */

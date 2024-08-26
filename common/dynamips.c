@@ -47,7 +47,6 @@
 #include "dev_vtty.h"
 #include "plugin.h"
 #include "hypervisor.h"
-#include "net_io.h"
 #include "net_io_bridge.h"
 #include "atm.h"
 #include "atm_bridge.h"

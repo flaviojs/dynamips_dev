@@ -14,7 +14,6 @@
 
 #include "utils.h"
 #include "dev_gt.h"
-#include "net_io.h"
 #include "vm.h"
 
 /* Get WIC device address for the specified onboard port */

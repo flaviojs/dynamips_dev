@@ -17,7 +17,6 @@
 #include <assert.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "dev_am79c971.h"
 #include "dev_dec21140.h"
 #include "dev_i8254x.h"

@@ -71,7 +71,6 @@ endif()
 set ( _files
    "${COMMON}/utils.c"
    "${COMMON}/plugin.c"
-   "${COMMON}/net_io.c"
    "${COMMON}/net_io_bridge.c"
    "${COMMON}/atm.c"
    "${COMMON}/atm_vsar.c"

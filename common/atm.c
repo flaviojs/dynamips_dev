@@ -24,7 +24,6 @@
 
 #include "utils.h"
 #include "atm.h"
-#include "net_io.h"
 
 /* RFC1483 bridged mode header */
 m_uint8_t atm_rfc1483b_header[ATM_RFC1483B_HLEN] = { 

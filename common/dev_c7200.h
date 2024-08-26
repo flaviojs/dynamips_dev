@@ -28,7 +28,6 @@
 
 #include "utils.h"
 #include "dev_mv64460.h"
-#include "net_io.h"
 #include "vm.h"
 
 /* Initialize system EEPROM groups */

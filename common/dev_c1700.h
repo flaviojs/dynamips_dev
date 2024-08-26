@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "dev_mpc860.h"
 #include "vm.h"
 

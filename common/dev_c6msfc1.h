@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
 #include "vm.h"
 
 /* Initialize EEPROM groups */

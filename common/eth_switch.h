@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
 
 /* Hash entries for the MAC address table */
 #define ETHSW_HASH_SIZE  4096

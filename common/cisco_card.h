@@ -13,7 +13,6 @@
 #include <pthread.h>
 
 #include "utils.h"
-#include "net_io.h"
 
 #define CISCO_CARD_MAX_WIC  8
 #define CISCO_CARD_MAX_SUBSLOTS  16

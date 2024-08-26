@@ -12,7 +12,6 @@
 #include "utils.h"
 #include "mips64.h"
 #include "cpu.h"
-#include "net_io.h"
 #include "vm.h"
 
 /* Forward declaration for Galilo controller private data */

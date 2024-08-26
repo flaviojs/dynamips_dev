@@ -35,7 +35,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "net_io.h"
 #include "dev_dec21140.h"
 
 /* Debugging flags */

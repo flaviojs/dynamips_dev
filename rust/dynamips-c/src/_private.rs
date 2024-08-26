@@ -191,6 +191,7 @@ extern "C" {
     pub fn vm_alloc_host_page(vm: *mut crate::vm::vm_instance_t) -> *mut c_void;
     pub fn vm_bind_device(vm: *mut crate::vm::vm_instance_t, dev: *mut crate::device::vdevice) -> c_int;
     pub fn vm_build_filename(vm: *mut crate::vm::vm_instance_t, name: *mut c_char) -> *mut c_char;
+    pub fn vm_get_type(vm: *mut crate::vm::vm_instance_t) -> *mut c_char;
     pub fn vm_ghost_image_get(filename: *mut c_char, ptr: *mut *mut u_char, fd: *mut c_int) -> c_int;
     pub fn vm_ghost_image_release(fd: c_int) -> c_int;
     pub fn vm_mmap_close_file(fd: c_int, ptr: *mut u_char, len: size_t) -> c_int;

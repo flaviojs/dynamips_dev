@@ -24,6 +24,8 @@ typedef struct sockaddr_un sockaddr_un;
 
 // forward declarations to avoid the warning: ‘struct’ declared inside parameter list will not be visible outside of this definition or declaration
 // see https://stackoverflow.com/a/16831951
+struct cisco_card_driver;
+struct cisco_card;
 struct vdevice;
 
 // cbindgen 0.27.0 puts the typedef of a struct after the struct declaration,

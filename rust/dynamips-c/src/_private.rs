@@ -173,28 +173,60 @@ impl sprintf::Printf for CustomPrintf<&[c_char]> {
 
 // dynamips C functions
 extern "C" {
+    pub fn atm_bridge_delete_all() -> c_int;
+    pub fn atm_bridge_start(filename: *mut c_char) -> c_int;
+    pub fn atm_init();
+    pub fn atmsw_delete_all() -> c_int;
+    pub fn atmsw_start(filename: *mut c_char) -> c_int;
+    pub fn c1700_platform_register() -> c_int;
+    pub fn c2600_platform_register() -> c_int;
+    pub fn c2691_platform_register() -> c_int;
+    pub fn c3600_platform_register() -> c_int;
+    pub fn c3725_platform_register() -> c_int;
+    pub fn c3745_platform_register() -> c_int;
+    pub fn c6msfc1_platform_register() -> c_int;
+    pub fn c6sup1_platform_register() -> c_int;
+    pub fn c7200_platform_register() -> c_int;
     pub fn dev_bswap_init(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, paddr: crate::dynamips_common::m_uint64_t, len: crate::dynamips_common::m_uint32_t, remap_addr: crate::dynamips_common::m_uint64_t) -> c_int;
     pub fn dev_pcmcia_disk_init(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, paddr: crate::dynamips_common::m_uint64_t, len: crate::dynamips_common::m_uint32_t, disk_size: u_int, mode: ::std::os::raw::c_int) -> *mut crate::vm::vm_obj_t;
+    pub fn ethsw_delete_all() -> c_int;
+    pub fn ethsw_start(filename: *mut c_char) -> c_int;
+    pub fn frsw_delete_all() -> c_int;
+    pub fn frsw_start(filename: *mut c_char) -> c_int;
+    pub fn hypervisor_stopsig() -> c_int;
+    pub fn hypervisor_tcp_server(ip_addr: *mut c_char, tcp_port: c_int) -> c_int;
     pub fn mips64_delete(cpu: *mut crate::mips64::cpu_mips_t);
+    pub fn mips64_exec_create_ilt();
     pub fn mips64_exec_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn mips64_init(cpu: *mut crate::mips64::cpu_mips_t) -> c_int;
+    pub fn mips64_jit_create_ilt();
     pub fn mips64_jit_init(cpu: *mut crate::mips64::cpu_mips_t) -> c_int;
     pub fn mips64_jit_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
+    pub fn netio_bridge_delete_all() -> c_int;
+    pub fn netio_bridge_start(filename: *mut c_char) -> c_int;
     pub fn pci_io_add(d: *mut crate::pci_io::pci_io_data, start: crate::dynamips_common::m_uint32_t, end: crate::dynamips_common::m_uint32_t, dev: *mut crate::device::vdevice, handler: crate::device::dev_handler_t) -> *mut crate::pci_dev::pci_io_device;
     pub fn pci_io_data_remove(vm: *mut crate::vm::vm_instance_t, d: *mut crate::pci_io::pci_io_data);
     pub fn pci_io_remove(dev: *mut crate::pci_dev::pci_io_device);
     pub fn ppc32_delete(cpu: *mut crate::ppc32::cpu_ppc_t);
+    pub fn ppc32_exec_create_ilt();
     pub fn ppc32_exec_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn ppc32_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;
+    pub fn ppc32_jit_create_ilt();
     pub fn ppc32_jit_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;
     pub fn ppc32_jit_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn ppc32_update_cr_set_altered_hreg(cpu: *mut crate::ppc32::cpu_ppc_t);
+    pub fn ppc32_vmtest_platform_register() -> c_int;
     pub fn vtty_create(vm: *mut crate::vm::vm_instance_t, name: *mut c_char, type_: c_int, tcp_port: c_int, option: *const crate::dev_vtty::vtty_serial_option_t) -> *mut crate::dev_vtty::vtty_t;
     pub fn vtty_delete(vtty: *mut crate::dev_vtty::vtty_t);
     pub fn vtty_flush(vtty: *mut crate::dev_vtty::vtty_t);
     pub fn vtty_get_char(vtty: *mut crate::dev_vtty::vtty_t) -> c_int;
+    pub fn vtty_init() -> c_int;
     pub fn vtty_is_char_avail(vtty: *mut crate::dev_vtty::vtty_t) -> c_int;
+    pub fn vtty_parse_serial_option(option: *mut crate::dev_vtty::vtty_serial_option_t, optarg: *mut c_char) -> c_int;
     pub fn vtty_put_char(vtty: *mut crate::dev_vtty::vtty_t, ch: c_char);
+    pub fn vtty_set_ctrlhandler(n: c_int);
+    pub fn vtty_set_telnetmsg(n: c_int);
+    pub fn vtty_store_ctrlc(vtty: *mut crate::dev_vtty::vtty_t) -> c_int;
 }
 
 // _private C functions

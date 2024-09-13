@@ -23,7 +23,6 @@
 #include "dev_c3600.h"
 #include "dev_c3600_iofpga.h"
 #include "dev_c3600_bay.h"
-#include "dev_vtty.h"
 
 /* ======================================================================== */
 /* EEPROM definitions                                                       */

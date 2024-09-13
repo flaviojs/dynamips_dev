@@ -29,7 +29,6 @@
 #include "vm.h"
 #include "dynamips.h"
 #include "dev_c7200.h"
-#include "dev_vtty.h"
 #include "utils.h"
 #include "atm.h"
 #include "frame_relay.h"

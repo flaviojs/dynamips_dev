@@ -19,7 +19,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "dev_vtty.h"
 #include "dev_c3725.h"
 
 /* Debugging flags */

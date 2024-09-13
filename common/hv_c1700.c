@@ -27,7 +27,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dev_c1700.h"
-#include "dev_vtty.h"
 #include "utils.h"
 #include "atm.h"
 #include "frame_relay.h"

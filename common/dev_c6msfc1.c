@@ -27,7 +27,6 @@
 #include "dev_i8254x.h"
 #include "dev_c6msfc1.h"
 #include "dev_c6msfc1_mpfpga.h"
-#include "dev_vtty.h"
 
 /* MSFC1 EEPROM */
 static m_uint16_t eeprom_msfc1_data[128] = {

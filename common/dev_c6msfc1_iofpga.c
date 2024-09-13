@@ -25,7 +25,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "dev_vtty.h"
 #include "dev_c6msfc1.h"
 
 /* Debugging flags */

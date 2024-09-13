@@ -14,7 +14,6 @@
 
 #include "dynamips.h"
 #include "cpu.h"
-#include "dev_vtty.h"
 
 extern int vm_file_naming_type;
 

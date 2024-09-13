@@ -25,7 +25,6 @@
 #include "dev_rom.h"
 #include "dev_c7200.h"
 #include "dev_c7200_mpfpga.h"
-#include "dev_vtty.h"
 
 /* ======================================================================== */
 /* CPU EEPROM definitions                                                   */

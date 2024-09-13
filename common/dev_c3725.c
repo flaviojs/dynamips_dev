@@ -23,7 +23,6 @@
 #include "dev_rom.h"
 #include "dev_c3725.h"
 #include "dev_c3725_iofpga.h"
-#include "dev_vtty.h"
 
 /* ======================================================================== */
 /* EEPROM definitions                                                       */

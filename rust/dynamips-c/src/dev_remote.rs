@@ -5,6 +5,7 @@
 
 use crate::_private::*;
 use crate::cpu::*;
+use crate::dev_vtty::*;
 use crate::device::*;
 use crate::dynamips::*;
 use crate::dynamips_common::*;

@@ -13,7 +13,6 @@
 #include "utils.h"
 
 #include "mips64.h"
-#include "mips64_cp0.h"
 #include "ppc32.h"
 
 /* Find a CPU in a group given its ID */

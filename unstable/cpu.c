@@ -22,7 +22,6 @@
 #include "vm.h"
 #include "tcb.h"
 #include "mips64.h"
-#include "mips64_cp0.h"
 #include "mips64_exec.h"
 #include "mips64_jit.h"
 #include "ppc32.h"

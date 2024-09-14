@@ -16,7 +16,6 @@
 #include "cpu.h"
 #include "mips64_jit.h"
 #include "mips64_amd64_trans.h"
-#include "mips64_cp0.h"
 
 /* Macros for CPU structure access */
 #define REG_OFFSET(reg)       (OFFSET(cpu_mips_t,gpr[(reg)]))

@@ -56,7 +56,6 @@ set ( _files
    "${LOCAL}/tcb.c" # only present in unstable
    "${LOCAL}/mips64.c"
    "${LOCAL}/mips64_mem.c"
-   "${LOCAL}/mips64_cp0.c"
    "${LOCAL}/mips64_jit.c"
    "${LOCAL}/mips64_exec.c"
    "${LOCAL}/ppc32.c"

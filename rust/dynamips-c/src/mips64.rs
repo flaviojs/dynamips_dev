@@ -5,8 +5,12 @@
 
 use crate::_private::*;
 use crate::cpu::*;
+use crate::dynamips::*;
 use crate::dynamips_common::*;
+use crate::memory::*;
+use crate::mips64_cp0::*;
 use crate::mips64_jit::*;
+use crate::ppc32::*;
 use crate::rbtree::*;
 #[cfg(feature = "USE_UNSTABLE")]
 use crate::tcb::*;
@@ -655,4 +659,1318 @@ pub unsafe extern "C" fn MIPS64_IRQ_LOCK(cpu: *mut cpu_mips_t) {
 #[no_mangle]
 pub unsafe extern "C" fn MIPS64_IRQ_UNLOCK(cpu: *mut cpu_mips_t) {
     libc::pthread_mutex_unlock(addr_of_mut!((*cpu).irq_lock));
+}
+
+/// MIPS general purpose registers names
+#[rustfmt::skip]
+#[no_mangle]
+pub static mut mips64_gpr_reg_names: [*mut c_char; MIPS64_GPR_NR] = [
+    cstr!("zr"), cstr!("at"), cstr!("v0"), cstr!("v1"), cstr!("a0"), cstr!("a1"), cstr!("a2"), cstr!("a3"),
+    cstr!("t0"), cstr!("t1"), cstr!("t2"), cstr!("t3"), cstr!("t4"), cstr!("t5"), cstr!("t6"), cstr!("t7"),
+    cstr!("s0"), cstr!("s1"), cstr!("s2"), cstr!("s3"), cstr!("s4"), cstr!("s5"), cstr!("s6"), cstr!("s7"),
+    cstr!("t8"), cstr!("t9"), cstr!("k0"), cstr!("k1"), cstr!("gp"), cstr!("sp"), cstr!("fp"), cstr!("ra"),
+];
+
+/// Cacheability and Coherency Attribute
+static cca_cache_status: [c_int; 8] = [1, 1, 0, 1, 0, 1, 0, 0];
+
+/// Get register index given its name
+#[no_mangle]
+pub unsafe extern "C" fn mips64_get_reg_index(name: *mut c_char) -> c_int {
+    for i in 0..MIPS64_GPR_NR as c_int {
+        if libc::strcmp(mips64_gpr_reg_names[i as usize], name) == 0 {
+            return i;
+        }
+    }
+
+    -1
+}
+
+/// Get cacheability info
+#[no_mangle]
+pub unsafe extern "C" fn mips64_cca_cached(val: m_uint8_t) -> c_int {
+    cca_cache_status[(val & 0x03) as usize]
+}
+
+/// Reset a MIPS64 CPU
+#[no_mangle]
+pub unsafe extern "C" fn mips64_reset(cpu: *mut cpu_mips_t) -> c_int {
+    (*cpu).pc = MIPS_ROM_PC;
+    (*cpu).gpr[MIPS_GPR_SP] = MIPS_ROM_SP;
+    (*cpu).cp0.reg[MIPS_CP0_STATUS] = MIPS_CP0_STATUS_BEV as m_uint64_t;
+    (*cpu).cp0.reg[MIPS_CP0_CAUSE] = 0;
+    (*cpu).cp0.reg[MIPS_CP0_CONFIG] = 0x00c08ff0_u64;
+
+    // Clear the complete TLB
+    libc::memset((*cpu).cp0.tlb.as_c_void_mut(), 0, MIPS64_TLB_MAX_ENTRIES * size_of::<tlb_entry_t>());
+
+    // Restart the MTS subsystem
+    mips64_set_addr_mode(cpu, 32 /*64*/); // zzz
+    (*(*cpu).gen).mts_rebuild.unwrap()((*cpu).gen);
+
+    // Flush JIT structures
+    mips64_jit_flush(cpu, 0);
+    0
+}
+
+/// Initialize a MIPS64 processor
+#[no_mangle]
+pub unsafe extern "C" fn mips64_init(cpu: *mut cpu_mips_t) -> c_int {
+    (*cpu).addr_bus_mask = 0xFFFFFFFFFFFFFFFF_u64;
+    (*cpu).cp0.reg[MIPS_CP0_PRID] = MIPS_PRID_R4600 as m_uint64_t;
+    (*cpu).cp0.tlb_entries = MIPS64_TLB_STD_ENTRIES as u_int;
+
+    // Initialize idle timer
+    (*(*cpu).gen).idle_max = 500;
+    (*(*cpu).gen).idle_sleep_time = 30000;
+
+    // Timer IRQ parameters (default frequency: 250 Hz <=> 4ms period)
+    (*cpu).timer_irq_check_itv = 1000;
+    (*cpu).timer_irq_freq = 250;
+
+    // Enable fast memory operations
+    (*cpu).fast_memop = TRUE as u_int;
+
+    // Enable/Disable direct block jump
+    (*cpu).exec_blk_direct_jump = (*(*cpu).vm).exec_blk_direct_jump as u_int;
+
+    // Create the IRQ lock (for non-jit architectures)
+    libc::pthread_mutex_init(addr_of_mut!((*cpu).irq_lock), null_mut());
+
+    // Idle loop mutex and condition
+    libc::pthread_mutex_init(addr_of_mut!((*(*cpu).gen).idle_mutex), null_mut());
+    libc::pthread_cond_init(addr_of_mut!((*(*cpu).gen).idle_cond), null_mut());
+
+    // Set the CPU methods
+    (*(*cpu).gen).reg_set = Some(mips64_reg_set);
+    (*(*cpu).gen).reg_dump = Some(mips64_dump_regs);
+    (*(*cpu).gen).mmu_dump = Some(mips64_tlb_dump);
+    (*(*cpu).gen).mmu_raw_dump = Some(mips64_tlb_raw_dump);
+    (*(*cpu).gen).add_breakpoint = Some(mips64_add_breakpoint);
+    (*(*cpu).gen).remove_breakpoint = Some(mips64_remove_breakpoint);
+    (*(*cpu).gen).set_idle_pc = Some(mips64_set_idle_pc);
+    (*(*cpu).gen).get_idling_pc = Some(mips64_get_idling_pc);
+
+    // Set the startup parameters
+    mips64_reset(cpu);
+    0
+}
+
+/// Delete the symbol tree node
+unsafe extern "C" fn mips64_delete_sym_tree_node(key: *mut c_void, _value: *mut c_void, _opt: *mut c_void) {
+    libc::free(key);
+}
+
+/// Delete a MIPS64 processor
+#[no_mangle]
+pub unsafe extern "C" fn mips64_delete(cpu: *mut cpu_mips_t) {
+    if !cpu.is_null() {
+        mips64_mem_shutdown(cpu);
+        mips64_jit_shutdown(cpu);
+        if !(*cpu).sym_tree.is_null() {
+            rbtree_foreach((*cpu).sym_tree, Some(mips64_delete_sym_tree_node), null_mut());
+            rbtree_delete((*cpu).sym_tree);
+            (*cpu).sym_tree = null_mut();
+        }
+    }
+}
+
+/// Set the CPU PRID register
+#[no_mangle]
+pub unsafe extern "C" fn mips64_set_prid(cpu: *mut cpu_mips_t, prid: m_uint32_t) {
+    (*cpu).cp0.reg[MIPS_CP0_PRID] = prid as m_uint64_t;
+
+    if (prid == MIPS_PRID_R7000) || (prid == MIPS_PRID_BCM1250) {
+        (*cpu).cp0.tlb_entries = MIPS64_TLB_MAX_ENTRIES as u_int;
+    }
+}
+
+/// Set idle PC value
+#[no_mangle]
+pub unsafe extern "C" fn mips64_set_idle_pc(cpu: *mut cpu_gen_t, addr: m_uint64_t) {
+    (*CPU_MIPS64(cpu)).idle_pc.set(addr);
+}
+
+/// Timer IRQ
+#[no_mangle]
+pub unsafe extern "C" fn mips64_timer_irq_run(cpu: *mut cpu_mips_t) -> *mut c_void {
+    let mut umutex: libc::pthread_mutex_t = libc::PTHREAD_MUTEX_INITIALIZER;
+    let mut ucond: libc::pthread_cond_t = libc::PTHREAD_COND_INITIALIZER;
+    let mut t_spc: libc::timespec = zeroed::<_>();
+    let mut expire: m_tmcnt_t;
+
+    let interval: u_int = 1000000 / (*cpu).timer_irq_freq;
+    let threshold: u_int = (*cpu).timer_irq_freq * 10;
+    expire = m_gettime_usec() + interval as m_tmcnt_t;
+
+    while (*(*cpu).gen).state.get() != CPU_STATE_HALTED {
+        libc::pthread_mutex_lock(addr_of_mut!(umutex));
+        t_spc.tv_sec = (expire / 1000000) as _;
+        t_spc.tv_nsec = ((expire % 1000000) * 1000) as _;
+        libc::pthread_cond_timedwait(addr_of_mut!(ucond), addr_of_mut!(umutex), addr_of_mut!(t_spc));
+        libc::pthread_mutex_unlock(addr_of_mut!(umutex));
+
+        if likely((*cpu).irq_disable.get() == 0) && likely((*(*cpu).gen).state.get() == CPU_STATE_RUNNING) {
+            (*cpu).timer_irq_pending.set((*cpu).timer_irq_pending.get() + 1);
+
+            if unlikely((*cpu).timer_irq_pending.get() > threshold) {
+                (*cpu).timer_irq_pending.set(0);
+                (*cpu).timer_drift += 1;
+                if false {
+                    libc::printf(cstr!("Timer IRQ not accurate (%u pending IRQ): reduce the \"--timer-irq-check-itv\" parameter (current value: %u)\n"), (*cpu).timer_irq_pending, (*cpu).timer_irq_check_itv);
+                }
+            }
+        }
+
+        expire += interval as m_tmcnt_t;
+    }
+
+    null_mut()
+}
+
+pub const IDLE_HASH_SIZE: usize = 8192;
+
+/// Idle PC hash item
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mips64_idle_pc_hash {
+    pub pc: m_uint64_t,
+    pub count: u_int,
+    pub next: *mut mips64_idle_pc_hash,
+}
+
+/// Determine an "idling" PC
+#[no_mangle]
+pub unsafe extern "C" fn mips64_get_idling_pc(cpu: *mut cpu_gen_t) {
+    unsafe fn mips64_get_idling_pc(cpu: *mut cpu_gen_t) -> c_int {
+        let mcpu: *mut cpu_mips_t = CPU_MIPS64(cpu);
+        let mut p: *mut mips64_idle_pc_hash;
+        let mut res: *mut cpu_idle_pc;
+        let mut h_index: u_int;
+        let mut cur_pc: m_uint64_t;
+
+        (*cpu).idle_pc_prop_count = 0;
+
+        if (*mcpu).idle_pc.get() != 0 {
+            libc::printf(cstr!("\nYou already use an idle PC, using the calibration would give incorrect results.\n"));
+            return -1;
+        }
+
+        libc::printf(cstr!("\nPlease wait while gathering statistics...\n"));
+
+        let pc_hash: *mut *mut mips64_idle_pc_hash = libc::calloc(IDLE_HASH_SIZE, size_of::<*mut mips64_idle_pc_hash>()).cast::<_>();
+        if pc_hash.is_null() {
+            libc::printf(cstr!("Out of memory."));
+            return -1;
+        }
+
+        // Disable IRQ
+        (*mcpu).irq_disable.set(TRUE as u_int);
+
+        // Take 1000 measures, each mesure every 10ms
+        for _ in 0..1000 {
+            cur_pc = (*mcpu).pc;
+            h_index = ((cur_pc >> 2) & (IDLE_HASH_SIZE as m_uint64_t - 1)) as u_int;
+
+            p = *pc_hash.add(h_index as usize);
+            while !p.is_null() {
+                if (*p).pc == cur_pc {
+                    (*p).count += 1;
+                    break;
+                }
+                p = (*p).next;
+            }
+
+            if p.is_null() {
+                p = libc::malloc(size_of::<mips64_idle_pc_hash>()).cast::<_>();
+                if !p.is_null() {
+                    (*p).pc = cur_pc;
+                    (*p).count = 1;
+                    (*p).next = *pc_hash.add(h_index as usize);
+                    *pc_hash.add(h_index as usize) = p;
+                }
+            }
+
+            libc::usleep(10000);
+        }
+
+        // Select PCs
+        'select_pcs: for i in 0..IDLE_HASH_SIZE as c_int {
+            p = *pc_hash.add(i as usize);
+            while !p.is_null() {
+                if ((*p).count >= 20) && ((*p).count <= if cfg!(not(feature = "USE_UNSTABLE")) { 80 } else { 180 }) {
+                    res = addr_of_mut!((*cpu).idle_pc_prop[(*cpu).idle_pc_prop_count as usize]);
+                    (*cpu).idle_pc_prop_count += 1;
+
+                    (*res).pc = (*p).pc;
+                    (*res).count = (*p).count;
+
+                    if (*cpu).idle_pc_prop_count >= CPU_IDLE_PC_MAX_RES as u_int {
+                        break 'select_pcs;
+                    }
+                }
+                p = (*p).next;
+            }
+        }
+
+        // Set idle PC
+        if (*cpu).idle_pc_prop_count != 0 {
+            libc::printf(cstr!("Done. Suggested idling PC:\n"));
+
+            for i in 0..(*cpu).idle_pc_prop_count as c_int {
+                libc::printf(cstr!("   0x%llx (count=%u)\n"), (*cpu).idle_pc_prop[i as usize].pc, (*cpu).idle_pc_prop[i as usize].count);
+            }
+
+            libc::printf(cstr!("Restart the emulator with \"--idle-pc=0x%llx\" (for example)\n"), (*cpu).idle_pc_prop[0].pc);
+        } else {
+            libc::printf(cstr!("Done. No suggestion for idling PC\n"));
+
+            for i in 0..IDLE_HASH_SIZE as c_int {
+                p = *pc_hash.add(i as usize);
+                while !p.is_null() {
+                    libc::printf(cstr!("  0x%16.16llx (%3u)\n"), (*p).pc, (*p).count);
+
+                    if (*cpu).idle_pc_prop_count < CPU_IDLE_PC_MAX_RES as u_int {
+                        res = addr_of_mut!((*cpu).idle_pc_prop[(*cpu).idle_pc_prop_count as usize]);
+                        (*cpu).idle_pc_prop_count += 1;
+
+                        (*res).pc = (*p).pc;
+                        (*res).count = (*p).count;
+                    }
+                    p = (*p).next;
+                }
+            }
+
+            libc::printf(cstr!("\n"));
+        }
+
+        // Re-enable IRQ
+        (*mcpu).irq_disable.set(FALSE as u_int);
+        libc::free(pc_hash.cast::<_>());
+        0
+    }
+    mips64_get_idling_pc(cpu);
+}
+
+/// Set an IRQ (VM IRQ standard routing)
+#[no_mangle]
+pub unsafe extern "C" fn mips64_vm_set_irq(vm: *mut vm_instance_t, irq: u_int) {
+    let boot_cpu: *mut cpu_mips_t = CPU_MIPS64((*vm).boot_cpu);
+
+    if (*boot_cpu).irq_disable.get() != 0 {
+        (*boot_cpu).irq_pending = 0;
+        return;
+    }
+
+    mips64_set_irq(boot_cpu, irq as m_uint8_t);
+
+    if (*boot_cpu).irq_idle_preempt[irq as usize] != 0 {
+        cpu_idle_break_wait((*vm).boot_cpu);
+    }
+}
+
+/// Clear an IRQ (VM IRQ standard routing)
+#[no_mangle]
+pub unsafe extern "C" fn mips64_vm_clear_irq(vm: *mut vm_instance_t, irq: u_int) {
+    let boot_cpu: *mut cpu_mips_t = CPU_MIPS64((*vm).boot_cpu);
+    mips64_clear_irq(boot_cpu, irq as m_uint8_t);
+}
+
+/// Update the IRQ flag (inline)
+#[inline(always)]
+pub unsafe extern "C" fn mips64_update_irq_flag_fast(cpu: *mut cpu_mips_t) -> c_int {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+    let imask: m_uint32_t;
+
+    (*cpu).irq_pending = FALSE as u_int;
+
+    let cause: m_uint32_t = ((*cp0).reg[MIPS_CP0_CAUSE] & !(MIPS_CP0_CAUSE_IMASK as m_uint64_t)) as m_uint32_t;
+    (*cp0).reg[MIPS_CP0_CAUSE] = (cause | (*cpu).irq_cause) as m_uint64_t;
+
+    let sreg_mask: m_uint32_t = MIPS_CP0_STATUS_IE | MIPS_CP0_STATUS_EXL | MIPS_CP0_STATUS_ERL;
+
+    if ((*cp0).reg[MIPS_CP0_STATUS] & sreg_mask as m_uint64_t) == MIPS_CP0_STATUS_IE as m_uint64_t {
+        imask = ((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_IMASK as m_uint64_t) as m_uint32_t;
+        if unlikely(((*cp0).reg[MIPS_CP0_CAUSE] & imask as m_uint64_t) != 0) {
+            (*cpu).irq_pending = TRUE as u_int;
+            return TRUE;
+        }
+    }
+
+    FALSE
+}
+
+/// Update the IRQ flag
+#[no_mangle]
+pub unsafe extern "C" fn mips64_update_irq_flag(cpu: *mut cpu_mips_t) {
+    mips64_update_irq_flag_fast(cpu);
+}
+
+/// Generate an exception
+#[cfg(not(feature = "USE_UNSTABLE"))]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_trigger_exception(cpu: *mut cpu_mips_t, exc_code: u_int, bd_slot: c_int) {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+    let mut cause: m_uint64_t;
+    let vector: m_uint64_t;
+
+    // we don't set EPC if EXL is set
+    if ((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_EXL as m_uint64_t) == 0 {
+        (*cp0).reg[MIPS_CP0_EPC] = (*cpu).pc;
+
+        // keep IM, set exception code and bd slot
+        cause = (*cp0).reg[MIPS_CP0_CAUSE] & MIPS_CP0_CAUSE_IMASK as m_uint64_t;
+
+        if bd_slot != 0 {
+            cause |= MIPS_CP0_CAUSE_BD_SLOT as m_uint64_t;
+        } else {
+            cause &= !(MIPS_CP0_CAUSE_BD_SLOT as m_uint64_t);
+        }
+
+        cause |= (exc_code << MIPS_CP0_CAUSE_SHIFT) as m_uint64_t;
+        (*cp0).reg[MIPS_CP0_CAUSE] = cause;
+
+        // XXX properly set vector
+        vector = 0x180_u64;
+    } else {
+        // keep IM and set exception code
+        cause = (*cp0).reg[MIPS_CP0_CAUSE] & MIPS_CP0_CAUSE_IMASK as m_uint64_t;
+        cause |= (exc_code << MIPS_CP0_CAUSE_SHIFT) as m_uint64_t;
+        (*cp0).reg[MIPS_CP0_CAUSE] = cause;
+
+        // set vector
+        vector = 0x180_u64;
+    }
+
+    // Set EXL bit in status register
+    (*cp0).reg[MIPS_CP0_STATUS] |= MIPS_CP0_STATUS_EXL as m_uint64_t;
+
+    // Use bootstrap vectors ?
+    if ((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_BEV as m_uint64_t) != 0 {
+        (*cpu).pc = 0xffffffffbfc00200_u64 + vector;
+    } else {
+        (*cpu).pc = 0xffffffff80000000_u64 + vector;
+    }
+
+    // Clear the pending IRQ flag
+    (*cpu).irq_pending = 0;
+}
+
+/// Generate a general exception
+#[cfg(feature = "USE_UNSTABLE")]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_general_exception(cpu: *mut cpu_mips_t, exc_code: u_int) {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+    let mut cause: m_uint64_t;
+
+    // Update cause register (set BD and ExcCode)
+    cause = (*cp0).reg[MIPS_CP0_CAUSE] & MIPS_CP0_CAUSE_IMASK as m_uint64_t;
+
+    if (*cpu).bd_slot != 0 {
+        cause |= MIPS_CP0_CAUSE_BD_SLOT as m_uint64_t;
+    } else {
+        cause &= !(MIPS_CP0_CAUSE_BD_SLOT as m_uint64_t);
+    }
+
+    cause |= (exc_code << MIPS_CP0_CAUSE_SHIFT) as m_uint64_t;
+    (*cp0).reg[MIPS_CP0_CAUSE] = cause;
+
+    // If EXL bit is 0, set EPC and BadVaddr registers
+    if likely(((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_EXL as m_uint64_t) == 0) {
+        (*cp0).reg[MIPS_CP0_EPC] = (*cpu).pc - ((*cpu).bd_slot << 2) as m_uint64_t;
+    }
+
+    // Set EXL bit in status register
+    (*cp0).reg[MIPS_CP0_STATUS] |= MIPS_CP0_STATUS_EXL as m_uint64_t;
+
+    // Use bootstrap vectors ?
+    if ((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_BEV as m_uint64_t) != 0 {
+        (*cpu).pc = 0xffffffffbfc00200_u64 + 0x180;
+    } else {
+        (*cpu).pc = 0xffffffff80000000_u64 + 0x180;
+    }
+
+    // Clear the pending IRQ flag
+    (*cpu).irq_pending = 0;
+}
+
+/// Generate a general exception that updates BadVaddr
+#[cfg(feature = "USE_UNSTABLE")]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_gen_exception_badva(cpu: *mut cpu_mips_t, exc_code: u_int, bad_vaddr: m_uint64_t) {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+    let mut cause: m_uint64_t;
+
+    // Update cause register (set BD and ExcCode)
+    cause = (*cp0).reg[MIPS_CP0_CAUSE] & MIPS_CP0_CAUSE_IMASK as m_uint64_t;
+
+    if (*cpu).bd_slot != 0 {
+        cause |= MIPS_CP0_CAUSE_BD_SLOT as m_uint64_t;
+    } else {
+        cause &= !(MIPS_CP0_CAUSE_BD_SLOT as m_uint64_t);
+    }
+
+    cause |= (exc_code << MIPS_CP0_CAUSE_SHIFT) as m_uint64_t;
+    (*cp0).reg[MIPS_CP0_CAUSE] = cause;
+
+    // If EXL bit is 0, set EPC and BadVaddr registers
+    if likely(((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_EXL as m_uint64_t) == 0) {
+        (*cp0).reg[MIPS_CP0_EPC] = (*cpu).pc - ((*cpu).bd_slot << 2) as m_uint64_t;
+        (*cp0).reg[MIPS_CP0_BADVADDR] = bad_vaddr;
+    }
+
+    // Set EXL bit in status register
+    (*cp0).reg[MIPS_CP0_STATUS] |= MIPS_CP0_STATUS_EXL as m_uint64_t;
+
+    // Use bootstrap vectors ?
+    if ((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_BEV as m_uint64_t) != 0 {
+        (*cpu).pc = 0xffffffffbfc00200_u64 + 0x180;
+    } else {
+        (*cpu).pc = 0xffffffff80000000_u64 + 0x180;
+    }
+
+    // Clear the pending IRQ flag
+    (*cpu).irq_pending = 0;
+}
+
+/// Generate a TLB/XTLB miss exception
+#[cfg(feature = "USE_UNSTABLE")]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_tlb_miss_exception(cpu: *mut cpu_mips_t, exc_code: u_int, bad_vaddr: m_uint64_t) {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+    let mut cause: m_uint64_t;
+    let vector: m_uint64_t;
+
+    // Update cause register (set BD and ExcCode)
+    cause = (*cp0).reg[MIPS_CP0_CAUSE] & MIPS_CP0_CAUSE_IMASK as m_uint64_t;
+
+    if (*cpu).bd_slot != 0 {
+        cause |= MIPS_CP0_CAUSE_BD_SLOT as m_uint64_t;
+    } else {
+        cause &= !(MIPS_CP0_CAUSE_BD_SLOT as m_uint64_t);
+    }
+
+    cause |= (exc_code << MIPS_CP0_CAUSE_SHIFT) as m_uint64_t;
+    (*cp0).reg[MIPS_CP0_CAUSE] = cause;
+
+    // If EXL bit is 0, set EPC and BadVaddr registers
+    if likely(((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_EXL as m_uint64_t) == 0) {
+        (*cp0).reg[MIPS_CP0_EPC] = (*cpu).pc - ((*cpu).bd_slot << 2) as m_uint64_t;
+        (*cp0).reg[MIPS_CP0_BADVADDR] = bad_vaddr;
+
+        // determine if TLB or XTLB exception, based on the current
+        // addressing mode.
+        if (*cpu).addr_mode == 64 {
+            vector = 0x080;
+        } else {
+            vector = 0x000;
+        }
+    } else {
+        // nested: handled as a general exception
+        vector = 0x180;
+    }
+
+    // Set EXL bit in status register
+    (*cp0).reg[MIPS_CP0_STATUS] |= MIPS_CP0_STATUS_EXL as m_uint64_t;
+
+    // Use bootstrap vectors ?
+    if ((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_BEV as m_uint64_t) != 0 {
+        (*cpu).pc = 0xffffffffbfc00200_u64 + vector;
+    } else {
+        (*cpu).pc = 0xffffffff80000000_u64 + vector;
+    }
+
+    // Clear the pending IRQ flag
+    (*cpu).irq_pending = 0;
+}
+
+/// Prepare a TLB exception
+#[cfg(feature = "USE_UNSTABLE")]
+#[no_mangle]
+pub unsafe extern "C" fn mips64_prepare_tlb_exception(cpu: *mut cpu_mips_t, vaddr: m_uint64_t) {
+    // Update CP0 context and xcontext registers
+    mips64_cp0_update_context_reg(cpu, vaddr);
+    mips64_cp0_update_xcontext_reg(cpu, vaddr);
+
+    // EntryHi also contains the VPN address
+    let mask: m_uint64_t = mips64_cp0_get_vpn2_mask(cpu);
+    let vpn2: m_uint64_t = vaddr & mask;
+    (*cpu).cp0.reg[MIPS_CP0_TLB_HI] &= !mask;
+    (*cpu).cp0.reg[MIPS_CP0_TLB_HI] |= vpn2;
+}
+
+/// Increment count register and trigger the timer IRQ if value in compare
+/// register is the same.
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_inc_cp0_cnt(cpu: *mut cpu_mips_t) {
+    (*cpu).cp0_virt_cnt_reg += 1;
+
+    if false {
+        // TIMER_IRQ
+        let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+        if unlikely((*cpu).cp0_virt_cnt_reg == (*cpu).cp0_virt_cmp_reg) {
+            (*cp0).reg[MIPS_CP0_COUNT] = (*cp0).reg[MIPS_CP0_COMPARE] as m_uint32_t as m_uint64_t;
+            mips64_set_irq(cpu, 7);
+            mips64_update_irq_flag_fast(cpu);
+        }
+    }
+}
+
+/// Trigger the Timer IRQ
+#[no_mangle]
+pub unsafe extern "C" fn mips64_trigger_timer_irq(cpu: *mut cpu_mips_t) {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+    (*cpu).timer_irq_count += 1;
+
+    (*cp0).reg[MIPS_CP0_COUNT] = (*cp0).reg[MIPS_CP0_COMPARE] as m_uint32_t as m_uint64_t;
+    mips64_set_irq(cpu, 7);
+    mips64_update_irq_flag_fast(cpu);
+}
+
+/// Execute ERET instruction
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_eret(cpu: *mut cpu_mips_t) {
+    let cp0: *mut mips_cp0_t = addr_of_mut!((*cpu).cp0);
+
+    if ((*cp0).reg[MIPS_CP0_STATUS] & MIPS_CP0_STATUS_ERL as m_uint64_t) != 0 {
+        (*cp0).reg[MIPS_CP0_STATUS] &= !(MIPS_CP0_STATUS_ERL as m_uint64_t);
+        (*cpu).pc = (*cp0).reg[MIPS_CP0_ERR_EPC];
+    } else {
+        (*cp0).reg[MIPS_CP0_STATUS] &= !(MIPS_CP0_STATUS_EXL as m_uint64_t);
+        (*cpu).pc = (*cp0).reg[MIPS_CP0_EPC];
+    }
+
+    // We have to clear the LLbit
+    (*cpu).ll_bit = 0;
+
+    // Update the pending IRQ flag
+    mips64_update_irq_flag_fast(cpu);
+}
+
+/// Execute SYSCALL instruction
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_syscall(cpu: *mut cpu_mips_t) {
+    if DEBUG_SYSCALL != 0 {
+        libc::printf(cstr!("MIPS64: SYSCALL at PC=0x%llx (RA=0x%llx)\n   a0=0x%llx, a1=0x%llx, a2=0x%llx, a3=0x%llx\n"), (*cpu).pc, (*cpu).gpr[MIPS_GPR_RA], (*cpu).gpr[MIPS_GPR_A0], (*cpu).gpr[MIPS_GPR_A1], (*cpu).gpr[MIPS_GPR_A2], (*cpu).gpr[MIPS_GPR_A3]);
+    }
+
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    {
+        // XXX TODO: Branch Delay slot
+        mips64_trigger_exception(cpu, MIPS_CP0_CAUSE_SYSCALL, 0);
+    }
+    #[cfg(feature = "USE_UNSTABLE")]
+    {
+        mips64_general_exception(cpu, MIPS_CP0_CAUSE_SYSCALL);
+    }
+}
+
+/// Execute BREAK instruction
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_break(cpu: *mut cpu_mips_t, code: u_int) {
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    {
+        libc::printf(cstr!("MIPS64: BREAK instruction (code=%u)\n"), code);
+        mips64_dump_regs((*cpu).gen);
+
+        // XXX TODO: Branch Delay slot
+        mips64_trigger_exception(cpu, MIPS_CP0_CAUSE_BP, 0);
+    }
+    #[cfg(feature = "USE_UNSTABLE")]
+    {
+        cpu_log!((*cpu).gen, cstr!("MIPS64"), cstr!("BREAK instruction (code=%u)\n"), code);
+        mips64_general_exception(cpu, MIPS_CP0_CAUSE_BP);
+    }
+}
+
+/// Trigger a Trap Exception
+#[no_mangle]
+pub unsafe extern "C" fn mips64_trigger_trap_exception(cpu: *mut cpu_mips_t) {
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    {
+        // XXX TODO: Branch Delay slot
+        libc::printf(cstr!("MIPS64: TRAP exception, CPU=%p\n"), cpu);
+        mips64_trigger_exception(cpu, MIPS_CP0_CAUSE_TRAP, 0);
+    }
+    #[cfg(feature = "USE_UNSTABLE")]
+    {
+        cpu_log!((*cpu).gen, cstr!("MIPS64"), cstr!("TRAP exception\n"));
+        mips64_general_exception(cpu, MIPS_CP0_CAUSE_TRAP);
+    }
+}
+
+/// Trigger IRQs
+#[no_mangle]
+pub unsafe extern "C" fn mips64_trigger_irq(cpu: *mut cpu_mips_t) {
+    if unlikely((*cpu).irq_disable.get() != 0) {
+        (*cpu).irq_pending = 0;
+        return;
+    }
+
+    (*cpu).irq_count += 1;
+    if mips64_update_irq_flag_fast(cpu) != 0 {
+        #[cfg(not(feature = "USE_UNSTABLE"))]
+        {
+            mips64_trigger_exception(cpu, MIPS_CP0_CAUSE_INTERRUPT, 0);
+        }
+        #[cfg(feature = "USE_UNSTABLE")]
+        {
+            mips64_general_exception(cpu, MIPS_CP0_CAUSE_INTERRUPT);
+        }
+    } else {
+        (*cpu).irq_fp_count += 1;
+    }
+}
+
+/// DMFC1
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_dmfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int) {
+    (*cpu).gpr[gp_reg as usize] = (*cpu).fpu.reg[cp1_reg as usize];
+}
+
+/// DMTC1
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_dmtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int) {
+    (*cpu).fpu.reg[cp1_reg as usize] = (*cpu).gpr[gp_reg as usize];
+}
+
+/// MFC1
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_mfc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int) {
+    let val: m_int64_t = ((*cpu).fpu.reg[cp1_reg as usize] & 0xffffffff) as m_int64_t;
+    (*cpu).gpr[gp_reg as usize] = sign_extend(val, 32) as m_uint64_t;
+}
+
+/// MTC1
+#[no_mangle]
+pub unsafe extern "C" fn mips64_exec_mtc1(cpu: *mut cpu_mips_t, gp_reg: u_int, cp1_reg: u_int) {
+    (*cpu).fpu.reg[cp1_reg as usize] = (*cpu).gpr[gp_reg as usize] & 0xffffffff;
+}
+
+/// Virtual breakpoint
+#[no_mangle]
+pub unsafe extern "C" fn mips64_run_breakpoint(cpu: *mut cpu_mips_t) {
+    cpu_log!((*cpu).gen, cstr!("BREAKPOINT"), cstr!("Virtual breakpoint reached at PC=0x%llx\n"), (*cpu).pc);
+
+    libc::printf(cstr!("[[[ Virtual Breakpoint reached at PC=0x%llx RA=0x%llx]]]\n"), (*cpu).pc, (*cpu).gpr[MIPS_GPR_RA]);
+
+    mips64_dump_regs((*cpu).gen);
+    memlog_dump((*cpu).gen);
+}
+
+/// Add a virtual breakpoint
+#[no_mangle]
+pub unsafe extern "C" fn mips64_add_breakpoint(cpu: *mut cpu_gen_t, pc: m_uint64_t) {
+    unsafe fn mips64_add_breakpoint(cpu: *mut cpu_gen_t, pc: m_uint64_t) -> c_int {
+        let mcpu: *mut cpu_mips_t = CPU_MIPS64(cpu);
+        let mut i: c_int;
+
+        i = 0;
+        while i < MIPS64_MAX_BREAKPOINTS as c_int {
+            if (*mcpu).breakpoints[i as usize] == 0 {
+                break;
+            }
+            i += 1;
+        }
+
+        if i == MIPS64_MAX_BREAKPOINTS as c_int {
+            return -1;
+        }
+
+        (*mcpu).breakpoints[i as usize] = pc;
+        (*mcpu).breakpoints_enabled = TRUE as u_int;
+        0
+    }
+    mips64_add_breakpoint(cpu, pc);
+}
+
+/// Remove a virtual breakpoint
+#[no_mangle]
+pub unsafe extern "C" fn mips64_remove_breakpoint(cpu: *mut cpu_gen_t, pc: m_uint64_t) {
+    let mcpu: *mut cpu_mips_t = CPU_MIPS64(cpu);
+
+    for i in 0..MIPS64_MAX_BREAKPOINTS as c_int {
+        if (*mcpu).breakpoints[i as usize] == pc {
+            for j in i..(MIPS64_MAX_BREAKPOINTS - 1) as c_int {
+                (*mcpu).breakpoints[j as usize] = (*mcpu).breakpoints[j as usize + 1];
+            }
+
+            (*mcpu).breakpoints[MIPS64_MAX_BREAKPOINTS - 1] = 0;
+        }
+    }
+
+    for i in 0..MIPS64_MAX_BREAKPOINTS as c_int {
+        if (*mcpu).breakpoints[i as usize] != 0 {
+            return;
+        }
+    }
+
+    (*mcpu).breakpoints_enabled = FALSE as u_int;
+}
+
+/// Debugging for register-jump to address 0
+#[no_mangle]
+pub unsafe extern "C" fn mips64_debug_jr0(cpu: *mut cpu_mips_t) {
+    libc::printf(cstr!("MIPS64: cpu %p jumping to address 0...\n"), cpu);
+    mips64_dump_regs((*cpu).gen);
+}
+
+/// Set a register
+#[no_mangle]
+pub unsafe extern "C" fn mips64_reg_set(cpu: *mut cpu_gen_t, reg: u_int, val: m_uint64_t) {
+    if reg < MIPS64_GPR_NR as u_int {
+        (*CPU_MIPS64(cpu)).gpr[reg as usize] = val;
+    }
+}
+
+/// Dump registers of a MIPS64 processor
+#[no_mangle]
+pub unsafe extern "C" fn mips64_dump_regs(cpu: *mut cpu_gen_t) {
+    let mcpu: *mut cpu_mips_t = CPU_MIPS64(cpu);
+    let insn: mips_insn_t;
+    let mut buffer: [c_char; 80] = [0; 80];
+
+    libc::printf(cstr!("MIPS64 Registers:\n"));
+
+    for i in 0..(MIPS64_GPR_NR / 2) as c_int {
+        libc::printf(cstr!("  %s ($%2d) = 0x%16.16llx   %s ($%2d) = 0x%16.16llx\n"), mips64_gpr_reg_names[(i * 2) as usize], i * 2, (*mcpu).gpr[(i * 2) as usize], mips64_gpr_reg_names[((i * 2) + 1) as usize], (i * 2) + 1, (*mcpu).gpr[((i * 2) + 1) as usize]);
+    }
+
+    libc::printf(cstr!("  lo = 0x%16.16llx, hi = 0x%16.16llx\n"), (*mcpu).lo, (*mcpu).hi);
+    libc::printf(cstr!("  pc = 0x%16.16llx, ll_bit = %u\n"), (*mcpu).pc, (*mcpu).ll_bit);
+
+    // Fetch the current instruction
+    let ptr: *mut mips_insn_t = (*mcpu).mem_op_lookup.unwrap()(mcpu, (*mcpu).pc).cast::<_>();
+    if !ptr.is_null() {
+        insn = vmtoh32(*ptr);
+
+        if mips64_dump_insn(buffer.as_c_mut(), buffer.len(), 1, (*mcpu).pc, insn) != -1 {
+            libc::printf(cstr!("  Instruction: %s\n"), buffer);
+        }
+    }
+
+    libc::printf(cstr!("\nCP0 Registers:\n"));
+
+    for i in 0..(MIPS64_CP0_REG_NR / 2) as c_int {
+        libc::printf(cstr!("  %-10s ($%2d) = 0x%16.16llx   %-10s ($%2d) = 0x%16.16llx\n"), mips64_cp0_reg_names[(i * 2) as usize], i * 2, mips64_cp0_get_reg(mcpu, (i * 2) as u_int), mips64_cp0_reg_names[((i * 2) + 1) as usize], (i * 2) + 1, mips64_cp0_get_reg(mcpu, ((i * 2) + 1) as u_int));
+    }
+
+    libc::printf(cstr!("\n  IRQ count: %llu, IRQ false positives: %llu, IRQ Pending: %u\n"), (*mcpu).irq_count, (*mcpu).irq_fp_count, (*mcpu).irq_pending);
+
+    libc::printf(cstr!("  Timer IRQ count: %llu, pending: %u, timer drift: %u\n\n"), (*mcpu).timer_irq_count, (*mcpu).timer_irq_pending, (*mcpu).timer_drift);
+
+    libc::printf(cstr!("  Device access count: %llu\n"), (*cpu).dev_access_counter);
+    libc::printf(cstr!("\n"));
+}
+
+/// Dump a memory block
+#[no_mangle]
+pub unsafe extern "C" fn mips64_dump_memory(cpu: *mut cpu_mips_t, mut vaddr: m_uint64_t, count: u_int) {
+    let mut haddr: *mut c_void;
+
+    for i in 0..count {
+        if (i & 3) == 0 {
+            libc::printf(cstr!("\n  0x%16.16llx: "), vaddr);
+        }
+
+        haddr = (*cpu).mem_op_lookup.unwrap()(cpu, vaddr);
+
+        if !haddr.is_null() {
+            libc::printf(cstr!("0x%8.8x "), htovm32(*haddr.cast::<m_uint32_t>()));
+        } else {
+            libc::printf(cstr!("XXXXXXXXXX "));
+        }
+        vaddr += 4;
+    }
+
+    libc::printf(cstr!("\n\n"));
+}
+
+/// Dump the stack
+#[no_mangle]
+pub unsafe extern "C" fn mips64_dump_stack(cpu: *mut cpu_mips_t, count: u_int) {
+    libc::printf(cstr!("MIPS Stack Dump at 0x%16.16llx:"), (*cpu).gpr[MIPS_GPR_SP]);
+    mips64_dump_memory(cpu, (*cpu).gpr[MIPS_GPR_SP], count);
+}
+
+/// Save the CPU state into a file
+#[no_mangle]
+pub unsafe extern "C" fn mips64_save_state(cpu: *mut cpu_mips_t, filename: *mut c_char) -> c_int {
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("w"));
+    if fd.is_null() {
+        libc::perror(cstr!("mips64_save_state: fopen"));
+        return -1;
+    }
+
+    // pc, lo and hi
+    libc::fprintf(fd, cstr!("pc: %16.16llx\n"), (*cpu).pc);
+    libc::fprintf(fd, cstr!("lo: %16.16llx\n"), (*cpu).lo);
+    libc::fprintf(fd, cstr!("hi: %16.16llx\n"), (*cpu).hi);
+
+    // general purpose registers
+    for i in 0..MIPS64_GPR_NR as c_int {
+        libc::fprintf(fd, cstr!("%s: %16.16llx\n"), mips64_gpr_reg_names[i as usize], (*cpu).gpr[i as usize]);
+    }
+
+    libc::printf(cstr!("\n"));
+
+    // cp0 registers
+    for i in 0..MIPS64_CP0_REG_NR as c_int {
+        libc::fprintf(fd, cstr!("%s: %16.16llx\n"), mips64_cp0_reg_names[i as usize], (*cpu).cp0.reg[i as usize]);
+    }
+
+    libc::printf(cstr!("\n"));
+
+    // cp1 registers
+    for i in 0..MIPS64_CP1_REG_NR as c_int {
+        libc::fprintf(fd, cstr!("fpu%d: %16.16llx\n"), i, (*cpu).fpu.reg[i as usize]);
+    }
+
+    libc::printf(cstr!("\n"));
+
+    // tlb entries
+    for i in 0..(*cpu).cp0.tlb_entries as c_int {
+        libc::fprintf(fd, cstr!("tlb%d_mask: %16.16llx\n"), i, (*cpu).cp0.tlb[i as usize].mask);
+        libc::fprintf(fd, cstr!("tlb%d_hi: %16.16llx\n"), i, (*cpu).cp0.tlb[i as usize].hi);
+        libc::fprintf(fd, cstr!("tlb%d_lo0: %16.16llx\n"), i, (*cpu).cp0.tlb[i as usize].lo0);
+        libc::fprintf(fd, cstr!("tlb%d_lo1: %16.16llx\n"), i, (*cpu).cp0.tlb[i as usize].lo1);
+    }
+
+    libc::fclose(fd);
+    0
+}
+
+/// Read a 64-bit unsigned integer
+unsafe fn mips64_hex_u64(mut str_: *mut c_char, _err: *mut c_int) -> m_uint64_t {
+    let mut res: m_uint64_t = 0;
+    let mut c: u_char;
+
+    // remove leading spaces
+    while (*str_ == b' ' as c_char) || (*str_ == b'\t' as c_char) {
+        str_ = str_.add(1);
+    }
+
+    while *str_ != 0 {
+        c = *str_ as u_char;
+
+        #[allow(clippy::manual_range_contains)]
+        if (c >= b'0') && (c <= b'9') {
+            res = (res << 4) + (c - b'0') as m_uint64_t;
+        }
+
+        #[allow(clippy::manual_range_contains)]
+        if (c >= b'a') && (c <= b'f') {
+            res = (res << 4) + ((c - b'a') + 10) as m_uint64_t;
+        }
+
+        #[allow(clippy::manual_range_contains)]
+        if (c >= b'A') && (c <= b'F') {
+            res = (res << 4) + ((c - b'A') + 10) as m_uint64_t;
+        }
+
+        str_ = str_.add(1);
+    }
+
+    res
+}
+
+/// Restore the CPU state from a file
+#[no_mangle]
+pub unsafe extern "C" fn mips64_restore_state(cpu: *mut cpu_mips_t, filename: *mut c_char) -> c_int {
+    let mut buffer: [c_char; 4096] = [0; 4096];
+    let mut sep: *mut c_char;
+    let mut value: *mut c_char;
+    let mut ep: *mut c_char;
+    let mut field: *mut c_char;
+    let mut len: size_t;
+    let mut index: c_int;
+
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("r"));
+    if fd.is_null() {
+        libc::perror(cstr!("mips64_restore_state: fopen"));
+        return -1;
+    }
+
+    while libc::feof(fd) == 0 {
+        buffer[0] = 0;
+        libc::fgets(buffer.as_c_mut(), buffer.len() as c_int, fd);
+        len = libc::strlen(buffer.as_c());
+
+        if buffer[len - 1] == b'\n' as c_char {
+            buffer[len - 1] = 0;
+        }
+
+        sep = libc::strchr(buffer.as_c(), b':' as c_int);
+        if sep.is_null() {
+            continue;
+        }
+
+        value = sep.add(1);
+        *sep = 0;
+
+        // gpr ?
+        index = mips64_get_reg_index(buffer.as_c_mut());
+        if index != -1 {
+            (*cpu).gpr[index as usize] = mips64_hex_u64(value, null_mut());
+            continue;
+        }
+
+        // cp0 register ?
+        index = mips64_cp0_get_reg_index(buffer.as_c_mut());
+        if index != -1 {
+            (*cpu).cp0.reg[index as usize] = mips64_hex_u64(value, null_mut());
+            continue;
+        }
+
+        // cp1 register ?
+        if (len > 3) && libc::strncmp(buffer.as_c(), cstr!("fpu"), 3) == 0 {
+            index = libc::atoi(buffer.as_c().add(3));
+            (*cpu).fpu.reg[index as usize] = mips64_hex_u64(value, null_mut());
+        }
+
+        // tlb entry ?
+        if (len > 3) && libc::strncmp(buffer.as_c(), cstr!("tlb"), 3) == 0 {
+            ep = libc::strchr(buffer.as_c(), b'_' as c_int);
+
+            if !ep.is_null() {
+                index = libc::atoi(buffer.as_c().add(3));
+                field = ep.add(1);
+
+                if libc::strcmp(field, cstr!("mask")) == 0 {
+                    (*cpu).cp0.tlb[index as usize].mask = mips64_hex_u64(value, null_mut());
+                    continue;
+                }
+
+                if libc::strcmp(field, cstr!("hi")) == 0 {
+                    (*cpu).cp0.tlb[index as usize].hi = mips64_hex_u64(value, null_mut());
+                    continue;
+                }
+
+                if libc::strcmp(field, cstr!("lo0")) == 0 {
+                    (*cpu).cp0.tlb[index as usize].lo0 = mips64_hex_u64(value, null_mut());
+                    continue;
+                }
+
+                if libc::strcmp(field, cstr!("lo1")) == 0 {
+                    (*cpu).cp0.tlb[index as usize].lo1 = mips64_hex_u64(value, null_mut());
+                    continue;
+                }
+            }
+        }
+
+        // pc, lo, hi ?
+        if libc::strcmp(buffer.as_c(), cstr!("pc")) == 0 {
+            (*cpu).pc = mips64_hex_u64(value, null_mut());
+            continue;
+        }
+
+        if libc::strcmp(buffer.as_c(), cstr!("lo")) == 0 {
+            (*cpu).lo = mips64_hex_u64(value, null_mut());
+            continue;
+        }
+
+        if libc::strcmp(buffer.as_c(), cstr!("hi")) == 0 {
+            (*cpu).hi = mips64_hex_u64(value, null_mut());
+            continue;
+        }
+    }
+
+    #[cfg(not(feature = "USE_UNSTABLE"))]
+    {
+        mips64_cp0_map_all_tlb_to_mts(cpu);
+    }
+
+    mips64_dump_regs((*cpu).gen);
+    mips64_tlb_dump((*cpu).gen);
+
+    libc::fclose(fd);
+    0
+}
+
+/// Load a raw image into the simulated memory
+#[no_mangle]
+pub unsafe extern "C" fn mips64_load_raw_image(cpu: *mut cpu_mips_t, filename: *mut c_char, mut vaddr: m_uint64_t) -> c_int {
+    let mut file_info: libc::stat = zeroed::<_>();
+    let mut len: size_t;
+    let mut clen: size_t;
+    let mut remain: m_uint32_t;
+    let mut haddr: *mut c_void;
+
+    let bfd: *mut libc::FILE = libc::fopen(filename, cstr!("r"));
+    if bfd.is_null() {
+        libc::perror(cstr!("fopen"));
+        return -1;
+    }
+
+    if libc::fstat(libc::fileno(bfd), addr_of_mut!(file_info)) == -1 {
+        libc::perror(cstr!("stat"));
+        libc::fclose(bfd);
+        return -1;
+    }
+
+    len = file_info.st_size as size_t;
+
+    libc::printf(cstr!("Loading RAW file '%s' at virtual address 0x%llx (size=%lu)\n"), filename, vaddr, len as u_long);
+
+    while len > 0 {
+        haddr = (*cpu).mem_op_lookup.unwrap()(cpu, vaddr);
+
+        if haddr.is_null() {
+            libc::fprintf(c_stderr(), cstr!("load_raw_image: invalid load address 0x%llx\n"), vaddr);
+            libc::fclose(bfd);
+            return -1;
+        }
+
+        if len > MIPS_MIN_PAGE_SIZE {
+            clen = MIPS_MIN_PAGE_SIZE;
+        } else {
+            clen = len;
+        }
+
+        remain = MIPS_MIN_PAGE_SIZE as m_uint32_t;
+        remain -= (vaddr - (vaddr & MIPS_MIN_PAGE_MASK)) as m_uint32_t;
+
+        clen = m_min(clen, remain as size_t);
+
+        if libc::fread(haddr.cast::<u_char>().cast::<_>(), clen, 1, bfd) != 1 {
+            break;
+        }
+
+        vaddr += clen as m_uint64_t;
+        len -= clen;
+    }
+
+    libc::fclose(bfd);
+    0
+}
+
+/// Load an ELF image into the simulated memory
+#[no_mangle]
+pub unsafe extern "C" fn mips64_load_elf_image(cpu: *mut cpu_mips_t, filename: *mut c_char, skip_load: c_int, entry_point: *mut m_uint32_t) -> c_int {
+    let mut vaddr: m_uint64_t;
+    let mut remain: m_uint32_t;
+    let mut haddr: *mut c_void;
+    let mut shdr: *mut libelf_sys::Elf32_Shdr;
+    let mut scn: *mut libelf_sys::Elf_Scn;
+    let mut len: size_t;
+    let mut clen: size_t;
+    let mut name: *mut c_char;
+    let fd: c_int;
+
+    if filename.is_null() {
+        return -1;
+    }
+
+    #[cfg(if_0)]
+    {
+        // ifdef __CYGWIN__
+        fd = libc::open(filename, libc::O_RDONLY | libc::O_BINARY);
+    }
+    #[cfg(not(if_0))]
+    {
+        fd = libc::open(filename, libc::O_RDONLY);
+    }
+
+    if fd == -1 {
+        libc::perror(cstr!("load_elf_image: open"));
+        return -1;
+    }
+
+    if libelf_sys::elf_version(libelf_sys::EV_CURRENT) == libelf_sys::EV_NONE {
+        libc::fprintf(c_stderr(), cstr!("load_elf_image: library out of date\n"));
+        libc::close(fd);
+        return -1;
+    }
+
+    let img_elf: *mut libelf_sys::Elf = libelf_sys::elf_begin(fd, libelf_sys::Elf_Cmd::ELF_C_READ, null_mut());
+    if img_elf.is_null() {
+        libc::fprintf(c_stderr(), cstr!("load_elf_image: elf_begin: %s\n"), libelf_sys::elf_errmsg(libelf_sys::elf_errno()));
+        libc::close(fd);
+        return -1;
+    }
+
+    let ehdr: *mut libelf_sys::Elf32_Ehdr = libelf_sys::elf32_getehdr(img_elf);
+    if ehdr.is_null() {
+        libc::fprintf(c_stderr(), cstr!("load_elf_image: invalid ELF file\n"));
+        libelf_sys::elf_end(img_elf);
+        libc::close(fd);
+        return -1;
+    }
+
+    libc::printf(cstr!("Loading ELF file '%s'...\n"), filename);
+    let bfd: *mut libc::FILE = libc::fdopen(fd, cstr!("rb"));
+
+    if bfd.is_null() {
+        libc::perror(cstr!("load_elf_image: fdopen"));
+        libelf_sys::elf_end(img_elf);
+        libc::close(fd);
+        return -1;
+    }
+
+    if skip_load == 0 {
+        for i in 0..(*ehdr).e_shnum as c_int {
+            scn = libelf_sys::elf_getscn(img_elf, i as size_t);
+
+            shdr = libelf_sys::elf32_getshdr(scn);
+            name = libelf_sys::elf_strptr(img_elf, (*ehdr).e_shstrndx as size_t, (*shdr).sh_name as size_t);
+            len = (*shdr).sh_size as size_t;
+
+            if ((*shdr).sh_flags & libelf_sys::SHF_ALLOC) == 0 || len == 0 {
+                continue;
+            }
+
+            if libc::fseek(bfd, (*shdr).sh_offset as c_long, libc::SEEK_SET) != 0 {
+                libc::perror(cstr!("load_elf_image: fseek"));
+                libelf_sys::elf_end(img_elf);
+                libc::fclose(bfd);
+                return -1;
+            }
+            vaddr = sign_extend((*shdr).sh_addr as m_int64_t, 32) as m_uint64_t;
+
+            if (*(*cpu).vm).debug_level > 0 {
+                libc::printf(cstr!("   * Adding section at virtual address 0x%8.8llx (len=0x%8.8lx)\n"), vaddr & 0xFFFFFFFF, len as u_long);
+            }
+
+            while len > 0 {
+                haddr = (*cpu).mem_op_lookup.unwrap()(cpu, vaddr);
+
+                if haddr.is_null() {
+                    libc::fprintf(c_stderr(), cstr!("load_elf_image: invalid load address 0x%llx\n"), vaddr);
+                    libelf_sys::elf_end(img_elf);
+                    libc::fclose(bfd);
+                    return -1;
+                }
+
+                if len > MIPS_MIN_PAGE_SIZE {
+                    clen = MIPS_MIN_PAGE_SIZE;
+                } else {
+                    clen = len;
+                }
+
+                remain = PPC32_MIN_PAGE_SIZE as m_uint32_t; // FIXME should be MIPS_MIN_PAGE_SIZE?
+                remain -= (vaddr - (vaddr & PPC32_MIN_PAGE_MASK as m_uint64_t)) as m_uint32_t; // FIXME should be MIPS_MIN_PAGE_MASK?
+
+                clen = m_min(clen, remain as size_t);
+
+                if (*shdr).sh_type == libelf_sys::SHT_NOBITS {
+                    // section with uninitialized data, zero it
+                    libc::memset(haddr.cast::<u_char>().cast::<_>(), 0, clen);
+                } else {
+                    #[warn(clippy::collapsible_else_if)]
+                    if libc::fread(haddr.cast::<u_char>().cast::<_>(), clen, 1, bfd) != 1 {
+                        libc::perror(cstr!("load_elf_image: fread"));
+                        libelf_sys::elf_end(img_elf);
+                        libc::fclose(bfd);
+                        return -1;
+                    }
+                }
+
+                vaddr += clen as m_uint64_t;
+                len -= clen;
+            }
+            let _ = name;
+        }
+    } else {
+        libc::printf(cstr!("ELF loading skipped, using a ghost RAM file.\n"));
+    }
+
+    libc::printf(cstr!("ELF entry point: 0x%x\n"), (*ehdr).e_entry);
+
+    if !entry_point.is_null() {
+        *entry_point = (*ehdr).e_entry;
+    }
+
+    libelf_sys::elf_end(img_elf);
+    libc::fclose(bfd);
+    0
+}
+
+/// Symbol lookup
+#[no_mangle]
+pub unsafe extern "C" fn mips64_sym_lookup(cpu: *mut cpu_mips_t, mut addr: m_uint64_t) -> *mut symbol {
+    rbtree_lookup((*cpu).sym_tree, addr_of_mut!(addr).cast::<_>()).cast::<_>()
+}
+
+/// Insert a new symbol
+#[no_mangle]
+pub unsafe extern "C" fn mips64_sym_insert(cpu: *mut cpu_mips_t, name: *mut c_char, addr: m_uint64_t) -> *mut symbol {
+    if (*cpu).sym_tree.is_null() {
+        return null_mut();
+    }
+
+    let len: size_t = libc::strlen(name);
+
+    let sym: *mut symbol = libc::malloc(len + 1 + size_of::<symbol>()).cast::<_>();
+    if sym.is_null() {
+        return null_mut();
+    }
+
+    libc::memcpy((*sym).name.as_c_void_mut(), name.cast::<_>(), len + 1);
+    (*sym).addr = addr;
+
+    if rbtree_insert((*cpu).sym_tree, sym.cast::<_>(), sym.cast::<_>()) == -1 {
+        libc::free(sym.cast::<_>());
+        return null_mut();
+    }
+
+    sym
+}
+
+/// Symbol comparison function
+unsafe extern "C" fn mips64_sym_compare(a1: *mut c_void, sym: *mut c_void, _: *mut c_void) -> c_int {
+    let a1: *mut m_uint64_t = a1.cast::<_>();
+    let sym: *mut symbol = sym.cast::<_>();
+    if *a1 > (*sym).addr {
+        return 1;
+    }
+
+    if *a1 < (*sym).addr {
+        return -1;
+    }
+
+    0
+}
+
+/// Create the symbol tree
+#[no_mangle]
+pub unsafe extern "C" fn mips64_sym_create_tree(cpu: *mut cpu_mips_t) -> c_int {
+    (*cpu).sym_tree = rbtree_create(Some(mips64_sym_compare), null_mut());
+    if !(*cpu).sym_tree.is_null() {
+        0
+    } else {
+        -1
+    }
+}
+
+/// Load a symbol file
+#[no_mangle]
+pub unsafe extern "C" fn mips64_sym_load_file(cpu: *mut cpu_mips_t, filename: *mut c_char) -> c_int {
+    let mut buffer: [c_char; 4096] = [0; 4096];
+    let mut func_name: [c_char; 128] = [0; 128];
+    let mut addr: m_uint64_t = 0;
+    let mut sym_type: c_char = 0;
+
+    if (*cpu).sym_tree.is_null() && (mips64_sym_create_tree(cpu) == -1) {
+        libc::fprintf(c_stderr(), cstr!("CPU%u: Unable to create symbol tree.\n"), (*(*cpu).gen).id);
+        return -1;
+    }
+
+    let fd: *mut libc::FILE = libc::fopen(filename, cstr!("r"));
+    if fd.is_null() {
+        libc::perror(cstr!("load_sym_file: fopen"));
+        return -1;
+    }
+
+    while libc::feof(fd) == 0 {
+        libc::fgets(buffer.as_c_mut(), buffer.len() as c_int, fd);
+
+        if libc::sscanf(buffer.as_c(), cstr!("%llx %c %s"), addr_of_mut!(addr), addr_of_mut!(sym_type), func_name) == 3 {
+            mips64_sym_insert(cpu, func_name.as_c_mut(), addr);
+        }
+    }
+
+    libc::fclose(fd);
+    0
 }

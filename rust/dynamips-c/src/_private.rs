@@ -195,17 +195,19 @@ extern "C" {
     pub fn frsw_start(filename: *mut c_char) -> c_int;
     pub fn hypervisor_stopsig() -> c_int;
     pub fn hypervisor_tcp_server(ip_addr: *mut c_char, tcp_port: c_int) -> c_int;
-    pub fn mips64_cca_cached(val: crate::dynamips_common::m_uint8_t) -> c_int;
     pub fn mips64_clear_irq(cpu: *mut crate::mips64::cpu_mips_t, irq: crate::dynamips_common::m_uint8_t);
-    pub fn mips64_delete(cpu: *mut crate::mips64::cpu_mips_t);
+    pub fn mips64_dump_insn(buffer: *mut c_char, buf_size: size_t, insn_name_size: size_t, pc: crate::dynamips_common::m_uint64_t, instruction: crate::utils::mips_insn_t) -> c_int;
     pub fn mips64_dump_stats(cpu: *mut crate::mips64::cpu_mips_t);
     pub fn mips64_exec_create_ilt();
     pub fn mips64_exec_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
-    pub fn mips64_init(cpu: *mut crate::mips64::cpu_mips_t) -> c_int;
     pub fn mips64_jit_create_ilt();
+    pub fn mips64_jit_flush(cpu: *mut crate::mips64::cpu_mips_t, threshold: u_int) -> u_int;
     pub fn mips64_jit_init(cpu: *mut crate::mips64::cpu_mips_t) -> c_int;
     pub fn mips64_jit_run_cpu(cpu: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
-    pub fn mips64_update_irq_flag(cpu: *mut crate::mips64::cpu_mips_t);
+    pub fn mips64_jit_shutdown(cpu: *mut crate::mips64::cpu_mips_t);
+    pub fn mips64_mem_shutdown(cpu: *mut crate::mips64::cpu_mips_t);
+    pub fn mips64_set_addr_mode(cpu: *mut crate::mips64::cpu_mips_t, addr_mode: u_int) -> c_int;
+    pub fn mips64_set_irq(cpu: *mut crate::mips64::cpu_mips_t, irq: crate::dynamips_common::m_uint8_t);
     pub fn netio_bridge_delete_all() -> c_int;
     pub fn netio_bridge_start(filename: *mut c_char) -> c_int;
     pub fn pci_io_add(d: *mut crate::pci_io::pci_io_data, start: crate::dynamips_common::m_uint32_t, end: crate::dynamips_common::m_uint32_t, dev: *mut crate::device::vdevice, handler: crate::device::dev_handler_t) -> *mut crate::pci_dev::pci_io_device;
@@ -222,14 +224,6 @@ extern "C" {
     pub fn ppc32_update_cr_set_altered_hreg(cpu: *mut crate::ppc32::cpu_ppc_t);
     pub fn ppc32_vmtest_platform_register() -> c_int;
     pub fn tsg_show_stats();
-}
-#[cfg(not(feature = "USE_UNSTABLE"))]
-extern "C" {
-    pub fn mips64_trigger_exception(cpu: *mut crate::mips64::cpu_mips_t, exc_code: u_int, bd_slot: c_int);
-}
-#[cfg(feature = "USE_UNSTABLE")]
-extern "C" {
-    pub fn mips64_general_exception(cpu: *mut crate::mips64::cpu_mips_t, exc_code: u_int);
 }
 
 // _private C functions

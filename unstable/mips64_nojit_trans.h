@@ -17,9 +17,6 @@
 
 #define JIT_SUPPORT 0
 
-static inline void mips64_jit_tcb_set_patch(u_char *code,u_char *target) {}
-static inline void mips64_jit_tcb_set_jump(u_char **instp,u_char *target) {}
-
 /* MIPS instruction array */
 extern struct mips64_insn_tag mips64_insn_tags[];
 

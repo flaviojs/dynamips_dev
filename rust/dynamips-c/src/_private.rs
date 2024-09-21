@@ -43,6 +43,17 @@ macro_rules! cstr {
 }
 pub use cstr;
 
+/// Equivalent to the C code: `*(buf)++ = value`
+/// Assumes buf is &mut *mut c_uchar or similar.
+#[macro_export]
+macro_rules! buf_push {
+    ($buf:expr, $value:expr) => {
+        **$buf = $value;
+        *$buf = $buf.add(1);
+    };
+}
+pub use buf_push;
+
 /// Trait that converts a rust type to a C representation.
 pub trait AsC<T, V> {
     fn as_c(&self) -> T;

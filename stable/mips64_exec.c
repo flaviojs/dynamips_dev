@@ -21,7 +21,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "mips64_exec.h"
-#include "insn_lookup.h"
 #include "dynamips.h"
 
 /* Forward declaration of instruction array */

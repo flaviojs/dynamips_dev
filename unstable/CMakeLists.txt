@@ -50,7 +50,6 @@ set ( _files
    "${COMMON}/frame_relay.c"
    "${COMMON}/eth_switch.c"
    "${COMMON}/dynamips.c"
-   "${COMMON}/insn_lookup.c"
    "${LOCAL}/vm.c"
    "${LOCAL}/cpu.c"
    "${LOCAL}/tcb.c" # only present in unstable

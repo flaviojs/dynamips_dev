@@ -20,7 +20,6 @@
 #include "vm.h"
 #include "ppc32_exec.h"
 #include "ppc32_mem.h"
-#include "insn_lookup.h"
 #include "dynamips.h"
 
 /* Forward declaration of instruction array */

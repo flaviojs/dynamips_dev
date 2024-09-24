@@ -10,15 +10,6 @@
 
 #include "utils.h"
 
-/* PowerPC instruction recognition */
-struct ppc32_insn_exec_tag {
-   char *name;
-   int (*exec)(cpu_ppc_t *,ppc_insn_t);
-   m_uint32_t mask,value;
-   int instr_type;
-   m_uint64_t count;
-};
-
 /* Get a rotation mask */
 static forced_inline m_uint32_t ppc32_rotate_mask(m_uint32_t mb,m_uint32_t me)
 {

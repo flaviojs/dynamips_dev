@@ -231,10 +231,18 @@ extern "C" {
     pub fn ppc32_exec_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
     pub fn ppc32_get_bat_spr(cpu: *mut crate::ppc32::cpu_ppc_t, spr: u_int) -> crate::dynamips_common::m_uint32_t;
     pub fn ppc32_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;
+    pub fn ppc32_jit_alloc_hreg_forced(cpu: *mut crate::ppc32::cpu_ppc_t, hreg: c_int) -> c_int;
+    pub fn ppc32_jit_alloc_hreg(cpu: *mut crate::ppc32::cpu_ppc_t, ppc_reg: c_int) -> c_int;
+    pub fn ppc32_jit_close_hreg_seq(cpu: *mut crate::ppc32::cpu_ppc_t);
     pub fn ppc32_jit_create_ilt();
     pub fn ppc32_jit_init(cpu: *mut crate::ppc32::cpu_ppc_t) -> c_int;
+    pub fn ppc32_jit_insert_hreg_mru(cpu: *mut crate::ppc32::cpu_ppc_t, map: *mut crate::utils::hreg_map);
     pub fn ppc32_jit_run_cpu(gen: *mut crate::cpu::cpu_gen_t) -> *mut c_void;
+    pub fn ppc32_jit_start_hreg_seq(cpu: *mut crate::ppc32::cpu_ppc_t, insn: *mut c_char);
+    pub fn ppc32_jit_tcb_recompile(cpu: *mut crate::ppc32::cpu_ppc_t, block: *mut crate::ppc32_jit::ppc32_jit_tcb_t) -> c_int;
+    pub fn ppc32_jit_tcb_record_patch(block: *mut crate::ppc32_jit::ppc32_jit_tcb_t, iop: *mut crate::jit_op::jit_op_t, jit_ptr: *mut u_char, vaddr: crate::dynamips_common::m_uint32_t) -> c_int;
     pub fn ppc32_mem_invalidate_cache(cpu: *mut crate::ppc32::cpu_ppc_t);
+    pub fn ppc32_run_breakpoint(cpu: *mut crate::ppc32::cpu_ppc_t);
     pub fn ppc32_set_bat_spr(cpu: *mut crate::ppc32::cpu_ppc_t, spr: u_int, val: crate::dynamips_common::m_uint32_t);
     pub fn ppc32_set_sdr1(cpu: *mut crate::ppc32::cpu_ppc_t, sdr1: crate::dynamips_common::m_uint32_t) -> c_int;
     pub fn ppc32_timer_irq_run(cpu: *mut crate::ppc32::cpu_ppc_t) -> *mut c_void;

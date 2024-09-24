@@ -280,7 +280,7 @@ pub use x86_modrm_rm;
 #[macro_export]
 macro_rules! x86_address_byte {
     ($inst:expr, $m:expr, $o:expr, $r:expr) => {
-        buf_push!($inst, ((($m & 0x03) << 6) | (($o & 0x07) << 3) | ($r & 0x07)));
+        buf_push!($inst, ((($m as c_uchar & 0x03) << 6) | (($o as c_uchar & 0x07) << 3) | ($r as c_uchar & 0x07)));
     };
 }
 pub use x86_address_byte;
@@ -298,8 +298,8 @@ pub use x86_imm_emit32;
 #[macro_export]
 macro_rules! x86_imm_emit16 {
     ($inst:expr, $imm:expr) => {
-        $inst.cast::<c_short>() = $imm;
-        $inst = $inst.add(2);
+        *$inst.cast::<c_short>() = $imm as c_short;
+        *$inst = $inst.add(2);
     };
 }
 pub use x86_imm_emit16;
@@ -363,7 +363,7 @@ macro_rules! x86_membase_emit {
                 if $disp == 0 {
                     x86_address_byte!($inst, 0, $r, X86_ESP);
                     x86_address_byte!($inst, 0, X86_ESP, X86_ESP);
-                } else if x86_is_imm8($disp) {
+                } else if x86_is_imm8!($disp) {
                     x86_address_byte!($inst, 1, $r, X86_ESP);
                     x86_address_byte!($inst, 0, X86_ESP, X86_ESP);
                     x86_imm_emit8!($inst, $disp);
@@ -378,7 +378,7 @@ macro_rules! x86_membase_emit {
                 x86_address_byte!($inst, 0, $r, $basereg);
                 break 'block;
             }
-            if x86_is_imm8($disp) {
+            if x86_is_imm8!($disp) {
                 x86_address_byte!($inst, 1, $r, $basereg);
                 x86_imm_emit8!($inst, $disp);
             } else {
@@ -547,7 +547,7 @@ pub use x86_prefix;
 macro_rules! x86_bswap {
     ($inst:expr, $reg:expr) => {
         buf_push!($inst, 0x0f);
-        buf_push!($inst, 0xc8 as c_uchar + reg);
+        buf_push!($inst, 0xc8 as c_uchar + $reg as c_uchar);
     };
 }
 pub use x86_bswap;

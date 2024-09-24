@@ -36,7 +36,7 @@ pub type ppc32_insn_exec_tag_exec = Option<unsafe extern "C" fn(_: *mut cpu_ppc_
 
 /// Get a rotation mask
 #[inline(always)]
-unsafe fn ppc32_rotate_mask(mb: m_uint32_t, me: m_uint32_t) -> m_uint32_t {
+pub unsafe fn ppc32_rotate_mask(mb: m_uint32_t, me: m_uint32_t) -> m_uint32_t {
     let mut mask: m_uint32_t = (0xFFFFFFFF >> mb) ^ ((0xFFFFFFFF >> me) >> 1);
 
     if me < mb {

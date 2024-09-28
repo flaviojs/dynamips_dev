@@ -727,7 +727,7 @@ static void ppc405_dump_tlb(cpu_gen_t *cpu)
 
 /* LBZ: Load Byte Zero */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_lbz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_lbz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -739,7 +739,7 @@ fastcall void ppc32_lbz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* LHZ: Load Half-Word Zero */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_lhz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_lhz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -751,7 +751,7 @@ fastcall void ppc32_lhz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* LWZ: Load Word Zero */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_lwz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_lwz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -763,7 +763,7 @@ fastcall void ppc32_lwz(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* LWBR: Load Word Byte Reverse */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_lwbr(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_lwbr(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -775,7 +775,7 @@ fastcall void ppc32_lwbr(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* LHA: Load Half-Word Algebraic */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_lha(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_lha(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -787,7 +787,7 @@ fastcall void ppc32_lha(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* STB: Store Byte */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_stb(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_stb(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -799,7 +799,7 @@ fastcall void ppc32_stb(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* STH: Store Half-Word */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_sth(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_sth(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -811,7 +811,7 @@ fastcall void ppc32_sth(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* STW: Store Word */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_stw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_stw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -823,7 +823,7 @@ fastcall void ppc32_stw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* STWBR: Store Word Byte Reversed */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_stwbr(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_stwbr(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -835,7 +835,7 @@ fastcall void ppc32_stwbr(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* LSW: Load String Word */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_lsw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_lsw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -847,7 +847,7 @@ fastcall void ppc32_lsw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* STW: Store String Word */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_stsw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_stsw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -859,7 +859,7 @@ fastcall void ppc32_stsw(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* LFD: Load Floating-Point Double */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_lfd(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_lfd(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -871,7 +871,7 @@ fastcall void ppc32_lfd(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* STFD: Store Floating-Point Double */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_stfd(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
+void ppc32_stfd(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 {
    m_uint64_t data;
    void *haddr;
@@ -883,7 +883,7 @@ fastcall void ppc32_stfd(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int reg)
 
 /* ICBI: Instruction Cache Block Invalidate */
 __attribute__((force_align_arg_pointer))
-fastcall void ppc32_icbi(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int op)
+void ppc32_icbi(cpu_ppc_t *cpu,m_uint32_t vaddr,u_int op)
 {
    ppc32_jit_tcb_t *block;
    m_uint32_t phys_page;

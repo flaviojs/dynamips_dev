@@ -115,7 +115,7 @@ static forced_inline int ppc32_exec_fetch(cpu_ppc_t *cpu,m_uint32_t ia,
 }
 
 /* Unknown opcode */
-static fastcall int ppc32_exec_unknown(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_unknown(cpu_ppc_t *cpu,ppc_insn_t insn)
 {   
    printf("PPC32: unknown opcode 0x%8.8x at ia = 0x%x\n",insn,cpu->ia);
    ppc32_dump_regs(cpu->gen);
@@ -126,7 +126,7 @@ static fastcall int ppc32_exec_unknown(cpu_ppc_t *cpu,ppc_insn_t insn)
 static forced_inline int 
 ppc32_exec_single_instruction(cpu_ppc_t *cpu,ppc_insn_t instruction)
 {
-   register fastcall int (*exec)(cpu_ppc_t *,ppc_insn_t) = NULL;
+   register int (*exec)(cpu_ppc_t *,ppc_insn_t) = NULL;
    struct ppc32_insn_exec_tag *tag;
    int index;
    
@@ -360,7 +360,7 @@ static forced_inline int ppc32_check_cond(cpu_ppc_t *cpu,m_uint32_t bo,
 }
 
 /* MFLR - Move From Link Register */
-static fastcall int ppc32_exec_MFLR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFLR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
 
@@ -369,7 +369,7 @@ static fastcall int ppc32_exec_MFLR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MTLR - Move To Link Register */
-static fastcall int ppc32_exec_MTLR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MTLR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
 
@@ -378,7 +378,7 @@ static fastcall int ppc32_exec_MTLR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFCTR - Move From Counter Register */
-static fastcall int ppc32_exec_MFCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
 
@@ -387,7 +387,7 @@ static fastcall int ppc32_exec_MFCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MTCTR - Move To Counter Register */
-static fastcall int ppc32_exec_MTCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MTCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
 
@@ -396,7 +396,7 @@ static fastcall int ppc32_exec_MTCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADD */
-static fastcall int ppc32_exec_ADD(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADD(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -407,7 +407,7 @@ static fastcall int ppc32_exec_ADD(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADD. */
-static fastcall int ppc32_exec_ADD_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADD_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -421,7 +421,7 @@ static fastcall int ppc32_exec_ADD_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDO - Add with Overflow */
-static fastcall int ppc32_exec_ADDO(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDO(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -438,7 +438,7 @@ static fastcall int ppc32_exec_ADDO(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDO. */
-static fastcall int ppc32_exec_ADDO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -456,7 +456,7 @@ static fastcall int ppc32_exec_ADDO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDC - Add Carrying */
-static fastcall int ppc32_exec_ADDC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -473,7 +473,7 @@ static fastcall int ppc32_exec_ADDC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDC. */
-static fastcall int ppc32_exec_ADDC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -491,7 +491,7 @@ static fastcall int ppc32_exec_ADDC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDCO - Add Carrying with Overflow */
-static fastcall int ppc32_exec_ADDCO(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDCO(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -509,7 +509,7 @@ static fastcall int ppc32_exec_ADDCO(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDCO. */
-static fastcall int ppc32_exec_ADDCO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDCO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -528,7 +528,7 @@ static fastcall int ppc32_exec_ADDCO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDE - Add Extended */
-static fastcall int ppc32_exec_ADDE(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDE(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -551,7 +551,7 @@ static fastcall int ppc32_exec_ADDE(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDE. */
-static fastcall int ppc32_exec_ADDE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -575,7 +575,7 @@ static fastcall int ppc32_exec_ADDE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDEO - Add Extended with Overflow */
-static fastcall int ppc32_exec_ADDEO(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDEO(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -599,7 +599,7 @@ static fastcall int ppc32_exec_ADDEO(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDEO. */
-static fastcall int ppc32_exec_ADDEO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDEO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -624,7 +624,7 @@ static fastcall int ppc32_exec_ADDEO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDI - ADD Immediate */
-static fastcall int ppc32_exec_ADDI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -641,7 +641,7 @@ static fastcall int ppc32_exec_ADDI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDIC - ADD Immediate with Carry */
-static fastcall int ppc32_exec_ADDIC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDIC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -656,7 +656,7 @@ static fastcall int ppc32_exec_ADDIC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDIC. */
-static fastcall int ppc32_exec_ADDIC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDIC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -672,7 +672,7 @@ static fastcall int ppc32_exec_ADDIC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDIS - ADD Immediate Shifted */
-static fastcall int ppc32_exec_ADDIS(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDIS(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -689,7 +689,7 @@ static fastcall int ppc32_exec_ADDIS(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDME - Add to Minus One Extended */
-static fastcall int ppc32_exec_ADDME(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDME(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -711,7 +711,7 @@ static fastcall int ppc32_exec_ADDME(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDME. */
-static fastcall int ppc32_exec_ADDME_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDME_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -734,7 +734,7 @@ static fastcall int ppc32_exec_ADDME_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDZE - Add to Zero Extended */
-static fastcall int ppc32_exec_ADDZE(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDZE(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -755,7 +755,7 @@ static fastcall int ppc32_exec_ADDZE(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ADDZE. */
-static fastcall int ppc32_exec_ADDZE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ADDZE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -777,7 +777,7 @@ static fastcall int ppc32_exec_ADDZE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* AND */
-static fastcall int ppc32_exec_AND(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_AND(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -788,7 +788,7 @@ static fastcall int ppc32_exec_AND(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* AND. */
-static fastcall int ppc32_exec_AND_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_AND_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -802,7 +802,7 @@ static fastcall int ppc32_exec_AND_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ANDC - AND with Complement */
-static fastcall int ppc32_exec_ANDC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ANDC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -813,7 +813,7 @@ static fastcall int ppc32_exec_ANDC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ANDC. - AND with Complement */
-static fastcall int ppc32_exec_ANDC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ANDC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -827,7 +827,7 @@ static fastcall int ppc32_exec_ANDC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ANDI. - AND Immediate */
-static fastcall int ppc32_exec_ANDI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ANDI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -841,7 +841,7 @@ static fastcall int ppc32_exec_ANDI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ANDIS. - AND Immediate Shifted */
-static fastcall int ppc32_exec_ANDIS_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ANDIS_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs  = bits(insn,21,25);
    int ra  = bits(insn,16,20);
@@ -855,7 +855,7 @@ static fastcall int ppc32_exec_ANDIS_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* B - Branch */
-static fastcall int ppc32_exec_B(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_B(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    m_uint32_t offset = bits(insn,2,25);
 
@@ -864,7 +864,7 @@ static fastcall int ppc32_exec_B(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BA - Branch Absolute */
-static fastcall int ppc32_exec_BA(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BA(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    m_uint32_t offset = bits(insn,2,25);
 
@@ -873,7 +873,7 @@ static fastcall int ppc32_exec_BA(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BL - Branch and Link */
-static fastcall int ppc32_exec_BL(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BL(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    m_uint32_t offset = bits(insn,2,25);
 
@@ -883,7 +883,7 @@ static fastcall int ppc32_exec_BL(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BLA - Branch and Link Absolute */
-static fastcall int ppc32_exec_BLA(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BLA(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    m_uint32_t offset = bits(insn,2,25);
 
@@ -893,7 +893,7 @@ static fastcall int ppc32_exec_BLA(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BC - Branch Conditional */
-static fastcall int ppc32_exec_BC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bo = bits(insn,21,25);
    int bi = bits(insn,16,20);
@@ -908,7 +908,7 @@ static fastcall int ppc32_exec_BC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BCA - Branch Conditional (absolute) */
-static fastcall int ppc32_exec_BCA(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BCA(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bo = bits(insn,21,25);
    int bi = bits(insn,16,20);
@@ -923,7 +923,7 @@ static fastcall int ppc32_exec_BCA(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BCL - Branch Conditional and Link */
-static fastcall int ppc32_exec_BCL(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BCL(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bo = bits(insn,21,25);
    int bi = bits(insn,16,20);
@@ -940,7 +940,7 @@ static fastcall int ppc32_exec_BCL(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BCLA - Branch Conditional and Link (absolute) */
-static fastcall int ppc32_exec_BCLA(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BCLA(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bo = bits(insn,21,25);
    int bi = bits(insn,16,20);
@@ -957,7 +957,7 @@ static fastcall int ppc32_exec_BCLA(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BCLR - Branch Conditional to Link register */
-static fastcall int ppc32_exec_BCLR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BCLR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bo = bits(insn,21,25);
    int bi = bits(insn,16,20);
@@ -971,7 +971,7 @@ static fastcall int ppc32_exec_BCLR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BCLRL - Branch Conditional to Link register */
-static fastcall int ppc32_exec_BCLRL(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BCLRL(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bo = bits(insn,21,25);
    int bi = bits(insn,16,20);
@@ -989,7 +989,7 @@ static fastcall int ppc32_exec_BCLRL(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BCCTR - Branch Conditional to Count register */
-static fastcall int ppc32_exec_BCCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BCCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bo = bits(insn,21,25);
    int bi = bits(insn,16,20);
@@ -1003,7 +1003,7 @@ static fastcall int ppc32_exec_BCCTR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* BCCTRL - Branch Conditional to Count register and Link */
-static fastcall int ppc32_exec_BCCTRL(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_BCCTRL(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bo = bits(insn,21,25);
    int bi = bits(insn,16,20);
@@ -1019,7 +1019,7 @@ static fastcall int ppc32_exec_BCCTRL(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CMP - Compare */
-static fastcall int ppc32_exec_CMP(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CMP(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,23,25);
    int ra = bits(insn,16,20);
@@ -1047,7 +1047,7 @@ static fastcall int ppc32_exec_CMP(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CMPI - Compare Immediate */
-static fastcall int ppc32_exec_CMPI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CMPI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,23,25);
    int ra = bits(insn,16,20);
@@ -1075,7 +1075,7 @@ static fastcall int ppc32_exec_CMPI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CMPL - Compare Logical */
-static fastcall int ppc32_exec_CMPL(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CMPL(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,23,25);
    int ra = bits(insn,16,20);
@@ -1102,7 +1102,7 @@ static fastcall int ppc32_exec_CMPL(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CMPLI - Compare Logical Immediate */
-static fastcall int ppc32_exec_CMPLI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CMPLI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,23,25);
    int ra = bits(insn,16,20);
@@ -1128,7 +1128,7 @@ static fastcall int ppc32_exec_CMPLI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CNTLZW - Count Leading Zeros Word */
-static fastcall int ppc32_exec_CNTLZW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CNTLZW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1150,7 +1150,7 @@ static fastcall int ppc32_exec_CNTLZW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CRAND - Condition Register AND */
-static fastcall int ppc32_exec_CRAND(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CRAND(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bd = bits(insn,21,25);
    int bb = bits(insn,16,20);
@@ -1169,7 +1169,7 @@ static fastcall int ppc32_exec_CRAND(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CREQV - Condition Register Equivalent */
-static fastcall int ppc32_exec_CREQV(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CREQV(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bd = bits(insn,21,25);
    int bb = bits(insn,16,20);
@@ -1188,7 +1188,7 @@ static fastcall int ppc32_exec_CREQV(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CRANDC - Condition Register AND with Complement */
-static fastcall int ppc32_exec_CRANDC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CRANDC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bd = bits(insn,21,25);
    int bb = bits(insn,16,20);
@@ -1207,7 +1207,7 @@ static fastcall int ppc32_exec_CRANDC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CRNAND - Condition Register NAND */
-static fastcall int ppc32_exec_CRNAND(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CRNAND(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bd = bits(insn,21,25);
    int bb = bits(insn,16,20);
@@ -1226,7 +1226,7 @@ static fastcall int ppc32_exec_CRNAND(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CRNOR - Condition Register NOR */
-static fastcall int ppc32_exec_CRNOR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CRNOR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bd = bits(insn,21,25);
    int bb = bits(insn,16,20);
@@ -1245,7 +1245,7 @@ static fastcall int ppc32_exec_CRNOR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CROR - Condition Register OR */
-static fastcall int ppc32_exec_CROR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CROR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bd = bits(insn,21,25);
    int bb = bits(insn,16,20);
@@ -1264,7 +1264,7 @@ static fastcall int ppc32_exec_CROR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CRORC - Condition Register OR with complement */
-static fastcall int ppc32_exec_CRORC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CRORC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bd = bits(insn,21,25);
    int bb = bits(insn,16,20);
@@ -1283,7 +1283,7 @@ static fastcall int ppc32_exec_CRORC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* CRXOR - Condition Register XOR */
-static fastcall int ppc32_exec_CRXOR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_CRXOR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int bd = bits(insn,21,25);
    int bb = bits(insn,16,20);
@@ -1302,7 +1302,7 @@ static fastcall int ppc32_exec_CRXOR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DCBF - Data Cache Block Flush */
-static fastcall int ppc32_exec_DCBF(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DCBF(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int ra = bits(insn,16,20);
    int rb = bits(insn,11,15);
@@ -1318,7 +1318,7 @@ static fastcall int ppc32_exec_DCBF(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DCBI - Data Cache Block Invalidate */
-static fastcall int ppc32_exec_DCBI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DCBI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int ra = bits(insn,16,20);
    int rb = bits(insn,11,15);
@@ -1334,7 +1334,7 @@ static fastcall int ppc32_exec_DCBI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DCBT - Data Cache Block Touch */
-static fastcall int ppc32_exec_DCBT(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DCBT(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int ra = bits(insn,16,20);
    int rb = bits(insn,11,15);
@@ -1350,7 +1350,7 @@ static fastcall int ppc32_exec_DCBT(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DCBST - Data Cache Block Store */
-static fastcall int ppc32_exec_DCBST(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DCBST(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int ra = bits(insn,16,20);
    int rb = bits(insn,11,15);
@@ -1366,7 +1366,7 @@ static fastcall int ppc32_exec_DCBST(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DIVW - Divide Word */
-static fastcall int ppc32_exec_DIVW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DIVW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1382,7 +1382,7 @@ static fastcall int ppc32_exec_DIVW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DIVW. - Divide Word */
-static fastcall int ppc32_exec_DIVW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DIVW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1402,7 +1402,7 @@ static fastcall int ppc32_exec_DIVW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DIVWU - Divide Word Unsigned */
-static fastcall int ppc32_exec_DIVWU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DIVWU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1418,7 +1418,7 @@ static fastcall int ppc32_exec_DIVWU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DIVWU. - Divide Word Unsigned */
-static fastcall int ppc32_exec_DIVWU_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DIVWU_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1438,13 +1438,13 @@ static fastcall int ppc32_exec_DIVWU_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* EIEIO - Enforce In-order Execution of I/O */
-static fastcall int ppc32_exec_EIEIO(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_EIEIO(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    return(0);
 }
 
 /* EQV */
-static fastcall int ppc32_exec_EQV(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_EQV(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1455,7 +1455,7 @@ static fastcall int ppc32_exec_EQV(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* EXTSB - Extend Sign Byte */
-static fastcall int ppc32_exec_EXTSB(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_EXTSB(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1465,7 +1465,7 @@ static fastcall int ppc32_exec_EXTSB(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* EXTSB. */
-static fastcall int ppc32_exec_EXTSB_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_EXTSB_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1478,7 +1478,7 @@ static fastcall int ppc32_exec_EXTSB_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* EXTSH - Extend Sign Word */
-static fastcall int ppc32_exec_EXTSH(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_EXTSH(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1488,7 +1488,7 @@ static fastcall int ppc32_exec_EXTSH(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* EXTSH. */
-static fastcall int ppc32_exec_EXTSH_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_EXTSH_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1501,7 +1501,7 @@ static fastcall int ppc32_exec_EXTSH_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ICBI - Instruction Cache Block Invalidate */
-static fastcall int ppc32_exec_ICBI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ICBI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int ra = bits(insn,16,20);
    int rb = bits(insn,11,15);
@@ -1517,13 +1517,13 @@ static fastcall int ppc32_exec_ICBI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ISYNC - Instruction Synchronize */
-static fastcall int ppc32_exec_ISYNC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ISYNC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    return(0);
 }
 
 /* LBZ - Load Byte and Zero */
-static fastcall int ppc32_exec_LBZ(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LBZ(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1540,7 +1540,7 @@ static fastcall int ppc32_exec_LBZ(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LBZU - Load Byte and Zero with Update */
-static fastcall int ppc32_exec_LBZU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LBZU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1554,7 +1554,7 @@ static fastcall int ppc32_exec_LBZU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LBZUX - Load Byte and Zero with Update Indexed */
-static fastcall int ppc32_exec_LBZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LBZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1568,7 +1568,7 @@ static fastcall int ppc32_exec_LBZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LBZX - Load Byte and Zero Indexed */
-static fastcall int ppc32_exec_LBZX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LBZX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1585,7 +1585,7 @@ static fastcall int ppc32_exec_LBZX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LHA - Load Half-Word Algebraic */
-static fastcall int ppc32_exec_LHA(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LHA(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1602,7 +1602,7 @@ static fastcall int ppc32_exec_LHA(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LHAU - Load Half-Word Algebraic with Update */
-static fastcall int ppc32_exec_LHAU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LHAU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1616,7 +1616,7 @@ static fastcall int ppc32_exec_LHAU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LHAUX - Load Half-Word Algebraic with Update Indexed */
-static fastcall int ppc32_exec_LHAUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LHAUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1630,7 +1630,7 @@ static fastcall int ppc32_exec_LHAUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LHAX - Load Half-Word Algebraic ndexed */
-static fastcall int ppc32_exec_LHAX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LHAX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1647,7 +1647,7 @@ static fastcall int ppc32_exec_LHAX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LHZ - Load Half-Word and Zero */
-static fastcall int ppc32_exec_LHZ(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LHZ(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1664,7 +1664,7 @@ static fastcall int ppc32_exec_LHZ(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LHZU - Load Half-Word and Zero with Update */
-static fastcall int ppc32_exec_LHZU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LHZU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1678,7 +1678,7 @@ static fastcall int ppc32_exec_LHZU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LHZUX - Load Half-Word and Zero with Update Indexed */
-static fastcall int ppc32_exec_LHZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LHZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1692,7 +1692,7 @@ static fastcall int ppc32_exec_LHZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LHZX - Load Half-Word and Zero Indexed */
-static fastcall int ppc32_exec_LHZX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LHZX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1709,7 +1709,7 @@ static fastcall int ppc32_exec_LHZX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LMW - Load Multiple Word */
-static fastcall int ppc32_exec_LMW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LMW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1731,7 +1731,7 @@ static fastcall int ppc32_exec_LMW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LWBRX - Load Word Byte-Reverse Indexed */
-static fastcall int ppc32_exec_LWBRX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LWBRX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1748,7 +1748,7 @@ static fastcall int ppc32_exec_LWBRX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LWZ - Load Word and Zero */
-static fastcall int ppc32_exec_LWZ(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LWZ(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1765,7 +1765,7 @@ static fastcall int ppc32_exec_LWZ(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LWZU - Load Word and Zero with Update */
-static fastcall int ppc32_exec_LWZU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LWZU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1779,7 +1779,7 @@ static fastcall int ppc32_exec_LWZU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LWZUX - Load Word and Zero with Update Indexed */
-static fastcall int ppc32_exec_LWZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LWZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1793,7 +1793,7 @@ static fastcall int ppc32_exec_LWZUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LWZX - Load Word and Zero Indexed */
-static fastcall int ppc32_exec_LWZX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LWZX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1810,7 +1810,7 @@ static fastcall int ppc32_exec_LWZX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LWARX - Load Word and Reserve Indexed */
-static fastcall int ppc32_exec_LWARX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LWARX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1828,7 +1828,7 @@ static fastcall int ppc32_exec_LWARX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LFD - Load Floating-Point Double */
-static fastcall int ppc32_exec_LFD(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LFD(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1845,7 +1845,7 @@ static fastcall int ppc32_exec_LFD(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LFDU - Load Floating-Point Double with Update */
-static fastcall int ppc32_exec_LFDU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LFDU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1859,7 +1859,7 @@ static fastcall int ppc32_exec_LFDU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LFDUX - Load Floating-Point Double with Update Indexed */
-static fastcall int ppc32_exec_LFDUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LFDUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1873,7 +1873,7 @@ static fastcall int ppc32_exec_LFDUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LFDX - Load Floating-Point Double Indexed */
-static fastcall int ppc32_exec_LFDX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LFDX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1890,7 +1890,7 @@ static fastcall int ppc32_exec_LFDX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LSWI - Load String Word Immediate */
-static fastcall int ppc32_exec_LSWI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LSWI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1927,7 +1927,7 @@ static fastcall int ppc32_exec_LSWI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* LSWX - Load String Word Indexed */
-static fastcall int ppc32_exec_LSWX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_LSWX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -1964,7 +1964,7 @@ static fastcall int ppc32_exec_LSWX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MCRF - Move Condition Register Field */
-static fastcall int ppc32_exec_MCRF(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MCRF(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,23,25);
    int rs = bits(insn,18,20);
@@ -1974,7 +1974,7 @@ static fastcall int ppc32_exec_MCRF(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFCR - Move from Condition Register */
-static fastcall int ppc32_exec_MFCR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFCR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
 
@@ -1983,7 +1983,7 @@ static fastcall int ppc32_exec_MFCR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFMSR - Move from Machine State Register */
-static fastcall int ppc32_exec_MFMSR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFMSR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
 
@@ -1992,7 +1992,7 @@ static fastcall int ppc32_exec_MFMSR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFTBU - Move from Time Base (Up) */
-static fastcall int ppc32_exec_MFTBU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFTBU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
 
@@ -2001,7 +2001,7 @@ static fastcall int ppc32_exec_MFTBU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFTBL - Move from Time Base (Lo) */
-static fastcall int ppc32_exec_MFTBL(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFTBL(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
 
@@ -2012,7 +2012,7 @@ static fastcall int ppc32_exec_MFTBL(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFSPR - Move from Special-Purpose Register */
-static fastcall int ppc32_exec_MFSPR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFSPR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd   = bits(insn,21,25);
    int spr0 = bits(insn,16,20);
@@ -2096,7 +2096,7 @@ static fastcall int ppc32_exec_MFSPR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFSR - Move From Segment Register */
-static fastcall int ppc32_exec_MFSR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFSR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {   
    int rd = bits(insn,21,25);
    int sr = bits(insn,16,19);
@@ -2106,7 +2106,7 @@ static fastcall int ppc32_exec_MFSR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFSRIN - Move From Segment Register Indirect */
-static fastcall int ppc32_exec_MFSRIN(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFSRIN(cpu_ppc_t *cpu,ppc_insn_t insn)
 {   
    int rd = bits(insn,21,25);
    int rb = bits(insn,11,15);
@@ -2116,7 +2116,7 @@ static fastcall int ppc32_exec_MFSRIN(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MTCRF - Move to Condition Register Fields */
-static fastcall int ppc32_exec_MTCRF(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MTCRF(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int crm = bits(insn,12,19);
@@ -2130,7 +2130,7 @@ static fastcall int ppc32_exec_MTCRF(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MTMSR - Move to Machine State Register */
-static fastcall int ppc32_exec_MTMSR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MTMSR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
 
@@ -2142,7 +2142,7 @@ static fastcall int ppc32_exec_MTMSR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MTSPR - Move to Special-Purpose Register */
-static fastcall int ppc32_exec_MTSPR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MTSPR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd   = bits(insn,21,25);
    int spr0 = bits(insn,16,20);
@@ -2209,7 +2209,7 @@ static fastcall int ppc32_exec_MTSPR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MTSR - Move To Segment Register */
-static fastcall int ppc32_exec_MTSR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MTSR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {   
    int rs = bits(insn,21,25);
    int sr = bits(insn,16,19);
@@ -2220,7 +2220,7 @@ static fastcall int ppc32_exec_MTSR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULHW - Multiply High Word */
-static fastcall int ppc32_exec_MULHW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULHW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2237,7 +2237,7 @@ static fastcall int ppc32_exec_MULHW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULHW. */
-static fastcall int ppc32_exec_MULHW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULHW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2254,7 +2254,7 @@ static fastcall int ppc32_exec_MULHW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULHWU - Multiply High Word Unsigned */
-static fastcall int ppc32_exec_MULHWU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULHWU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2271,7 +2271,7 @@ static fastcall int ppc32_exec_MULHWU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULHWU. */
-static fastcall int ppc32_exec_MULHWU_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULHWU_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2288,7 +2288,7 @@ static fastcall int ppc32_exec_MULHWU_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULLI - Multiply Low Immediate */
-static fastcall int ppc32_exec_MULLI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULLI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2299,7 +2299,7 @@ static fastcall int ppc32_exec_MULLI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULLW - Multiply Low Word */
-static fastcall int ppc32_exec_MULLW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULLW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2313,7 +2313,7 @@ static fastcall int ppc32_exec_MULLW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULLW. */
-static fastcall int ppc32_exec_MULLW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULLW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2331,7 +2331,7 @@ static fastcall int ppc32_exec_MULLW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULLWO - Multiply Low Word with Overflow */
-static fastcall int ppc32_exec_MULLWO(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULLWO(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2351,7 +2351,7 @@ static fastcall int ppc32_exec_MULLWO(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MULLWO. */
-static fastcall int ppc32_exec_MULLWO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MULLWO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2374,7 +2374,7 @@ static fastcall int ppc32_exec_MULLWO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* NAND */
-static fastcall int ppc32_exec_NAND(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_NAND(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2385,7 +2385,7 @@ static fastcall int ppc32_exec_NAND(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* NAND. */
-static fastcall int ppc32_exec_NAND_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_NAND_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2399,7 +2399,7 @@ static fastcall int ppc32_exec_NAND_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* NEG - Negate */
-static fastcall int ppc32_exec_NEG(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_NEG(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2409,7 +2409,7 @@ static fastcall int ppc32_exec_NEG(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* NEG. */
-static fastcall int ppc32_exec_NEG_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_NEG_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2422,7 +2422,7 @@ static fastcall int ppc32_exec_NEG_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* NEGO */
-static fastcall int ppc32_exec_NEGO(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_NEGO(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2441,7 +2441,7 @@ static fastcall int ppc32_exec_NEGO(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* NEGO. */
-static fastcall int ppc32_exec_NEGO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_NEGO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2460,7 +2460,7 @@ static fastcall int ppc32_exec_NEGO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* NOR */
-static fastcall int ppc32_exec_NOR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_NOR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2471,7 +2471,7 @@ static fastcall int ppc32_exec_NOR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* NOR. */
-static fastcall int ppc32_exec_NOR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_NOR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2485,7 +2485,7 @@ static fastcall int ppc32_exec_NOR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* OR */
-static fastcall int ppc32_exec_OR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_OR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2496,7 +2496,7 @@ static fastcall int ppc32_exec_OR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* OR. */
-static fastcall int ppc32_exec_OR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_OR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2510,7 +2510,7 @@ static fastcall int ppc32_exec_OR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ORC - OR with Complement */
-static fastcall int ppc32_exec_ORC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ORC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2521,7 +2521,7 @@ static fastcall int ppc32_exec_ORC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ORC. */
-static fastcall int ppc32_exec_ORC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ORC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2535,7 +2535,7 @@ static fastcall int ppc32_exec_ORC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ORI - OR Immediate */
-static fastcall int ppc32_exec_ORI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ORI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2546,7 +2546,7 @@ static fastcall int ppc32_exec_ORI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ORIS - OR Immediate Shifted */
-static fastcall int ppc32_exec_ORIS(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ORIS(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2557,7 +2557,7 @@ static fastcall int ppc32_exec_ORIS(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* RFI - Return From Interrupt */
-static fastcall int ppc32_exec_RFI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_RFI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    //printf("RFI: srr0=0x%8.8x, srr1=0x%8.8x\n",cpu->srr0,cpu->srr1);
 
@@ -2574,7 +2574,7 @@ static fastcall int ppc32_exec_RFI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* RLWIMI - Rotate Left Word Immediate then Mask Insert */
-static fastcall int ppc32_exec_RLWIMI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_RLWIMI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2590,7 +2590,7 @@ static fastcall int ppc32_exec_RLWIMI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* RLWIMI. - Rotate Left Word Immediate then Mask Insert */
-static fastcall int ppc32_exec_RLWIMI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_RLWIMI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2608,7 +2608,7 @@ static fastcall int ppc32_exec_RLWIMI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* RLWINM - Rotate Left Word Immediate AND with Mask */
-static fastcall int ppc32_exec_RLWINM(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_RLWINM(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2624,7 +2624,7 @@ static fastcall int ppc32_exec_RLWINM(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* RLWINM. - Rotate Left Word Immediate AND with Mask */
-static fastcall int ppc32_exec_RLWINM_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_RLWINM_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2642,7 +2642,7 @@ static fastcall int ppc32_exec_RLWINM_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* RLWNM - Rotate Left Word then Mask Insert */
-static fastcall int ppc32_exec_RLWNM(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_RLWNM(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2659,7 +2659,7 @@ static fastcall int ppc32_exec_RLWNM(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* RLWNM. - Rotate Left Word then Mask Insert */
-static fastcall int ppc32_exec_RLWNM_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_RLWNM_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2678,14 +2678,14 @@ static fastcall int ppc32_exec_RLWNM_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SC - System Call */
-static fastcall int ppc32_exec_SC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    ppc32_trigger_exception(cpu,PPC32_EXC_SYSCALL);
    return(1);
 }
 
 /* SLW - Shift Left Word */
-static fastcall int ppc32_exec_SLW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SLW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2703,7 +2703,7 @@ static fastcall int ppc32_exec_SLW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SLW. */
-static fastcall int ppc32_exec_SLW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SLW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2723,7 +2723,7 @@ static fastcall int ppc32_exec_SLW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SRAW - Shift Right Algebraic Word */
-static fastcall int ppc32_exec_SRAW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SRAW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2752,7 +2752,7 @@ static fastcall int ppc32_exec_SRAW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SRAWI - Shift Right Algebraic Word Immediate */
-static fastcall int ppc32_exec_SRAWI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SRAWI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2772,7 +2772,7 @@ static fastcall int ppc32_exec_SRAWI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SRAWI. */
-static fastcall int ppc32_exec_SRAWI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SRAWI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2794,7 +2794,7 @@ static fastcall int ppc32_exec_SRAWI_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SRW - Shift Right Word */
-static fastcall int ppc32_exec_SRW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SRW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2812,7 +2812,7 @@ static fastcall int ppc32_exec_SRW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SRW. */
-static fastcall int ppc32_exec_SRW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SRW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2832,7 +2832,7 @@ static fastcall int ppc32_exec_SRW_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STB - Store Byte */
-static fastcall int ppc32_exec_STB(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STB(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2849,7 +2849,7 @@ static fastcall int ppc32_exec_STB(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STBU - Store Byte with Update */
-static fastcall int ppc32_exec_STBU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STBU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2863,7 +2863,7 @@ static fastcall int ppc32_exec_STBU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STBUX - Store Byte with Update Indexed */
-static fastcall int ppc32_exec_STBUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STBUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2877,7 +2877,7 @@ static fastcall int ppc32_exec_STBUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STBX - Store Byte Indexed */
-static fastcall int ppc32_exec_STBX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STBX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2894,7 +2894,7 @@ static fastcall int ppc32_exec_STBX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STH - Store Half-Word */
-static fastcall int ppc32_exec_STH(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STH(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2911,7 +2911,7 @@ static fastcall int ppc32_exec_STH(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STHU - Store Half-Word with Update */
-static fastcall int ppc32_exec_STHU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STHU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs  = bits(insn,21,25);
    int ra  = bits(insn,16,20);
@@ -2925,7 +2925,7 @@ static fastcall int ppc32_exec_STHU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STHUX - Store Half-Word with Update Indexed */
-static fastcall int ppc32_exec_STHUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STHUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2939,7 +2939,7 @@ static fastcall int ppc32_exec_STHUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STHX - Store Half-Word Indexed */
-static fastcall int ppc32_exec_STHX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STHX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2956,7 +2956,7 @@ static fastcall int ppc32_exec_STHX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STMW - Store Multiple Word */
-static fastcall int ppc32_exec_STMW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STMW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2978,7 +2978,7 @@ static fastcall int ppc32_exec_STMW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STW - Store Word */
-static fastcall int ppc32_exec_STW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -2995,7 +2995,7 @@ static fastcall int ppc32_exec_STW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STWU - Store Word with Update */
-static fastcall int ppc32_exec_STWU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STWU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3009,7 +3009,7 @@ static fastcall int ppc32_exec_STWU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STWUX - Store Word with Update Indexed */
-static fastcall int ppc32_exec_STWUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STWUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3023,7 +3023,7 @@ static fastcall int ppc32_exec_STWUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STWX - Store Word Indexed */
-static fastcall int ppc32_exec_STWX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STWX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3040,7 +3040,7 @@ static fastcall int ppc32_exec_STWX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STWBRX - Store Word Byte-Reverse Indexed */
-static fastcall int ppc32_exec_STWBRX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STWBRX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3057,7 +3057,7 @@ static fastcall int ppc32_exec_STWBRX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STWCX. - Store Word Conditional Indexed */
-static fastcall int ppc32_exec_STWCX_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STWCX_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3089,7 +3089,7 @@ static fastcall int ppc32_exec_STWCX_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STFD - Store Floating-Point Double */
-static fastcall int ppc32_exec_STFD(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STFD(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3106,7 +3106,7 @@ static fastcall int ppc32_exec_STFD(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STFDU - Store Floating-Point Double with Update */
-static fastcall int ppc32_exec_STFDU(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STFDU(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3120,7 +3120,7 @@ static fastcall int ppc32_exec_STFDU(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STFDUX - Store Floating-Point Double with Update Indexed */
-static fastcall int ppc32_exec_STFDUX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STFDUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3134,7 +3134,7 @@ static fastcall int ppc32_exec_STFDUX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STFDX - Store Floating-Point Double Indexed */
-static fastcall int ppc32_exec_STFDX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STFDX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3151,7 +3151,7 @@ static fastcall int ppc32_exec_STFDX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STSWI - Store String Word Immediate */
-static fastcall int ppc32_exec_STSWI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STSWI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3186,7 +3186,7 @@ static fastcall int ppc32_exec_STSWI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* STSWX - Store String Word Indexed */
-static fastcall int ppc32_exec_STSWX(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_STSWX(cpu_ppc_t *cpu,ppc_insn_t insn)
 {  
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3221,7 +3221,7 @@ static fastcall int ppc32_exec_STSWX(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBF - Subtract From */
-static fastcall int ppc32_exec_SUBF(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBF(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3232,7 +3232,7 @@ static fastcall int ppc32_exec_SUBF(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBF. */
-static fastcall int ppc32_exec_SUBF_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBF_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3246,7 +3246,7 @@ static fastcall int ppc32_exec_SUBF_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFO - Subtract From with Overflow */
-static fastcall int ppc32_exec_SUBFO(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBFO(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3263,7 +3263,7 @@ static fastcall int ppc32_exec_SUBFO(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFO. */
-static fastcall int ppc32_exec_SUBFO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBFO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3281,7 +3281,7 @@ static fastcall int ppc32_exec_SUBFO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFC - Subtract From Carrying */
-static fastcall int ppc32_exec_SUBFC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBFC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3303,7 +3303,7 @@ static fastcall int ppc32_exec_SUBFC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFC. */
-static fastcall int ppc32_exec_SUBFC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBFC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3326,7 +3326,7 @@ static fastcall int ppc32_exec_SUBFC_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFCO - Subtract From with Overflow */
-_Unused static fastcall int ppc32_exec_SUBFCO(cpu_ppc_t *cpu,ppc_insn_t insn)
+_Unused static int ppc32_exec_SUBFCO(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3344,7 +3344,7 @@ _Unused static fastcall int ppc32_exec_SUBFCO(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFCO. */
-_Unused static fastcall int ppc32_exec_SUBFCO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+_Unused static int ppc32_exec_SUBFCO_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3363,7 +3363,7 @@ _Unused static fastcall int ppc32_exec_SUBFCO_dot(cpu_ppc_t *cpu,ppc_insn_t insn
 }
 
 /* SUBFE - Subtract From Carrying */
-static fastcall int ppc32_exec_SUBFE(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBFE(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3387,7 +3387,7 @@ static fastcall int ppc32_exec_SUBFE(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFIC - Subtract From Immediate Carrying */
-static fastcall int ppc32_exec_SUBFIC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBFIC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3409,7 +3409,7 @@ static fastcall int ppc32_exec_SUBFIC(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFZE - Subtract From Zero extended */
-static fastcall int ppc32_exec_SUBFZE(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBFZE(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3429,7 +3429,7 @@ static fastcall int ppc32_exec_SUBFZE(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SUBFZE. */
-static fastcall int ppc32_exec_SUBFZE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SUBFZE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rd = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3450,33 +3450,33 @@ static fastcall int ppc32_exec_SUBFZE_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* SYNC - Synchronize */
-static fastcall int ppc32_exec_SYNC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_SYNC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    return(0);
 }
 
 /* TLBIA - TLB Invalidate All */
-static fastcall int ppc32_exec_TLBIA(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_TLBIA(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    ppc32_mem_invalidate_cache(cpu);
    return(0);
 }
 
 /* TLBIE - TLB Invalidate Entry */
-static fastcall int ppc32_exec_TLBIE(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_TLBIE(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    ppc32_mem_invalidate_cache(cpu);
    return(0);
 }
 
 /* TLBSYNC - TLB Synchronize */
-static fastcall int ppc32_exec_TLBSYNC(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_TLBSYNC(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    return(0);
 }
 
 /* TW - Trap Word */
-static fastcall int ppc32_exec_TW(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_TW(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int to = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3501,7 +3501,7 @@ static fastcall int ppc32_exec_TW(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* TWI - Trap Word Immediate */
-static fastcall int ppc32_exec_TWI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_TWI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int to = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3526,7 +3526,7 @@ static fastcall int ppc32_exec_TWI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* XOR */
-static fastcall int ppc32_exec_XOR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_XOR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3537,7 +3537,7 @@ static fastcall int ppc32_exec_XOR(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* XOR. */
-static fastcall int ppc32_exec_XOR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_XOR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3551,7 +3551,7 @@ static fastcall int ppc32_exec_XOR_dot(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* XORI - XOR Immediate */
-static fastcall int ppc32_exec_XORI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_XORI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3562,7 +3562,7 @@ static fastcall int ppc32_exec_XORI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* XORIS - XOR Immediate Shifted */
-static fastcall int ppc32_exec_XORIS(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_XORIS(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3573,7 +3573,7 @@ static fastcall int ppc32_exec_XORIS(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* DCCCI - Data Cache Congruence Class Invalidate (PowerPC 405) */
-static fastcall int ppc32_exec_DCCCI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_DCCCI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int ra = bits(insn,16,20);
    int rb = bits(insn,11,15);
@@ -3588,7 +3588,7 @@ static fastcall int ppc32_exec_DCCCI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* ICCCI - Instruction Cache Congruence Class Invalidate (PowerPC 405) */
-static fastcall int ppc32_exec_ICCCI(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_ICCCI(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int ra = bits(insn,16,20);
    int rb = bits(insn,11,15);
@@ -3603,21 +3603,21 @@ static fastcall int ppc32_exec_ICCCI(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* MFDCR - Move From Device Control Register (PowerPC 405) */
-static fastcall int ppc32_exec_MFDCR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MFDCR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int UNUSED(rt) = bits(insn,21,25);
    return(0);
 }
 
 /* MTDCR - Move To Device Control Register (PowerPC 405) */
-static fastcall int ppc32_exec_MTDCR(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_MTDCR(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int UNUSED(rt) = bits(insn,21,25);
    return(0);
 }
 
 /* TLBRE - TLB Read Entry (PowerPC 405) */
-static fastcall int ppc32_exec_TLBRE(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_TLBRE(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rt = bits(insn,21,25);
    int ra = bits(insn,16,20);
@@ -3637,7 +3637,7 @@ static fastcall int ppc32_exec_TLBRE(cpu_ppc_t *cpu,ppc_insn_t insn)
 }
 
 /* TLBWE - TLB Write Entry (PowerPC 405) */
-static fastcall int ppc32_exec_TLBWE(cpu_ppc_t *cpu,ppc_insn_t insn)
+static int ppc32_exec_TLBWE(cpu_ppc_t *cpu,ppc_insn_t insn)
 {
    int rs = bits(insn,21,25);
    int ra = bits(insn,16,20);

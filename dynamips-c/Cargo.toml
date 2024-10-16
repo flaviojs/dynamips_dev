@@ -1,0 +1,23 @@
+[package]
+name = "dynamips-c"
+description = "Conversion of the original dynamips C code to rust"
+license = "GPL-2.0-only"
+edition = "2021"
+publish = false
+workspace = ".."
+version.workspace = true
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+
+[features]
+DYNAMIPS_ARCH_amd64 = [] # can recompile opcodes to native assembly code (amd64/x86_64)
+DYNAMIPS_ARCH_nojit = [] # cannot recompile opcodes
+DYNAMIPS_ARCH_ppc32 = [] # can recompile opcodes to native assembly code (ppc32)
+DYNAMIPS_ARCH_x86 = [] # can recompile opcodes to native assembly code (x86)
+ENABLE_GEN_ETH = [] # pcap
+ENABLE_IPV6 = [] # ipv6
+ENABLE_LINUX_ETH =[] # linux raw sockets
+USE_UNSTABLE = [] # replace stable code with unstable code

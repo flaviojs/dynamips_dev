@@ -5,6 +5,8 @@
  * PowerPC (32-bit) generic routines.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

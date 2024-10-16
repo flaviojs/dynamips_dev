@@ -8,6 +8,8 @@
 #ifndef __TSG_H__
 #define __TSG_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 #include "vm.h"
 

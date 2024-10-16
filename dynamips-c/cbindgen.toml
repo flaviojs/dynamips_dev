@@ -1,0 +1,46 @@
+language = "C"
+include_version = true
+include_guard = "DYNAMIPS_C_CBINDGEN_H"
+pragma_once = true
+documentation_style = "c++"
+style = "tag"
+after_includes = """
+// BEGIN after_includes
+
+#ifdef DYNAMIPS_ARCH_amd64
+#define JIT_ARCH "amd64"
+#define JIT_CPU CPU_amd64
+#define MIPS64_ARCH_INC_FILE "mips64_amd64_trans.h"
+#define PPC32_ARCH_INC_FILE "ppc32_amd64_trans.h"
+#endif
+
+#ifdef DYNAMIPS_ARCH_nojit
+#define JIT_ARCH "nojit"
+#define JIT_CPU CPU_nojit
+#define MIPS64_ARCH_INC_FILE "mips64_nojit_trans.h"
+#define PPC32_ARCH_INC_FILE "ppc32_nojit_trans.h"
+#endif
+
+#ifdef DYNAMIPS_ARCH_ppc32
+#define JIT_ARCH "ppc32"
+#define JIT_CPU CPU_ppc32
+#define MIPS64_ARCH_INC_FILE "mips64_ppc32_trans.h"
+#define PPC32_ARCH_INC_FILE "ppc32_ppc32_trans.h"
+#endif
+
+#ifdef DYNAMIPS_ARCH_x86
+#define JIT_ARCH "x86"
+#define JIT_CPU CPU_x86
+#define MIPS64_ARCH_INC_FILE "mips64_x86_trans.h"
+#define PPC32_ARCH_INC_FILE "ppc32_x86_trans.h"
+#endif
+
+// END after_includes
+"""
+
+[defines]
+"feature = DYNAMIPS_ARCH_amd64" = "DYNAMIPS_ARCH_amd64" # can recompile opcodes to native assembly code (amd64/x86_64)
+"feature = DYNAMIPS_ARCH_nojit" = "DYNAMIPS_ARCH_nojit" # cannot recompile opcodes
+"feature = DYNAMIPS_ARCH_ppc32" = "DYNAMIPS_ARCH_ppc32" # can recompile opcodes to native assembly code (ppc32)
+"feature = DYNAMIPS_ARCH_x86" = "DYNAMIPS_ARCH_x86" # can recompile opcodes to native assembly code (x86)
+"feature = USE_UNSTABLE" = "USE_UNSTABLE" # replace stable code with unstable code

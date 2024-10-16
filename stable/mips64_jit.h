@@ -8,6 +8,8 @@
 #ifndef __MIPS64_JIT_H__
 #define __MIPS64_JIT_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 #include "sbox.h"
 

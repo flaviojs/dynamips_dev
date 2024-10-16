@@ -6,6 +6,8 @@
  * Copyright (c) 2013 Flávio J. Saraiva <flaviojs2005@gmail.com>
  */
 
+#include "dynamips_c.h"
+
 #include <assert.h>
 #include <errno.h>
 #include <stddef.h> // offsetof

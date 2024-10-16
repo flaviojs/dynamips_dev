@@ -8,6 +8,8 @@
 #ifndef __INSN_LOOKUP_H__
 #define __INSN_LOOKUP_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 #include "hash.h"
 

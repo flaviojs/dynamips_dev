@@ -1,0 +1,2 @@
+use_small_heuristics = "Max" # do not wrap below max_width
+max_width = 200 # max line size (double the default)

@@ -8,6 +8,8 @@
 #ifndef __DEV_VTTY_H__
 #define __DEV_VTTY_H__
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 #include <pthread.h>
 

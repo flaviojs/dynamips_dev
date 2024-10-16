@@ -9,6 +9,8 @@
  * Serial console by Peter Ross (suxen_drol@hotmail.com)
  */
 
+#include "dynamips_c.h"
+
 #include "dynamips_common.h"
 
 #include <stdio.h>

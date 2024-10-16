@@ -10,6 +10,8 @@
 #ifndef __GEN_ETH_H__
 #define __GEN_ETH_H__  1
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 #include <pcap.h>
 

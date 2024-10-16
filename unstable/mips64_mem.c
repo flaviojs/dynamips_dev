@@ -4,6 +4,8 @@
  * Patched by Jeremy Grossmann for the GNS3 project (www.gns3.net)
  */
 
+#include "dynamips_c.h"
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>

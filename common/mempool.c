@@ -5,6 +5,8 @@
  * mempool.c: Simple Memory Pools.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

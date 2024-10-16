@@ -5,6 +5,8 @@
  * PowerPC (32-bit) step-by-step execution.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

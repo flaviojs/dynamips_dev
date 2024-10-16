@@ -6,6 +6,8 @@
 #ifndef __MIPS64_X86_TRANS_H__
 #define __MIPS64_X86_TRANS_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 #include "x86-codegen.h"
 #include "cpu.h"

@@ -14,6 +14,8 @@
 #ifndef FS_NVRAM_H__
 #define FS_NVRAM_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 
 

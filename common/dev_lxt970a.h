@@ -13,6 +13,8 @@
 #ifndef __DEV_LXT970A_H__
 #define __DEV_LXT970A_H__
 
+#include "dynamips_c.h"
+
 /*
 Abreviations:
  RW=x - Read/Write with default value x

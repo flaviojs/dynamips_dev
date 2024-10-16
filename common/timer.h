@@ -8,6 +8,8 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__  1
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 #include <pthread.h>
 #include "utils.h"

@@ -5,6 +5,8 @@
  * ROMMON Environment Variables.
  */
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 #include "rommon_var.h"
 

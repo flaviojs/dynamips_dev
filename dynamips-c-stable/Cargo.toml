@@ -1,0 +1,13 @@
+[package]
+name = "dynamips-c-stable"
+description = "dynamips-c without USE_UNSTABLE (staticlib)"
+edition = "2021"
+publish = false
+workspace = ".."
+version.workspace = true
+
+[lib]
+crate-type = ["staticlib"]
+
+[dependencies]
+dynamips-c = { path = "../dynamips-c", features = [] }

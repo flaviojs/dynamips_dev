@@ -8,6 +8,8 @@
 #ifndef __DEV_C3745_IOFPGA_H__
 #define __DEV_C3745_IOFPGA_H__
 
+#include "dynamips_c.h"
+
 /* Forward declaration for IO_FPGA private data */
 struct c3745_iofpga_data;
 

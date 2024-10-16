@@ -6,6 +6,8 @@
 #ifndef __MIPS64_EXEC_H__
 #define __MIPS64_EXEC_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 
 /* MIPS instruction recognition */

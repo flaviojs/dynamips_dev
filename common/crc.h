@@ -8,6 +8,8 @@
 #ifndef __CRC_H__
 #define __CRC_H__
 
+#include "dynamips_c.h"
+
 #include "dynamips_common.h"
 
 extern m_uint16_t crc12_array[],crc16_array[];

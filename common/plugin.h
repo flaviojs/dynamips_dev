@@ -8,6 +8,8 @@
 #ifndef __PLUGIN_H__
 #define __PLUGIN_H__
 
+#include "dynamips_c.h"
+
 struct plugin {
    char *filename;
    void *dl_handle;

@@ -6,7 +6,7 @@
 #  - ANY_COMPILER    : skip compiler check (assumes gcc)
 #  - CMAKE_INSTALL_PREFIX : where to install
 
-cmake_minimum_required ( VERSION 3.5 )
+cmake_minimum_required ( VERSION 3.15 )
 foreach ( _dir
    "/usr/sfw" # search in "Sun FreeWare" (SunOS)
    "/opt/csw" # search in "OpenCSW" (SunOS)
@@ -20,6 +20,11 @@ if ( CMAKE_PREFIX_PATH )
 endif ( CMAKE_PREFIX_PATH )
 list ( APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake" )
 message ( STATUS "CMAKE_MODULE_PATH=${CMAKE_MODULE_PATH}" )
+
+if( NOT CMAKE_BUILD_TYPE ) # make sure the build type is set
+   set( CMAKE_BUILD_TYPE "RelWithDebInfo" )
+   message( WARNING "CMAKE_BUILD_TYPE is not set, defaulting to ${CMAKE_BUILD_TYPE}" )
+endif()
 
 project ( dynamips 
    VERSION 0.2.23
@@ -38,7 +43,38 @@ if( APPLE OR (CMAKE_SYSTEM_NAME MATCHES "FreeBSD") )
 endif()
 
 # Enable testing
+set( CTEST_TEST_TIMEOUT 0 ) # disable timeout
 include(CTest)
+
+# import rust crates
+corrosion_import_crate(
+   MANIFEST_PATH "${CMAKE_SOURCE_DIR}/Cargo.toml"
+   PROFILE "cmake-${CMAKE_BUILD_TYPE}"
+   CRATES
+      dynamips-c-stable # dynamips_c_stable
+      dynamips-c-unstable # dynamips_c_unstable
+   FEATURES ${DYNAMIPS_FEATURES}
+)
+# generate dynamips_c.h
+add_library( dynamips_c_h INTERFACE ) # FIXME workaround for corrosion_experimental_cbindgen(MANIFEST_DIRECTORY)
+set_target_properties( dynamips_c_h PROPERTIES
+   INTERFACE_COR_PACKAGE_MANIFEST_PATH "${CMAKE_SOURCE_DIR}/dynamips-c/Cargo.toml"
+   INTERFACE_COR_CARGO_PACKAGE_NAME "dynamips-c"
+)
+corrosion_experimental_cbindgen( TARGET dynamips_c_h HEADER_NAME "dynamips_c.h" )
+
+string( REPLACE ";" "," _features_commas "${DYNAMIPS_FEATURES}" )
+add_custom_target( cargo_fmt COMMAND cargo fmt -v WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" USES_TERMINAL )
+add_custom_target( cargo_clippy COMMAND cargo clippy "--profile=cmake-${CMAKE_BUILD_TYPE}" --features=${_features_commas} --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" USES_TERMINAL )
+add_custom_target( cargo_test COMMAND cargo test "--profile=cmake-${CMAKE_BUILD_TYPE}" --features=${_features_commas} --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v -- --test-threads 1 WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" USES_TERMINAL )
+add_custom_target( cargo_doc COMMAND cargo doc --features=${_features_commas} --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" USES_TERMINAL )
+
+add_test( NAME test_cargo_fmt COMMAND cargo fmt --check -v WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" )
+set_tests_properties( test_cargo_fmt PROPERTIES TIMEOUT 0 )
+add_test( NAME test_cargo_clippy COMMAND cargo clippy "--profile=cmake-${CMAKE_BUILD_TYPE}" --features=${_features_commas} --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v -- -D warnings WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" )
+set_tests_properties( test_cargo_clippy PROPERTIES TIMEOUT 0 )
+add_test( NAME test_cargo_test COMMAND cargo test "--profile=cmake-${CMAKE_BUILD_TYPE}" --features=${_features_commas} --target-dir "${CMAKE_BINARY_DIR}/cargo/build" -v -- --test-threads 1 WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}" )
+set_tests_properties( test_cargo_test PROPERTIES TIMEOUT 0 )
 
 add_subdirectory ( man )
 add_subdirectory ( common )
@@ -69,3 +105,5 @@ print_summary ()
 
 # Enable packaging
 include(CPack)
+
+enable_testing()

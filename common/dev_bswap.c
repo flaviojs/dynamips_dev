@@ -5,6 +5,8 @@
  * Byte-swapping device.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

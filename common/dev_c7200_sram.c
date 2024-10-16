@@ -5,6 +5,8 @@
  * Packet SRAM. This is a fast memory zone for packets on NPE150/NPE200.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

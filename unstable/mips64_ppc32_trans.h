@@ -9,6 +9,8 @@
 #ifndef __MIPS64_PPC32_TRANS_H__
 #define __MIPS64_PPC32_TRANS_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 #include "cpu.h"
 #include "mips64_exec.h"

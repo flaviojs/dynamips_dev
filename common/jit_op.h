@@ -6,6 +6,8 @@
 #ifndef __JIT_OP_H__
 #define __JIT_OP_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h"
 
 /* Number of JIT pools */

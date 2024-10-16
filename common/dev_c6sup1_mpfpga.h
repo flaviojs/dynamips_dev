@@ -8,6 +8,8 @@
 #ifndef __DEV_C6SUP1_MPFPGA_H__
 #define __DEV_C6SUP1_MPFPGA_H__
 
+#include "dynamips_c.h"
+
 /* Forward declaration for MP_FPGA private data */
 struct c6sup1_mpfpga_data;
 

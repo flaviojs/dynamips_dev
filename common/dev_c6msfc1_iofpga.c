@@ -10,6 +10,8 @@
  * This is very similar to c7200 platform.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -62,7 +64,7 @@
 /* Pack the NVRAM */
 #define NVRAM_PACKED   0x04
 
-/* Temperature: 22°C as default value */
+/* Temperature: 22Â°C as default value */
 #define C6MSFC1_DEFAULT_TEMP  22
 #define DS1620_CHIP(d,id) (&(d)->router->ds1620_sensors[(id)])
 

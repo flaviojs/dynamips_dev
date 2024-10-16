@@ -11,6 +11,8 @@
 #ifndef FS_MBR__
 #define FS_MBR__
 
+#include "dynamips_c.h"
+
 #include "dynamips_common.h"
 
 #define MBR_CYLINDER_MIN 0

@@ -6,6 +6,8 @@
 #ifndef __DEV_MV64460_H__
 #define __DEV_MV64460_H__
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 #include "utils.h"
 #include "mips64.h"

@@ -7,6 +7,8 @@
  * Considering the access pattern, this might be emulating SST39VF1681/SST39VF1682.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

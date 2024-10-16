@@ -10,6 +10,8 @@
 #ifndef __LINUX_ETH_H__
 #define __LINUX_ETH_H__  1
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 
 /* Get interface index of specified device */

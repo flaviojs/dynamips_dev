@@ -6,6 +6,8 @@
 #ifndef __PCI_IO_H__
 #define __PCI_IO_H__
 
+#include "dynamips_c.h"
+
 #include "pci_dev.h"
 
 /* PCI I/O data */

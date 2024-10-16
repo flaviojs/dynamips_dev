@@ -1,0 +1,36 @@
+[workspace]
+resolver = "2"
+members = [
+    "dynamips-c-stable",
+    "dynamips-c-unstable",
+    "dynamips-c",
+]
+
+[workspace.package] # can he inherited with <option>.workspace = true
+version = "0.2.23"
+
+
+# replicate CMAKE_BUILD_TYPE profiles (cargo 1.57+)
+
+[profile.cmake-Debug]
+inherits = "dev"
+
+[profile.cmake-Release]
+inherits = "release"
+
+[profile.cmake-RelWithDebInfo]
+inherits = "release"
+debug = true # full debug info
+
+[profile.cmake-MinSizeRel]
+inherits = "release"
+opt-level = "s" # optimize for size
+
+
+# change default profiles
+
+[profile.test]
+inherits = "cmake-RelWithDebInfo" # instead of dev
+
+[profile.bench]
+inherits = "cmake-RelWithDebInfo" # instead of release

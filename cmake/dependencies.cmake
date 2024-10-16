@@ -10,6 +10,7 @@
 #  - DYNAMIPS_DEFINITIONS
 #  - DYNAMIPS_INCLUDES
 #  - DYNAMIPS_LIBRARIES
+#  - DYNAMIPS_FEATURES
 # XXX assumes utils.cmake was included
 
 message ( STATUS "dependencies - BEGIN" )
@@ -312,5 +313,14 @@ else ()
    set ( HAVE_IPV6 0 )
 endif ()
 print_variables ( HAVE_IPV6 )
+
+# corrosion-rs (for rust targets)
+include(FetchContent)
+FetchContent_Declare(
+    Corrosion
+    GIT_REPOSITORY https://github.com/corrosion-rs/corrosion.git
+    GIT_TAG v0.5 # wants cmake 3.15
+)
+FetchContent_MakeAvailable(Corrosion)
 
 message ( STATUS "dependencies - END" )

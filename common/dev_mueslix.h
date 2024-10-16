@@ -6,6 +6,8 @@
 #ifndef __DEV_MUESLIX_H__
 #define __DEV_MUESLIX_H__
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 
 #include "utils.h"

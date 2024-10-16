@@ -13,6 +13,7 @@
 #  - DYNAMIPS_DEFINITIONS
 #  - DYNAMIPS_INCLUDES
 #  - DYNAMIPS_LIBRARIES
+#  - DYNAMIPS_FEATURES
 # XXX assumes utils.cmake and dependencies.cmake were included
 
 message ( STATUS "configure - BEGIN" )
@@ -26,13 +27,9 @@ message ( STATUS "DYNAMIPS_VERSION=${DYNAMIPS_VERSION}" )
 #  - Use "x86" to build for x86 (32-bit)
 #  - Use "amd64" to build for x86_64 (64-bit)
 #  - Use "nojit" to build for other architectures (no recompilation)
-set ( JIT_ARCH "\"${DYNAMIPS_ARCH}\"" )
-set ( JIT_CPU "CPU_${DYNAMIPS_ARCH}" )
-set ( MIPS64_ARCH_INC_FILE "\"mips64_${DYNAMIPS_ARCH}_trans.h\"" )
-set ( PPC32_ARCH_INC_FILE "\"ppc32_${DYNAMIPS_ARCH}_trans.h\"" )
-list ( APPEND DYNAMIPS_DEFINITIONS "-DJIT_ARCH=${JIT_ARCH}" "-DJIT_CPU=${JIT_CPU}"
-   "-DMIPS64_ARCH_INC_FILE=${MIPS64_ARCH_INC_FILE}"
-   "-DPPC32_ARCH_INC_FILE=${PPC32_ARCH_INC_FILE}" )
+#  - Use "ppc32" to build for ppc32 (32-bit)
+list ( APPEND DYNAMIPS_DEFINITIONS "-DDYNAMIPS_ARCH_${DYNAMIPS_ARCH}" )
+list ( APPEND DYNAMIPS_FEATURES "dynamips-c/DYNAMIPS_ARCH_${DYNAMIPS_ARCH}" )
 print_variables ( DYNAMIPS_ARCH )
 
 # Target code:
@@ -109,6 +106,7 @@ if ( "Linux" STREQUAL "${CMAKE_SYSTEM_NAME}" )
 endif ()
 if ( ENABLE_LINUX_ETH )
    list ( APPEND DYNAMIPS_DEFINITIONS "-DLINUX_ETH" )
+   list ( APPEND DYNAMIPS_FEATURES "dynamips-c/ENABLE_LINUX_ETH" )
 endif ()
 
 # ENABLE_GEN_ETH
@@ -119,6 +117,7 @@ endif ()
 if ( ENABLE_GEN_ETH )
    list ( APPEND DYNAMIPS_DEFINITIONS "-DGEN_ETH" )
    list ( APPEND DYNAMIPS_LIBRARIES ${PCAP_LIBRARIES} )
+   list ( APPEND DYNAMIPS_FEATURES "dynamips-c/ENABLE_GEN_ETH" )
 endif ()
 
 # ENABLE_IPV6
@@ -128,6 +127,7 @@ if ( HAVE_IPV6 )
 endif ()
 if ( ENABLE_IPV6 )
    list ( APPEND DYNAMIPS_DEFINITIONS "-DHAS_RFC2553=1" )
+   list ( APPEND DYNAMIPS_FEATURES "dynamips-c/ENABLE_IPV6" )
 else ()
    list ( APPEND DYNAMIPS_DEFINITIONS "-DHAS_RFC2553=0" )
 endif ()
@@ -161,7 +161,8 @@ endforeach ()
 string ( STRIP "${CMAKE_C_FLAGS}" CMAKE_C_FLAGS )
 add_definitions ( ${DYNAMIPS_DEFINITIONS} )
 include_directories ( ${DYNAMIPS_INCLUDES} )
-print_variables ( DYNAMIPS_FLAGS DYNAMIPS_DEFINITIONS DYNAMIPS_INCLUDES DYNAMIPS_LIBRARIES )
+list ( APPEND DYNAMIPS_FEATURES "dynamips-c/DYNAMIPS_ARCH_${DYNAMIPS_ARCH}" )
+print_variables ( DYNAMIPS_FLAGS DYNAMIPS_DEFINITIONS DYNAMIPS_INCLUDES DYNAMIPS_LIBRARIES DYNAMIPS_FEATURES )
 
 # summary
 macro ( print_summary )

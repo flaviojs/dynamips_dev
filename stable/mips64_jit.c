@@ -5,6 +5,8 @@
  * MIPS64 JIT compiler.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

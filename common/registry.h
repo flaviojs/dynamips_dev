@@ -11,6 +11,8 @@
 
 static const char rcsid_registry[] = "$Id$";
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <pthread.h>

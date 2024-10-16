@@ -6,6 +6,8 @@
 #ifndef __UTILS_H__
 #define __UTILS_H__
 
+#include "dynamips_c.h"
+
 #include "dynamips_common.h"
 
 #include <sys/time.h>

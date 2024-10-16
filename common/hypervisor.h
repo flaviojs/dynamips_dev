@@ -8,6 +8,8 @@
 #ifndef __HYPERVISOR_H__
 #define __HYPERVISOR_H__
 
+#include "dynamips_c.h"
+
 /* Default TCP port */
 #define HYPERVISOR_TCP_PORT 7200
 

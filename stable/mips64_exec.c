@@ -5,6 +5,8 @@
  * MIPS64 Step-by-step execution.
  */
 
+#include "dynamips_c.h"
+
 #if __GNUC__ > 2
 
 #include <stdio.h>

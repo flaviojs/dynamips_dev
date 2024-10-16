@@ -3,7 +3,7 @@ name: CI build
 on:
   workflow_dispatch: # run manually https://docs.github.com/en/actions/using-workflows/manually-running-a-workflow
   push:
-    branches: [ "master" ] # run for these branches
+    branches: [ "master", "dev" ] # run for these branches
   pull_request:
     branches: [ "master" ] # run for pull requests that target these branches
 
@@ -79,6 +79,12 @@ jobs:
           elfutils-dev
           libpcap-dev
           cmake
+          git
+          cbindgen
+          cargo
+          rust
+          rustfmt
+          rust-clippy
 
     - name: Configure with CMake
       shell: alpine.sh {0}
@@ -175,6 +181,9 @@ jobs:
 
   # ----------------------------------------------------------------------------------------------
   cygwin-amd64:
+    # FIXME rust needs a cygwin target/toolchain (that understands cygwin paths)
+    # An attempt: https://github.com/ookiineko-cygport
+    if: false
     name: Cygwin (amd64/x86_64)
     runs-on: windows-latest
     env:
@@ -203,6 +212,15 @@ jobs:
         git config --global --add safe.directory '*'
         # set the start directory
         echo "cd '${{github.workspace}}'" >> ~/.bash_profile
+        # make windows rust stuff available to cygwin
+        ln -s $(cygpath "${USERPROFILE}")/.cargo .cargo
+        echo "export PATH=\$PATH:$(pwd)/.cargo/bin" >> ~/.bash_profile
+
+    - name: Install dependencies (rust)
+      run: |
+        set -x
+        rustup default stable-x86_64-pc-windows-gnu # FIXME needs a target that understands cygwin paths
+        rustup component add clippy rustfmt
 
     - name: Install dependencies (libelf)
       run: |

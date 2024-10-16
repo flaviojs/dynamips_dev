@@ -6,6 +6,8 @@
 #ifndef __PPC32_MEM_H__
 #define __PPC32_MEM_H__
 
+#include "dynamips_c.h"
+
 /* Initialize the MTS subsystem for the specified CPU */
 int ppc32_mem_init(cpu_ppc_t *cpu);
 

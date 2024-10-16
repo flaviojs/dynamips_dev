@@ -1,0 +1,9 @@
+language = "C"
+include_version = true
+include_guard = "DYNAMIPS_C_CBINDGEN_H"
+pragma_once = true
+documentation_style = "c++"
+style = "tag"
+
+[defines]
+"feature = USE_UNSTABLE" = "USE_UNSTABLE" # some code is different in unstable

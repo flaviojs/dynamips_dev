@@ -13,6 +13,7 @@
 #  - DYNAMIPS_DEFINITIONS
 #  - DYNAMIPS_INCLUDES
 #  - DYNAMIPS_LIBRARIES
+#  - DYNAMIPS_FEATURES
 # XXX assumes utils.cmake and dependencies.cmake were included
 
 message ( STATUS "configure - BEGIN" )
@@ -33,6 +34,7 @@ set ( PPC32_ARCH_INC_FILE "\"ppc32_${DYNAMIPS_ARCH}_trans.h\"" )
 list ( APPEND DYNAMIPS_DEFINITIONS "-DJIT_ARCH=${JIT_ARCH}" "-DJIT_CPU=${JIT_CPU}"
    "-DMIPS64_ARCH_INC_FILE=${MIPS64_ARCH_INC_FILE}"
    "-DPPC32_ARCH_INC_FILE=${PPC32_ARCH_INC_FILE}" )
+list ( APPEND DYNAMIPS_FEATURES "dynamips-c/DYNAMIPS_ARCH_${DYNAMIPS_ARCH}" )
 print_variables ( DYNAMIPS_ARCH )
 
 # Target code:
@@ -67,10 +69,10 @@ else ()
 endif ()
 print_variables ( DYNAMIPS_CODE BUILD_DYNAMIPS_STABLE BUILD_DYNAMIPS_UNSTABLE )
 
-# Rename target (auto;stable;unstable;<empty>)
+# Rename target (auto;stable;unstable;none)
 # XXX should auto or not renaming be the default?
-set ( DYNAMIPS_RENAME "auto" CACHE STRING "which executable is renamed to dynamips (auto;stable;unstable;<empty>)" )
-set_property ( CACHE DYNAMIPS_RENAME PROPERTY STRINGS "auto" "stable" "unstable" )
+set ( DYNAMIPS_RENAME "auto" CACHE STRING "which executable is renamed to dynamips (auto;stable;unstable;none)" )
+set_property ( CACHE DYNAMIPS_RENAME PROPERTY STRINGS "auto" "stable" "unstable" "none" )
 set ( DYNAMIPS_RENAME_TARGET )
 if ( "auto" STREQUAL DYNAMIPS_RENAME )
    foreach ( _target "${DYNAMIPS_CODE}" "stable" "unstable" )
@@ -82,8 +84,8 @@ if ( "auto" STREQUAL DYNAMIPS_RENAME )
    endforeach ()
 elseif ( "stable" STREQUAL DYNAMIPS_RENAME OR "unstable" STREQUAL DYNAMIPS_RENAME )
    set ( DYNAMIPS_RENAME_TARGET "dynamips_${DYNAMIPS_ARCH}_${DYNAMIPS_RENAME}" )
-elseif ( DYNAMIPS_RENAME )
-   message ( FATAL_ERROR "unknown rename target DYNAMIPS_RENAME=${DYNAMIPS_RENAME} (auto;stable;unstable;<empty>)" )
+elseif ( NOT "none" STREQUAL DYNAMIPS_RENAME )
+   message ( FATAL_ERROR "unknown rename target DYNAMIPS_RENAME=${DYNAMIPS_RENAME} (auto;stable;unstable;none)" )
 endif ()
 print_variables ( DYNAMIPS_RENAME DYNAMIPS_RENAME_TARGET )
 
@@ -109,6 +111,7 @@ if ( "Linux" STREQUAL "${CMAKE_SYSTEM_NAME}" )
 endif ()
 if ( ENABLE_LINUX_ETH )
    list ( APPEND DYNAMIPS_DEFINITIONS "-DLINUX_ETH" )
+   list ( APPEND DYNAMIPS_FEATURES "dynamips-c/ENABLE_LINUX_ETH" )
 endif ()
 
 # ENABLE_GEN_ETH
@@ -119,6 +122,7 @@ endif ()
 if ( ENABLE_GEN_ETH )
    list ( APPEND DYNAMIPS_DEFINITIONS "-DGEN_ETH" )
    list ( APPEND DYNAMIPS_LIBRARIES ${PCAP_LIBRARIES} )
+   list ( APPEND DYNAMIPS_FEATURES "dynamips-c/ENABLE_GEN_ETH" )
 endif ()
 
 # ENABLE_IPV6
@@ -128,6 +132,7 @@ if ( HAVE_IPV6 )
 endif ()
 if ( ENABLE_IPV6 )
    list ( APPEND DYNAMIPS_DEFINITIONS "-DHAS_RFC2553=1" )
+   list ( APPEND DYNAMIPS_FEATURES "dynamips-c/ENABLE_IPV6" )
 else ()
    list ( APPEND DYNAMIPS_DEFINITIONS "-DHAS_RFC2553=0" )
 endif ()
@@ -161,7 +166,8 @@ endforeach ()
 string ( STRIP "${CMAKE_C_FLAGS}" CMAKE_C_FLAGS )
 add_definitions ( ${DYNAMIPS_DEFINITIONS} )
 include_directories ( ${DYNAMIPS_INCLUDES} )
-print_variables ( DYNAMIPS_FLAGS DYNAMIPS_DEFINITIONS DYNAMIPS_INCLUDES DYNAMIPS_LIBRARIES )
+list ( APPEND DYNAMIPS_FEATURES "dynamips-c/DYNAMIPS_ARCH_${DYNAMIPS_ARCH}" )
+print_variables ( DYNAMIPS_FLAGS DYNAMIPS_DEFINITIONS DYNAMIPS_INCLUDES DYNAMIPS_LIBRARIES DYNAMIPS_FEATURES )
 
 # summary
 macro ( print_summary )

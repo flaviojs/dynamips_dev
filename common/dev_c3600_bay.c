@@ -5,6 +5,8 @@
  * Cisco 3600 Network Modules. Info are obtained with "show pci bridge".
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

@@ -6,6 +6,8 @@
  * We don't use the JIT here, since there is no high performance needed.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

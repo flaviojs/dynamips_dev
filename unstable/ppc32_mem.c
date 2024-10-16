@@ -5,6 +5,8 @@
  * PowerPC MMU.
  */
 
+#include "dynamips_c.h"
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>

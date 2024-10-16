@@ -11,6 +11,8 @@
 
 static const char rcsid_rbtree[] = "$Id$";
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 #include "mempool.h"
 

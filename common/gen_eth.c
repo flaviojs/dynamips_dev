@@ -7,6 +7,8 @@
  * Use libpcap (0.9+) or WinPcap (0.4alpha1+) to receive and send packets.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

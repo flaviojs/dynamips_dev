@@ -5,6 +5,8 @@
  * NMC93C46/NMC93C56 Serial EEPROM.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

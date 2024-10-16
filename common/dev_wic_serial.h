@@ -8,6 +8,8 @@
 #ifndef __DEV_WIC_SERIAL_H__
 #define __DEV_WIC_SERIAL_H__
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 
 #include "utils.h"

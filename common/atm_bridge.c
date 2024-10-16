@@ -5,6 +5,8 @@
  * ATM bridge (RFC1483)
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

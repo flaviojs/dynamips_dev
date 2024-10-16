@@ -8,6 +8,8 @@
 #ifndef __ETH_SWITCH_H__
 #define __ETH_SWITCH_H__
 
+#include "dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h"

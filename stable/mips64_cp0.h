@@ -6,6 +6,8 @@
 #ifndef __CP0_H__
 #define __CP0_H__
 
+#include "dynamips_c.h"
+
 #include "utils.h" 
 
 /* CP0 register names */

@@ -3,6 +3,7 @@
 set ( COMMON "${CMAKE_SOURCE_DIR}/common" )
 set ( LOCAL "${CMAKE_CURRENT_SOURCE_DIR}" )
 include_directories ( "${CMAKE_CURRENT_SOURCE_DIR}" "${COMMON}" "${CMAKE_CURRENT_BINARY_DIR}" )
+set( DYNAMIPS_LIBRARIES ${DYNAMIPS_LIBRARIES} dynamips_c_unstable dynamips_c_h )
 
 # mips64_microcode_dump.inc
 set ( _input "${LOCAL}/mips64_microcode" )

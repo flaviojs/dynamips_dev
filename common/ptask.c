@@ -5,6 +5,8 @@
  * Periodic tasks centralization. Used for TX part of network devices.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

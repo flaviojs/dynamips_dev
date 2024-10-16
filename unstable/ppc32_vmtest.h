@@ -8,6 +8,8 @@
 #ifndef __PPC32_VMTEST_H__
 #define __PPC32_VMTEST_H__
 
+#include "dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h"

@@ -8,6 +8,8 @@
 #ifndef __CISCO_CARD_H__
 #define __CISCO_CARD_H__
 
+#include "dynamips_c.h"
+
 #include <pthread.h>
 
 #include "utils.h"

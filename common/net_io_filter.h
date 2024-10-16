@@ -8,6 +8,8 @@
 #ifndef __NET_IO_FILTER_H__
 #define __NET_IO_FILTER_H__
 
+#include "dynamips_c.h"
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>

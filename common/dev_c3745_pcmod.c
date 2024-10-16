@@ -5,6 +5,8 @@
  * PC Modules NM (NM-NAM, NM-CIDS, ...) for c3745 platforms.
  */
 
+#include "dynamips_c.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

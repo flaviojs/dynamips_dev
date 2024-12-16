@@ -45,3 +45,12 @@
 //!  * [`stackoverflow:a/11310578`](https://stackoverflow.com/a/11310578)
 //!  * [`stackoverflow:a/17312930`](https://stackoverflow.com/a/17312930)
 //!  * [`idryman:2012/11/21/integer-promotion`](http://www.idryman.org/blog/2012/11/21/integer-promotion/)
+#![allow(non_camel_case_types)]
+#![allow(unused_imports)]
+#![allow(unused_macros)]
+
+pub mod _extra;
+#[cfg(test)]
+pub mod _tests;
+
+pub mod dynamips_common;

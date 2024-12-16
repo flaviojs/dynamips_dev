@@ -8,8 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <signal.h>

@@ -10,8 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 extern m_uint32_t sbox_array[];
 
 static inline m_uint32_t sbox_compute(m_uint8_t *data,int len)

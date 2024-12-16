@@ -7,8 +7,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 m_uint32_t sbox_array[] = {
    0xF53E1837, 0x5F14C86B, 0x9EE3964C, 0xFA796D53,
    0x32223FC3, 0x4D82BC98, 0xA0C7FA62, 0x63E2C982,

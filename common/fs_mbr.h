@@ -13,8 +13,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 #define MBR_CYLINDER_MIN 0
 #define MBR_CYLINDER_MAX 1023
 #define MBR_HEAD_MIN 0

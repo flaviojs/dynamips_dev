@@ -10,8 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 /* ROMMON variable */
 struct rommon_var {
    struct rommon_var *next;

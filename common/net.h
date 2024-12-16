@@ -10,8 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 #include <arpa/inet.h>
 #include <netdb.h>
 /* TODO missing in MinGW */

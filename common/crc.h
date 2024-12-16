@@ -10,8 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 extern m_uint16_t crc12_array[],crc16_array[];
 extern m_uint32_t crc32_array[];
 

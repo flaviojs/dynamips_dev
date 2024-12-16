@@ -7,8 +7,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>

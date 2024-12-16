@@ -11,8 +11,6 @@
 
 #include "dynamips_c.h"
 
-#include "dynamips_common.h"
-
 struct ds1620_data {
    u_int state;
    u_int clk_bit;

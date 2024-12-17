@@ -28,7 +28,6 @@
 #include "insn_lookup.h"
 #include "memory.h"
 #include "ptask.h"
-#include "crc.h"
 
 #include MIPS64_ARCH_INC_FILE
 

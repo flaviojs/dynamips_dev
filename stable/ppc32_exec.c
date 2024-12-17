@@ -23,7 +23,6 @@
 #include "memory.h"
 #include "insn_lookup.h"
 #include "dynamips.h"
-#include "crc.h"
 
 /* Forward declaration of instruction array */
 static struct ppc32_insn_exec_tag ppc32_exec_tags[];

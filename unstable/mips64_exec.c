@@ -24,7 +24,6 @@
 #include "memory.h"
 #include "insn_lookup.h"
 #include "dynamips.h"
-#include "crc.h"
 
 /* Forward declaration of instruction array */
 static struct mips64_insn_exec_tag mips64_exec_tags[];

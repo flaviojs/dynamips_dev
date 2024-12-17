@@ -27,7 +27,6 @@
 #include "utils.h"
 #include "net.h"
 #include "atm_bridge.h"
-#include "crc.h"
 #include "net_io.h"
 #include "registry.h"
 #include "hypervisor.h"

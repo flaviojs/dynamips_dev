@@ -27,7 +27,6 @@
 #include "utils.h"
 #include "net.h"
 #include "eth_switch.h"
-#include "crc.h"
 #include "net_io.h"
 #include "registry.h"
 #include "hypervisor.h"

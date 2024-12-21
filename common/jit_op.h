@@ -10,6 +10,9 @@
 
 #include "utils.h"
 
+typedef struct cpu_gen cpu_gen_t;
+typedef struct jit_op jit_op_t;
+
 /* Number of JIT pools */
 #define JIT_OP_POOL_NR  8
 

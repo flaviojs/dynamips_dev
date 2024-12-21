@@ -13,6 +13,9 @@
 #include "utils.h" 
 #include "rbtree.h"
 
+typedef struct vm_instance vm_instance_t;
+typedef struct mips64_jit_tcb mips64_jit_tcb_t;
+
 /* 
  * MIPS General Purpose Registers 
  */

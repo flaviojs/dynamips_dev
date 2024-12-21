@@ -47,6 +47,7 @@
 //!  * [`idryman:2012/11/21/integer-promotion`](http://www.idryman.org/blog/2012/11/21/integer-promotion/)
 #![allow(clippy::missing_safety_doc)]
 #![allow(clippy::needless_range_loop)]
+#![allow(deprecated)]
 #![allow(non_camel_case_types)]
 #![allow(non_upper_case_globals)]
 #![allow(unused_imports)]
@@ -58,3 +59,4 @@ pub mod _tests;
 
 pub mod crc;
 pub mod dynamips_common;
+pub mod utils;

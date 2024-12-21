@@ -90,3 +90,216 @@ mod dynamips_common {
         assert_eq!(OFFSET!(S, inner.arr[1]), 23);
     }
 }
+
+mod utils {
+    use crate::utils::*;
+    use std::ffi::c_char;
+    use std::ffi::c_int;
+    use std::ffi::CStr;
+    use std::ptr::addr_of_mut;
+    use std::ptr::null_mut;
+
+    #[repr(C)]
+    #[derive(Copy, Clone)]
+    struct S {
+        pub field: u8,
+        pub list_next: *mut S,
+        pub list_pprev: *mut *mut S,
+    }
+    impl Default for S {
+        fn default() -> Self {
+            Self { field: 0, list_next: null_mut(), list_pprev: null_mut() }
+        }
+    }
+
+    fn _test_m_list<const N: usize, F: FnOnce([*mut S; N])>(f: F) {
+        let mut arr: [S; N] = [S::default(); N];
+        let p: [*mut S; N] = arr.each_mut().map(|r| addr_of_mut!(*r));
+        f(p)
+    }
+
+    #[test]
+    fn test_m_list_add() {
+        _test_m_list(|[p1, p2, p3]| unsafe {
+            let mut root: *mut S = null_mut();
+            M_LIST_ADD!(p1, root, list);
+            M_LIST_ADD!(p2, root, list);
+            M_LIST_ADD!(p3, root, list);
+            assert!(root == p3);
+            assert!((*p3).list_next == p2);
+            assert!((*p2).list_next == p1);
+            assert!((*p1).list_next == null_mut());
+            assert!((*p1).list_pprev == addr_of_mut!((*p2).list_next));
+            assert!((*p2).list_pprev == addr_of_mut!((*p3).list_next));
+            assert!((*p3).list_pprev == addr_of_mut!(root));
+        });
+    }
+
+    #[test]
+    fn test_m_list_remove_0() {
+        _test_m_list(|[p1]| unsafe {
+            M_LIST_REMOVE!(p1, list);
+            assert!((*p1).list_next == null_mut());
+            assert!((*p1).list_pprev == null_mut());
+        });
+    }
+
+    #[test]
+    fn test_m_list_remove_1() {
+        _test_m_list(|[p1]| unsafe {
+            let mut root: *mut S = null_mut();
+            M_LIST_ADD!(p1, root, list);
+            M_LIST_REMOVE!(p1, list);
+            assert!(root == null_mut());
+            assert!((*p1).list_next == null_mut());
+            assert!((*p1).list_pprev == null_mut());
+        });
+    }
+
+    #[test]
+    fn test_m_list_remove_2_1() {
+        _test_m_list(|[p1, p2]| unsafe {
+            let mut root: *mut S = null_mut();
+            M_LIST_ADD!(p1, root, list);
+            M_LIST_ADD!(p2, root, list);
+            M_LIST_REMOVE!(p1, list);
+            assert!(root == p2);
+            assert!((*p2).list_next == null_mut());
+            assert!((*p1).list_next == null_mut());
+            assert!((*p1).list_pprev == null_mut());
+            assert!((*p2).list_pprev == addr_of_mut!(root));
+        });
+    }
+
+    #[test]
+    fn test_m_list_remove_2_2() {
+        _test_m_list(|[p1, p2]| unsafe {
+            let mut root: *mut S = null_mut();
+            M_LIST_ADD!(p1, root, list);
+            M_LIST_ADD!(p2, root, list);
+            M_LIST_REMOVE!(p2, list);
+            assert!(root == p1);
+            assert!((*p2).list_next == null_mut());
+            assert!((*p1).list_next == null_mut());
+            assert!((*p1).list_pprev == addr_of_mut!(root));
+            assert!((*p2).list_pprev == null_mut());
+        });
+    }
+
+    #[test]
+    fn test_m_list_remove_3_1() {
+        _test_m_list(|[p1, p2, p3]| unsafe {
+            let mut root: *mut S = null_mut();
+            M_LIST_ADD!(p1, root, list);
+            M_LIST_ADD!(p2, root, list);
+            M_LIST_ADD!(p3, root, list);
+            M_LIST_REMOVE!(p1, list);
+            assert!(root == p3);
+            assert!((*p3).list_next == p2);
+            assert!((*p2).list_next == null_mut());
+            assert!((*p1).list_next == null_mut());
+            assert!((*p1).list_pprev == null_mut());
+            assert!((*p2).list_pprev == addr_of_mut!((*p3).list_next));
+            assert!((*p3).list_pprev == addr_of_mut!(root));
+        });
+    }
+
+    #[test]
+    fn test_m_list_remove_3_2() {
+        _test_m_list(|[p1, p2, p3]| unsafe {
+            let mut root: *mut S = null_mut();
+            M_LIST_ADD!(p1, root, list);
+            M_LIST_ADD!(p2, root, list);
+            M_LIST_ADD!(p3, root, list);
+            M_LIST_REMOVE!(p2, list);
+            assert!(root == p3);
+            assert!((*p3).list_next == p1);
+            assert!((*p2).list_next == null_mut());
+            assert!((*p1).list_next == null_mut());
+            assert!((*p1).list_pprev == addr_of_mut!((*p3).list_next));
+            assert!((*p2).list_pprev == null_mut());
+            assert!((*p3).list_pprev == addr_of_mut!(root));
+        });
+    }
+
+    #[test]
+    fn test_m_list_remove_3_3() {
+        _test_m_list(|[p1, p2, p3]| unsafe {
+            let mut root: *mut S = null_mut();
+            M_LIST_ADD!(p1, root, list);
+            M_LIST_ADD!(p2, root, list);
+            M_LIST_ADD!(p3, root, list);
+            M_LIST_REMOVE!(p3, list);
+            assert!(root == p2);
+            assert!((*p3).list_next == null_mut());
+            assert!((*p2).list_next == p1);
+            assert!((*p1).list_next == null_mut());
+            assert!((*p1).list_pprev == addr_of_mut!((*p2).list_next));
+            assert!((*p2).list_pprev == addr_of_mut!(root));
+            assert!((*p3).list_pprev == null_mut());
+        });
+    }
+
+    #[test]
+    fn test_dyn_sprintf() {
+        macro_rules! _assert_eq {
+            ($code:expr, $expected:expr) => {{
+                let p: *mut c_char = $code;
+                if p.is_null() {
+                    panic!("{} is null", stringify!($code));
+                } else {
+                    assert_eq!(CStr::from_ptr(p), $expected);
+                    libc::free(p.cast::<_>());
+                }
+            }};
+        }
+        unsafe {
+            _assert_eq!(dyn_sprintf!("no args"), c"no args");
+            _assert_eq!(dyn_sprintf!("%d int", 1), c"1 int");
+            _assert_eq!(dyn_sprintf!("%d %d int", 1, 2), c"1 2 int");
+            _assert_eq!(dyn_sprintf!("%d %d %d int", 1, 2, 3), c"1 2 3 int");
+            _assert_eq!(dyn_sprintf!("%s", "str"), c"str");
+            _assert_eq!(dyn_sprintf!("%s", c"CStr"), c"CStr");
+            _assert_eq!(dyn_sprintf!("%s", c"CString".to_owned()), c"CString");
+            _assert_eq!(dyn_sprintf!("%s", c"c_str_ptr".as_ptr()), c"c_str_ptr");
+        }
+    }
+
+    #[test]
+    fn test_m_log() {
+        let mut buffer: [c_char; 100] = [0; 100];
+        unsafe {
+            crate::utils::log_file = libc::fmemopen(buffer.as_mut_ptr().cast::<_>(), buffer.len(), c"w".as_ptr());
+
+            m_log!(c"module".as_ptr(), c"no args\n".as_ptr());
+            assert!(CStr::from_ptr(buffer.as_ptr()).to_str().expect("str").ends_with("module: no args\n"));
+
+            m_log!(c"x".as_ptr(), c"%d %s args\n".as_ptr(), 1, c"two".as_ptr());
+            assert!(CStr::from_ptr(buffer.as_ptr()).to_str().expect("str").ends_with("x: 1 two args\n"));
+
+            libc::fclose(crate::utils::log_file);
+            crate::utils::log_file = null_mut();
+        }
+    }
+
+    #[test]
+    fn test_fd_printf() {
+        unsafe {
+            let mut fds: [c_int; 2] = [-1; 2];
+            assert_eq!(libc::socketpair(libc::AF_UNIX, libc::SOCK_STREAM, 0, fds.as_mut_ptr()), 0);
+
+            let mut buffer: [c_char; 100] = [0; 100];
+            assert_eq!(fd_printf!(fds[0], 0, "no args\n"), 8);
+            assert_eq!(libc::read(fds[1], buffer.as_mut_ptr().cast::<_>(), buffer.len()), 8);
+            assert!(CStr::from_ptr(buffer.as_ptr()).to_str().expect("str").ends_with("no args\n"));
+
+            let mut buffer: [c_char; 100] = [0; 100];
+            assert_eq!(fd_printf!(fds[0], 0, "%d %s args\n", 1, c"two".as_ptr()), 11);
+            assert_eq!(libc::read(fds[1], buffer.as_mut_ptr().cast::<_>(), buffer.len()), 11);
+            assert!(CStr::from_ptr(buffer.as_ptr()).to_str().expect("str").ends_with("1 two args\n"));
+
+            libc::close(fds[0]);
+            libc::close(fds[1]);
+        }
+    }
+}

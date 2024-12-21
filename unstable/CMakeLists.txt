@@ -41,6 +41,7 @@ endif ( NOT BUILD_DYNAMIPS_UNSTABLE )
 add_definitions( "-DUSE_UNSTABLE" )
 
 set ( _files
+   "${COMMON}/_tmp.c"
    "${COMMON}/mempool.c"
    "${COMMON}/registry.c"
    "${COMMON}/rbtree.c"

@@ -20,6 +20,9 @@
 #include "cisco_card.h"
 #include "rommon_var.h"
 
+typedef struct vm_instance vm_instance_t;
+typedef struct vm_platform vm_platform_t;
+
 #define VM_PAGE_SHIFT  12
 #define VM_PAGE_SIZE   (1 << VM_PAGE_SHIFT)
 #define VM_PAGE_IMASK  (VM_PAGE_SIZE - 1)

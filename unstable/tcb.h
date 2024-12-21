@@ -13,6 +13,9 @@
 #include "utils.h"
 #include "vm.h"
 
+typedef struct cpu_tb cpu_tb_t;
+typedef struct cpu_tc cpu_tc_t;
+
 /* Checksum type */
 typedef m_uint64_t tsg_checksum_t;
 

@@ -107,3 +107,40 @@ function ( install_man_pages )
          )
    endforeach ()
 endfunction ( install_man_pages )
+
+# Creates a cargo crate and uses cargo check to probe if something compiles.
+#  - varname
+#  - CFG "has_xxx"
+#  - DEPENDENCIES "" (optional)
+#  - CODE "" (optional)
+#  - OPTION
+function ( cargo_probe varname )
+   set ( options )
+   set ( oneValueArgs CFG DEPENDENCIES CODE )
+   set ( multiValueArgs )
+   cmake_parse_arguments ( PARSE_ARGV 0 PROBE "${options}" "${oneValueArgs}" "${multiValueArgs}" )
+   if ( NOT PROBE_CFG )
+      message ( FATAL_ERROR "CFG is required" )
+   endif()
+   message ( STATUS "Probing ${PROBE_CFG}" )
+   message ( VERBOSE "DEPENDENCIES: ${PROBE_DEPENDENCIES}" )
+   message ( VERBOSE "CODE: ${PROBE_CODE}" )
+   set ( _in_dir "${CMAKE_CURRENT_LIST_DIR}/cargo_probe.in" )
+   set ( _crate_dir "${CMAKE_BINARY_DIR}/cargo_probe/${PROBE_CFG}" )
+   file( GLOB_RECURSE _paths RELATIVE "${_in_dir}" CONFIGURE_DEPENDS "${_in_dir}/*" )
+   foreach ( _path IN ITEMS ${_paths} )
+      message( VERBOSE "Configure ${_in_dir}/${_path} -> ${_crate_dir}/${_path}" )
+      configure_file ( "${_in_dir}/${_path}" "${_crate_dir}/${_path}" @ONLY )
+   endforeach()
+   execute_process (
+      COMMAND cargo check --target-dir "${CMAKE_BINARY_DIR}/cargo/probe" -v
+      WORKING_DIRECTORY "${_crate_dir}"
+      RESULT_VARIABLE _result
+      OUTPUT_VARIABLE _stdout
+      ERROR_VARIABLE _stderr
+   )
+   message ( VERBOSE "result: =${_result}" )
+   message ( VERBOSE "stdout:\n${_stdout}" )
+   message ( VERBOSE "stderr:\n${_stderr}" )
+   message ( FATAL_ERROR "TODO" )
+endfunction ( )

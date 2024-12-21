@@ -11,6 +11,9 @@
 #include <sys/types.h>
 #include "utils.h"
 
+typedef struct cpu_gen cpu_gen_t;
+typedef struct vm_instance vm_instance_t;
+
 /* MTS operation */
 #define MTS_READ  0
 #define MTS_WRITE 1

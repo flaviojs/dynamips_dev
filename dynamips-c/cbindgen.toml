@@ -8,6 +8,8 @@ sys_includes = [
     "errno.h",
     "stdio.h",
     "string.h",
+    "sys/socket.h",
+    "sys/time.h",
     "time.h",
     "unistd.h",
 ]
@@ -129,6 +131,50 @@ after_includes = """
 #define XSTRINGIFY(val)  #val
 #define STRINGIFY(val)   XSTRINGIFY(val)
 
+/* MMAP */
+#ifndef MAP_ANONYMOUS
+#define MAP_ANONYMOUS MAP_ANON
+#endif
+
+#ifdef USE_UNSTABLE
+/* Macros for double linked list */
+#define M_LIST_ADD(item,head,prefix) \
+   do { \
+      (item)->prefix##_next  = (head); \
+      (item)->prefix##_pprev = &(head); \
+      \
+      if ((head) != NULL) \
+         (head)->prefix##_pprev = &(item)->prefix##_next; \
+      \
+      (head) = (item); \
+   }while(0)
+
+#define M_LIST_REMOVE(item,prefix) \
+   do { \
+      if ((item)->prefix##_pprev != NULL) { \
+         if ((item)->prefix##_next != NULL) \
+            (item)->prefix##_next->prefix##_pprev = (item)->prefix##_pprev; \
+         \
+         *((item)->prefix##_pprev) = (item)->prefix##_next; \
+         \
+         (item)->prefix##_pprev = NULL; \
+         (item)->prefix##_next  = NULL; \
+      } \
+   }while(0)
+#endif
+
+char *dyn_sprintf(const char *fmt,...);
+void m_flog(FILE *fd,char *module,char *fmt,va_list ap);
+void m_log(char *module,char *fmt,...);
+ssize_t fd_printf(int fd,int flags,char *fmt,...);
+
+// FIXME cbindgen limitation: struct comes before the typedef, so a forward declaration is needed to use the typedef inside the struct
+typedef struct insn_exec_page insn_exec_page_t;
+typedef struct m_list m_list_t;
+
+// for layout.aligned_n
+#define CBINDGEN_LAYOUT_ALIGNED_N(n) __attribute__ ((aligned(n)))
+
 // END after_includes
 """
 
@@ -138,3 +184,6 @@ after_includes = """
 "feature = DYNAMIPS_ARCH_ppc32" = "DYNAMIPS_ARCH_ppc32" # can recompile opcodes to native assembly code (ppc32)
 "feature = DYNAMIPS_ARCH_x86" = "DYNAMIPS_ARCH_x86" # can recompile opcodes to native assembly code (x86)
 "feature = USE_UNSTABLE" = "USE_UNSTABLE" # replace stable code with unstable code
+
+[layout]
+aligned_n = "CBINDGEN_LAYOUT_ALIGNED_N"

@@ -13,6 +13,8 @@
 #include "utils.h"
 #include "sbox.h"
 
+typedef struct ppc32_jit_tcb ppc32_jit_tcb_t;
+
 /* Size of executable page area (in Mb) */
 #ifndef __CYGWIN__
 #define PPC_EXEC_AREA_SIZE  64

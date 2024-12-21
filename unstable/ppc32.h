@@ -13,6 +13,8 @@
 #include "utils.h" 
 #include "rbtree.h"
 
+typedef struct ppc32_jit_tcb ppc32_jit_tcb_t;
+
 /* CPU identifiers */
 #define PPC32_PVR_405     0x40110000 /* PowerPC 405GPa */
 #define PPC32_PVR_MPC8xx  0x00500000 /* PowerPC MPC 8xx cores (aka PowerQUICC) */

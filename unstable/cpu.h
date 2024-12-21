@@ -17,6 +17,9 @@
 #include "mips64_cp0.h"
 #include "ppc32.h"
 
+typedef struct cpu_gen cpu_gen_t;
+typedef struct cpu_tc cpu_tc_t;
+
 /* Possible CPU types */
 enum {
    CPU_TYPE_MIPS64 = 1,

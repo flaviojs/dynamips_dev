@@ -11,6 +11,13 @@ version.workspace = true
 crate-type = ["rlib"]
 
 [dependencies]
+libc = { version = "0.2", features = ["extra_traits"] }
+paste = "1.0"
+sprintf = "0.4"
+unixstring = "0.2.7"
+
+[build-dependencies]
+autocfg = "1"
 
 [features]
 DYNAMIPS_ARCH_amd64 = [] # can recompile opcodes to native assembly code (amd64/x86_64)

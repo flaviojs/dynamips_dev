@@ -31,7 +31,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "utils.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

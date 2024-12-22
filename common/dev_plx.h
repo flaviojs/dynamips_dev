@@ -9,7 +9,6 @@
 #include "dynamips_c.h"
 
 #include <sys/types.h>
-#include "utils.h"
 #include "mips64.h"
 #include "cpu.h"
 #include "device.h"

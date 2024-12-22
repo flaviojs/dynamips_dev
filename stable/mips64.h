@@ -10,7 +10,6 @@
 
 #include <pthread.h>
 
-#include "utils.h" 
 #include "rbtree.h"
 
 typedef struct vm_instance vm_instance_t;

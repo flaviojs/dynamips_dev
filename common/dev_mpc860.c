@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "utils.h"
 #include "net.h"
 #include "cpu.h"
 #include "vm.h"

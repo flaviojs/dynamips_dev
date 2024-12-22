@@ -247,7 +247,6 @@ foreach ( _header #standalone
    "stdlib.h"
    "string.h"
    "sys/ioctl.h"
-   "sys/mman.h" #utils.c
    "sys/select.h"
    "sys/socket.h"
    "sys/stat.h"

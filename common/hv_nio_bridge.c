@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "utils.h"
 #include "net.h"
 #include "net_io.h"
 #include "net_io_bridge.h"

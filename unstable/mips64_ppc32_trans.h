@@ -11,7 +11,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
 #include "cpu.h"
 #include "mips64_exec.h"
 #include "dynamips.h"

@@ -22,7 +22,6 @@
 #include <sys/types.h>
 #include <assert.h>
 
-#include "utils.h"
 #include "mempool.h"
 
 /* 

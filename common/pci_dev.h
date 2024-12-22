@@ -8,8 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
-
 #define	PCI_BUS_ADDR  0xcf8
 #define	PCI_BUS_DATA  0xcfc
 

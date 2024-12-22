@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "utils.h"
 #include "net.h"
 #include "atm.h"
 #include "net_io.h"

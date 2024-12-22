@@ -26,7 +26,6 @@
 #include <pthread.h>
 #include <assert.h>
 
-#include "utils.h"
 #include "mempool.h"
 #include "hash.h"
 #include "timer.h"

@@ -20,7 +20,6 @@ static const char rcsid[] = "$Id$";
 #include <fcntl.h>
 #include <ctype.h>
 
-#include "utils.h"
 #include "rbtree.h"
 
 #define rbtree_nil(tree) (&(tree)->nil)

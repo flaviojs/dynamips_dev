@@ -8,8 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
-
 /* MIPS instruction recognition */
 struct mips64_insn_exec_tag {
    char *name;

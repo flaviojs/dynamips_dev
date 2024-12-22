@@ -10,7 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
 #include "vm.h"
 
 typedef struct cpu_tb cpu_tb_t;

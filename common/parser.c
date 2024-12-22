@@ -23,7 +23,6 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 
-#include "utils.h"
 #include "parser.h"
 
 #define TOKEN_MAX_SIZE  512

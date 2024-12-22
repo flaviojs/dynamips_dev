@@ -8,8 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h" 
-
 #define TLB_ZONE_ADD 0
 #define TLB_ZONE_DELETE 1
 

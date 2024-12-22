@@ -10,7 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
 #include "sbox.h"
 
 typedef struct ppc32_jit_tcb ppc32_jit_tcb_t;

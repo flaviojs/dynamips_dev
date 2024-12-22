@@ -8,8 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
-
 /* PowerPC instruction recognition */
 struct ppc32_insn_exec_tag {
    char *name;

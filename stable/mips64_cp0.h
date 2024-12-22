@@ -8,8 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h" 
-
 /* CP0 register names */
 extern char *mips64_cp0_reg_names[];
 

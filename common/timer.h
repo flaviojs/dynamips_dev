@@ -12,7 +12,6 @@
 
 #include <sys/types.h>
 #include <pthread.h>
-#include "utils.h"
 
 /* Default number of Timer Queues */
 #define TIMERQ_NUMBER   10

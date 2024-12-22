@@ -10,7 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
 #include "sbox.h"
 
 typedef struct mips64_jit_tcb mips64_jit_tcb_t;

@@ -19,7 +19,6 @@
 #include <assert.h>
 #include <dlfcn.h>
 
-#include "utils.h"
 #include "plugin.h"
 
 /* Plugin list */

@@ -8,7 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
 #include "amd64-codegen.h"
 #include "cpu.h"
 #include "dynamips.h"

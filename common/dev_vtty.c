@@ -27,7 +27,6 @@
 #include <arpa/telnet.h>
 #include <arpa/inet.h>
 
-#include "utils.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

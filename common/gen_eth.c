@@ -35,7 +35,6 @@
 #endif
 
 #include "pcap.h"
-#include "utils.h"
 #include "gen_eth.h"
 
 /* Initialize a generic ethernet driver */

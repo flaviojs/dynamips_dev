@@ -12,7 +12,6 @@
 
 #include <pthread.h>
 
-#include "utils.h"
 #include "net_io.h"
 
 #define ATM_REAS_MAX_SIZE  16384

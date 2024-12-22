@@ -9,7 +9,6 @@
 #include "dynamips_c.h"
 
 #include <sys/types.h>
-#include "utils.h"
 #include "cpu.h"
 #include "net_io.h"
 #include "vm.h"

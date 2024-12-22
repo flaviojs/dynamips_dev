@@ -15,7 +15,6 @@
 #include <sys/stat.h>
 #include <assert.h>
 
-#include "utils.h"
 #include "hash.h"
 
 /* Compare two strings */

@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "utils.h"
 #include "base64.h"
 #include "registry.h"
 #include "hypervisor.h"

@@ -21,7 +21,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "utils.h"
 #include "timer.h"
 #include "net.h"
 #include "net_io.h"

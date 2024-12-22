@@ -47,7 +47,6 @@ set ( _files
    "${COMMON}/rbtree.c"
    "${COMMON}/hash.c"
    "${COMMON}/sbox.c"
-   "${COMMON}/utils.c"
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"
    "${COMMON}/ptask.c"

@@ -14,8 +14,6 @@
 #include <sys/time.h>
 #include <pthread.h>
 
-#include "utils.h"
-
 /* Memory Pool "Fixed" Flag */
 #define MEMPOOL_FIXED  1
 

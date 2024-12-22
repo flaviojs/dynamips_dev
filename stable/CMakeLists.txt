@@ -10,7 +10,6 @@ if ( BUILD_UDP_SEND )
 add_executable ( udp_send
    "${COMMON}/net.c"
    "${COMMON}/udp_send.c"
-   "${COMMON}/utils.c"
    )
 target_link_libraries ( udp_send ${DYNAMIPS_LIBRARIES} )
 install_executable ( udp_send )
@@ -21,7 +20,6 @@ if ( BUILD_UDP_RECV )
 add_executable ( udp_recv
    "${COMMON}/net.c"
    "${COMMON}/udp_recv.c"
-   "${COMMON}/utils.c"
    )
 target_link_libraries ( udp_recv ${DYNAMIPS_LIBRARIES} )
 install_executable ( udp_recv )
@@ -91,7 +89,6 @@ set ( _files
    "${COMMON}/rbtree.c"
    "${COMMON}/hash.c"
    "${COMMON}/sbox.c"
-   "${COMMON}/utils.c"
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"
    "${COMMON}/ptask.c"

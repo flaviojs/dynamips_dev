@@ -7,7 +7,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
 #include "rommon_var.h"
 
 #define DEBUG_OPEN  0

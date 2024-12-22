@@ -14,7 +14,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <pthread.h>
-#include "utils.h"
 #include "net_io.h"
 
 /* Directions for filters */

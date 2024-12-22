@@ -16,8 +16,6 @@
 #include <assert.h>
 #include <libelf.h>
 
-#include "utils.h"
-
 /* Extract ROM code+data from an ELF file and convert it into a C array */
 int main(int argc,char *argv[])
 {   

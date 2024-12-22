@@ -10,8 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
-
 /*
 CISCO EEPROM format version 1 (size=0x20?)
 0x00: 01(version)

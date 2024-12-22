@@ -8,7 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
 #include "x86-codegen.h"
 #include "cpu.h"
 #include "ppc32_exec.h"

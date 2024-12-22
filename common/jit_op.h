@@ -8,8 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
-
 typedef struct cpu_gen cpu_gen_t;
 typedef struct jit_op jit_op_t;
 

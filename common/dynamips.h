@@ -11,8 +11,6 @@
 
 #include <libelf.h>
 
-#include "utils.h"
-
 /* Debugging flags */
 #define DEBUG_BLOCK_SCAN       0
 #define DEBUG_BLOCK_COMPILE    0

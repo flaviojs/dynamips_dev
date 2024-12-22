@@ -13,7 +13,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
-#include "utils.h"
 
 /* ptask identifier */
 typedef m_int64_t ptask_id_t;

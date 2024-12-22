@@ -10,7 +10,6 @@
 
 #include <sys/types.h>
 
-#include "utils.h"
 #include "cpu.h"
 #include "vm.h"
 #include "device.h"

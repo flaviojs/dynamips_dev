@@ -15,8 +15,6 @@
 #include <sys/un.h>
 #include <pthread.h>
 
-#include "utils.h"
-
 #ifdef LINUX_ETH
 #include "linux_eth.h"
 #endif

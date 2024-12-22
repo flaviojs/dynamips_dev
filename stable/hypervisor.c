@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "utils.h"
 #include "parser.h"
 #include "net.h"
 #include "registry.h"

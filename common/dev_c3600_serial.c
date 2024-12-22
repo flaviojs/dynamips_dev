@@ -16,7 +16,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "utils.h"
 #include "net.h"
 #include "net_io.h"
 #include "ptask.h"

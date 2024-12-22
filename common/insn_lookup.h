@@ -10,7 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "utils.h"
 #include "hash.h"
 
 /* Forward declaration for instruction lookup table */

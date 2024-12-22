@@ -14,7 +14,6 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 
-#include "utils.h"
 #include "cisco_eeprom.h"
 
 /* ====================================================================== */

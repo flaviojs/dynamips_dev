@@ -35,7 +35,6 @@
 #endif
 
 #include "registry.h"
-#include "net.h"
 #include "net_io.h"
 #include "net_io_filter.h"
 #include "ptask.h"

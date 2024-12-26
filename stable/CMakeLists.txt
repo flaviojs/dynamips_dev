@@ -8,7 +8,6 @@ set( DYNAMIPS_LIBRARIES ${DYNAMIPS_LIBRARIES} dynamips_c_stable dynamips_c_h )
 # udp_send
 if ( BUILD_UDP_SEND )
 add_executable ( udp_send
-   "${COMMON}/net.c"
    "${COMMON}/udp_send.c"
    )
 target_link_libraries ( udp_send ${DYNAMIPS_LIBRARIES} )
@@ -18,7 +17,6 @@ endif ( BUILD_UDP_SEND )
 # udp_recv
 if ( BUILD_UDP_RECV )
 add_executable ( udp_recv
-   "${COMMON}/net.c"
    "${COMMON}/udp_recv.c"
    )
 target_link_libraries ( udp_recv ${DYNAMIPS_LIBRARIES} )
@@ -94,7 +92,6 @@ set ( _files
    "${COMMON}/ptask.c"
    "${COMMON}/timer.c"
    "${COMMON}/base64.c"
-   "${COMMON}/net.c"
    "${COMMON}/net_io.c"
    "${COMMON}/net_io_bridge.c"
    "${COMMON}/net_io_filter.c"

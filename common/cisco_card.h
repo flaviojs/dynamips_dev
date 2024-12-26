@@ -12,7 +12,6 @@
 
 #include <pthread.h>
 
-#include "net.h"
 #include "net_io.h"
 #include "cisco_eeprom.h"
 

@@ -10,8 +10,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "net.h"
-
 #define MAX_PKT_SIZE  2048
 
 int main(int argc,char *argv[])

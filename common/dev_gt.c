@@ -19,7 +19,6 @@
 #include <string.h>
 #include <stddef.h>
 
-#include "net.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

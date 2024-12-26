@@ -22,7 +22,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "net.h"
 #include "net_io.h"
 #include "registry.h"
 #include "ptask.h"

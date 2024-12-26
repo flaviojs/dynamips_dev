@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "net.h"
 #include "frame_relay.h"
 #include "net_io.h"
 #include "registry.h"

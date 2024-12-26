@@ -12,7 +12,6 @@
 
 #include <pthread.h>
 
-#include "net.h"
 #include "net_io.h"
 
 /* Hash entries for the MAC address table */

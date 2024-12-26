@@ -1,6 +1,7 @@
 //! build script for dynamips_c
 
 use std::env;
+use std::fs;
 use std::io;
 use std::path::PathBuf;
 use std::process::Command;
@@ -20,7 +21,7 @@ trait AutoCfgExt {
 impl AutoCfgExt for autocfg::AutoCfg {
     fn probe_raw_crate(&self, name: &str, cargo_toml: &str, lib_rs: &str) -> Result<(), io::Error> {
         // create crate
-        let mut crate_path: PathBuf = env::var_os("OUT_DIR").expect("out dir").into();
+        let mut crate_path: PathBuf = out_dir();
         crate_path.push("probe_raw_crate");
         crate_path.push(name);
         let src_path = crate_path.join("src");
@@ -74,13 +75,43 @@ impl AutoCfgExt for autocfg::AutoCfg {
     }
 }
 
+fn out_dir() -> PathBuf {
+    env::var_os("OUT_DIR").expect("out dir").into()
+}
+
 fn main() {
+    // auto config
     let ac = autocfg::new();
 
     let libc = r#"libc = { version = "0.2", features = ["extra_traits"] }"#;
-    ac.emit_dep_has_struct_field(libc, "libc::tm", "tm_gmtoff", "has_libc_tm_tm_gmtoff");
-    ac.emit_dep_has_path(libc, "libc::posix_memalign", "has_libc_posix_memalign");
     ac.emit_dep_has_path(libc, "libc::memalign", "has_libc_memalign");
+    ac.emit_dep_has_path(libc, "libc::posix_memalign", "has_libc_posix_memalign");
+    ac.emit_dep_has_path(libc, "libc::IPV6_V6ONLY", "has_libc_ipv6_v6only");
+    ac.emit_dep_has_struct_field(libc, "libc::sockaddr_in6", "sin6_len", "has_libc_sockaddr_in6_sin6_len");
+    ac.emit_dep_has_struct_field(libc, "libc::tm", "tm_gmtoff", "has_libc_tm_tm_gmtoff");
 
     autocfg::rerun_path("build.rs");
+
+    // Extra system symbols not included in libc, update only if the bindings changed.
+    let contents = r#"
+    #include <arpa/inet.h>
+    #include <netdb.h>
+    "#;
+    let mut new_data = Vec::new();
+    bindgen::Builder::default()
+        .header_contents("_extra_sys.h", contents)
+        .blocklist_item("IPPORT_RESERVED") // defined multiple times
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .generate()
+        .expect("bindings")
+        .write(Box::new(&mut new_data))
+        .expect("new data");
+    let rs_path: PathBuf = out_dir().join("_extra_sys.rs");
+    let create_or_update = fs::read_to_string(&rs_path).map_or_else(|_| true, |old_data| old_data.as_bytes() != new_data);
+    if create_or_update {
+        fs::write(rs_path, &new_data).expect("extra sys");
+    }
+
+    // Extra C symbols.
+    cc::Build::new().static_flag(true).file("src/_extra.c").cargo_warnings(true).cargo_output(true).compile("_extra_c");
 }

@@ -109,6 +109,7 @@ jobs:
           rust
           rust-clippy
           rustfmt
+          clang18-libclang
 
     - name: Install dependencies with cargo
       shell: alpine.sh {0}
@@ -458,7 +459,7 @@ jobs:
         rm -rf $HOME/.cargo $HOME/.rustup
 
         ## Add ArchPOWER stuff
-        sudo pacman -S --noprogressbar --noconfirm --needed base-devel git cmake zip libelf libpcap rustup cbindgen
+        sudo pacman -S --noprogressbar --noconfirm --needed base-devel git cmake zip libelf libpcap rustup cbindgen clang
         rustup install stable
         rustup component add clippy rustfmt
 

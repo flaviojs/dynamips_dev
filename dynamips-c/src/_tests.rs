@@ -91,6 +91,72 @@ mod dynamips_common {
     }
 }
 
+mod net {
+    use crate::_extra::*;
+    use crate::dynamips_common::*;
+    use crate::net::*;
+    use crate::utils::*;
+    use std::ffi::c_int;
+    use std::ffi::c_uint;
+
+    // Partial checksum test
+    #[test]
+    fn test_ip_cksum_partial() {
+        unsafe {
+            const N_BUF: usize = 4;
+            let mut buffer: [[m_uint8_t; 512]; N_BUF] = [[0; 512]; N_BUF];
+            let mut psum: [m_uint16_t; N_BUF] = [0; N_BUF];
+            let mut tmp: m_uint32_t;
+            let mut sum: m_uint32_t;
+            let gsum: m_uint32_t;
+
+            for i in 0..N_BUF {
+                m_randomize_block(buffer[i].as_mut_ptr(), size_of_val(&buffer[i]));
+                if false {
+                    mem_dump(c_stdout(), buffer[i].as_mut_ptr(), size_of_val(&buffer[i]) as u_int);
+                }
+
+                sum = ip_cksum_partial(buffer[i].as_mut_ptr(), size_of_val(&buffer[i]) as c_int);
+
+                while (sum >> 16) != 0 {
+                    sum = (sum & 0xFFFF) + (sum >> 16);
+                }
+
+                psum[i] = (!sum) as m_uint16_t;
+            }
+
+            // partial sums + accumulator
+            tmp = 0;
+            for i in 0..N_BUF {
+                if false {
+                    libc::printf(c"psum[%d] = 0x%4.4x\n".as_ptr(), i, psum[i] as c_uint);
+                }
+                tmp += !psum[i] as m_uint16_t as m_uint32_t;
+            }
+
+            // global sum
+            sum = ip_cksum_partial(buffer.as_mut_ptr().cast::<m_uint8_t>(), size_of_val(&buffer) as c_int);
+
+            while (sum >> 16) != 0 {
+                sum = (sum & 0xFFFF) + (sum >> 16);
+            }
+
+            gsum = sum;
+
+            // accumulator
+            while (tmp >> 16) != 0 {
+                tmp = (tmp & 0xFFFF) + (tmp >> 16);
+            }
+
+            if false {
+                libc::printf(c"gsum = 0x%4.4x, tmp = 0x%4.4x : %s\n".as_ptr(), gsum, tmp, if gsum == tmp { c"OK".as_ptr() } else { c"FAILURE".as_ptr() });
+            }
+
+            assert_eq!(tmp, gsum);
+        }
+    }
+}
+
 mod utils {
     use crate::utils::*;
     use std::ffi::c_char;

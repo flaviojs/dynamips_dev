@@ -1682,7 +1682,7 @@ static int mv64460_eth_handle_rxqueue(struct mv64460_data *d,u_int port_id,
                if (!frag && rxcs) {
                   cksum = pkt_ctx_tcp_cksum(ctx,TRUE);
 
-                  if (cksum == ntohs(ctx->tcp->cksum))
+                  if (cksum == ntohs(ctx->l4.tcp->cksum))
                      rxd0.cmd_stat |= MV64460_ETH_RXDESC_L4CHK_OK;
                } else {
                   cksum = pkt_ctx_tcp_cksum(ctx,FALSE);
@@ -1698,7 +1698,7 @@ static int mv64460_eth_handle_rxqueue(struct mv64460_data *d,u_int port_id,
                if (!frag && rxcs) {
                   cksum = pkt_ctx_tcp_cksum(ctx,TRUE);
 
-                  if (!ctx->udp->cksum || (cksum == ntohs(ctx->udp->cksum)))
+                  if (!ctx->l4.udp->cksum || (cksum == ntohs(ctx->l4.udp->cksum)))
                      rxd0.cmd_stat |= MV64460_ETH_RXDESC_L4CHK_OK;
                } else {
                   cksum = pkt_ctx_tcp_cksum(ctx,FALSE);

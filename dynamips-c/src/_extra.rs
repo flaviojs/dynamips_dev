@@ -7,6 +7,21 @@ use std::ffi::c_ulong;
 use std::ffi::CStr;
 use std::ffi::CString;
 
+pub mod _sys {
+    //! Extra system symbols not included in libc, generated in the build script with bindgen.
+    #![allow(non_snake_case)]
+
+    include!(concat!(env!("OUT_DIR"), "/_extra_sys.rs"));
+}
+
+// Extra C symbols, generated in the build script with cc.
+unsafe extern "C" {
+    pub fn c_stderr_set(x: *mut libc::FILE);
+    pub fn c_stderr() -> *mut libc::FILE;
+    pub fn c_stdout_set(x: *mut libc::FILE);
+    pub fn c_stdout() -> *mut libc::FILE;
+}
+
 // Non-standard types. The C header that contains them is unknown.
 pub type u_char = c_uchar;
 pub type u_int = c_uint;
@@ -69,6 +84,12 @@ impl<T: 'static> sprintf::Printf for Printf<*mut T> {
 pub extern "C" fn _export(
     _: crate::dynamips_common::m_int16_t,
     _: crate::dynamips_common::m_int8_t,
+    _: crate::net::n_eth_dot1q_hdr_t,
+    _: crate::net::n_eth_hdr_t,
+    _: crate::net::n_eth_isl_hdr_t,
+    _: crate::net::n_eth_snap_hdr_t,
+    _: crate::net::n_ip_network_t,
+    _: crate::net::n_ipv6_network_t,
     _: crate::utils::hreg_map,
     _: crate::utils::insn_exec_page_t,
     _: crate::utils::insn_tblock_fptr,

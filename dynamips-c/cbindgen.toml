@@ -16,6 +16,10 @@ sys_includes = [
 after_includes = """
 // BEGIN after_includes
 
+#if HAS_RFC2553
+#define ENABLE_IPV6
+#endif
+
 #ifdef DYNAMIPS_ARCH_amd64
 #define JIT_ARCH "amd64"
 #define JIT_CPU CPU_amd64
@@ -175,6 +179,9 @@ typedef struct m_list m_list_t;
 // for layout.aligned_n
 #define CBINDGEN_LAYOUT_ALIGNED_N(n) __attribute__ ((aligned(n)))
 
+// for layout.packed
+#define CBINDGEN_LAYOUT_PACKED __attribute__ ((__packed__))
+
 // END after_includes
 """
 
@@ -183,7 +190,9 @@ typedef struct m_list m_list_t;
 "feature = DYNAMIPS_ARCH_nojit" = "DYNAMIPS_ARCH_nojit" # cannot recompile opcodes
 "feature = DYNAMIPS_ARCH_ppc32" = "DYNAMIPS_ARCH_ppc32" # can recompile opcodes to native assembly code (ppc32)
 "feature = DYNAMIPS_ARCH_x86" = "DYNAMIPS_ARCH_x86" # can recompile opcodes to native assembly code (x86)
+"feature = ENABLE_IPV6" = "ENABLE_IPV6" # ipv6
 "feature = USE_UNSTABLE" = "USE_UNSTABLE" # replace stable code with unstable code
 
 [layout]
 aligned_n = "CBINDGEN_LAYOUT_ALIGNED_N"
+packed = "CBINDGEN_LAYOUT_PACKED"

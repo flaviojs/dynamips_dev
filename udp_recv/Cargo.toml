@@ -1,0 +1,15 @@
+[package]
+name = "udp_recv"
+edition = "2021"
+publish = false
+workspace = ".."
+version.workspace = true
+
+[[bin]]
+name = "udp_recv"
+path = "src/udp_recv.rs"
+
+[dependencies]
+dynamips-c = { path = "../dynamips-c", features = [] }
+libc = { version = "0.2", features = ["extra_traits"] }
+unixstring = "0.2.7"

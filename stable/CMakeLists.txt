@@ -5,15 +5,6 @@ set ( LOCAL "${CMAKE_CURRENT_SOURCE_DIR}" )
 include_directories ( "${CMAKE_CURRENT_SOURCE_DIR}" "${COMMON}" "${CMAKE_CURRENT_BINARY_DIR}" )
 set( DYNAMIPS_LIBRARIES ${DYNAMIPS_LIBRARIES} dynamips_c_stable dynamips_c_h )
 
-# udp_send
-if ( BUILD_UDP_SEND )
-add_executable ( udp_send
-   "${COMMON}/udp_send.c"
-   )
-target_link_libraries ( udp_send ${DYNAMIPS_LIBRARIES} )
-install_executable ( udp_send )
-endif ( BUILD_UDP_SEND )
-
 # udp_recv
 if ( BUILD_UDP_RECV )
 add_executable ( udp_recv

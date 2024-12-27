@@ -47,14 +47,22 @@ set( CTEST_TEST_TIMEOUT 0 ) # disable timeout
 include(CTest)
 
 # import rust crates
+set ( _extra_crates )
+if ( BUILD_UDP_SEND )
+   set( _extra_crates ${_extra_crates} udp_send )
+endif()
 corrosion_import_crate(
    MANIFEST_PATH "${CMAKE_SOURCE_DIR}/Cargo.toml"
    PROFILE "cmake-${CMAKE_BUILD_TYPE}"
    CRATES
       dynamips-c-stable # dynamips_c_stable
       dynamips-c-unstable # dynamips_c_unstable
+      ${_extra_crates}
    FEATURES ${DYNAMIPS_FEATURES}
 )
+if ( _extra_crates )
+corrosion_install( TARGETS ${_extra_crates} )
+endif()
 # generate dynamips_c.h
 add_library( dynamips_c_h INTERFACE ) # FIXME workaround for corrosion_experimental_cbindgen(MANIFEST_DIRECTORY)
 set_target_properties( dynamips_c_h PROPERTIES

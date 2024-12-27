@@ -4,6 +4,7 @@ members = [
     "dynamips-c-stable",
     "dynamips-c-unstable",
     "dynamips-c",
+    "udp_send",
 ]
 
 [workspace.package] # can he inherited with <option>.workspace = true

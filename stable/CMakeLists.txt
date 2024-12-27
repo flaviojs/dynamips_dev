@@ -5,15 +5,6 @@ set ( LOCAL "${CMAKE_CURRENT_SOURCE_DIR}" )
 include_directories ( "${CMAKE_CURRENT_SOURCE_DIR}" "${COMMON}" "${CMAKE_CURRENT_BINARY_DIR}" )
 set( DYNAMIPS_LIBRARIES ${DYNAMIPS_LIBRARIES} dynamips_c_stable dynamips_c_h )
 
-# udp_recv
-if ( BUILD_UDP_RECV )
-add_executable ( udp_recv
-   "${COMMON}/udp_recv.c"
-   )
-target_link_libraries ( udp_recv ${DYNAMIPS_LIBRARIES} )
-install_executable ( udp_recv )
-endif ( BUILD_UDP_RECV )
-
 # rom2c
 # XXX must be built for the host, not target, to support cross-compiling
 add_executable ( rom2c EXCLUDE_FROM_ALL

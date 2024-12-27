@@ -48,6 +48,9 @@ include(CTest)
 
 # import rust crates
 set ( _extra_crates )
+if ( BUILD_UDP_RECV )
+   set( _extra_crates ${_extra_crates} udp_recv )
+endif()
 if ( BUILD_UDP_SEND )
    set( _extra_crates ${_extra_crates} udp_send )
 endif()

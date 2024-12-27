@@ -57,6 +57,7 @@ pub mod _extra;
 #[cfg(test)]
 pub mod _tests;
 
+pub mod base64;
 pub mod crc;
 pub mod dynamips_common;
 pub mod net;

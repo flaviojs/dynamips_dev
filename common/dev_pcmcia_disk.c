@@ -23,7 +23,6 @@
 #include "memory.h"
 #include "device.h"
 #include "fs_mbr.h"
-#include "fs_fat.h"
 
 #define DEBUG_ACCESS  0
 #define DEBUG_ATA     0

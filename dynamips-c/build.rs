@@ -113,5 +113,6 @@ fn main() {
     }
 
     // Extra C symbols.
-    cc::Build::new().static_flag(true).file("src/_extra.c").cargo_warnings(true).cargo_output(true).compile("_extra_c");
+    autocfg::rerun_path("src/_extra.c");
+    cc::Build::new().static_flag(true).file("src/_extra.c").cargo_warnings(true).cargo_output(true).warnings_into_errors(true).compile("_extra_c");
 }

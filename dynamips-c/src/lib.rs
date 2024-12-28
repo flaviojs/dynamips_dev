@@ -61,5 +61,6 @@ pub mod base64;
 pub mod cisco_eeprom;
 pub mod crc;
 pub mod dynamips_common;
+pub mod fs_fat;
 pub mod net;
 pub mod utils;

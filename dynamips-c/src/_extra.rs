@@ -1,6 +1,7 @@
 //! Extra stuff that does not come from the dynamips C code.
 
 use std::ffi::c_char;
+use std::ffi::c_int;
 use std::ffi::c_uchar;
 use std::ffi::c_uint;
 use std::ffi::c_ulong;
@@ -16,6 +17,8 @@ pub mod _sys {
 
 // Extra C symbols, generated in the build script with cc.
 unsafe extern "C" {
+    pub fn c_errno_set(x: c_int);
+    pub fn c_errno() -> c_int;
     pub fn c_stderr_set(x: *mut libc::FILE);
     pub fn c_stderr() -> *mut libc::FILE;
     pub fn c_stdout_set(x: *mut libc::FILE);

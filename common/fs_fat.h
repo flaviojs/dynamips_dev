@@ -13,10 +13,4 @@
 
 #include "dynamips_c.h"
 
-#define FS_FAT_SECTOR_SIZE  512
-
-int fs_fat_format16(int fd, m_uint32_t begin_lba, m_uint32_t nr_sectors, 
-                    m_uint16_t sects_per_track, m_uint16_t heads,
-                    const char *volume_name);
-
 #endif

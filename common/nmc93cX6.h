@@ -11,7 +11,6 @@
 #include "dynamips_c.h"
 
 #include <sys/types.h>
-#include "cisco_eeprom.h"
 
 /* EEPROM types */
 enum {

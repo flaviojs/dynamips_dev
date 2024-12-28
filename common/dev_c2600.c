@@ -22,7 +22,6 @@
 #include "device.h"
 #include "ppc32_mem.h"
 #include "pci_io.h"
-#include "cisco_eeprom.h"
 #include "dev_mpc860.h"
 #include "dev_rom.h"
 #include "dev_c2600.h"

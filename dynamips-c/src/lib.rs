@@ -58,6 +58,7 @@ pub mod _extra;
 pub mod _tests;
 
 pub mod base64;
+pub mod cisco_eeprom;
 pub mod crc;
 pub mod dynamips_common;
 pub mod net;

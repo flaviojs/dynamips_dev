@@ -173,6 +173,7 @@ void m_log(char *module,char *fmt,...);
 ssize_t fd_printf(int fd,int flags,char *fmt,...);
 
 // FIXME cbindgen limitation: struct comes before the typedef, so a forward declaration is needed to use the typedef inside the struct
+typedef struct fs_nvram fs_nvram_t;
 typedef struct insn_exec_page insn_exec_page_t;
 typedef struct m_list m_list_t;
 

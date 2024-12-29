@@ -87,6 +87,10 @@ impl<T: 'static> sprintf::Printf for Printf<*mut T> {
 pub extern "C" fn _export(
     _: crate::dynamips_common::m_int16_t,
     _: crate::dynamips_common::m_int8_t,
+    _: crate::fs_nvram::fs_nvram_file_sector,
+    _: crate::fs_nvram::fs_nvram_header_private_config,
+    _: crate::fs_nvram::fs_nvram_header_startup_config,
+    _: crate::fs_nvram::fs_nvram_header,
     _: crate::net::n_eth_dot1q_hdr_t,
     _: crate::net::n_eth_hdr_t,
     _: crate::net::n_eth_isl_hdr_t,

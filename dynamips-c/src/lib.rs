@@ -49,6 +49,7 @@
 #![allow(clippy::needless_range_loop)]
 #![allow(deprecated)]
 #![allow(non_camel_case_types)]
+#![allow(non_snake_case)]
 #![allow(non_upper_case_globals)]
 #![allow(unused_imports)]
 #![allow(unused_macros)]
@@ -63,5 +64,6 @@ pub mod crc;
 pub mod dynamips_common;
 pub mod fs_fat;
 pub mod fs_mbr;
+pub mod fs_nvram;
 pub mod net;
 pub mod utils;

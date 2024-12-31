@@ -172,8 +172,12 @@ void m_flog(FILE *fd,char *module,char *fmt,va_list ap);
 void m_log(char *module,char *fmt,...);
 ssize_t fd_printf(int fd,int flags,char *fmt,...);
 
+#define hash_u64_create(hash_size) \
+   hash_table_create(u64_hash,u64_equal,hash_size)
+
 // FIXME cbindgen limitation: struct comes before the typedef, so a forward declaration is needed to use the typedef inside the struct
 typedef struct fs_nvram fs_nvram_t;
+typedef struct hash_node hash_node_t;
 typedef struct insn_exec_page insn_exec_page_t;
 typedef struct m_list m_list_t;
 

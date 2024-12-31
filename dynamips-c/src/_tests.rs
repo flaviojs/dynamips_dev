@@ -91,6 +91,67 @@ mod dynamips_common {
     }
 }
 
+mod hash {
+    use crate::_extra::*;
+    use crate::hash::*;
+    use std::ffi::c_int;
+    use std::ffi::c_void;
+
+    #[test]
+    fn test_hash_table_create() {
+        extern "C" fn x_hash(x: *mut c_void) -> u_int {
+            x as usize as _
+        }
+        extern "C" fn x_equal(x1: *mut c_void, x2: *mut c_void) -> c_int {
+            (x1 == x2) as _
+        }
+        const HASH_SIZE: c_int = 16;
+
+        unsafe {
+            let ht = hash_table_create(Some(x_hash), Some(x_equal), HASH_SIZE);
+            assert!(!ht.is_null());
+            hash_table_delete(ht);
+
+            let ht = hash_string_create!(HASH_SIZE);
+            assert!(!ht.is_null());
+            hash_table_delete(ht);
+
+            let ht = hash_int_create!(HASH_SIZE);
+            assert!(!ht.is_null());
+            hash_table_delete(ht);
+
+            let ht = hash_u64_create!(HASH_SIZE);
+            assert!(!ht.is_null());
+            hash_table_delete(ht);
+
+            let ht = hash_ptr_create!(HASH_SIZE);
+            assert!(!ht.is_null());
+            hash_table_delete(ht);
+        }
+    }
+
+    #[test]
+    fn test_macro_hash_table_foreach() {
+        unsafe {
+            const HASH_SIZE: c_int = 16;
+            let ht = hash_int_create!(HASH_SIZE);
+            assert!(!ht.is_null());
+            for i in 0..64 {
+                hash_table_insert(ht, i as _, i as _);
+            }
+
+            let mut found: u64 = 0;
+            HASH_TABLE_FOREACH!(i, ht, hn, {
+                assert!((*hn).key == (*hn).value);
+                found |= 1 << ((*hn).key as usize);
+            });
+            assert_eq!(found, !0_u64);
+
+            hash_table_delete(ht);
+        }
+    }
+}
+
 mod net {
     use crate::_extra::*;
     use crate::dynamips_common::*;

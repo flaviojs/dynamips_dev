@@ -27,7 +27,6 @@
 #include <assert.h>
 
 #include "mempool.h"
-#include "hash.h"
 #include "timer.h"
 
 /* Lock and unlock access to global structures */

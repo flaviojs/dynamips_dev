@@ -66,7 +66,6 @@ set ( _files
    "${COMMON}/mempool.c"
    "${COMMON}/registry.c"
    "${COMMON}/rbtree.c"
-   "${COMMON}/hash.c"
    "${COMMON}/sbox.c"
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"

@@ -26,7 +26,6 @@
 #include <sys/wait.h>
 #include <assert.h>
 
-#include "hash.h"
 #include "mempool.h"
 #include "registry.h"
 

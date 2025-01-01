@@ -10,8 +10,6 @@
 
 #include <pthread.h>
 
-#include "rbtree.h"
-
 typedef struct ppc32_jit_tcb ppc32_jit_tcb_t;
 
 /* CPU identifiers */

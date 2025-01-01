@@ -64,7 +64,6 @@ endif()
 set ( _files
    "${COMMON}/_tmp.c"
    "${COMMON}/registry.c"
-   "${COMMON}/rbtree.c"
    "${COMMON}/sbox.c"
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"

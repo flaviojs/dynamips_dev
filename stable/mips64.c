@@ -16,7 +16,6 @@
 #include <fcntl.h>
 #include <assert.h>
 
-#include "rbtree.h"
 #include "cpu.h"
 #include "mips64_mem.h"
 #include "mips64_exec.h"

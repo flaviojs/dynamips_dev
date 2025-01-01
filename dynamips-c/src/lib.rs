@@ -66,5 +66,6 @@ pub mod fs_fat;
 pub mod fs_mbr;
 pub mod fs_nvram;
 pub mod hash;
+pub mod mempool;
 pub mod net;
 pub mod utils;

@@ -91,6 +91,7 @@ pub extern "C" fn _export(
     _: crate::fs_nvram::fs_nvram_header_private_config,
     _: crate::fs_nvram::fs_nvram_header_startup_config,
     _: crate::fs_nvram::fs_nvram_header,
+    _: crate::mempool::mp_foreach_cbk,
     _: crate::net::n_eth_dot1q_hdr_t,
     _: crate::net::n_eth_hdr_t,
     _: crate::net::n_eth_isl_hdr_t,

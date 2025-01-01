@@ -6,6 +6,7 @@ documentation_style = "c++"
 style = "tag"
 sys_includes = [
     "errno.h",
+    "pthread.h",
     "stdio.h",
     "string.h",
     "sys/socket.h",
@@ -180,6 +181,7 @@ typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct insn_exec_page insn_exec_page_t;
 typedef struct m_list m_list_t;
+typedef struct memblock memblock_t;
 
 // for layout.aligned_n
 #define CBINDGEN_LAYOUT_ALIGNED_N(n) __attribute__ ((aligned(n)))

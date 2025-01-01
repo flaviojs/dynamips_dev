@@ -68,4 +68,5 @@ pub mod fs_nvram;
 pub mod hash;
 pub mod mempool;
 pub mod net;
+pub mod rbtree;
 pub mod utils;

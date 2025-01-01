@@ -26,7 +26,6 @@
 #include <sys/wait.h>
 #include <assert.h>
 
-#include "mempool.h"
 #include "registry.h"
 
 #define DEBUG_REGISTRY  0

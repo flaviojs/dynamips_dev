@@ -12,7 +12,6 @@
 
 #include <pthread.h>
 
-#include "mempool.h"
 #include "net_io.h"
 
 /* DLCIs used for LMI */

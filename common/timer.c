@@ -26,7 +26,6 @@
 #include <pthread.h>
 #include <assert.h>
 
-#include "mempool.h"
 #include "timer.h"
 
 /* Lock and unlock access to global structures */

@@ -12,7 +12,6 @@
 
 #include <pthread.h>
 
-#include "mempool.h"
 #include "net_io.h"
 
 /* ATM payload size */

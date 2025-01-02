@@ -10,7 +10,6 @@
 
 #include "dynamips_c.h"
 
-#include "sbox.h"
 #include "tcb.h"
 
 /* Size of hash for virtual address lookup */

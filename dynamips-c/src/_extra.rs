@@ -7,6 +7,10 @@ use std::ffi::c_uint;
 use std::ffi::c_ulong;
 use std::ffi::CStr;
 use std::ffi::CString;
+use std::ptr::addr_of;
+use std::ptr::addr_of_mut;
+use std::ptr::read_volatile;
+use std::ptr::write_volatile;
 
 pub mod _sys {
     //! Extra system symbols not included in libc, generated in the build script with bindgen.
@@ -81,6 +85,20 @@ impl<T: 'static> sprintf::Printf for Printf<*mut T> {
     }
 }
 
+/// Wrapper around a volatile type.
+/// cbindgen:no-export
+#[repr(transparent)]
+#[derive(Debug, Copy, Clone)]
+pub struct Volatile<T>(pub T);
+impl<T> Volatile<T> {
+    pub fn get(&self) -> T {
+        unsafe { read_volatile(addr_of!(self.0)) }
+    }
+    pub fn set(&mut self, x: T) {
+        unsafe { write_volatile(addr_of_mut!(self.0), x) }
+    }
+}
+
 /// Make sure cbindgen exports types by using them as arguments in this empty function.
 #[rustfmt::skip]
 #[no_mangle]
@@ -98,6 +116,7 @@ pub extern "C" fn _export(
     _: crate::net::n_eth_snap_hdr_t,
     _: crate::net::n_ip_network_t,
     _: crate::net::n_ipv6_network_t,
+    _: crate::timer::timer_queue_t, // FIXME cbindgen limitation: timer_proc is exported in an incompatible order without this
     _: crate::utils::hreg_map,
     _: crate::utils::insn_exec_page_t,
     _: crate::utils::insn_tblock_fptr,

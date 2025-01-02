@@ -182,10 +182,15 @@ typedef struct hash_node hash_node_t;
 typedef struct insn_exec_page insn_exec_page_t;
 typedef struct m_list m_list_t;
 typedef struct memblock memblock_t;
+typedef struct timer_entry timer_entry_t;
+typedef struct timer_queue timer_queue_t;
 
 // FIXME cbindgen limitation: there is no way to specify individual structures should use the style "both"
 typedef struct rbtree_node rbtree_node;
 typedef struct rbtree_tree rbtree_tree;
+
+// FIXME cbindgen limitation: the volatile qualifier is ignored. so a wrapper is needed
+typedef volatile int Volatile_c_int;
 
 // for layout.aligned_n
 #define CBINDGEN_LAYOUT_ALIGNED_N(n) __attribute__ ((aligned(n)))

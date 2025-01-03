@@ -17,7 +17,6 @@
 #include "cpu.h"
 #include "dev_vtty.h"
 #include "cisco_card.h"
-#include "rommon_var.h"
 
 typedef struct vm_instance vm_instance_t;
 typedef struct vm_platform vm_platform_t;

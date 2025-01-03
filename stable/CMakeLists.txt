@@ -195,7 +195,6 @@ set ( _files
    "${COMMON}/hv_c3745.c"
    "${COMMON}/hv_c2600.c"
    "${COMMON}/hv_c1700.c"
-   "${COMMON}/rommon_var.c"
    "${COMMON}/get_cpu_time.c"
    "${COMMON}/dev_lxt970a.c"
    )

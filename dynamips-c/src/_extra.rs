@@ -126,5 +126,6 @@ pub extern "C" fn _export(
     _: crate::utils::mts64_entry_t,
     _: crate::utils::ppc_insn_t,
     _: u_long,
+    _: crate::rommon_var::rommon_var_list,
 ) {
 }

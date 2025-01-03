@@ -69,6 +69,7 @@ pub mod hash;
 pub mod mempool;
 pub mod net;
 pub mod rbtree;
+pub mod rommon_var;
 pub mod sbox;
 pub mod timer;
 pub mod utils;

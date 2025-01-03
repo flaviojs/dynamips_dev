@@ -11,6 +11,7 @@ version.workspace = true
 crate-type = ["rlib"]
 
 [dependencies]
+function_name = "0.3"
 libc = { version = "0.2", features = ["extra_traits"] }
 paste = "1.0"
 sprintf = "0.4"

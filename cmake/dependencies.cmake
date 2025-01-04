@@ -226,7 +226,6 @@ foreach ( _header #standalone
    "arpa/telnet.h" #dev_vtty.c
    "assert.h"
    "ctype.h"
-   "dlfcn.h" #plugin.c
    "errno.h"
    "fcntl.h"
    "getopt.h" #dynamips.c

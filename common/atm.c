@@ -22,7 +22,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#include "registry.h"
 #include "atm.h"
 #include "net_io.h"
 

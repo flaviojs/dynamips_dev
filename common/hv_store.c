@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "registry.h"
 #include "hypervisor.h"
 
 struct store_object {

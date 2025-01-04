@@ -33,7 +33,6 @@
 #include <pcap.h>
 #endif
 
-#include "registry.h"
 #include "net_io.h"
 #include "net_io_filter.h"
 

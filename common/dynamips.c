@@ -47,7 +47,6 @@
 #include "dev_vtty.h"
 #include "ptask.h"
 #include "plugin.h"
-#include "registry.h"
 #include "hypervisor.h"
 #include "net_io.h"
 #include "net_io_bridge.h"

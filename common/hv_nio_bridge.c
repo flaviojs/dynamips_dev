@@ -26,7 +26,6 @@
 
 #include "net_io.h"
 #include "net_io_bridge.h"
-#include "registry.h"
 #include "hypervisor.h"
 
 /* Create a new NIO bridge */

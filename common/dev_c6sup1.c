@@ -29,7 +29,6 @@
 #include "dev_c6sup1.h"
 #include "dev_c6sup1_mpfpga.h"
 #include "dev_vtty.h"
-#include "registry.h"
 
 /* ====================================================================== */
 /* EOBC - Ethernet Out of Band Channel                                    */

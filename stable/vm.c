@@ -17,7 +17,6 @@
 #include <assert.h>
 #include <glob.h>
 
-#include "registry.h"
 #include "device.h"
 #include "pci_dev.h"
 #include "pci_io.h"

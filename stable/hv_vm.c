@@ -38,7 +38,6 @@
 #ifdef GEN_ETH
 #include "gen_eth.h"
 #endif
-#include "registry.h"
 #include "hypervisor.h"
 #include "get_cpu_time.h"
 

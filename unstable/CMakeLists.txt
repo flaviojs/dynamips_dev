@@ -42,7 +42,6 @@ add_definitions( "-DUSE_UNSTABLE" )
 
 set ( _files
    "${COMMON}/_tmp.c"
-   "${COMMON}/registry.c"
    "${COMMON}/parser.c"
    "${COMMON}/plugin.c"
    "${COMMON}/ptask.c"

@@ -116,6 +116,7 @@ pub extern "C" fn _export(
     _: crate::net::n_eth_snap_hdr_t,
     _: crate::net::n_ip_network_t,
     _: crate::net::n_ipv6_network_t,
+    _: crate::registry::registry_t,
     _: crate::timer::timer_queue_t, // FIXME cbindgen limitation: timer_proc is exported in an incompatible order without this
     _: crate::utils::hreg_map,
     _: crate::utils::insn_exec_page_t,

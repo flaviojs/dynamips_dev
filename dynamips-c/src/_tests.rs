@@ -218,6 +218,55 @@ mod net {
     }
 }
 
+mod parser {
+    use crate::parser::*;
+    use std::ffi::c_char;
+    use std::ffi::c_int;
+    use std::mem::zeroed;
+    use std::ptr::addr_of_mut;
+    use std::ptr::null_mut;
+
+    #[test]
+    fn test_parser() {
+        unsafe {
+            // Parser tests
+            let parser_test_str: [*mut c_char; 8] = [
+                c"c7200 show_hardware R1".as_ptr().cast_mut(),
+                c"c7200 show_hardware \"R1\"".as_ptr().cast_mut(),
+                c"   c7200    show_hardware   \"R1\"    ".as_ptr().cast_mut(),
+                c"\"c7200\" \"show_hardware\" \"R1\"".as_ptr().cast_mut(),
+                c"hypervisor set_working_dir \"C:\\Program Files\\Dynamips Test\"".as_ptr().cast_mut(),
+                c"hypervisor # This is a comment set_working_dir \"C:\\Program Files\"".as_ptr().cast_mut(),
+                c"\"c7200\" \"show_hardware\" \"R1".as_ptr().cast_mut(), // FIXME does not check if this test produces an error
+                null_mut(),
+            ];
+            let mut ctx: parser_context_t = zeroed();
+            let mut i: c_int;
+            let mut res: c_int;
+
+            i = 0;
+            while !parser_test_str[i as usize].is_null() {
+                parser_context_init(addr_of_mut!(ctx));
+
+                res = parser_scan_buffer(addr_of_mut!(ctx), parser_test_str[i as usize], libc::strlen(parser_test_str[i as usize]) + 1);
+
+                libc::printf(c"\n%d: Test string: [%s] => res=%d, state=%d\n".as_ptr(), i, parser_test_str[i as usize], res, ctx.state);
+
+                if (res != 0) && (ctx.error == 0) {
+                    if !ctx.tok_head.is_null() {
+                        libc::printf(c"Tokens: ".as_ptr());
+                        parser_dump_tokens(addr_of_mut!(ctx));
+                        libc::printf(c"\n".as_ptr());
+                    }
+                }
+
+                parser_context_free(addr_of_mut!(ctx));
+                i += 1;
+            }
+        }
+    }
+}
+
 mod utils {
     use crate::utils::*;
     use std::ffi::c_char;

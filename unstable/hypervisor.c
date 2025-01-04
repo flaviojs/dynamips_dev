@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "parser.h"
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"

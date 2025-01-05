@@ -231,10 +231,7 @@ foreach ( _header #standalone
    "getopt.h" #dynamips.c
    "glob.h"
    #"libelf.h" #find_package
-   #"linux/if.h" #linux_eth.c (LINUX_ETH)
-   #"linux/if_packet.h" #linux_eth.c (LINUX_ETH)
    "netdb.h"
-   #"netinet/if_ether.h" #linux_eth.c (LINUX_ETH)
    #"netinet/tcp.h" #dev_vtty.c
    #"pcap.h" #find_package (GEN_ETH)
    #"pthread.h" #find_package

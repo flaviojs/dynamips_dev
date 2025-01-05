@@ -15,9 +15,6 @@
 #include <sys/un.h>
 #include <pthread.h>
 
-#ifdef LINUX_ETH
-#include "linux_eth.h"
-#endif
 #ifdef GEN_ETH
 #include "gen_eth.h"
 #endif

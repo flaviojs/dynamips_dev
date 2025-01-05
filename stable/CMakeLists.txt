@@ -193,9 +193,6 @@ set ( _files
    "${COMMON}/get_cpu_time.c"
    "${COMMON}/dev_lxt970a.c"
    )
-if ( ENABLE_GEN_ETH )
-   set ( _files ${_files} "${COMMON}/gen_eth.c" )
-endif ( ENABLE_GEN_ETH )
 set ( _dependencies ppc32_microcode_dump_stable mips64_microcode_dump_stable )
 
 # dynamips_amd64_stable

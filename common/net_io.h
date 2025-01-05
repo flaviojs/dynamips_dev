@@ -15,10 +15,6 @@
 #include <sys/un.h>
 #include <pthread.h>
 
-#ifdef GEN_ETH
-#include "gen_eth.h"
-#endif
-
 /* Maximum packet size */
 #define NETIO_MAX_PKT_SIZE  32768
 

@@ -29,10 +29,6 @@
 #include <netdb.h>
 #include <pthread.h>
 
-#ifdef GEN_ETH
-#include <pcap.h>
-#endif
-
 #include "net_io.h"
 #include "net_io_filter.h"
 

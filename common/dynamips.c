@@ -53,9 +53,6 @@
 #include "atm_bridge.h"
 #include "frame_relay.h"
 #include "eth_switch.h"
-#ifdef GEN_ETH
-#include "gen_eth.h"
-#endif
 #ifdef PROFILE
 #include "profiler.h"
 #endif

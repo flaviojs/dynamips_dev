@@ -63,6 +63,10 @@ corrosion_import_crate(
       ${_extra_crates}
    FEATURES ${DYNAMIPS_FEATURES}
 )
+if ( ENABLE_GEN_ETH )
+   target_link_libraries( dynamips_c_stable-static INTERFACE ${PCAP_LIBRARIES} )
+   target_link_libraries( dynamips_c_unstable-static INTERFACE ${PCAP_LIBRARIES} )
+endif()
 if ( _extra_crates )
 corrosion_install( TARGETS ${_extra_crates} )
 endif()

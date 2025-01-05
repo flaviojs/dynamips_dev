@@ -14,6 +14,7 @@ use std::ptr::write_volatile;
 
 pub mod _sys {
     //! Extra system symbols not included in libc, generated in the build script with bindgen.
+    #![allow(clippy::ptr_offset_with_cast)]
     #![allow(non_snake_case)]
 
     include!(concat!(env!("OUT_DIR"), "/_extra_sys.rs"));
@@ -97,6 +98,13 @@ impl<T> Volatile<T> {
     pub fn set(&mut self, x: T) {
         unsafe { write_volatile(addr_of_mut!(self.0), x) }
     }
+}
+
+/// The optional dependency pcap brings in libpcap.
+/// A symbol must be used somewhere to ensure the linker does not discard the library.
+#[cfg(feature = "ENABLE_GEN_ETH")]
+pub fn _link_pcap() {
+    let _ = pcap::Device::lookup();
 }
 
 /// Make sure cbindgen exports types by using them as arguments in this empty function.

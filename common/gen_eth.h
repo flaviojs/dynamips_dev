@@ -12,22 +12,4 @@
 
 #include "dynamips_c.h"
 
-#include <sys/types.h>
-#include <pcap.h>
-
-/* Initialize a generic ethernet driver */
-pcap_t *gen_eth_init(char *device);
-
-/* Free resources of a generic ethernet driver */
-void gen_eth_close(pcap_t *p);
-
-/* Send an ethernet frame */
-ssize_t gen_eth_send(pcap_t *p,char *buffer,size_t len);
-
-/* Receive an ethernet frame */
-ssize_t gen_eth_recv(pcap_t *p,char *buffer,size_t len);
-
-/* Display Ethernet interfaces of the system */
-int gen_eth_show_dev_list(void);
-
 #endif

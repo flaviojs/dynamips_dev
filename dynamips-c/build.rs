@@ -80,6 +80,8 @@ fn out_dir() -> PathBuf {
 }
 
 fn main() {
+    let enable_gen_eth: bool = env::var_os("CARGO_FEATURE_ENABLE_GEN_ETH").is_some();
+
     // auto config
     let ac = autocfg::new();
 
@@ -93,13 +95,26 @@ fn main() {
     autocfg::rerun_path("build.rs");
 
     // Extra system symbols not included in libc, update only if the bindings changed.
+    let has_net_bpf_biocfeedback = "has_net_bpf_biocfeedback";
+    autocfg::emit_possibility(has_net_bpf_biocfeedback);
+
     let contents = r#"
     #include <arpa/inet.h>
     #include <netdb.h>
     "#;
+    let mut gen_eth_contents = String::new();
+    if enable_gen_eth {
+        gen_eth_contents.push_str("#include <pcap.h>\n");
+        // XXX the optional dependency pcap will link libpcap
+
+        if cc::Build::new().file("src/_has_net_bpf_biocfeedback.c").cargo_warnings(false).try_compile(has_net_bpf_biocfeedback).is_ok() {
+            gen_eth_contents.push_str("#include <net/bpf.h>\n");
+            autocfg::emit(has_net_bpf_biocfeedback);
+        }
+    }
     let mut new_data = Vec::new();
     bindgen::Builder::default()
-        .header_contents("_extra_sys.h", contents)
+        .header_contents("_extra_sys.h", &format!("{contents}\n{gen_eth_contents}"))
         .blocklist_item("IPPORT_RESERVED") // defined multiple times
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
         .generate()

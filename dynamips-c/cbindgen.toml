@@ -17,6 +17,15 @@ sys_includes = [
 after_includes = """
 // BEGIN after_includes
 
+#ifdef GEN_ETH
+#ifdef CYGWIN
+/* Needed for pcap_open() flags */
+#define HAVE_REMOTE
+#endif
+
+#include <pcap.h>
+#endif
+
 #if HAS_RFC2553
 #define ENABLE_IPV6
 #endif
@@ -208,6 +217,7 @@ typedef volatile int Volatile_c_int;
 "feature = DYNAMIPS_ARCH_nojit" = "DYNAMIPS_ARCH_nojit" # cannot recompile opcodes
 "feature = DYNAMIPS_ARCH_ppc32" = "DYNAMIPS_ARCH_ppc32" # can recompile opcodes to native assembly code (ppc32)
 "feature = DYNAMIPS_ARCH_x86" = "DYNAMIPS_ARCH_x86" # can recompile opcodes to native assembly code (x86)
+"feature = ENABLE_GEN_ETH" = "GEN_ETH" # can do generic ethernet with libpcap
 "feature = ENABLE_IPV6" = "ENABLE_IPV6" # ipv6
 "feature = ENABLE_LINUX_ETH" = "LINUX_ETH" # can do linux ethernet
 "feature = USE_UNSTABLE" = "USE_UNSTABLE" # replace stable code with unstable code

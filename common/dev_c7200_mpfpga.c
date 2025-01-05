@@ -16,7 +16,6 @@
 #include "dynamips.h"
 #include "memory.h"
 #include "device.h"
-#include "nmc93cX6.h"
 #include "dev_c7200.h"
 
 #define DEBUG_UNKNOWN  1

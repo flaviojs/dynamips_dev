@@ -22,7 +22,6 @@
 #include "memory.h"
 #include "device.h"
 #include "dev_vtty.h"
-#include "nmc93cX6.h"
 #include "dev_c3600.h"
 
 /* Debugging flags */

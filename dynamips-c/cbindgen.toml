@@ -209,6 +209,7 @@ typedef volatile int Volatile_c_int;
 "feature = DYNAMIPS_ARCH_ppc32" = "DYNAMIPS_ARCH_ppc32" # can recompile opcodes to native assembly code (ppc32)
 "feature = DYNAMIPS_ARCH_x86" = "DYNAMIPS_ARCH_x86" # can recompile opcodes to native assembly code (x86)
 "feature = ENABLE_IPV6" = "ENABLE_IPV6" # ipv6
+"feature = ENABLE_LINUX_ETH" = "LINUX_ETH" # can do linux ethernet
 "feature = USE_UNSTABLE" = "USE_UNSTABLE" # replace stable code with unstable code
 
 [layout]

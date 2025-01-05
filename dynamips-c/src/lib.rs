@@ -66,6 +66,8 @@ pub mod fs_fat;
 pub mod fs_mbr;
 pub mod fs_nvram;
 pub mod hash;
+#[cfg(feature = "ENABLE_LINUX_ETH")]
+pub mod linux_eth;
 pub mod mempool;
 pub mod net;
 pub mod nmc93cx6;

@@ -61,6 +61,7 @@ pub mod _tests;
 pub mod base64;
 pub mod cisco_eeprom;
 pub mod crc;
+pub mod dev_lxt970a;
 pub mod dynamips_common;
 pub mod fs_fat;
 pub mod fs_mbr;

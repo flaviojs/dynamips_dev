@@ -11,6 +11,3 @@
  */
 
 #include "dynamips_c.h"
-
-#include "dev_lxt970a.h"
-

@@ -74,6 +74,8 @@ pub mod hash;
 pub mod linux_eth;
 pub mod mempool;
 pub mod net;
+pub mod net_io;
+pub mod net_io_filter;
 pub mod nmc93cx6;
 pub mod parser;
 pub mod plugin;

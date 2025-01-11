@@ -10,7 +10,6 @@
 
 #include <sys/types.h>
 #include "cpu.h"
-#include "net_io.h"
 #include "vm.h"
 
 /* Device Flags */

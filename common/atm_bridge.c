@@ -17,7 +17,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#include "net_io.h"
 #include "atm.h"
 #include "atm_vsar.h"
 #include "atm_bridge.h"

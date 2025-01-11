@@ -15,7 +15,6 @@
 #include "device.h"
 #include "pci_dev.h"
 #include "dev_gt.h"
-#include "net_io.h"
 #include "vm.h"
 
 /* Default C3745 parameters */

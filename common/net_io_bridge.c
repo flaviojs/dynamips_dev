@@ -17,7 +17,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#include "net_io.h"
 #include "net_io_bridge.h"
 
 #define PKT_MAX_SIZE 2048

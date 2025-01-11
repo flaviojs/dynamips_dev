@@ -12,8 +12,6 @@
 
 #include <pthread.h>
 
-#include "net_io.h"
-
 /* DLCIs used for LMI */
 #define FR_DLCI_LMI_ANSI   0       /* ANSI LMI */
 #define FR_DLCI_LMI_CISCO  1023    /* Cisco LMI */

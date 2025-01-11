@@ -21,7 +21,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "net_io.h"
 #include "dev_nm_16esw.h"
 
 /* Debugging flags */

@@ -16,7 +16,6 @@
 #include <errno.h>
 #include <assert.h>
 
-#include "net_io.h"
 #include "vm.h"
 #include "dev_i8255x.h"
 #include "dev_c2600.h"

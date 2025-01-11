@@ -17,7 +17,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#include "net_io.h"
 #include "frame_relay.h"
 
 #define DEBUG_FRSW  0

@@ -18,7 +18,6 @@
 #include <sys/types.h>
 #include <assert.h>
 
-#include "net_io.h"
 #include "eth_switch.h"
 
 /* Debbuging message */

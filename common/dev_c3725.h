@@ -14,7 +14,6 @@
 
 #include "device.h"
 #include "pci_dev.h"
-#include "net_io.h"
 #include "vm.h"
 
 /* Default C3725 parameters */

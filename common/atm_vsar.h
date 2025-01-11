@@ -12,8 +12,6 @@
 
 #include <pthread.h>
 
-#include "net_io.h"
-
 #define ATM_REAS_MAX_SIZE  16384
 
 /* Reassembly Context */

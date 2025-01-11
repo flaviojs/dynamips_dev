@@ -25,7 +25,6 @@
 #include <pthread.h>
 
 #include "frame_relay.h"
-#include "net_io.h"
 #include "hypervisor.h"
 
 /* Create a new FRSW object */

@@ -42,7 +42,6 @@ add_definitions( "-DUSE_UNSTABLE" )
 
 set ( _files
    "${COMMON}/_tmp.c"
-   "${COMMON}/net_io_bridge.c"
    "${COMMON}/atm.c"
    "${COMMON}/atm_vsar.c"
    "${COMMON}/atm_bridge.c"

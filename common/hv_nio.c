@@ -26,7 +26,6 @@
 
 #include "atm.h"
 #include "frame_relay.h"
-#include "net_io_bridge.h"
 #include "hypervisor.h"
 
 /* 

@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "net_io_bridge.h"
 #include "hypervisor.h"
 
 /* Create a new NIO bridge */

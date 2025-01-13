@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "atm.h"
 #include "hypervisor.h"
 
 /* Create a new ATMSW object */

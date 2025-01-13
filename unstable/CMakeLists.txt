@@ -42,7 +42,6 @@ add_definitions( "-DUSE_UNSTABLE" )
 
 set ( _files
    "${COMMON}/_tmp.c"
-   "${COMMON}/atm.c"
    "${COMMON}/atm_vsar.c"
    "${COMMON}/atm_bridge.c"
    "${COMMON}/frame_relay.c"

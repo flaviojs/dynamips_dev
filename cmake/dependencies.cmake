@@ -248,7 +248,6 @@ foreach ( _header #standalone
    "sys/stat.h"
    "sys/time.h"
    "sys/types.h"
-   "sys/uio.h" #atm_vsar.c
    "sys/un.h"
    "sys/wait.h"
    "termios.h"

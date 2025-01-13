@@ -17,7 +17,6 @@
 #include <sys/time.h>
 #include <sys/types.h>
 
-#include "atm_vsar.h"
 #include "atm_bridge.h"
 
 #define ATM_BRIDGE_LOCK(t)   pthread_mutex_lock(&(t)->lock)

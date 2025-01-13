@@ -11,6 +11,7 @@ sys_includes = [
     "string.h",
     "sys/socket.h",
     "sys/time.h",
+    "sys/uio.h",
     "sys/un.h",
     "time.h",
     "unistd.h",
@@ -204,6 +205,7 @@ typedef struct timer_entry timer_entry_t;
 typedef struct timer_queue timer_queue_t;
 
 // FIXME cbindgen limitation: there is no way to specify individual structures should use the style "both"
+typedef struct iovec iovec;
 typedef struct rbtree_node rbtree_node;
 typedef struct rbtree_tree rbtree_tree;
 typedef struct sockaddr_un sockaddr_un;

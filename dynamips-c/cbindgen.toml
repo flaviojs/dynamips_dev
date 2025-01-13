@@ -187,6 +187,8 @@ ssize_t fd_printf(int fd,int flags,char *fmt,...);
    hash_table_create(u64_hash,u64_equal,hash_size)
 
 // FIXME cbindgen limitation: struct comes before the typedef, so a forward declaration is needed to use the typedef inside the struct
+typedef struct atmsw_vc_conn atmsw_vc_conn_t;
+typedef struct atmsw_vp_conn atmsw_vp_conn_t;
 typedef struct fs_nvram fs_nvram_t;
 typedef struct hash_node hash_node_t;
 typedef struct insn_exec_page insn_exec_page_t;

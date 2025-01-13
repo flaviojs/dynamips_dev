@@ -58,6 +58,7 @@ pub mod _extra;
 #[cfg(test)]
 pub mod _tests;
 
+pub mod atm;
 pub mod base64;
 pub mod cisco_eeprom;
 pub mod crc;

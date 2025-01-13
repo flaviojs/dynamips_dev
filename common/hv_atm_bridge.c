@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "atm_bridge.h"
 #include "hypervisor.h"
 
 /* Create a new ATM bridge object */

@@ -59,6 +59,7 @@ pub mod _extra;
 pub mod _tests;
 
 pub mod atm;
+pub mod atm_bridge;
 pub mod atm_vsar;
 pub mod base64;
 pub mod cisco_eeprom;

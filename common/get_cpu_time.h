@@ -9,7 +9,5 @@
 
 #include "dynamips_c.h"
 
-double get_cpu_time();
-
 #endif
 

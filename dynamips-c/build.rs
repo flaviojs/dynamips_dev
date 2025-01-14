@@ -86,9 +86,16 @@ fn main() {
     let ac = autocfg::new();
 
     let libc = r#"libc = { version = "0.2", features = ["extra_traits"] }"#;
+    ac.emit_dep_has_path(libc, "libc::_SC_CLK_TCK", "has_libc__sc_clk_tck");
+    ac.emit_dep_has_path(libc, "libc::clock_getcpuclockid", "has_libc_clock_getcpuclockid");
+    ac.emit_dep_has_path(libc, "libc::clock_gettime", "has_libc_clock_gettime");
+    ac.emit_dep_has_path(libc, "libc::CLOCK_PROCESS_CPUTIME_ID", "has_libc_clock_process_cputime_id");
+    ac.emit_dep_has_path(libc, "libc::CLOCK_VIRTUAL", "has_libc_clock_virtual");
+    ac.emit_dep_has_path(libc, "libc::CLOCKS_PER_SEC", "has_libc_clocks_per_sec");
     ac.emit_dep_has_path(libc, "libc::IPV6_V6ONLY", "has_libc_ipv6_v6only");
     ac.emit_dep_has_path(libc, "libc::memalign", "has_libc_memalign");
     ac.emit_dep_has_path(libc, "libc::posix_memalign", "has_libc_posix_memalign");
+    ac.emit_dep_has_path(libc, "libc::RUSAGE_SELF", "has_libc_rusage_self");
     ac.emit_dep_has_struct_field(libc, "libc::sockaddr_in6", "sin6_len", "has_libc_sockaddr_in6_sin6_len");
     ac.emit_dep_has_struct_field(libc, "libc::tm", "tm_gmtoff", "has_libc_tm_tm_gmtoff");
 

@@ -74,6 +74,7 @@ pub mod fs_mbr;
 pub mod fs_nvram;
 #[cfg(feature = "ENABLE_GEN_ETH")]
 pub mod gen_eth;
+pub mod get_cpu_time;
 pub mod hash;
 #[cfg(feature = "ENABLE_LINUX_ETH")]
 pub mod linux_eth;

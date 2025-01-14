@@ -18,6 +18,9 @@ sprintf = "0.4"
 unixstring = "0.2.7"
 pcap = { version = "2", optional = true }
 
+[target.'cfg(target_os = "windows")'.dependencies]
+windows-sys = "0.59"
+
 [build-dependencies]
 autocfg = "1"
 bindgen = "0.71"

@@ -68,6 +68,7 @@ pub mod dev_ds1620;
 pub mod dev_lxt970a;
 pub mod dynamips_common;
 pub mod eth_switch;
+pub mod frame_relay;
 pub mod fs_fat;
 pub mod fs_mbr;
 pub mod fs_nvram;

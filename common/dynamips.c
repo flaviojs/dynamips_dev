@@ -46,7 +46,6 @@
 #include "ppc32_vmtest.h"
 #include "dev_vtty.h"
 #include "hypervisor.h"
-#include "frame_relay.h"
 #ifdef PROFILE
 #include "profiler.h"
 #endif

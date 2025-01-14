@@ -63,7 +63,6 @@ endif()
 # dynamips_*_stable
 set ( _files
    "${COMMON}/_tmp.c"
-   "${COMMON}/frame_relay.c"
    "${COMMON}/dynamips.c"
    "${COMMON}/insn_lookup.c"
    "${LOCAL}/vm.c"

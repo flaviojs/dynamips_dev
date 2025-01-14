@@ -35,7 +35,6 @@
 #include "dev_c2600.h"
 #include "dev_c1700.h"
 #include "hypervisor.h"
-#include "frame_relay.h"
 
 #define DEBUG_TOKEN  0
 

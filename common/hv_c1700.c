@@ -29,7 +29,6 @@
 #include "device.h"
 #include "dev_c1700.h"
 #include "dev_vtty.h"
-#include "frame_relay.h"
 #include "hypervisor.h"
 
 /* Set the chassis type */

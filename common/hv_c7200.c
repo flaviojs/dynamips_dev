@@ -29,7 +29,6 @@
 #include "device.h"
 #include "dev_c7200.h"
 #include "dev_vtty.h"
-#include "frame_relay.h"
 #include "hypervisor.h"
 
 /* Set the NPE type */

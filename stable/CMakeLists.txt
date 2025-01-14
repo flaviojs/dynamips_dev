@@ -181,7 +181,6 @@ set ( _files
    "${COMMON}/hv_c3745.c"
    "${COMMON}/hv_c2600.c"
    "${COMMON}/hv_c1700.c"
-   "${COMMON}/get_cpu_time.c"
    )
 set ( _dependencies ppc32_microcode_dump_stable mips64_microcode_dump_stable )
 

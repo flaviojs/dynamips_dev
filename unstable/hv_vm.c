@@ -32,7 +32,6 @@
 #include "dev_c7200.h"
 #include "dev_vtty.h"
 #include "hypervisor.h"
-#include "get_cpu_time.h"
 
 /* Find the specified CPU */
 static cpu_gen_t *find_cpu(hypervisor_conn_t *conn,vm_instance_t *vm,

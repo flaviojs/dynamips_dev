@@ -113,6 +113,7 @@ pub fn _link_pcap() {
 pub extern "C" fn _export(
     _: crate::dynamips_common::m_int16_t,
     _: crate::dynamips_common::m_int8_t,
+    _: crate::eth_switch::ethsw_input_vector_t,
     _: crate::fs_nvram::fs_nvram_file_sector,
     _: crate::fs_nvram::fs_nvram_header_private_config,
     _: crate::fs_nvram::fs_nvram_header_startup_config,

@@ -24,7 +24,6 @@
 #include <arpa/inet.h>
 #include <pthread.h>
 
-#include "eth_switch.h"
 #include "hypervisor.h"
 
 /* Create a new Ethernet switch object */

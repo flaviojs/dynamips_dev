@@ -47,7 +47,6 @@
 #include "dev_vtty.h"
 #include "hypervisor.h"
 #include "frame_relay.h"
-#include "eth_switch.h"
 #ifdef PROFILE
 #include "profiler.h"
 #endif

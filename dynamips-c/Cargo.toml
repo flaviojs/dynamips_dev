@@ -13,10 +13,12 @@ crate-type = ["rlib"]
 [dependencies]
 function_name = "0.3"
 libc = { version = "0.2", features = ["extra_traits"] }
+likely_stable = "0.1"
 paste = "1.0"
+pcap = { version = "2", optional = true }
+setjmp = "0.1"
 sprintf = "0.4"
 unixstring = "0.2.7"
-pcap = { version = "2", optional = true }
 
 [target.'cfg(target_os = "windows")'.dependencies]
 windows-sys = "0.59"
@@ -27,6 +29,7 @@ bindgen = "0.71"
 cc = "1"
 
 [features]
+DEBUG_BLOCK_TIMESTAMP = [] # enable block timestamping (little overhead)
 DYNAMIPS_ARCH_amd64 = [] # can recompile opcodes to native assembly code (amd64/x86_64)
 DYNAMIPS_ARCH_nojit = [] # cannot recompile opcodes
 DYNAMIPS_ARCH_ppc32 = [] # can recompile opcodes to native assembly code (ppc32)

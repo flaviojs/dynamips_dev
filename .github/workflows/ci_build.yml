@@ -34,8 +34,15 @@ jobs:
     - name: Install dependencies with cargo
       run: |
         set -x
-        # needs cbindgen 0.27+
-        cargo install cbindgen
+        ## needs cbindgen 0.27+
+        #cargo install cbindgen
+        ## temporary cbindgen that resolves order of dependencies
+        git clone https://github.com/flaviojs/cbindgen_tmp
+        cd cbindgen_tmp
+        git checkout resolve-order-dependencies-clike
+        cargo install --path .
+        cd ..
+        rm -rf cbindgen_tmp
 
     - name: Log versions
       run: |
@@ -117,8 +124,15 @@ jobs:
       shell: alpine.sh {0}
       run: |
         set -x
-        # needs cbindgen 0.27+
-        cargo install cbindgen
+        ## needs cbindgen 0.27+
+        #cargo install cbindgen
+        # temporary cbindgen that resolves order of dependencies
+        git clone https://github.com/flaviojs/cbindgen_tmp
+        cd cbindgen_tmp
+        git checkout resolve-order-dependencies-clike
+        cargo install --path .
+        cd ..
+        rm -rf cbindgen_tmp
 
     - name: Log versions
       shell: alpine.sh {0}
@@ -196,8 +210,15 @@ jobs:
         set -x
         rustup install stable
         rustup component add clippy rustfmt
-        # needs cbindgen 0.27+
-        cargo install cbindgen
+        ## needs cbindgen 0.27+
+        #cargo install cbindgen
+        # temporary cbindgen that resolves order of dependencies
+        git clone https://github.com/flaviojs/cbindgen_tmp
+        cd cbindgen_tmp
+        git checkout resolve-order-dependencies-clike
+        cargo install --path .
+        cd ..
+        rm -rf cbindgen_tmp
 
     - name: Log versions
       run: |
@@ -468,9 +489,18 @@ jobs:
         rm -rf $HOME/.cargo $HOME/.rustup
 
         ## Add ArchPOWER stuff
-        sudo pacman -S --noprogressbar --noconfirm --needed base-devel git cmake zip libelf libpcap rustup cbindgen clang
+        sudo pacman -S --noprogressbar --noconfirm --needed base-devel git cmake zip libelf libpcap rustup clang
+        #cbindgen
         rustup install stable
         rustup component add clippy rustfmt
+
+        ## temporary cbindgen that resolves order of dependencies
+        git clone https://github.com/flaviojs/cbindgen_tmp
+        cd cbindgen_tmp
+        git checkout resolve-order-dependencies-clike
+        cargo install --path .
+        cd ..
+        rm -rf cbindgen_tmp
 
     - name: Log versions
       shell: archpower.sh {0}

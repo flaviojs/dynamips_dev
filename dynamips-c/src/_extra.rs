@@ -113,12 +113,15 @@ pub fn _link_pcap() {
 pub extern "C" fn _export(
     _: crate::dynamips_common::m_int16_t,
     _: crate::dynamips_common::m_int8_t,
+    _: crate::dynamips::symbol,
     _: crate::eth_switch::ethsw_input_vector_t,
     _: crate::fs_nvram::fs_nvram_file_sector,
     _: crate::fs_nvram::fs_nvram_header_private_config,
     _: crate::fs_nvram::fs_nvram_header_startup_config,
     _: crate::fs_nvram::fs_nvram_header,
     _: crate::mempool::mp_foreach_cbk,
+    _: crate::mips64_jit::mips64_insn_jump,
+    _: crate::mips64_jit::mips64_insn_tag,
     _: crate::net_io::netio_rx_listener,
     _: crate::net_io::netio_stat_t,
     _: crate::net_io::vde_request_v3,
@@ -129,17 +132,21 @@ pub extern "C" fn _export(
     _: crate::net::n_ip_network_t,
     _: crate::net::n_ipv6_network_t,
     _: crate::plugin::plugin_init_t,
+    _: crate::ppc32_jit::ppc32_insn_tag,
+    _: crate::ppc32::ppc32_bat_prog,
     _: crate::ptask::ptask_t,
     _: crate::registry::registry_t,
-    _: crate::timer::timer_queue_t, // FIXME cbindgen limitation: timer_proc is exported in an incompatible order without this
-    _: crate::utils::hreg_map,
-    _: crate::utils::insn_exec_page_t,
     _: crate::utils::insn_tblock_fptr,
-    _: crate::utils::mips_insn_t,
     _: crate::utils::mts_map_t,
-    _: crate::utils::mts32_entry_t,
-    _: crate::utils::mts64_entry_t,
-    _: crate::utils::ppc_insn_t,
-    _: u_long,
+    _: crate::vm::vm_ghost_image_t,
+    _: crate::vm::vm_obj_t,
+    _: crate::vm::vm_platform_list,
+) {
+}
+#[cfg(feature = "USE_UNSTABLE")]
+#[rustfmt::skip]
+#[no_mangle]
+pub extern "C" fn _export_unstable(
+    _: crate::tcb::tsg_stats,
 ) {
 }

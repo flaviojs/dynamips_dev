@@ -8,14 +8,6 @@
 
 #include "dynamips_c.h"
 
-#include "pci_dev.h"
-
-/* PCI I/O data */
-struct pci_io_data {
-   struct vdevice dev;
-   struct pci_io_device *dev_list;
-};
-
 /* Add a new PCI I/O device */
 struct pci_io_device *pci_io_add(struct pci_io_data *d,
                                  m_uint32_t start,m_uint32_t end,

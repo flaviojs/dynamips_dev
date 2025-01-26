@@ -81,6 +81,9 @@ fn out_dir() -> PathBuf {
 
 fn main() {
     let enable_gen_eth: bool = env::var_os("CARGO_FEATURE_ENABLE_GEN_ETH").is_some();
+    let target_arch = env::var("CARGO_CFG_TARGET_ARCH").expect("target_arch");
+    let target_os = env::var("CARGO_CFG_TARGET_OS").expect("target_os");
+    let use_unstable: bool = env::var_os("CARGO_FEATURE_USE_UNSTABLE").is_some();
 
     // auto config
     let ac = autocfg::new();
@@ -137,4 +140,11 @@ fn main() {
     // Extra C symbols.
     autocfg::rerun_path("src/_extra.c");
     cc::Build::new().static_flag(true).file("src/_extra.c").cargo_warnings(true).cargo_output(true).warnings_into_errors(true).compile("_extra_c");
+
+    // set MAC64HACK on stable OSX amd64 build
+    let mac64hack = "MAC64HACK";
+    autocfg::emit_possibility(mac64hack);
+    if !use_unstable && target_os == "macos" || target_arch == "x86_64" {
+        autocfg::emit(mac64hack);
+    }
 }

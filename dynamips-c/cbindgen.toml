@@ -5,6 +5,7 @@ pragma_once = true
 documentation_style = "c++"
 style = "tag"
 sys_includes = [
+   "setjmp.h",
     "errno.h",
     "pthread.h",
     "stdio.h",
@@ -187,23 +188,14 @@ ssize_t fd_printf(int fd,int flags,char *fmt,...);
 #define hash_u64_create(hash_size) \
    hash_table_create(u64_hash,u64_equal,hash_size)
 
-// FIXME cbindgen limitation: struct comes before the typedef, so a forward declaration is needed to use the typedef inside the struct
-typedef struct atmsw_vc_conn atmsw_vc_conn_t;
-typedef struct atmsw_vp_conn atmsw_vp_conn_t;
-typedef struct frsw_conn frsw_conn_t;
-typedef struct fs_nvram fs_nvram_t;
-typedef struct hash_node hash_node_t;
-typedef struct insn_exec_page insn_exec_page_t;
-typedef struct m_list m_list_t;
-typedef struct memblock memblock_t;
-typedef struct netio_desc netio_desc_t;
-typedef struct netio_fifo_desc netio_fifo_desc_t;
-typedef struct netio_fifo_pkt netio_fifo_pkt_t;
-typedef struct netio_pktfilter netio_pktfilter_t;
-typedef struct ptask ptask_t;
-typedef struct registry_entry registry_entry_t;
-typedef struct timer_entry timer_entry_t;
-typedef struct timer_queue timer_queue_t;
+// FIXME cbindgen limitation: some constants that need to come before the structs that use them
+#define PPC_MEMOP_MAX 16
+#if !defined(USE_UNSTABLE)
+#define MIPS_MEMOP_MAX 25
+#endif
+#if defined(USE_UNSTABLE)
+#define MIPS_MEMOP_MAX 26
+#endif
 
 // FIXME cbindgen limitation: there is no way to specify individual structures should use the style "both"
 typedef struct iovec iovec;
@@ -213,6 +205,9 @@ typedef struct sockaddr_un sockaddr_un;
 
 // FIXME cbindgen limitation: the volatile qualifier is ignored. so a wrapper is needed
 typedef volatile int Volatile_c_int;
+typedef volatile u_int Volatile_u_int;
+typedef volatile uint32_t Volatile_m_uint32_t;
+typedef volatile uint64_t Volatile_m_uint64_t;
 
 // for layout.aligned_n
 #define CBINDGEN_LAYOUT_ALIGNED_N(n) __attribute__ ((aligned(n)))
@@ -224,6 +219,7 @@ typedef volatile int Volatile_c_int;
 """
 
 [defines]
+"feature = DEBUG_BLOCK_TIMESTAMP" = "_CBINDGEN_IGNORED"
 "feature = DYNAMIPS_ARCH_amd64" = "DYNAMIPS_ARCH_amd64" # can recompile opcodes to native assembly code (amd64/x86_64)
 "feature = DYNAMIPS_ARCH_nojit" = "DYNAMIPS_ARCH_nojit" # cannot recompile opcodes
 "feature = DYNAMIPS_ARCH_ppc32" = "DYNAMIPS_ARCH_ppc32" # can recompile opcodes to native assembly code (ppc32)
@@ -232,6 +228,7 @@ typedef volatile int Volatile_c_int;
 "feature = ENABLE_IPV6" = "ENABLE_IPV6" # ipv6
 "feature = ENABLE_LINUX_ETH" = "LINUX_ETH" # can do linux ethernet
 "feature = USE_UNSTABLE" = "USE_UNSTABLE" # replace stable code with unstable code
+"MAC64HACK" = "_CBINDGEN_IGNORED"
 
 [layout]
 aligned_n = "CBINDGEN_LAYOUT_ALIGNED_N"

@@ -5,6 +5,7 @@ use crate::_extra::*;
 use crate::cpu::*;
 use crate::dynamips::*;
 use crate::dynamips_common::*;
+use crate::vm::*;
 use std::arch::asm;
 use std::ffi::c_char;
 use std::ffi::c_int;
@@ -84,4 +85,9 @@ pub unsafe extern "C" fn dev_access_fast(cpu: *mut cpu_gen_t, dev_id: u_int, off
     }
 
     (*dev).handler.unwrap()(cpu, dev, offset, op_size, op_type, data)
+}
+
+extern "C" {
+    pub fn dev_lookup(vm: *mut vm_instance_t, phys_addr: m_uint64_t, cached: c_int) -> *mut vdevice; // TODO replace
+    pub fn dev_sparse_get_host_addr(vm: *mut vm_instance_t, dev: *mut vdevice, paddr: m_uint64_t, op_type: u_int, cow: *mut c_int) -> m_iptr_t; // TODO replace
 }

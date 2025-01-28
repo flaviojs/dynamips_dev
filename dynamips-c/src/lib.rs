@@ -84,6 +84,7 @@ pub mod hash;
 pub mod jit_op;
 #[cfg(feature = "ENABLE_LINUX_ETH")]
 pub mod linux_eth;
+pub mod memory;
 pub mod mempool;
 pub mod mips64;
 pub mod mips64_jit;

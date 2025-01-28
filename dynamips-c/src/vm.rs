@@ -254,3 +254,7 @@ pub unsafe extern "C" fn vm_clear_irq(vm: *mut vm_instance_t, irq: u_int) {
         (*vm).clear_irq.unwrap()(vm, irq);
     }
 }
+
+extern "C" {
+    pub fn vm_log(vm: *mut vm_instance_t, module: *mut c_char, format: *mut c_char, ...); // TODO replace
+}

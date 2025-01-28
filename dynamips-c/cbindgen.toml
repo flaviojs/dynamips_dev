@@ -188,6 +188,27 @@ ssize_t fd_printf(int fd,int flags,char *fmt,...);
 #define hash_u64_create(hash_size) \
    hash_table_create(u64_hash,u64_equal,hash_size)
 
+#ifndef USE_UNSTABLE
+/* MTS64 hash on virtual addresses */
+#define MTS64_HASH(vaddr)  (((vaddr) >> MTS64_HASH_SHIFT) & MTS64_HASH_MASK)
+
+/* MTS32 hash on virtual addresses */
+#define MTS32_HASH(vaddr)  (((vaddr) >> MTS32_HASH_SHIFT) & MTS32_HASH_MASK)
+#endif
+
+#ifdef USE_UNSTABLE
+/* Macro for easy hash computing */
+#define MTS_SHR(v,sr) ((v) >> (sr))
+
+/* MTS64 hash on virtual addresses */
+#define MTS64_SHR(v,i)    (MTS_SHR((v),MTS64_HASH_SHIFT##i))
+#define MTS64_HASH(vaddr) ((MTS64_SHR(vaddr,1) ^ MTS64_SHR(vaddr,2)) & MTS64_HASH_MASK)
+
+/* MTS32 hash on virtual addresses */
+#define MTS32_SHR(v,i)    (MTS_SHR((v),MTS32_HASH_SHIFT##i))
+#define MTS32_HASH(vaddr) ((MTS32_SHR(vaddr,1) ^ MTS32_SHR(vaddr,2)) & MTS32_HASH_MASK)
+#endif
+
 // FIXME cbindgen limitation: some constants that need to come before the structs that use them
 #define PPC_MEMOP_MAX 16
 #if !defined(USE_UNSTABLE)

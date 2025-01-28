@@ -33,7 +33,6 @@
 #include "mips64_exec.h"
 #include "ppc32_exec.h"
 #include "device.h"
-#include "memory.h"
 #include "dev_vtty.h"
 
 #ifdef USE_UNSTABLE

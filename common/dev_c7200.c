@@ -18,7 +18,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "ppc32_mem.h"
 #include "device.h"
 #include "pci_io.h"

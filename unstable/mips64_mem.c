@@ -21,7 +21,6 @@
 #include "tcb.h"
 #include "mips64_jit.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 
 /* Undefined access */

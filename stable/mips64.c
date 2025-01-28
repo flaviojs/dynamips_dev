@@ -21,7 +21,6 @@
 #include "mips64_exec.h"
 #include "mips64_jit.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 
 /* MIPS general purpose registers names */

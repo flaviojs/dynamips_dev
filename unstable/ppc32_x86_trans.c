@@ -17,7 +17,6 @@
 #include "jit_op.h"
 #include "ppc32_jit.h"
 #include "ppc32_x86_trans.h"
-#include "memory.h"
 
 /* %esp adjustment (for MacOS X) */
 #define STACK_ADJUST  12

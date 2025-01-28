@@ -16,7 +16,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 #include "dev_vtty.h"
 #include "dev_mv64460.h"

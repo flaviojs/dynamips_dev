@@ -29,7 +29,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 #include "dev_mueslix.h"
 #include "dev_c7200.h"

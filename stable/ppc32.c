@@ -18,7 +18,6 @@
 
 #include "cpu.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 #include "ppc32_mem.h"
 #include "ppc32_exec.h"

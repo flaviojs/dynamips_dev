@@ -20,7 +20,6 @@
 #include "mips64.h"
 #include "mips64_cp0.h"
 #include "dynamips.h"
-#include "memory.h"
 
 /* MIPS cp0 registers names */
 char *mips64_cp0_reg_names[MIPS64_CP0_REG_NR] = {

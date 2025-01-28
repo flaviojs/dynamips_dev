@@ -16,7 +16,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 
 #define AP1011_PCI_VENDOR_ID   0x14D9

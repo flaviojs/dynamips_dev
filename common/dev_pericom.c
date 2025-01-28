@@ -14,7 +14,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 #include "pci_dev.h"
 

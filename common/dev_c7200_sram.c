@@ -16,7 +16,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 
 #define PCI_VENDOR_SRAM   0x1137

@@ -20,7 +20,6 @@
 #include "cpu.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 
 #define DEBUG_ACCESS  0

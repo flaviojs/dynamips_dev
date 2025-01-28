@@ -19,7 +19,6 @@
 #include "mips64_jit.h"
 #include "vm.h"
 #include "dynamips.h"
-#include "memory.h"
 #include "device.h"
 
 /* MTS access with special access mask */

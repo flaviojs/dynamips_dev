@@ -107,6 +107,17 @@ pub fn _link_pcap() {
     let _ = pcap::Device::lookup();
 }
 
+/// Equivalent to the C code `*buf++ = val;`
+/// Use this macro to avoid forgotten pointer increments.
+/// Assumes $buf is `&mut *mut std::ffi::c_uchar` or equivalent.
+macro_rules! _bytes_push {
+    ($buf:expr, $val:expr) => {{
+        **$buf = $val;
+        *$buf = $buf.add(1);
+    }};
+}
+pub(crate) use _bytes_push;
+
 /// Make sure cbindgen exports types by using them as arguments in this empty function.
 #[rustfmt::skip]
 #[no_mangle]
@@ -141,6 +152,7 @@ pub extern "C" fn _export(
     _: crate::vm::vm_ghost_image_t,
     _: crate::vm::vm_obj_t,
     _: crate::vm::vm_platform_list,
+    _: crate::x86_codegen::x86_imm_buf,
 ) {
 }
 #[cfg(feature = "USE_UNSTABLE")]

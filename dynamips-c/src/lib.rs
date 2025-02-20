@@ -109,3 +109,4 @@ pub mod tcb;
 pub mod timer;
 pub mod utils;
 pub mod vm;
+pub mod x86_codegen;
